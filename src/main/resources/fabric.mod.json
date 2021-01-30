@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "uhcmod",
+  "version": "${version}",
+  "name": "Casual UHC mod",
+  "description": "UHC mod for Casual UHC",
+  "authors": [
+    "Kerb",
+    "FX",
+    "Nick!"
+  ],
+  "contact": {
+    "repo": "https://github.com/CasualUHC/uhc-mod.git"
+  },
+  "license": "MIT",
+  "icon": "assets/uhcmod/icon.png",
+  "environment": "*",
+  "entrypoints": {},
+  "mixins": [
+    "uhcmod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.1",
+    "fabric": "*",
+    "minecraft": "1.16.5"
+  }
+}

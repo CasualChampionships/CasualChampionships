@@ -1,0 +1,7 @@
+{
+  "uhc.chat.type.team.text": "%s %s %s",
+  "uhc.chat.type.team.sent": "-> %s %s %s",
+
+  "uhc.chat.type.dead.text": "%s %s",
+  "uhc.chat.type.dead.sent": "-> %s %s"
+}
