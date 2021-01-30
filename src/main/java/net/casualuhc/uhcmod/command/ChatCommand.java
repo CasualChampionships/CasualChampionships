@@ -8,6 +8,10 @@ import net.casualuhc.uhcmod.event.ChatMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
+
+import net.minecraft.util.Util;
+
 
 import static net.minecraft.server.command.CommandManager.literal;
 import static net.casualuhc.uhcmod.event.ChatMode.Mode;
@@ -28,6 +32,7 @@ public class ChatCommand {
         ServerCommandSource source = context.getSource();
         ServerPlayerEntity playerEntity = source.getPlayer();
         ChatMode.setMode(playerEntity, mode);
+        playerEntity.sendSystemMessage(new LiteralText("Now talking in " + mode), Util.NIL_UUID);
         return 0;
     }
 }
