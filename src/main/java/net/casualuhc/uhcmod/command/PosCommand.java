@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandException;
 import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.CommandManager;
@@ -29,7 +28,7 @@ public class PosCommand {
         Entity entity = source.getEntityOrThrow();
         Vec3d pos = entity.getPos();
 
-        Team team = (Team)entity.getScoreboardTeam();
+        Team team = (Team) entity.getScoreboardTeam();
 
         if (team == null){
             manager.execute(source, String.format("/me is at %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));

@@ -1,22 +1,14 @@
 package net.casualuhc.uhcmod.event;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
-import net.minecraft.network.MessageType;
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
-
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ChatMode {
@@ -35,6 +27,8 @@ public class ChatMode {
             return String.format("uhc_chat_%s", this.toString());
         }
     }
+
+    public static final String[] KEYWORDS = {"rip", "f"};
 
     public static final Style DEAD_STYLE = Style.EMPTY.withItalic(true).withColor(Formatting.GRAY);
     public static final Text DEAD = new LiteralText("(dead)").fillStyle(DEAD_STYLE);
@@ -58,11 +52,22 @@ public class ChatMode {
     }
 
     public static boolean redirectMsg(ServerPlayerEntity player,Text text) {
+        if(checkWord(text.asString()))
+            return false;
+
         Mode mode = getMode(player);
         switch (mode){
             case ALL: return false;
             case TEAM: return redirectTeam(player, text);
             case SPECTATOR: return broadcastSpectator(player, text);
+        }
+        return false;
+    }
+
+    private static boolean checkWord(String text) {
+        for (String word: KEYWORDS) {
+            if(text.toLowerCase().contains(word))
+                return true;
         }
         return false;
     }
@@ -112,9 +117,6 @@ public class ChatMode {
         }
         return true;
     }
-
-
-
 
     private static boolean redirectTeam (ServerPlayerEntity player, Text text){
         Team team = (Team) player.getScoreboardTeam();
