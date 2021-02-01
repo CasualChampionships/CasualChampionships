@@ -31,9 +31,9 @@ public class PosCommand {
         Team team = (Team) entity.getScoreboardTeam();
 
         if (team == null){
-            manager.execute(source, String.format("/me is at %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
+            manager.execute(source, String.format("/me is @ %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
         }else{
-            manager.execute(source, String.format("/tm I am at %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
+            manager.execute(source, String.format("/tm I'm @ %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
         }
         return 0;
     }

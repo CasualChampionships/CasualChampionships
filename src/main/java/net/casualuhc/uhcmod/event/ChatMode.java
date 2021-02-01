@@ -48,11 +48,11 @@ public class ChatMode {
                 stream(Mode.values()).
                 filter(mode -> player.getScoreboardTags().contains(mode.asTag())).
                 findFirst().
-                orElse(Mode.ALL);
+                orElse(Mode.TEAM);
     }
 
     public static boolean redirectMsg(ServerPlayerEntity player,Text text) {
-        if(checkWord(text.asString()))
+        if(checkWord(text.getString()))
             return false;
 
         Mode mode = getMode(player);
@@ -65,8 +65,9 @@ public class ChatMode {
     }
 
     private static boolean checkWord(String text) {
+        String msg = text.replaceFirst("<.*> ", "");
         for (String word: KEYWORDS) {
-            if(text.toLowerCase().contains(word))
+            if(text.toLowerCase().equals(word))
                 return true;
         }
         return false;
@@ -85,7 +86,7 @@ public class ChatMode {
             if(player.interactionManager.getGameMode() != GameMode.SPECTATOR)
                 continue;
 
-            String translation = player == entity ? "uhc.chat.type.dead.sent" : "uhc.chat.type.dead.text";
+            String translation = player == entity ? "-> %s %s" : "%s %s";
             Text message = new TranslatableText(translation, DEAD, text);
             player.sendSystemMessage(message, entity.getUuid());
         }
@@ -111,7 +112,7 @@ public class ChatMode {
             if(player.interactionManager.getGameMode() != GameMode.SPECTATOR)
                 continue;
 
-            String translation = player == entity ? "uhc.chat.type.team.sent" : "uhc.type.team.text";
+            String translation = player == entity ? "-> %s %s %s" : "%s %s %s";
             Text message = new TranslatableText(translation, team.getFormattedName(), DEAD, text);
             player.sendSystemMessage(message, entity.getUuid());
         }

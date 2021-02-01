@@ -30,7 +30,7 @@ public class JoinCommand {
         ServerPlayerEntity player = source.getPlayer();
         Team team = TeamArgumentType.getTeam(context, "team");
 
-        manager.execute(source.withLevel(2), String.format("/team join %s %s", team.getName(), player.getName()));
+        manager.execute(source.withLevel(2), String.format("/team join %s %s", team.getName(), player.getEntityName()));
         return 0;
     }
 }

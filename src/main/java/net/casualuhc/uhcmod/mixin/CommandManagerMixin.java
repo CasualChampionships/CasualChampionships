@@ -1,9 +1,7 @@
 package net.casualuhc.uhcmod.mixin;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.casualuhc.uhcmod.command.ChatCommand;
-import net.casualuhc.uhcmod.command.JoinCommand;
-import net.casualuhc.uhcmod.command.PosCommand;
+import net.casualuhc.uhcmod.command.*;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import org.spongepowered.asm.mixin.Final;
@@ -22,8 +20,10 @@ public class CommandManagerMixin {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void register(RegistrationEnvironment env, CallbackInfo ci){
-        PosCommand.register(dispatcher);
-        JoinCommand.register(dispatcher);
+        CameramanCommand.register(dispatcher);
         ChatCommand.register(dispatcher);
+        JoinCommand.register(dispatcher);
+        PosCommand.register(dispatcher);
+        SpectCommand.register(dispatcher);
     }
 }
