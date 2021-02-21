@@ -4,6 +4,7 @@
   "package": "net.casualuhc.uhcmod.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "ClickSlot",
     "CommandManagerMixin",
     "PlayerMixin",
     "PlayerManagerMixin"
