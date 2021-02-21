@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod.mixin;
 
+import net.casualuhc.uhcmod.gui.button.StackButton;
 import net.casualuhc.uhcmod.gui.screen.SpectatorScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.server.MinecraftServer;
@@ -28,14 +29,10 @@ public class PlayerMixin {
             self.inventory.clear();
             screen = new SpectatorScreen(self);
         } else {
+            screen.close();
             self.inventory.clone(this.savedInventory);
-            try {
-                screen.close();
-            }catch (Exception ignored){
-
-            }finally {
-                screen = null;
-            }
+            screen = null;
+            System.out.printf("Buttons in hash: %d \n", StackButton.buttons.size());
 
         }
 
