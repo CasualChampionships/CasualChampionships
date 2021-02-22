@@ -32,8 +32,6 @@ public class PlayerMixin {
             screen.close();
             self.inventory.clone(this.savedInventory);
             screen = null;
-            System.out.printf("Buttons in hash: %d \n", StackButton.buttons.size());
-
         }
 
         this.server.getCommandManager().sendCommandTree((ServerPlayerEntity) (Object) this);
