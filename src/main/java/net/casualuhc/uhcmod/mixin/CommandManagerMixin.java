@@ -25,5 +25,6 @@ public class CommandManagerMixin {
         JoinCommand.register(dispatcher);
         PosCommand.register(dispatcher);
         SpectCommand.register(dispatcher);
+        CoordsCommand.register(dispatcher);
     }
 }

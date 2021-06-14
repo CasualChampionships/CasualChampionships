@@ -6,8 +6,9 @@
   "mixins": [
     "ClickSlot",
     "CommandManagerMixin",
+    "PlayerManagerMixin",
     "PlayerMixin",
-    "PlayerManagerMixin"
+    "ServerWorldMixin"
   ],
   "client": [
   ],
