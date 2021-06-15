@@ -22,7 +22,6 @@ public class PlayerMixin implements ServerPlayerMixinInterface {
     protected ServerPlayerEntity self = (ServerPlayerEntity) (Object) this;
 
     private final PlayerInventory savedInventory = new PlayerInventory(self);
-    private SpectatorScreen screen;
     //Vars for WB and coords
     private long time = 0;
     private boolean already = true;
@@ -69,19 +68,5 @@ public class PlayerMixin implements ServerPlayerMixinInterface {
         this.time = time;
     }
 
-    @Inject(method = "setGameMode", at = @At("RETURN"))
-    public void setGameMode(GameMode gameMode, CallbackInfo cb){
-        if (gameMode == GameMode.SPECTATOR){
-            this.savedInventory.clone(self.inventory);
-            self.inventory.clear();
-            screen = new SpectatorScreen(self);
-        } else {
-            screen.close();
-            self.inventory.clone(this.savedInventory);
-            screen = null;
-        }
-
-        this.server.getCommandManager().sendCommandTree((ServerPlayerEntity) (Object) this);
-    }
 
 }
