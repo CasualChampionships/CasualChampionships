@@ -25,11 +25,6 @@ public class SpectCommand {
                 requires(SpectCommand::canSpectate).
                 executes(SpectCommand::spectateTeammate).
 
-                then(literal("team").
-                        executes(SpectCommand::spectateTeammate).
-                        then(argument("team", TeamArgumentType.team()).
-                                executes(SpectCommand::spectateTeam))).
-
                 then(argument("player", EntityArgumentType.player()).
                         executes(SpectCommand::spectatePlayer));
 
@@ -56,16 +51,6 @@ public class SpectCommand {
 
         ServerPlayerEntity entity = EntityArgumentType.getPlayer(context, "player");
         Spectator.spectate(player, entity);
-        return 0;
-    }
-
-    private static int spectateTeam(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        ServerPlayerEntity player = context.getSource().getPlayer();
-        if (!player.isSpectator())
-            throw NOT_SPECTATOR.create();
-
-        Team team = TeamArgumentType.getTeam(context, "team");
-        spectate(player, team);
         return 0;
     }
 

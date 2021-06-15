@@ -9,6 +9,7 @@ import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,13 +53,13 @@ public abstract class ServerWorldMixin {
                             break;
                     }
 
-                    Text hotBar = Text.of("(" + player.getBlockPos().getX() + ", " + player.getBlockPos().getY() + ", " +
+                    LiteralText hotBar = new LiteralText("(" + player.getBlockPos().getX() + ", " + player.getBlockPos().getY() + ", " +
                             player.getBlockPos().getZ() + ") | Direction: " +
                             ((ServerPlayerMixinInterface) player).getDirection() + " | Distance to WB: " +
                             ((int) player.getEntityWorld().getWorldBorder().getDistanceInsideBorder(entity)) +
                             " | WB radius: " + ((int) player.getEntityWorld().getWorldBorder().getSize() / 2));
 
-                    player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.ACTIONBAR,hotBar));
+                    player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.ACTIONBAR, hotBar));
                 }
 
                 //checking to see if the players is behind the world boarder
@@ -82,11 +83,11 @@ public abstract class ServerWorldMixin {
                             ((ServerPlayerMixinInterface) player).setDirection("west");
 
                             for (int x = 0; x < 15; x++) {
-                                player.networkHandler.sendPacket(new ParticleS2CPacket(ParticleTypes.END_ROD, false, player.getBlockPos().getX() + 0.2 + (float) x / 45, bottomBlockY + 0.001, player.getBlockPos().getZ()+ 0.5 + (float) x / 30, 0.0f, 0.0f, 0.0f, 0.0f, 1));
+                                player.networkHandler.sendPacket(new ParticleS2CPacket(ParticleTypes.END_ROD, false, player.getBlockPos().getX() + 0.2 + (float) x / 45, bottomBlockY + 0.001, player.getBlockPos().getZ() + 0.5 + (float) x / 30, 0.0f, 0.0f, 0.0f, 0.0f, 1));
                                 player.networkHandler.sendPacket(new ParticleS2CPacket(ParticleTypes.END_ROD, false, player.getBlockPos().getX() + 0.2 + (float) x / 45, bottomBlockY + 0.001, player.getBlockPos().getZ() + 0.5 - (float) x / 30, 0.0f, 0.0f, 0.0f, 0.0f, 1));
                                 player.networkHandler.sendPacket(new ParticleS2CPacket(ParticleTypes.END_ROD, false, player.getBlockPos().getX() + 0.2 + (float) x / 20, bottomBlockY + 0.001, player.getBlockPos().getZ() + 0.5, 0.0f, 0.0f, 0.0f, 0.0f, 1));
                             }
-                        //checking to see if the player is closer to the east world border -- handing particle stuff (arrow)
+                            //checking to see if the player is closer to the east world border -- handing particle stuff (arrow)
                         } else {
                             ((ServerPlayerMixinInterface) player).getWorldBorder().setCenter(-1 * player.getEntityWorld().getWorldBorder().getSize(), player.getEntityWorld().getWorldBorder().getCenterZ());
                             ((ServerPlayerMixinInterface) player).setDirection("east");
@@ -108,7 +109,7 @@ public abstract class ServerWorldMixin {
                                 player.networkHandler.sendPacket(new ParticleS2CPacket(ParticleTypes.END_ROD, false, player.getBlockPos().getX() + 0.5 - (float) x / 30, bottomBlockY + 0.001, player.getBlockPos().getZ() + 0.2 + (float) x / 45, 0.0f, 0.0f, 0.0f, 0.0f, 1));
                                 player.networkHandler.sendPacket(new ParticleS2CPacket(ParticleTypes.END_ROD, false, player.getBlockPos().getX() + 0.5, bottomBlockY + 0.001, player.getBlockPos().getZ() + 0.2 + (float) x / 20, 0.0f, 0.0f, 0.0f, 0.0f, 1));
                             }
-                        //checking to see if the player is closer to the south world border -- handing particle stuff (arrow)
+                            //checking to see if the player is closer to the south world border -- handing particle stuff (arrow)
                         } else {
                             ((ServerPlayerMixinInterface) player).getWorldBorder().setCenter(player.getEntityWorld().getWorldBorder().getCenterX(), -1 * player.getEntityWorld().getWorldBorder().getSize());
                             ((ServerPlayerMixinInterface) player).setDirection("south");
@@ -122,42 +123,42 @@ public abstract class ServerWorldMixin {
                     }
                     //sending fake world border packets to the player
                     ((ServerPlayerMixinInterface) player).getWorldBorder().setSize(player.getEntityWorld().getWorldBorder().getSize() + 1);
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(),WorldBorderS2CPacket.Type.LERP_SIZE));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(),WorldBorderS2CPacket.Type.SET_CENTER));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(),WorldBorderS2CPacket.Type.SET_WARNING_TIME));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(),WorldBorderS2CPacket.Type.SET_WARNING_BLOCKS));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(),WorldBorderS2CPacket.Type.SET_SIZE));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(),WorldBorderS2CPacket.Type.INITIALIZE));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(), WorldBorderS2CPacket.Type.LERP_SIZE));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(), WorldBorderS2CPacket.Type.SET_CENTER));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(), WorldBorderS2CPacket.Type.SET_WARNING_TIME));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(), WorldBorderS2CPacket.Type.SET_WARNING_BLOCKS));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(), WorldBorderS2CPacket.Type.SET_SIZE));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(((ServerPlayerMixinInterface) player).getWorldBorder(), WorldBorderS2CPacket.Type.INITIALIZE));
 
                     //the big title and sub title msg packets -- sent every 100 game ticks
                     if (((ServerPlayerMixinInterface) player).getTime() % 100 == 0) {
-                        Text title = Text.of("§cYou're outside the border!");
-                        Text subTitle = Text.of("§cTravel " + ((ServerPlayerMixinInterface) player).getDirection() + " to get to safety!");
+                       LiteralText title = new LiteralText("§cYou're outside the border!");
+                        LiteralText subTitle = new LiteralText("§cTravel " + "§a" + ((ServerPlayerMixinInterface) player).getDirection() + " §cto get to safety!");
 
-                        player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE,title));
-                        player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE,subTitle));
+                        player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.TITLE, title));
+                        player.networkHandler.sendPacket(new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, subTitle));
                     }
                     //the player is within the world border so we sent the correct packets one time to remove the fake world border
                 } else if (((ServerPlayerMixinInterface) player).getAlready()) {
                     ((ServerPlayerMixinInterface) player).setAlready(false);
                     ((ServerPlayerMixinInterface) player).setTime(99);
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.LERP_SIZE));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.SET_CENTER));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.SET_WARNING_TIME));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.SET_WARNING_BLOCKS));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.SET_SIZE));
-                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.INITIALIZE));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.LERP_SIZE));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.SET_CENTER));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.SET_WARNING_TIME));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.SET_WARNING_BLOCKS));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.SET_SIZE));
+                    player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.INITIALIZE));
                 }
                 //the edge case where the player dies from the world border and is put into spectator mode. Sends correct world border packet one time
             } else if (((ServerPlayerMixinInterface) player).getAlready()) {
                 ((ServerPlayerMixinInterface) player).setAlready(false);
                 ((ServerPlayerMixinInterface) player).setTime(99);
-                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.LERP_SIZE));
-                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.SET_CENTER));
-                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.SET_WARNING_TIME));
-                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.SET_WARNING_BLOCKS));
-                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.SET_SIZE));
-                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(),WorldBorderS2CPacket.Type.INITIALIZE));
+                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.LERP_SIZE));
+                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.SET_CENTER));
+                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.SET_WARNING_TIME));
+                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.SET_WARNING_BLOCKS));
+                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.SET_SIZE));
+                player.networkHandler.sendPacket(new WorldBorderS2CPacket(player.getEntityWorld().getWorldBorder(), WorldBorderS2CPacket.Type.INITIALIZE));
             }
         }
     }

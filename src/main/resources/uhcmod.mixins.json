@@ -4,10 +4,8 @@
   "package": "net.casualuhc.uhcmod.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ClickSlot",
     "CommandManagerMixin",
-    "PlayerManagerMixin",
-    "PlayerMixin",
+    "ServerPlayerEntityMixin",
     "ServerWorldMixin"
   ],
   "client": [

@@ -12,9 +12,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public class CoordsCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-            dispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)CommandManager.literal("coords").requires((source) -> {
-                return source.hasPermissionLevel(1);
-            })).executes(CoordsCommand::run));
+        dispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)CommandManager.literal("coords").requires((source) -> {
+            return source.hasPermissionLevel(0);
+        })).executes(CoordsCommand::run));
     }
 
     private static int run(CommandContext context) {

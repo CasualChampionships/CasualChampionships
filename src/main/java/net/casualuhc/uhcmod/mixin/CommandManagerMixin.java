@@ -21,8 +21,6 @@ public class CommandManagerMixin {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void register(RegistrationEnvironment env, CallbackInfo ci){
         CameramanCommand.register(dispatcher);
-        ChatCommand.register(dispatcher);
-        JoinCommand.register(dispatcher);
         PosCommand.register(dispatcher);
         SpectCommand.register(dispatcher);
         CoordsCommand.register(dispatcher);

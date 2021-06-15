@@ -8,13 +8,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 
 public class PosCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher){
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         LiteralArgumentBuilder<ServerCommandSource> pos = literal("pos");
         pos.requires(player -> true).executes(PosCommand::sendPosition);
 
@@ -24,16 +27,19 @@ public class PosCommand {
     public static int sendPosition(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
         CommandManager manager = source.getMinecraftServer().getCommandManager();
+        ServerPlayerEntity playerEntity = source.getPlayer();
 
         Entity entity = source.getEntityOrThrow();
         Vec3d pos = entity.getPos();
 
         Team team = (Team) entity.getScoreboardTeam();
 
-        if (team == null){
-            manager.execute(source, String.format("/me is @ %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
-        }else{
-            manager.execute(source, String.format("/tm I'm @ %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
+        if (team == null) {
+            playerEntity.sendSystemMessage(new LiteralText("§4[ERROR] You can only run this command if you are in a team!"), Util.NIL_UUID);
+        } else if (playerEntity.isSpectator()) {
+            playerEntity.sendSystemMessage(new LiteralText("§4[ERROR] You can only run this command if you are alive!"), Util.NIL_UUID);
+        } else {
+            manager.execute(source, String.format("/tm I'm at %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
         }
         return 0;
     }
