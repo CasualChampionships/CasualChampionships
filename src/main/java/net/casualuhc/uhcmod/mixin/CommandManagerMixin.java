@@ -24,5 +24,8 @@ public class CommandManagerMixin {
         PosCommand.register(dispatcher);
         SpectCommand.register(dispatcher);
         CoordsCommand.register(dispatcher);
+        ForceStartCommand.register(dispatcher);
+        SetupCommand.register(dispatcher);
+        OpenLobbyCommand.register(dispatcher);
     }
 }
