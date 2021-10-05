@@ -11,7 +11,7 @@ public class ForceStartCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("forcestart")
                 .executes(context -> {
-                    GameManager.setGameState(GameState.STARTING);
+                    GameManager.STARTING.getFunction().executeFunction();
                     return 1;
                 }));
     }

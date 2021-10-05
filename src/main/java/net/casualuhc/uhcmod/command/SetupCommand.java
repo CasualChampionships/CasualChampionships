@@ -11,7 +11,7 @@ public class SetupCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
     dispatcher.register(literal("setup")
             .executes(context -> {
-                    GameManager.setGameState(GameState.SETUP);
+                    GameManager.SETUP.getFunction().executeFunction();
         return 1;
     }));
     }

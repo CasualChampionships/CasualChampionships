@@ -13,7 +13,7 @@ public class OpenLobbyCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("openlobby")
                 .executes(context -> {
-                    GameManager.setGameState(GameState.LOBBY);
+                    GameManager.LOBBY.getFunction().executeFunction();
                     return 1;
                 }));
     }
