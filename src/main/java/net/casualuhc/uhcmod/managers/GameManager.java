@@ -5,6 +5,8 @@ import net.casualuhc.uhcmod.interfaces.GameStateFunction;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 
+import java.util.Set;
+
 public class GameManager {
 
     private final GameStateFunction gameStateFunction;
@@ -19,9 +21,10 @@ public class GameManager {
 
     public static GameManager SETUP = new GameManager(() -> {
         System.out.println("Setup");
-        // Make Holding room
         // Pre-gen World
-        // Setup Teams
+        SetupHelper.GenerateLobby();
+        TeamManager.createTeams();
+
         // Kman can add this :)
     });
 

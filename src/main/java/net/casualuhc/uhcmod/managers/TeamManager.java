@@ -1,20 +1,30 @@
 package net.casualuhc.uhcmod.managers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.ListCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.mojang.serialization.codecs.UnboundedMapCodec;
 import net.casualuhc.uhcmod.UHCMod;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.Team;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.server.command.ServerCommandSource;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TeamManager {
 
@@ -42,15 +52,33 @@ public class TeamManager {
             Codec.STRING.fieldOf("members").forGetter(t -> t.membersAsString)
     ).apply(instance, TeamManager::new));
 
+    public static UnboundedMapCodec<String, TeamManager> MAP_CODEC = Codec.unboundedMap(Codec.STRING, CODEC.codec());
+
     public static void readFile() {
         Path path = getPath();
         if (!Files.isRegularFile(path))
             return;
         try (BufferedReader reader = Files.newBufferedReader(path)) {
-            CODEC.decoder();
+            MAP_CODEC.decode(JsonOps.INSTANCE, JsonHelper.deserialize(reader));
         }
         catch (IOException e) {
             UHCMod.UHCLogger.error("Could not read JSON :(");
+        }
+    }
+
+    public static void createTeams() {
+        readFile();
+        Scoreboard scoreboard = UHCMod.UHCServer.getScoreboard();
+        scoreboard.getTeams().forEach(scoreboard::removeTeam);
+        for (TeamManager teamManager : teamSet) {
+            Team team = scoreboard.getTeam(teamManager.name);
+            if (team == null)
+                team = scoreboard.addTeam(teamManager.name);
+            team.setPrefix(new LiteralText(teamManager.prefix));
+            team.setColor(Formatting.byName(teamManager.colour));
+            for (String memberName : teamManager.members) {
+                scoreboard.addPlayerToTeam(memberName, team);
+            }
         }
     }
 
@@ -58,21 +86,14 @@ public class TeamManager {
         return FabricLoader.getInstance().getConfigDir().resolve("Teams.json");
     }
 
-    public static void createTeams(ServerCommandSource source) {
-        for (TeamManager teamManager : teamSet) {
-            //code for creating team here
-        }
-    }
-
 
 /*
-"Team1": {r
-   prefixrd_id: "1999199",
-    name: "Scicraft",
-    color: "#002000",
-    prefix: "Sci",
-    members: "Kerb:Santa"
-}
+"Team1": {
+    "name": "Scicraft",
+    "color": "YELLOW",
+    "prefix": "[SCI] ",
+    "members": "Kerbaras:PR0CESS"
+  }
  */
 
 

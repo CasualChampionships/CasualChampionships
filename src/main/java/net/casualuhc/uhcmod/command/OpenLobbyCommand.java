@@ -1,9 +1,7 @@
 package net.casualuhc.uhcmod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.managers.GameState;
 import net.minecraft.server.command.ServerCommandSource;
 
 import static net.minecraft.server.command.CommandManager.literal;
