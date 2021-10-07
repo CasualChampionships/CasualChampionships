@@ -23,9 +23,8 @@ public class GameManager {
         System.out.println("Setup");
         // Pre-gen World
         SetupHelper.GenerateLobby();
+        SetupHelper.SetGamerules();
         TeamManager.createTeams();
-
-        // Kman can add this :)
     });
 
     public static GameManager VOTING = new GameManager(() -> {
