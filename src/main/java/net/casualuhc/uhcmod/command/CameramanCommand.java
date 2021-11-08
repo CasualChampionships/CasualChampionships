@@ -14,10 +14,11 @@ import static net.minecraft.server.command.CommandManager.argument;
 public class CameramanCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(literal("cameraman").
-                requires(source -> source.hasPermissionLevel(4)).
-                then(argument("player", EntityArgumentType.player()).
-                    executes(CameramanCommand::setCameraman)));
+        dispatcher.register(literal("cameraman").requires(source -> source.hasPermissionLevel(4))
+            .then(argument("player", EntityArgumentType.player()).
+                executes(CameramanCommand::setCameraman)
+            )
+        );
     }
 
     private static int setCameraman(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {

@@ -20,8 +20,6 @@ public class GameManager {
     }
 
     public static GameManager SETUP = new GameManager(() -> {
-        System.out.println("Setup");
-        // Pre-gen World
         SetupHelper.GenerateLobby();
         SetupHelper.SetGamerules();
         TeamManager.createTeams();

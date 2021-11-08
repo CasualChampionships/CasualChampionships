@@ -14,8 +14,7 @@ public class UHCMod implements ModInitializer {
     public static MinecraftServer UHCServer;
 
     @Override
-    public void onInitialize(){
-            System.out.println("Technical Minecraft UHC Ready!");
-        }
-
+    public void onInitialize() {
+        System.out.println("Technical Minecraft UHC Ready!");
+    }
 }

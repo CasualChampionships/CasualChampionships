@@ -1,30 +1,25 @@
 package net.casualuhc.uhcmod.managers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.ListCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
 import net.casualuhc.uhcmod.UHCMod;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.JsonHelper;
-import net.minecraft.server.command.ServerCommandSource;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TeamManager {
 
@@ -69,11 +64,16 @@ public class TeamManager {
     public static void createTeams() {
         readFile();
         Scoreboard scoreboard = UHCMod.UHCServer.getScoreboard();
-        scoreboard.getTeams().forEach(scoreboard::removeTeam);
+        // This MUST be done like this or will encounter ConcurrentModificationException
+        final Team[] teams = scoreboard.getTeams().toArray(Team[]::new);
+        for (Team team : teams) {
+            scoreboard.removeTeam(team);
+        }
         for (TeamManager teamManager : teamSet) {
             Team team = scoreboard.getTeam(teamManager.name);
-            if (team == null)
+            if (team == null) {
                 team = scoreboard.addTeam(teamManager.name);
+            }
             team.setPrefix(new LiteralText(teamManager.prefix));
             team.setColor(Formatting.byName(teamManager.colour));
             for (String memberName : teamManager.members) {
@@ -85,17 +85,4 @@ public class TeamManager {
     private static Path getPath() {
         return FabricLoader.getInstance().getConfigDir().resolve("Teams.json");
     }
-
-
-/*
-"Team1": {
-    "name": "Scicraft",
-    "color": "YELLOW",
-    "prefix": "[SCI] ",
-    "members": "Kerbaras:PR0CESS"
-  }
- */
-
-
-
 }

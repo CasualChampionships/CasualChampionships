@@ -10,9 +10,10 @@ public class OpenLobbyCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("openlobby")
-                .executes(context -> {
-                    GameManager.LOBBY.getFunction().executeFunction();
-                    return 1;
-                }));
+            .executes(context -> {
+                GameManager.LOBBY.getFunction().executeFunction();
+                return 1;
+            })
+        );
     }
 }

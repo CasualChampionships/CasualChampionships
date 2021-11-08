@@ -12,17 +12,13 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public class CoordsCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)CommandManager.literal("coords").requires((source) -> {
-            return source.hasPermissionLevel(0);
-        })).executes(CoordsCommand::run));
+        dispatcher.register(CommandManager.literal("coords").executes(CoordsCommand::run));
     }
 
-    private static int run(CommandContext context) {
-        Entity entity = ((ServerCommandSource) context.getSource()).getEntity();
-        if (entity != null) {
-            if (entity instanceof ServerPlayerEntity) {
-                ((ServerPlayerMixinInterface) entity).setCoordsBoolean(!((ServerPlayerMixinInterface) entity).getCoordsBoolean());
-            }
+    private static int run(CommandContext<ServerCommandSource> context) {
+        Entity entity = (context.getSource()).getEntity();
+        if (entity instanceof ServerPlayerEntity) {
+            ((ServerPlayerMixinInterface) entity).setCoordsBoolean(!((ServerPlayerMixinInterface) entity).getCoordsBoolean());
         }
         return 1;
     }

@@ -2,7 +2,6 @@ package net.casualuhc.uhcmod.interfaces;
 
 import net.minecraft.world.border.WorldBorder;
 
-//@Mixin(ServerPlayerEntity.class)
 public interface ServerPlayerMixinInterface {
     long getTime();
 

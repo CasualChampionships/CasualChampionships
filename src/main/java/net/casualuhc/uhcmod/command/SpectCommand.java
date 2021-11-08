@@ -20,17 +20,22 @@ public class SpectCommand {
 
     private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(new TranslatableText("You need to be dead to spectate!"));
 
+    // TODO This is bad because the command tree is never sent to the player
+    // Client won't register this as a valid command unless they join in survival or get OP and vise versa
+    // Either mixin to when player gets put in/out of spectator and send command tree there
+    // Or just make this command available to everyone but throw when player is not in spectator
+
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher){
-        LiteralArgumentBuilder<ServerCommandSource> s = literal("s").
-                requires(SpectCommand::canSpectate).
-                executes(SpectCommand::spectateTeammate).
+        LiteralArgumentBuilder<ServerCommandSource> s = literal("s")
+            .requires(SpectCommand::canSpectate)
+            .executes(SpectCommand::spectateTeammate)
+            .then(argument("player", EntityArgumentType.player())
+                .executes(SpectCommand::spectatePlayer)
+            );
 
-                then(argument("player", EntityArgumentType.player()).
-                        executes(SpectCommand::spectatePlayer));
-
-        LiteralArgumentBuilder<ServerCommandSource> c = literal("c").
-                requires(SpectCommand::canSpectate).
-                executes(SpectCommand::spectateCameraman);
+        LiteralArgumentBuilder<ServerCommandSource> c = literal("c")
+            .requires(SpectCommand::canSpectate)
+            .executes(SpectCommand::spectateCameraman);
 
         dispatcher.register(s);
         dispatcher.register(c);
@@ -39,15 +44,17 @@ public class SpectCommand {
     private static boolean canSpectate(ServerCommandSource source) {
         try {
             return source.getPlayer().isSpectator();
-        } catch (CommandSyntaxException ignored) {
+        }
+        catch (CommandSyntaxException ignored) {
             return false;
         }
     }
 
     private static int spectatePlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = context.getSource().getPlayer();
-        if (!player.isSpectator())
+        if (!player.isSpectator()) {
             throw NOT_SPECTATOR.create();
+        }
 
         ServerPlayerEntity entity = EntityArgumentType.getPlayer(context, "player");
         Spectator.spectate(player, entity);
@@ -56,8 +63,9 @@ public class SpectCommand {
 
     private static int spectateTeammate(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = context.getSource().getPlayer();
-        if (!player.isSpectator())
+        if (!player.isSpectator()) {
             throw NOT_SPECTATOR.create();
+        }
 
         Team team = (Team) player.getScoreboardTeam();
         spectate(player, team);
@@ -66,17 +74,19 @@ public class SpectCommand {
 
     private static int spectateCameraman(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = context.getSource().getPlayer();
-        if (!player.isSpectator())
+        if (!player.isSpectator()) {
             throw NOT_SPECTATOR.create();
+        }
 
         Spectator.spectate(player);
         return 0;
     }
 
     private static void spectate(ServerPlayerEntity player, Team team){
-        if(team == null) {
+        if (team == null) {
             Spectator.spectate(player);
-        } else {
+        }
+        else {
             Spectator.spectate(player, team);
         }
     }
