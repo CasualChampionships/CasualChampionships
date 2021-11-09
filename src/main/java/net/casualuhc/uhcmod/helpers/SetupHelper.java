@@ -31,6 +31,6 @@ public class SetupHelper {
         server.setDifficulty(Difficulty.PEACEFUL, true);
         server.getOverworld().setTimeOfDay(6000); // 6000 = noon
         server.getOverworld().setWeather(999999, 0, false, false);
-        ((IntRuleMixinInterface) server.getGameRules().get(GameRules.RANDOM_TICK_SPEED)).setIntegerValue(0);
+        ((IntRuleMixinInterface) server.getGameRules().get(GameRules.RANDOM_TICK_SPEED)).setIntegerValue(0, server);
     }
 }
