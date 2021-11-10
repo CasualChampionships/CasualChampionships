@@ -18,5 +18,6 @@ public class ChatColour {
     public static String GRAY = "§7";
     public static String DARK_GRAY = "§8";
     public static String BLACK = "§0";
+    public static String RESET = "§r";
 
 }

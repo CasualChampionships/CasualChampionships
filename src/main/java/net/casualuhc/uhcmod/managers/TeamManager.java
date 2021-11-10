@@ -17,7 +17,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,10 +40,10 @@ public class TeamManager {
     }
 
     public static final MapCodec<TeamManager> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Codec.STRING.fieldOf("name").forGetter(t -> t.name),
-            Codec.STRING.fieldOf("color").forGetter(t -> t.colour),
-            Codec.STRING.fieldOf("prefix").forGetter(t -> t.prefix),
-            Codec.STRING.fieldOf("members").forGetter(t -> t.membersAsString)
+        Codec.STRING.fieldOf("name").forGetter(t -> t.name),
+        Codec.STRING.fieldOf("color").forGetter(t -> t.colour),
+        Codec.STRING.fieldOf("prefix").forGetter(t -> t.prefix),
+        Codec.STRING.fieldOf("members").forGetter(t -> t.membersAsString)
     ).apply(instance, TeamManager::new));
 
     public static UnboundedMapCodec<String, TeamManager> MAP_CODEC = Codec.unboundedMap(Codec.STRING, CODEC.codec());

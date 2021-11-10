@@ -24,8 +24,6 @@ public class CommandManagerMixin {
         PosCommand.register(this.dispatcher);
         SpectCommand.register(this.dispatcher);
         CoordsCommand.register(this.dispatcher);
-        ForceStartCommand.register(this.dispatcher);
-        SetupCommand.register(this.dispatcher);
-        OpenLobbyCommand.register(this.dispatcher);
+        UHCCommand.register(this.dispatcher);
     }
 }

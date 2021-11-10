@@ -8,7 +8,8 @@
     "Kerb",
     "FX",
     "SuperSanta",
-    "Kman"
+    "Kman",
+    "Sensei"
   ],
   "contact": {
     "repo": "https://github.com/CasualUHC/uhc-mod.git"
@@ -16,13 +17,16 @@
   "license": "MIT",
   "icon": "assets/uhcmod/icon.png",
   "environment": "*",
-  "entrypoints": {},
+  "entrypoints": {
+    "main": [
+      "net.casualuhc.uhcmod.UHCMod"
+    ]
+  },
   "mixins": [
     "uhcmod.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.11.1",
-    "fabric": "*",
-    "minecraft": "1.16.5"
+    "minecraft": "1.17.1"
   }
 }

@@ -16,10 +16,16 @@ public interface ServerPlayerMixinInterface {
     void setCoordsBoolean(boolean coordsBoolean);
 
 
-    void setDirection(String direction);
+    void setDirection(Direction direction);
 
-    String getDirection();
+    Direction getDirection();
 
     WorldBorder getWorldBorder();
 
+    enum Direction {
+        NORTH,
+        SOUTH,
+        EAST,
+        WEST
+    }
 }

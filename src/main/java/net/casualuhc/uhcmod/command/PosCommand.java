@@ -29,7 +29,7 @@ public class PosCommand {
 
     public static int sendPosition(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
-        CommandManager manager = source.getMinecraftServer().getCommandManager();
+        CommandManager manager = source.getServer().getCommandManager();
 
         Entity entity = source.getEntityOrThrow();
         Vec3d pos = entity.getPos();
