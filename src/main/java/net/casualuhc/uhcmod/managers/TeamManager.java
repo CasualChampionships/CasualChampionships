@@ -6,6 +6,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
@@ -74,11 +75,21 @@ public class TeamManager {
                 team = scoreboard.addTeam(teamManager.name);
             }
             team.setPrefix(new LiteralText(teamManager.prefix));
-            team.setColor(Formatting.byName(teamManager.colour));
+            Formatting formatting = Formatting.byName(teamManager.colour);
+            if (formatting != null) {
+                team.setColor(formatting);
+            }
             for (String memberName : teamManager.members) {
                 scoreboard.addPlayerToTeam(memberName, team);
             }
         }
+        TeamUtils.clearNonTeam();
+        Team team = scoreboard.addTeam("Spectator");
+        team.setColor(Formatting.DARK_GRAY);
+        TeamUtils.addNonTeam(team);
+        team = scoreboard.addTeam("Operator");
+        team.setColor(Formatting.WHITE);
+        TeamUtils.addNonTeam(team);
     }
 
     private static Path getPath() {

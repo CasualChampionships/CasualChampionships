@@ -3,6 +3,7 @@ package net.casualuhc.uhcmod.interfaces;
 import net.minecraft.world.border.WorldBorder;
 
 public interface ServerPlayerMixinInterface {
+
     long getTime();
 
     void setTime(long time);

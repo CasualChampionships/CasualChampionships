@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.utils;
 
+@SuppressWarnings("unused")
 public class ChatColour {
-
     public static String DARK_RED = "§4";
     public static String RED = "§c";
     public static String GOLD = "§6";
@@ -19,5 +19,4 @@ public class ChatColour {
     public static String DARK_GRAY = "§8";
     public static String BLACK = "§0";
     public static String RESET = "§r";
-
 }

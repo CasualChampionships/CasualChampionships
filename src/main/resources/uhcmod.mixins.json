@@ -4,11 +4,13 @@
   "package": "net.casualuhc.uhcmod.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "AbstractTeamMixin",
     "CommandManagerMixin",
     "IntRuleMixin",
     "MinecraftServerMixin",
     "ServerPlayerEntityMixin",
-    "ServerWorldMixin"
+    "ServerWorldMixin",
+    "SpreadPlayersCommandMixin"
   ],
   "client": [
   ],

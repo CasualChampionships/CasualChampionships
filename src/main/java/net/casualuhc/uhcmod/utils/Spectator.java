@@ -16,9 +16,12 @@ public class Spectator {
         if (!from.isSpectator())
             return;
         from.teleport(
-                (ServerWorld) player.world,
-                player.getX(), player.getY(), player.getZ(),
-                player.getYaw(), player.getPitch()
+            (ServerWorld) player.world,
+            player.getX(),
+            player.getY(),
+            player.getZ(),
+            player.getYaw(),
+            player.getPitch()
         );
     }
 
@@ -38,14 +41,13 @@ public class Spectator {
     }
 
     public static ServerPlayerEntity getAnyAlive(MinecraftServer server, Team team){
-        return server.
-                getPlayerManager().
-                getPlayerList().
-                stream().
-                filter(player -> player.isTeamPlayer(team)).
-                filter(player -> !player.isSpectator())
-                .findAny()
-                .orElse(cameraman);
+        return server.getPlayerManager()
+            .getPlayerList()
+            .stream()
+            .filter(player -> player.isTeamPlayer(team))
+            .filter(player -> !player.isSpectator())
+            .findAny()
+            .orElse(cameraman);
     }
 
     public static void setCameraman(ServerPlayerEntity player) {

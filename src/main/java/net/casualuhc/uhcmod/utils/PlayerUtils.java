@@ -1,14 +1,18 @@
 package net.casualuhc.uhcmod.utils;
 
+import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
+
+import java.util.function.Consumer;
 
 public class PlayerUtils {
 	
@@ -30,12 +34,12 @@ public class PlayerUtils {
 				case 3 -> Iplayer.setDirection(ServerPlayerMixinInterface.Direction.EAST);
 			}
 			String locationInfo = "(%d, %d, %d) | Direction: %s | Distance to WB: %d | WB radius: %d".formatted(
-					playerEntity.getBlockX(),
-					playerEntity.getBlockY(),
-					playerEntity.getBlockZ(),
-					Iplayer.getDirection(),
-					((int) border.getDistanceInsideBorder(playerEntity)),
-					((int) border.getSize() / 2)
+				playerEntity.getBlockX(),
+				playerEntity.getBlockY(),
+				playerEntity.getBlockZ(),
+				Iplayer.getDirection(),
+				((int) border.getDistanceInsideBorder(playerEntity)),
+				((int) border.getSize() / 2)
 			);
 
 			playerEntity.sendMessage(new LiteralText(locationInfo), true);
@@ -165,5 +169,17 @@ public class PlayerUtils {
 		playerEntity.networkHandler.sendPacket(new WorldBorderWarningBlocksChangedS2CPacket(border));
 		playerEntity.networkHandler.sendPacket(new WorldBorderSizeChangedS2CPacket(border));
 		playerEntity.networkHandler.sendPacket(new WorldBorderInitializeS2CPacket(border));
+	}
+
+	public static void forEveryPlayer(Consumer<ServerPlayerEntity> consumer) {
+		UHCMod.UHCServer.execute(() -> {
+			for (ServerPlayerEntity playerEntity : UHCMod.UHCServer.getPlayerManager().getPlayerList()) {
+				consumer.accept(playerEntity);
+			}
+		});
+	}
+
+	public static void messageEveryPlayer(Text text) {
+		forEveryPlayer(playerEntity -> playerEntity.sendMessage(text, false));
 	}
 }

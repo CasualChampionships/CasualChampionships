@@ -25,5 +25,6 @@ public class CommandManagerMixin {
         SpectCommand.register(this.dispatcher);
         CoordsCommand.register(this.dispatcher);
         UHCCommand.register(this.dispatcher);
+        ReadyCommand.register(this.dispatcher);
     }
 }

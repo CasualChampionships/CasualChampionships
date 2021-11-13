@@ -1,30 +1,22 @@
 package net.casualuhc.uhcmod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.AbstractTeam;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.server.network.ServerPlayerEntity;
 
-import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
+import static net.minecraft.server.command.CommandManager.literal;
 
 public class PosCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        LiteralArgumentBuilder<ServerCommandSource> pos = literal("pos");
-        pos.requires(player -> true).executes(PosCommand::sendPosition);
-
-        dispatcher.register(pos);
+        dispatcher.register(literal("pos").requires(source -> source.getEntity() != null).executes(PosCommand::sendPosition));
     }
 
     public static int sendPosition(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
