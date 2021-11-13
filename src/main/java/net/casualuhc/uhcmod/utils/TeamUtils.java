@@ -13,7 +13,6 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,7 +23,7 @@ public class TeamUtils {
 	private static final Set<AbstractTeam> nonTeams = new HashSet<>();
 
 	public static boolean isNonTeam(AbstractTeam team) {
-		return nonTeams.contains(team);
+		return team == null || nonTeams.contains(team);
 	}
 
 	public static void addNonTeam(AbstractTeam team) {

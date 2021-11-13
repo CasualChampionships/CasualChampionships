@@ -5,8 +5,6 @@ import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;

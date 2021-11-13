@@ -2,6 +2,7 @@ package net.casualuhc.uhcmod.utils;
 
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.IntRuleMixinInterface;
+import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.server.MinecraftServer;
@@ -9,6 +10,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
 
 public class GameManagerUtils {
@@ -68,7 +70,15 @@ public class GameManagerUtils {
             });
             // Pushing back to main thread
             MinecraftServer server = UHCMod.UHCServer;
+            PlayerUtils.forEveryPlayer(playerEntity -> {
+                if (!TeamUtils.isNonTeam(playerEntity.getScoreboardTeam()) && !playerEntity.isSpectator()) {
+                    ((ServerPlayerMixinInterface) playerEntity).setCoordsBoolean(true);
+                    playerEntity.changeGameMode(GameMode.SURVIVAL);
+                }
+            });
             server.execute(() -> {
+                server.getCommandManager().execute(server.getCommandSource(), "/fill 17 250 17 -18 255 -17 minecraft:air");
+                server.getCommandManager().execute(server.getCommandSource(), "/kill @e[tag=lobby]");
                 server.getCommandManager().execute(server.getCommandSource(), "/spreadplayers 0 0 500 2900 true @e[type=player]");
                 GameManager.Phase.ACTIVE.run();
             });
@@ -82,7 +92,7 @@ public class GameManagerUtils {
             for (int i = 10; i > 0; i--) {
                 switch (i) {
                     case 10, 5, 2, 1 -> PlayerUtils.messageEveryPlayer(
-                            new LiteralText("PVP will begin in %d minutes".formatted(i)).formatted(Formatting.GOLD)
+                        new LiteralText("PVP will begin in %d minutes".formatted(i)).formatted(Formatting.GOLD)
                     );
                 }
                 try { Thread.sleep(60000); }

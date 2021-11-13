@@ -36,12 +36,12 @@ public abstract class ServerWorldMixin {
 
     @Inject(method = "onPlayerConnected", at = @At("HEAD"))
     private void onPlayerConnected(ServerPlayerEntity player, CallbackInfo ci) {
-        if (player.getScoreboardTeam() == null) {
-            UHCMod.UHCServer.getScoreboard().addPlayerToTeam(player.getEntityName(), UHCMod.UHCServer.getScoreboard().getTeam("Spectator"));
-            player.changeGameMode(GameMode.SPECTATOR);
-        }
         if (GameManager.currentPhase.getPhaseNumber() < 5) {
             player.teleport(UHCMod.UHCServer.getOverworld(), 0, 253, 0, 0, 0);
+        }
+        else if (player.getScoreboardTeam() == null) {
+            UHCMod.UHCServer.getScoreboard().addPlayerToTeam(player.getEntityName(), UHCMod.UHCServer.getScoreboard().getTeam("Spectator"));
+            player.changeGameMode(GameMode.SPECTATOR);
         }
     }
 }

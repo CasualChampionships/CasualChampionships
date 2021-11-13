@@ -136,7 +136,7 @@ public class PlayerUtils {
 			else if (Iplayer.getAlready()) {
 				Iplayer.setAlready(false);
 				Iplayer.setTime(99);
-				sendWorldBorderPackets(playerEntity, Iborder);
+				sendWorldBorderPackets(playerEntity, playerEntity.world.getWorldBorder());
 			}
 			// The edge case where the player dies from the world border and is put into spectator mode. Sends correct world border packet one time
 		}
