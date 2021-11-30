@@ -1,10 +1,6 @@
 package net.casualuhc.uhcmod.managers;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.mojang.serialization.codecs.UnboundedMapCodec;
+import com.google.gson.*;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.fabricmc.loader.api.FabricLoader;
@@ -15,6 +11,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.JsonHelper;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,47 +19,64 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TeamManager {
+    private static final Set<TeamManager> teamSet = new HashSet<>();
 
-    public static Set<TeamManager> teamSet = new HashSet<>();
+    private final String name;
+    private final String colour;
+    private final String prefix;
+    private final String[] members;
 
-    public String name;
-    public String colour;
-    public String prefix;
-    public String membersAsString;
-    public String[] members;
-
-    public TeamManager(String name, String colour, String prefix, String membersAsString) {
+    private TeamManager(String name, String colour, String prefix, String[] members) {
         this.name = name;
         this.colour = colour;
         this.prefix = prefix;
-        this.membersAsString = membersAsString;
-        this.members = membersAsString.split(":");
+        this.members = members;
         teamSet.add(this);
     }
 
-    public static final MapCodec<TeamManager> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-        Codec.STRING.fieldOf("name").forGetter(t -> t.name),
-        Codec.STRING.fieldOf("color").forGetter(t -> t.colour),
-        Codec.STRING.fieldOf("prefix").forGetter(t -> t.prefix),
-        Codec.STRING.fieldOf("members").forGetter(t -> t.membersAsString)
-    ).apply(instance, TeamManager::new));
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public static UnboundedMapCodec<String, TeamManager> MAP_CODEC = Codec.unboundedMap(Codec.STRING, CODEC.codec());
-
-    public static void readFile() {
+    private static void load() throws IOException {
+        teamSet.clear();
         Path path = getPath();
-        if (!Files.isRegularFile(path))
-            return;
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            MAP_CODEC.decode(JsonOps.INSTANCE, JsonHelper.deserialize(reader));
+        File file = path.toFile();
+        BufferedReader bufferedReader = null;
+        if (file.exists()) {
+            try {
+                bufferedReader = Files.newBufferedReader(path);
+                JsonArray jsonArray = GSON.fromJson(bufferedReader, JsonArray.class);
+                for (JsonElement jsonElement : jsonArray) {
+                    JsonObject jsonObject = JsonHelper.asObject(jsonElement, "entry");
+                    teamFromJson(jsonObject);
+                }
+            }
+            catch (JsonParseException e) {
+                UHCMod.UHCLogger.error("Could not read JSON");
+                e.printStackTrace();
+            }
         }
-        catch (IOException e) {
-            UHCMod.UHCLogger.error("Could not read JSON :(");
+        if (bufferedReader != null) {
+            bufferedReader.close();
+        }
+    }
+
+    private static void teamFromJson(JsonObject json) {
+        if (json.has("name") && json.has("colour") && json.has("prefix") && json.has("members")) {
+            String teamName = json.get("name").getAsString();
+            String colour = json.get("colour").getAsString();
+            String prefix = "[%s]".formatted(json.get("prefix").getAsString());
+            String[] members = json.get("members").getAsString().split(":");
+            new TeamManager(teamName, colour, prefix, members);
         }
     }
 
     public static void createTeams() {
-        readFile();
+        try {
+            load();
+        }
+        catch (IOException e) {
+            UHCMod.UHCLogger.error("Error with buffered reader");
+        }
         Scoreboard scoreboard = UHCMod.UHCServer.getScoreboard();
         // This MUST be done like this or will encounter ConcurrentModificationException
         final Team[] teams = scoreboard.getTeams().toArray(Team[]::new);
@@ -74,7 +88,7 @@ public class TeamManager {
             if (team == null) {
                 team = scoreboard.addTeam(teamManager.name);
             }
-            team.setPrefix(new LiteralText(teamManager.prefix));
+            team.setPrefix(new LiteralText("%s ".formatted(teamManager.prefix)));
             Formatting formatting = Formatting.byName(teamManager.colour);
             if (formatting != null) {
                 team.setColor(formatting);
@@ -89,6 +103,8 @@ public class TeamManager {
         TeamUtils.addNonTeam(team);
         team = scoreboard.addTeam("Operator");
         team.setColor(Formatting.WHITE);
+        team.setPrefix(new LiteralText("[OP] "));
+        scoreboard.addPlayerToTeam("senseiwells", team);
         TeamUtils.addNonTeam(team);
     }
 

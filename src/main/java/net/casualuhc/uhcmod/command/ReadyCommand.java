@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.minecraft.scoreboard.AbstractTeam;
@@ -35,7 +36,7 @@ public class ReadyCommand {
 	}
 
 	private static int ready(CommandContext<ServerCommandSource> context, boolean isReady) throws CommandSyntaxException {
-		if (GameManager.currentPhase != GameManager.Phase.READY) {
+		if (!GameManager.isPhase(Phase.READY)) {
 			throw new SimpleCommandExceptionType(new LiteralText("You cannot ready now!")).create();
 		}
 		AbstractTeam team = context.getSource().getPlayer().getScoreboardTeam();

@@ -1,13 +1,20 @@
 package net.casualuhc.uhcmod.utils;
 
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.argument.TeamArgumentType;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -67,29 +74,42 @@ public class TeamUtils {
 		return true;
 	}
 
+	public static AbstractTeam getLastTeam() {
+		MinecraftServer server = UHCMod.UHCServer;
+		AbstractTeam team = null;
+
+		for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
+			if (playerEntity.interactionManager.getGameMode() == GameMode.SURVIVAL) {
+				team = playerEntity.getScoreboardTeam();
+			}
+		}
+		return team;
+	}
+
 	public static void sendReadyMessage() {
-		Text yesMessage = new LiteralText("YES").formatted(Formatting.BOLD, Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes")));
-		Text noMessage = new LiteralText("NO").formatted(Formatting.BOLD, Formatting.RED).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no")));
+		Text yesMessage = new LiteralText("[YES]").formatted(Formatting.BOLD, Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes")));
+		Text noMessage = new LiteralText("[NO]").formatted(Formatting.BOLD, Formatting.RED).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no")));
 		Text readyMessage = new LiteralText(
-				"""
-				%s========================================= %s
-				
-				Is your team ready?
-				
-				
-				""".formatted(ChatColour.GOLD, ChatColour.RESET)
-		).append(yesMessage).append("           ").append(noMessage).append(
-				"""
-				
-				
-				%s========================================= %s
-				""".formatted(ChatColour.GOLD, ChatColour.RESET)
+			"""
+			%s══════════════════%s
+			
+			      Is your team ready?
+			
+			
+			""".formatted(ChatColour.GOLD, ChatColour.RESET)
+		).append("       ").append(yesMessage).append("        ").append(noMessage).append(
+			"""
+   
+   
+			%s══════════════════%s
+			""".formatted(ChatColour.GOLD, ChatColour.RESET)
 		);
 		PlayerUtils.forEveryPlayer(playerEntity -> {
 			AbstractTeam team = playerEntity.getScoreboardTeam();
 			if (TeamUtils.isNonTeam(team)) {
 				return;
 			}
+			playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 1f, 1f);
 			playerEntity.sendMessage(readyMessage, false);
 		});
 	}
@@ -106,10 +126,34 @@ public class TeamUtils {
 					teamHasMember = true;
 				}
 			}
-			if (teamHasMember && !((AbstractTeamMixinInterface) team).isReady() && !isNonTeam(team)) {
+			if (teamHasMember && !((AbstractTeamMixinInterface) team).isReady() && !TeamUtils.isNonTeam(team)) {
 				return;
 			}
 		}
-		GameManager.Phase.START.run();
+		Phase.START.run();
+	}
+
+	public static int forceAddPlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
+		Team team = TeamArgumentType.getTeam(context, "team");
+		UHCMod.UHCServer.getScoreboard().addPlayerToTeam(player.getEntityName(), team);
+		player.sendMessage(new LiteralText("You have been added to team ").append(team.getFormattedName()), false);
+		context.getSource().sendFeedback(new LiteralText("Successfully added to team"), false);
+		team.getPlayerList().forEach(s ->
+			PlayerUtils.forEveryPlayer(playerEntity -> {
+				if (playerEntity.getEntityName().equals(s) && playerEntity.interactionManager.getGameMode() == GameMode.SURVIVAL) {
+					player.teleport(
+						playerEntity.getServerWorld(),
+						playerEntity.getX(),
+						playerEntity.getY(),
+						playerEntity.getZ(),
+						playerEntity.getYaw(),
+						playerEntity.getPitch()
+					);
+					player.changeGameMode(GameMode.SURVIVAL);
+				}
+			})
+		);
+		return 1;
 	}
 }

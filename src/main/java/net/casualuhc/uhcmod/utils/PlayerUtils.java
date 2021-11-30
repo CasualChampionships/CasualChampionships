@@ -7,16 +7,33 @@ import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 
+import java.text.DecimalFormat;
 import java.util.function.Consumer;
 
 public class PlayerUtils {
+
+	private static final MutableText HEADER = new LiteralText("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
+	private static final MutableText FOOTER = new LiteralText("\nServer Hosted By CloudTech").formatted(Formatting.AQUA, Formatting.BOLD);
+	private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
 	
 	public static void updateActionBar(ServerPlayerEntity playerEntity) {
+		if (playerEntity.getServerWorld().getTime() % 20 == 0) {
+			float ticksPerSecond = 1000 / Math.max(50, UHCMod.calculateMSPT());
+			Formatting formatting = ticksPerSecond == 20 ? Formatting.DARK_GREEN : ticksPerSecond > 15 ? Formatting.YELLOW : ticksPerSecond > 10 ? Formatting.RED : Formatting.DARK_RED;
+			playerEntity.networkHandler.sendPacket(new PlayerListHeaderS2CPacket(
+				HEADER,
+				new LiteralText("\nServer TPS: ").append(new LiteralText(decimalFormat.format(ticksPerSecond)).formatted(formatting)).append(FOOTER)
+			));
+		}
+
 		// Only non spectators
 		if (playerEntity.isSpectator()) {
 			return;

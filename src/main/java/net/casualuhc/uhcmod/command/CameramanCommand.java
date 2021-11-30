@@ -14,7 +14,6 @@ import static net.minecraft.server.command.CommandManager.literal;
 import static net.minecraft.server.command.CommandManager.argument;
 
 public class CameramanCommand {
-
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("cameraman").requires(source -> source.hasPermissionLevel(4))
             .then(argument("player", EntityArgumentType.player()).

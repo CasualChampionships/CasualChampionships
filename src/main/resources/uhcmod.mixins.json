@@ -6,13 +6,16 @@
   "mixins": [
     "AbstractTeamMixin",
     "CommandManagerMixin",
+    "DedicatedPlayerManagerMixin",
     "IntRuleMixin",
     "MinecraftServerMixin",
+    "PlayerManagerMixin",
+    "PortalForcerMixin",
+    "ServerChunkManagerMixin",
+    "ServerEntityManagerMixin",
     "ServerPlayerEntityMixin",
     "ServerWorldMixin",
     "SpreadPlayersCommandMixin"
-  ],
-  "client": [
   ],
   "injectors": {
     "defaultRequire": 1

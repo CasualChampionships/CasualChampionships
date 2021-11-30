@@ -1,5 +1,5 @@
 package net.casualuhc.uhcmod.mixin;
-;
+
 import net.casualuhc.uhcmod.interfaces.IntRuleMixinInterface;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.GameRules;

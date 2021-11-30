@@ -3,6 +3,8 @@ package net.casualuhc.uhcmod.mixin;
 import com.mojang.authlib.GameProfile;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.managers.VoteManager;
+import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.minecraft.entity.ItemEntity;
@@ -13,6 +15,8 @@ import net.minecraft.item.Items;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -40,6 +44,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     private Direction direction;
     @Unique
     private boolean coordsBoolean = false;
+    @Unique
+    private final VoteManager voteManager = new VoteManager();
 
     public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
         super(world, pos, yaw, profile);
@@ -54,16 +60,22 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
 
     @Inject(method = "onDeath", at = @At("TAIL"))
     private void onDeath(DamageSource source, CallbackInfo ci) {
-        if (GameManager.currentPhase == GameManager.Phase.ACTIVE) {
+        if (GameManager.isPhase(Phase.ACTIVE)) {
             this.dropItem(new ItemStack(Items.GOLDEN_APPLE), true, false);
             AbstractTeam team = this.getScoreboardTeam();
             this.interactionManager.changeGameMode(GameMode.SPECTATOR);
             if (team != null && !TeamUtils.teamHasAlive(team)) {
-                PlayerUtils.messageEveryPlayer(new LiteralText("%s has been ELIMINATED!".formatted(team.getName())).formatted(team.getColor(), Formatting.BOLD));
+                PlayerUtils.forEveryPlayer(playerEntity -> {
+                    playerEntity.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 0.5f, 1);
+                    playerEntity.sendMessage(new LiteralText("%s has been ELIMINATED!".formatted(team.getName())).formatted(team.getColor(), Formatting.BOLD), false);
+                });
             }
             if (TeamUtils.isLastTeam()) {
-                GameManager.Phase.END.run();
+                Phase.END.run();
             }
+        }
+        if (GameManager.isPhase(Phase.END)) {
+            this.interactionManager.changeGameMode(GameMode.SPECTATOR);
         }
     }
 
@@ -92,6 +104,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     @Override
     public WorldBorder getWorldBorder() {
         return this.worldBorder;
+    }
+
+    @Override
+    public VoteManager getVoteManager() {
+        return this.voteManager;
     }
 
     // Setters
