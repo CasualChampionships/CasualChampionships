@@ -35,9 +35,9 @@ public class WorldBoarderManager {
         Thread thread = new Thread(threadGroup, () -> {
             try {
                 if (!ignoreGrace) {
-                    int minutes = (int) ((grace * GameSettings.WORLD_BORDER_MULTIPLIER.getValue()) / 60000);
+                    int minutes = (int) ((grace * GameSettings.WORLD_BORDER_SPEED.getValue()) / 60000);
                     PlayerUtils.messageEveryPlayer(new LiteralText("World border will start moving in %d minutes".formatted(minutes)).formatted(Formatting.GREEN));
-                    Thread.sleep((long) ((long) grace * GameSettings.WORLD_BORDER_MULTIPLIER.getValue()) + 1);
+                    Thread.sleep((long) ((long) grace * GameSettings.WORLD_BORDER_SPEED.getValue()) + 1);
                     PlayerUtils.forEveryPlayer(playerEntity -> {
                         playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 1.0F, 1.0F);
                         playerEntity.sendMessage(new LiteralText("World border will start moving now").formatted(Formatting.RED), false);
@@ -50,7 +50,7 @@ public class WorldBoarderManager {
                     if (currentStage == null) {
                         break;
                     }
-                    long time = (long) (currentStage.getTime(size) * GameSettings.WORLD_BORDER_MULTIPLIER.getValue());
+                    long time = (long) (currentStage.getTime(size) * GameSettings.WORLD_BORDER_SPEED.getValue());
                     moveWorldBorders(currentStage.getEndSize(), time);
                     long sleepTime = time * 1000;
                     Thread.sleep((long) (sleepTime + (sleepTime * 0.05)));

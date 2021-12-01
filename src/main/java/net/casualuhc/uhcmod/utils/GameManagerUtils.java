@@ -8,6 +8,7 @@ import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.MinecraftServer;
@@ -80,7 +81,6 @@ public class GameManagerUtils {
         server.getServerMetadata().setDescription(description);
     }
 
-
     public static void setUHCGamerules() {
         MinecraftServer server = UHCMod.UHCServer;
         setDescriptor(server);
@@ -121,7 +121,7 @@ public class GameManagerUtils {
                 EntityAttributeInstance instance = playerEntity.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
                 if (instance != null) {
                     instance.removeModifier(HEALTH_BOOST);
-                    instance.addPersistentModifier(new EntityAttributeModifier(HEALTH_BOOST, "Health Boost", GameSettings.HEALTH_MULTIPLIER.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
+                    instance.addPersistentModifier(new EntityAttributeModifier(HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
                 }
                 playerEntity.setHealth(playerEntity.getMaxHealth());
             });
@@ -188,6 +188,7 @@ public class GameManagerUtils {
         Thread thread = new Thread(threadGroup, () -> {
             PlayerUtils.forEveryPlayer(playerEntity -> {
                 playerEntity.setGlowing(false);
+                new ChatMessageC2SPacket()
                 playerEntity.networkHandler.sendPacket(new TitleS2CPacket(new LiteralText("%s has won!".formatted(team.getName())).formatted(team.getColor())));
             });
             for (int i = 0; i < 10; i++) {
