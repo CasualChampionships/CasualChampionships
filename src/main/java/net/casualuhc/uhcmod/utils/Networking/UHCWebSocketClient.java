@@ -1,12 +1,11 @@
 package net.casualuhc.uhcmod.utils.Networking;
 
-import java.net.URI;
-
 import net.casualuhc.uhcmod.UHCMod;
-import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ServerHandshake;
+
+import java.net.URI;
 
 public class UHCWebSocketClient extends WebSocketClient {
     public UHCWebSocketClient(URI serverUri) {
@@ -14,18 +13,19 @@ public class UHCWebSocketClient extends WebSocketClient {
     }
 
     @Override
-    public WebSocket getConnection() {
-        return super.getConnection();
-    }
-
-    @Override
-    public void onOpen(ServerHandshake handShakeData) {
-        this.getConnection().send("Connected to the server");
+    public void onOpen(ServerHandshake handshakedata) {
+        System.out.println("Connection to Discord bot has been established");
+//        UHCMod.UHCSocketClient.send("Connected!");
     }
 
     @Override
     public void onMessage(String message) {
-        // We can pass messages from discord to the in-game chat
+        System.out.print(message);
+    }
+
+    @Override
+    public void onClose(int code, String reason, boolean remote) {
+        System.out.println("Closed");
     }
 
     @Override
@@ -39,10 +39,8 @@ public class UHCWebSocketClient extends WebSocketClient {
     }
 
     @Override
-    public void onClose(int code, String reason, boolean remote) { }
-
-    @Override
     public void onError(Exception e) {
         UHCMod.UHCLogger.error("WebSocket Error: {}", e.toString());
     }
 }
+

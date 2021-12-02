@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.mixin;
 
 import com.mojang.authlib.GameProfile;
+import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.VoteManager;
@@ -60,6 +61,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
 
     @Inject(method = "onDeath", at = @At("TAIL"))
     private void onDeath(DamageSource source, CallbackInfo ci) {
+        // imperfect implementation, does not give specific death message, only "{player} Died"
+        UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().toString());
         if (GameManager.isPhase(Phase.ACTIVE)) {
             this.dropItem(new ItemStack(Items.GOLDEN_APPLE), true, false);
             AbstractTeam team = this.getScoreboardTeam();

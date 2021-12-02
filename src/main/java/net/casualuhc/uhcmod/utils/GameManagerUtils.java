@@ -188,7 +188,8 @@ public class GameManagerUtils {
         Thread thread = new Thread(threadGroup, () -> {
             PlayerUtils.forEveryPlayer(playerEntity -> {
                 playerEntity.setGlowing(false);
-                new ChatMessageC2SPacket()
+// I don't know what this is, but it throws an error on startup
+//                new ChatMessageC2SPacket()
                 playerEntity.networkHandler.sendPacket(new TitleS2CPacket(new LiteralText("%s has won!".formatted(team.getName())).formatted(team.getColor())));
             });
             for (int i = 0; i < 10; i++) {
