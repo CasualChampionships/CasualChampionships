@@ -59,10 +59,13 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     @Final
     public ServerPlayerInteractionManager interactionManager;
 
+    @Inject(method = "onDeath", at = @At("HEAD"))
+    private void onDeathPre(DamageSource source, CallbackInfo ci) {
+        UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().getString());
+    }
+
     @Inject(method = "onDeath", at = @At("TAIL"))
-    private void onDeath(DamageSource source, CallbackInfo ci) {
-        // imperfect implementation, does not give specific death message, only "{player} Died"
-        UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().toString());
+    private void onDeathPost(DamageSource source, CallbackInfo ci) {
         if (GameManager.isPhase(Phase.ACTIVE)) {
             this.dropItem(new ItemStack(Items.GOLDEN_APPLE), true, false);
             AbstractTeam team = this.getScoreboardTeam();
