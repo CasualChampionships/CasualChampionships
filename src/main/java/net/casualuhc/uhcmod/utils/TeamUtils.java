@@ -143,7 +143,7 @@ public class TeamUtils {
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				if (playerEntity.getEntityName().equals(s) && playerEntity.interactionManager.getGameMode() == GameMode.SURVIVAL) {
 					player.teleport(
-						playerEntity.getServerWorld(),
+						playerEntity.getWorld(),
 						playerEntity.getX(),
 						playerEntity.getY(),
 						playerEntity.getZ(),

@@ -71,13 +71,13 @@ public class WorldBoarderManager {
     }
 
     private enum Stage {
-        FIRST(6128, 3064, 2000),
+        FIRST(6128, 3064, 1500),
         SECOND(3064, 1532),
         THIRD(1532, 766, 1000),
         FOURTH(766, 383, 900),
         FIFTH(383, 180, 800),
         SIX(180, 50, 1000),
-        FINAL(50, 20, 3000),
+        FINAL(50, 20, 1500),
         ;
 
         private final float startSize;

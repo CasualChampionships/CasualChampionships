@@ -2,6 +2,8 @@ package net.casualuhc.uhcmod.managers;
 
 import com.google.gson.*;
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
+import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.scoreboard.Scoreboard;
@@ -99,16 +101,18 @@ public class TeamManager {
         }
         TeamUtils.clearNonTeam();
         Team team = scoreboard.addTeam("Spectator");
+        ((AbstractTeamMixinInterface) team).setEliminated(true);
         team.setColor(Formatting.DARK_GRAY);
         TeamUtils.addNonTeam(team);
         team = scoreboard.addTeam("Operator");
+        ((AbstractTeamMixinInterface) team).setEliminated(true);
         team.setColor(Formatting.WHITE);
         team.setPrefix(new LiteralText("[OP] "));
         scoreboard.addPlayerToTeam("senseiwells", team);
         TeamUtils.addNonTeam(team);
     }
 
-    private static Path getPath() {
+    public static Path getPath() {
         return FabricLoader.getInstance().getConfigDir().resolve("Teams.json");
     }
 }

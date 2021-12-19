@@ -20,12 +20,13 @@ import java.util.function.Consumer;
 
 public class PlayerUtils {
 
+	public static boolean displayTab = true;
 	private static final MutableText HEADER = new LiteralText("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
 	private static final MutableText FOOTER = new LiteralText("\nServer Hosted By CloudTech").formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
 	
 	public static void updateActionBar(ServerPlayerEntity playerEntity) {
-		if (playerEntity.getServerWorld().getTime() % 20 == 0) {
+		if (playerEntity.getWorld().getTime() % 20 == 0 && displayTab) {
 			float ticksPerSecond = 1000 / Math.max(50, UHCMod.calculateMSPT());
 			Formatting formatting = ticksPerSecond == 20 ? Formatting.DARK_GREEN : ticksPerSecond > 15 ? Formatting.YELLOW : ticksPerSecond > 10 ? Formatting.RED : Formatting.DARK_RED;
 			playerEntity.networkHandler.sendPacket(new PlayerListHeaderS2CPacket(

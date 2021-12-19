@@ -5,10 +5,10 @@ import net.casualuhc.uhcmod.interfaces.IntRuleMixinInterface;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
+import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.MinecraftServer;
@@ -75,7 +75,7 @@ public class GameManagerUtils {
         }
     }
 
-    private static void setDescriptor(MinecraftServer server) {
+    public static void setDescriptor(MinecraftServer server) {
         MutableText description = new LiteralText("            %s፠ %sWelcome to Casual UHC! %s፠\n".formatted(ChatColour.GOLD, ChatColour.AQUA, ChatColour.GOLD))
             .append(new LiteralText("     Yes, it's back! Is your team prepared?").formatted(Formatting.DARK_AQUA));
         server.getServerMetadata().setDescription(description);
@@ -185,6 +185,7 @@ public class GameManagerUtils {
             UHCMod.UHCLogger.error("Last team was null!");
             return;
         }
+        UHCDataBase.INSTANCE.incrementWinDataBase(team.getName());
         Thread thread = new Thread(threadGroup, () -> {
             PlayerUtils.forEveryPlayer(playerEntity -> {
                 playerEntity.setGlowing(false);

@@ -2,12 +2,15 @@ package net.casualuhc.uhcmod.mixin;
 
 import com.mojang.authlib.GameProfile;
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.VoteManager;
+import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -62,6 +65,15 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     @Inject(method = "onDeath", at = @At("HEAD"))
     private void onDeathPre(DamageSource source, CallbackInfo ci) {
         UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().getString());
+        Entity entity = source.getSource();
+        if (GameManager.isPhase(Phase.ACTIVE)) {
+            if (entity instanceof ServerPlayerEntity player && player.interactionManager.getGameMode() == GameMode.SURVIVAL) {
+                UHCDataBase.INSTANCE.incrementStatDatabase(player.getEntityName(), UHCDataBase.Stat.KILLS, 1);
+            }
+            if (this.interactionManager.getGameMode() == GameMode.SURVIVAL) {
+                UHCDataBase.INSTANCE.incrementStatDatabase(this.getEntityName(), UHCDataBase.Stat.DEATHS, 1);
+            }
+        }
     }
 
     @Inject(method = "onDeath", at = @At("TAIL"))
@@ -70,7 +82,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
             this.dropItem(new ItemStack(Items.GOLDEN_APPLE), true, false);
             AbstractTeam team = this.getScoreboardTeam();
             this.interactionManager.changeGameMode(GameMode.SPECTATOR);
-            if (team != null && !TeamUtils.teamHasAlive(team)) {
+            AbstractTeamMixinInterface iTeam = (AbstractTeamMixinInterface) team;
+            if (team != null && !TeamUtils.teamHasAlive(team) && !iTeam.isEliminated()) {
+                iTeam.setEliminated(true);
                 PlayerUtils.forEveryPlayer(playerEntity -> {
                     playerEntity.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 0.5f, 1);
                     playerEntity.sendMessage(new LiteralText("%s has been ELIMINATED!".formatted(team.getName())).formatted(team.getColor(), Formatting.BOLD), false);
@@ -83,6 +97,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
         if (GameManager.isPhase(Phase.END)) {
             this.interactionManager.changeGameMode(GameMode.SPECTATOR);
         }
+    }
+
+    @Inject(method = "onDisconnect", at = @At("TAIL"))
+    private void onDisconnect(CallbackInfo ci) {
+        UHCDataBase.INSTANCE.updateStats((ServerPlayerEntity) (Object) this);
     }
 
     // Getters

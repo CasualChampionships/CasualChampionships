@@ -23,7 +23,7 @@ public class PortalForcerMixin {
     private boolean isNether;
 
     @Inject(method = "getPortalRect", at = @At("HEAD"))
-    private void isNether(BlockPos destPos, boolean destIsNether, CallbackInfoReturnable<Optional<BlockLocating.Rectangle>> cir) {
+    private void isNether(BlockPos pos, boolean destIsNether, WorldBorder worldBorder, CallbackInfoReturnable<Optional<BlockLocating.Rectangle>> cir) {
         this.isNether = destIsNether;
     }
 

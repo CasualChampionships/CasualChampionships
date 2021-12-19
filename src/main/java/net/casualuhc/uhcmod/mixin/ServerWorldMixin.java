@@ -3,6 +3,7 @@ package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -67,5 +68,6 @@ public abstract class ServerWorldMixin {
                 scoreboard.addPlayerToTeam(player.getEntityName(), spectator);
             }
         }
+        UHCDataBase.INSTANCE.initialiseStats(player);
     }
 }
