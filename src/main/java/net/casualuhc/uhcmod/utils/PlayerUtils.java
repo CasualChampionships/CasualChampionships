@@ -11,7 +11,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 
@@ -194,8 +194,8 @@ public class PlayerUtils {
 	}
 
 	public static void forEveryPlayer(Consumer<ServerPlayerEntity> consumer) {
-		UHCMod.UHCServer.execute(() -> {
-			for (ServerPlayerEntity playerEntity : UHCMod.UHCServer.getPlayerManager().getPlayerList()) {
+		UHCMod.UHC_SERVER.execute(() -> {
+			for (ServerPlayerEntity playerEntity : UHCMod.UHC_SERVER.getPlayerManager().getPlayerList()) {
 				consumer.accept(playerEntity);
 			}
 		});
@@ -212,5 +212,9 @@ public class PlayerUtils {
 	public static boolean isPlayerPlaying(ServerPlayerEntity player) {
 		Boolean isPlaying = isPlayerPlayingMap.get(player.getUuidAsString());
 		return isPlaying != null && isPlaying;
+	}
+
+	public static boolean isPlayerSurvival(ServerPlayerEntity player) {
+		return player.interactionManager.getGameMode() == GameMode.SURVIVAL;
 	}
 }

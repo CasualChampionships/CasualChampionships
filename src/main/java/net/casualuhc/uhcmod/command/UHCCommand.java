@@ -2,6 +2,7 @@ package net.casualuhc.uhcmod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.TeamManager;
@@ -99,6 +100,17 @@ public class UHCCommand {
 				.then(literal("worldborder")
 					.then(getWorldBorderStagesStart())
 					.then(getWorldBorderStagesEnd())
+					.then(literal("stop")
+						.executes(context -> {
+							if (!GameManager.isPhase(Phase.ACTIVE)) {
+								throw CANNOT_MODIFY_WB;
+							}
+							Phase.getPhaseThreadGroup().interrupt();
+							context.getSource().getServer().getWorlds().forEach(serverWorld -> serverWorld.getWorldBorder().setSize(serverWorld.getWorldBorder().getSize()));
+							context.getSource().sendFeedback(new LiteralText("Border stopped"), false);
+							return 1;
+						})
+					)
 				)
 				.then(literal("pvp")
 					.then(literal("true").executes(context -> {
@@ -116,6 +128,14 @@ public class UHCCommand {
 						return 1;
 					}))
 				)
+				.then(literal("floodgate")
+					.then(literal("open")
+						.executes(context -> changeOpJoin(context.getSource(), true))
+					)
+					.then(literal("close")
+						.executes(context -> changeOpJoin(context.getSource(), false))
+					)
+				)
 				.then(literal("removeglow")
 					.executes(context -> {
 						PlayerUtils.forEveryPlayer(player -> player.setGlowing(false));
@@ -126,6 +146,14 @@ public class UHCCommand {
 			)
 		);
 	}
+
+	private static int changeOpJoin(ServerCommandSource source, boolean enable) {
+		GameManager.nonOpJoin = enable;
+		source.sendFeedback(new LiteralText("The floodgates are %s".formatted(enable ? "open" : "closed")), false);
+		return 1;
+	}
+
+	private static final CommandSyntaxException CANNOT_MODIFY_WB = new SimpleCommandExceptionType(new LiteralText("Cannot change world border now")).create();
 
 	private static LiteralArgumentBuilder<ServerCommandSource> getWorldBorderStagesStart() {
 		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("forcestart");
@@ -138,7 +166,7 @@ public class UHCCommand {
 						WorldBoarderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
 						return 1;
 					}
-					throw new SimpleCommandExceptionType(new LiteralText("Cannot change world border now")).create();
+					throw CANNOT_MODIFY_WB;
 				})
 			);
 		}
@@ -156,7 +184,7 @@ public class UHCCommand {
 							WorldBoarderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
 							return 1;
 						}
-						throw new SimpleCommandExceptionType(new LiteralText("Cannot change world border now")).create();
+						throw CANNOT_MODIFY_WB;
 					})
 			);
 		}

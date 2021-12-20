@@ -9,32 +9,50 @@ import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
+import net.minecraft.resource.ReloadableResourceManagerImpl;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.structure.Structure;
+import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
+import org.apache.commons.io.IOUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 public class GameManager {
     public static final UUID HEALTH_BOOST = UUID.fromString("a61b8a4f-a4f5-4b7f-b787-d10ba4ad3d57");
+    public static final Identifier LOBBY = new Identifier("uhcmod", "lobby");
+
     private static Phase currentPhase = Phase.NONE;
+    public static boolean nonOpJoin = false;
+
 
     public static boolean isReadyForPlayers() {
-        return currentPhase.phaseNumber() >= 2;
+        return currentPhase.phaseNumber() >= 2 && nonOpJoin;
     }
 
     public static boolean isGameActive() {
@@ -53,15 +71,31 @@ public class GameManager {
         return currentPhase;
     }
 
-    public static void generateLobby()  {
-        MinecraftServer server = UHCMod.UHCServer;
+    public static void generateLobby() {
+        MinecraftServer server = UHCMod.UHC_SERVER;
+        /* Old lobby generation...
         server.getCommandManager().execute(server.getCommandSource(), "/fill 17 250 17 -18 255 -17 minecraft:barrier hollow");
         server.getCommandManager().execute(server.getCommandSource(), "/summon minecraft:armor_stand 0 251 0 {Tags:[lobby,lobbycenter],NoGravity:1b,Small:1b,Invisible:1b,CustomNameVisible:1b,CustomName:\"[{\\\"text\\\":\\\"\\\"},{\\\"text\\\":\\\"UHC\\\",\\\"color\\\":\\\"gold\\\"},{\\\"text\\\":\\\" \\\\u2503 \\\"},{\\\"text\\\":\\\"Lobby\\\",\\\"color\\\":\\\"aqua\\\"}]\"}");
-        PlayerUtils.messageEveryPlayer(new LiteralText(ChatColour.GREEN + "[SETUP] Lobby has finished!"));
+        */
+        try {
+            InputStream inputStream = GameManager.class.getClassLoader().getResourceAsStream("assets/uhcmod/structures/lobby.nbt");
+            if (inputStream == null) {
+                throw new IOException("Could not find lobby structure");
+            }
+            NbtCompound nbtStructure = NbtIo.readCompressed(inputStream) ;
+            Structure lobbyStructure = server.getStructureManager().createStructure(nbtStructure);
+            BlockPos pos = new BlockPos(0, 200, 0);
+            lobbyStructure.place(server.getOverworld(), pos, pos, new StructurePlacementData(), new Random(), 3);
+            PlayerUtils.messageEveryPlayer(new LiteralText(ChatColour.GREEN + "Successfully generated lobby!"));
+        }
+        catch (IOException e) {
+            UHCMod.UHCLogger.error(e);
+            PlayerUtils.messageEveryPlayer(new LiteralText("Failed to load Lobby"));
+        }
     }
 
     public static void setBeforeGamerules() {
-        MinecraftServer server = UHCMod.UHCServer;
+        MinecraftServer server = UHCMod.UHC_SERVER;
         server.getGameRules().get(GameRules.NATURAL_REGENERATION).set(true, server);
         server.getGameRules().get(GameRules.DO_INSOMNIA).set(false, server);
         server.getGameRules().get(GameRules.DO_FIRE_TICK).set(false, server);
@@ -104,7 +138,7 @@ public class GameManager {
     }
 
     public static void setUHCGamerules() {
-        MinecraftServer server = UHCMod.UHCServer;
+        MinecraftServer server = UHCMod.UHC_SERVER;
         server.getGameRules().get(GameRules.NATURAL_REGENERATION).set(false, server);
         server.getGameRules().get(GameRules.DO_FIRE_TICK).set(true, server);
         server.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
@@ -147,7 +181,7 @@ public class GameManager {
                 playerEntity.setHealth(playerEntity.getMaxHealth());
             });
             // Pushing back to main thread
-            MinecraftServer server = UHCMod.UHCServer;
+            MinecraftServer server = UHCMod.UHC_SERVER;
             PlayerUtils.forEveryPlayer(playerEntity -> {
                 if (!TeamUtils.isNonTeam(playerEntity.getScoreboardTeam()) && !playerEntity.isSpectator()) {
                     ((ServerPlayerMixinInterface) playerEntity).setCoordsBoolean(true);
@@ -190,7 +224,7 @@ public class GameManager {
                     return;
                 }
             }
-            MinecraftServer server = UHCMod.UHCServer;
+            MinecraftServer server = UHCMod.UHC_SERVER;
             server.setPvpEnabled(true);
             PlayerUtils.forEveryPlayer(playerEntity -> {
                 playerEntity.sendMessage(new LiteralText("Grace Period is now over! Good Luck!").formatted(Formatting.RED, Formatting.BOLD), false);
@@ -208,6 +242,7 @@ public class GameManager {
             return;
         }
         UHCDataBase.INSTANCE.incrementWinDataBase(team.getName());
+        UHCDataBase.INSTANCE.updateTotalDataBase();
         Thread thread = new Thread(threadGroup, () -> {
             PlayerUtils.forEveryPlayer(playerEntity -> {
                 playerEntity.setGlowing(false);
@@ -244,7 +279,7 @@ public class GameManager {
     public static void worldBorderFinishedPost() {
         if (GameSettings.END_GAME_GLOW.getValue()) {
             PlayerUtils.forEveryPlayer(playerEntity -> {
-                if (playerEntity.interactionManager.getGameMode() == GameMode.SURVIVAL) {
+                if (PlayerUtils.isPlayerSurvival(playerEntity)) {
                     playerEntity.setGlowing(true);
                 }
             });

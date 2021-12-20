@@ -9,7 +9,6 @@ import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -64,20 +63,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     @Inject(method = "onDeath", at = @At("HEAD"))
     private void onDeathPre(DamageSource source, CallbackInfo ci) {
         // UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().getString());
-        Entity entity = source.getSource();
-        if (GameManager.isPhase(Phase.ACTIVE)) {
-            if (entity instanceof ServerPlayerEntity player && player.interactionManager.getGameMode() == GameMode.SURVIVAL) {
-                UHCDataBase.INSTANCE.incrementStatDatabase(player.getEntityName(), UHCDataBase.Stat.KILLS, 1);
-            }
-            if (this.interactionManager.getGameMode() == GameMode.SURVIVAL) {
-                UHCDataBase.INSTANCE.incrementStatDatabase(this.getEntityName(), UHCDataBase.Stat.DEATHS, 1);
-            }
-        }
     }
 
     @Inject(method = "onDeath", at = @At("TAIL"))
     private void onDeathPost(DamageSource source, CallbackInfo ci) {
         if (GameManager.isPhase(Phase.ACTIVE)) {
+            UHCDataBase.INSTANCE.updateStats((ServerPlayerEntity) (Object) this);
             this.dropItem(new ItemStack(Items.GOLDEN_APPLE), true, false);
             AbstractTeam team = this.getScoreboardTeam();
             this.interactionManager.changeGameMode(GameMode.SPECTATOR);

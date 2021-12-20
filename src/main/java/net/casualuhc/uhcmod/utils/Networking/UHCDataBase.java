@@ -10,15 +10,13 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.TeamManager;
-import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.minecraft.entity.EntityType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.stat.Stat;
 import net.minecraft.stat.StatHandler;
 import net.minecraft.stat.Stats;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.GameMode;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -26,17 +24,17 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import static com.mongodb.client.model.Filters.eq;
 
 public class UHCDataBase {
 	public final MongoClient mongoClient;
 	private final MongoCollection<Document> playerStats;
+	private final MongoCollection<Document> totalPlayerStats;
 	private final MongoCollection<Document> teamConfig;
 	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -45,12 +43,12 @@ public class UHCDataBase {
 	private UHCDataBase() {
 		this.mongoClient = new MongoClient(new MongoClientURI("mongodb+srv://admin:Q9RtqgHBcxXW6h2@cluster0.w6iug.mongodb.net/UHC?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"));
 		MongoDatabase database = this.mongoClient.getDatabase("UHC");
-		this.playerStats = database.getCollection("player_stats");
+		this.playerStats = database.getCollection("test_player_stats");
+		this.totalPlayerStats = database.getCollection("total_player_stats");
 		this.teamConfig = database.getCollection("teams");
-		this.startUpdatingStats();
 	}
 
-	public void updateStatDatabase(final String name, final Stat stat, final Object newValue) {
+	public void updateStatDatabase(final String name, final UHCStat stat, final Object newValue) {
 		this.executor.execute(() -> {
 			Bson filter = eq("name", name);
 			MongoCursor<Document> cursor = this.playerStats.find(filter).cursor();
@@ -59,105 +57,46 @@ public class UHCDataBase {
 			document.replace(stat.name, newValue);
 			if (hasDocument) {
 				this.playerStats.replaceOne(filter, document);
-			}
-			else {
-				this.playerStats.insertOne(document);
-			}
-		});
-	}
-
-	public void incrementStatDatabase(final String name, final Stat stat, final int incrementAmount) {
-		this.executor.execute(() -> {
-			Bson filter = eq("name", name);
-			MongoCursor<Document> cursor = this.playerStats.find(filter).cursor();
-			boolean hasDocument = cursor.hasNext();
-			Document document = hasDocument ? cursor.next() : this.createDefaultStat(name);
-			int currentStat = document.get(stat.name, Integer.class);
-			document.replace(stat.name, currentStat + incrementAmount);
-			if (hasDocument) {
-				this.playerStats.replaceOne(filter, document);
-			}
-			else {
-				this.playerStats.insertOne(document);
-			}
-		});
-	}
-
-	private Document createDefaultStat(String name) {
-		Document document = new Document("_id", this.playerStats.countDocuments()).append("name", name);
-		for (Stat stat : Stat.values()) {
-			document.append(stat.name, 0);
-		}
-		return document;
-	}
-
-	public void initialiseStats(ServerPlayerEntity player) {
-		StatHandler handler = player.getStatHandler();
-		List<Stat> stats = Arrays.stream(Stat.values()).filter(stat -> {
-			if (stat.statId == null) {
-				return false;
-			}
-			int statValue = handler.getStat(Stats.CUSTOM.getOrCreateStat(stat.statId));
-			return statValue == 0;
-		}).collect(Collectors.toList());
-		if (!stats.isEmpty()) {
-			this.syncInGameStat(player, stats);
-		}
-	}
-
-	private void syncInGameStat(final ServerPlayerEntity player, final List<Stat> stats) {
-		this.executor.execute(() -> {
-			String name = player.getEntityName();
-			Bson filter = eq("name", name);
-			MongoCursor<Document> cursor = this.playerStats.find(filter).cursor();
-			boolean hasDocument = cursor.hasNext();
-			Document document = hasDocument ? cursor.next() : this.createDefaultStat(name);
-			if (!hasDocument) {
-				this.playerStats.insertOne(document);
 				return;
 			}
-			for (Stat stat : stats) {
-				if (stat.statId == null) {
+			this.playerStats.insertOne(document);
+		});
+	}
+
+	public void updateTotalDataBase() {
+		this.executor.execute(() -> {
+			for (Document document : this.playerStats.find()) {
+				String name = document.getString("name");
+				Bson filter = eq("name", name);
+				MongoCursor<Document> totalPlayer = this.totalPlayerStats.find(filter).cursor();
+				if (!totalPlayer.hasNext()) {
+					this.totalPlayerStats.insertOne(document);
 					continue;
 				}
-				int databaseStat = document.get(stat.name, Integer.class) * 10;
-				UHCMod.UHCServer.execute(() -> player.getStatHandler().setStat(player, Stats.CUSTOM.getOrCreateStat(stat.statId), databaseStat));
+				Document totalPlayerDocument = totalPlayer.next();
+				for (UHCStat stat : UHCStat.values()) {
+					int statValue = document.getInteger(stat.name, 0);
+					if (statValue <= 0) {
+						continue;
+					}
+					int totalStatValue = totalPlayerDocument.getInteger(stat.name, 0) + statValue;
+					totalPlayerDocument.replace(stat.name, totalStatValue);
+				}
+				this.totalPlayerStats.replaceOne(filter, totalPlayerDocument);
 			}
 		});
 	}
 
 	public void updateStats(ServerPlayerEntity player) {
+		if (!PlayerUtils.isPlayerSurvival(player) || !PlayerUtils.isPlayerPlaying(player)) {
+			return;
+		}
 		StatHandler handler = player.getStatHandler();
 		String playerName = player.getEntityName();
-		int damageTaken = handler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.DAMAGE_TAKEN)) / 10;
-		this.updateStatDatabase(playerName, Stat.DAMAGE_TAKEN, damageTaken);
-
-		int damageGiven = handler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.DAMAGE_DEALT)) / 10;
-		this.updateStatDatabase(playerName, Stat.DAMAGE_GIVEN, damageGiven);
-	}
-
-	private void startUpdatingStats() {
-		Thread thread = new Thread(() -> {
-			boolean running = true;
-			while (running) {
-				PlayerUtils.forEveryPlayer(player -> {
-					if (player.interactionManager.getGameMode() == GameMode.SURVIVAL && PlayerUtils.isPlayerPlaying(player)) {
-						this.updateStats(player);
-					}
-				});
-				if (GameManager.isPhase(Phase.END)) {
-					return;
-				}
-				try {
-					Thread.sleep(600000);
-				}
-				catch (InterruptedException ignored) {
-					running = false;
-				}
-			}
-		});
-		thread.setDaemon(true);
-		thread.start();
+		for (UHCStat stat : UHCStat.values()) {
+			int statValue = stat.applyModifier(handler.getStat(stat.statValue));
+			this.updateStatDatabase(playerName, stat, statValue);
+		}
 	}
 
 	public void downloadTeamFromDataBase() {
@@ -165,8 +104,8 @@ public class UHCDataBase {
 			try {
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
 				List<JsonObject> jsonObjects = new ArrayList<>();
-				for (Document doc : this.teamConfig.find()) {
-					jsonObjects.add(gson.fromJson(doc.toJson(), JsonObject.class));
+				for (Document document : this.teamConfig.find()) {
+					jsonObjects.add(gson.fromJson(document.toJson(), JsonObject.class));
 				}
 				File teamJsonFile = TeamManager.getPath().toFile();
 				try (FileWriter fileWriter = new FileWriter(teamJsonFile)) {
@@ -190,7 +129,7 @@ public class UHCDataBase {
 				return;
 			}
 			Document document = cursor.next();
-			int currentWins = document.get("wins", Integer.class);
+			int currentWins = document.getInteger("wins");
 			document.replace("wins", currentWins + 1);
 			this.teamConfig.replaceOne(filter, document);
 		});
@@ -201,22 +140,35 @@ public class UHCDataBase {
 		this.executor.shutdown();
 	}
 
-	public enum Stat {
-		DAMAGE_GIVEN("damage dealt", Stats.DAMAGE_DEALT),
-		DAMAGE_TAKEN("damage taken", Stats.DAMAGE_TAKEN),
-		DEATHS("deaths"),
-		KILLS("kills");
+	private Document createDefaultStat(String name) {
+		Document document = new Document("_id", this.playerStats.countDocuments()).append("name", name);
+		for (UHCStat stat : UHCStat.values()) {
+			document.append(stat.name, 0);
+		}
+		return document;
+	}
 
-		public final String name;
-		public final Identifier statId;
+	private static final Function<Integer, Integer> DIVIDE_TEN = (integer) -> integer / 10;
 
-		Stat(String name, Identifier statId) {
+	private enum UHCStat {
+		DAMAGE_DEALT("damage dealt", Stats.CUSTOM.getOrCreateStat(Stats.DAMAGE_DEALT), DIVIDE_TEN),
+		DAMAGE_TAKEN("damage taken", Stats.CUSTOM.getOrCreateStat(Stats.DAMAGE_TAKEN), DIVIDE_TEN),
+		KILLS("kills", Stats.KILLED.getOrCreateStat(EntityType.PLAYER), null),
+		DEATHS("deaths", Stats.CUSTOM.getOrCreateStat(Stats.DEATHS), null),
+		;
+
+		private final String name;
+		private final Stat<?> statValue;
+		private final Function<Integer, Integer> statModifier;
+
+		UHCStat(String name, Stat<?> statId, Function<Integer, Integer> statModifier) {
 			this.name = name;
-			this.statId = statId;
+			this.statValue = statId;
+			this.statModifier = statModifier;
 		}
 
-		Stat(String name) {
-			this(name, null);
+		public int applyModifier(int start) {
+			return this.statModifier == null ? start : this.statModifier.apply(start);
 		}
 	}
 }

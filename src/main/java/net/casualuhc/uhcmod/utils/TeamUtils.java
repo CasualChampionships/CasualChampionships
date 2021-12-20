@@ -47,17 +47,17 @@ public class TeamUtils {
 	}
 
 	public static void unReadyAllTeams() {
-		for (Team team : UHCMod.UHCServer.getScoreboard().getTeams()) {
+		for (Team team : UHCMod.UHC_SERVER.getScoreboard().getTeams()) {
 			((AbstractTeamMixinInterface) team).setReady(false);
 		}
 	}
 
 	public static boolean teamHasAlive(AbstractTeam team) {
-		MinecraftServer server = UHCMod.UHCServer;
+		MinecraftServer server = UHCMod.UHC_SERVER;
 		Collection<String> playerNames = team.getPlayerList();
 		for (String playerName : playerNames) {
 			ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerName);
-			if (player != null && player.interactionManager.getGameMode() == GameMode.SURVIVAL) {
+			if (player != null && PlayerUtils.isPlayerSurvival(player)) {
 				return true;
 			}
 		}
@@ -65,11 +65,11 @@ public class TeamUtils {
 	}
 
 	public static boolean isLastTeam() {
-		MinecraftServer server = UHCMod.UHCServer;
+		MinecraftServer server = UHCMod.UHC_SERVER;
 		AbstractTeam team = null;
 
 		for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
-			if (playerEntity.interactionManager.getGameMode() == GameMode.SURVIVAL) {
+			if (PlayerUtils.isPlayerSurvival(playerEntity)) {
 				team = team == null ? playerEntity.getScoreboardTeam() : team;
 				if (team != playerEntity.getScoreboardTeam()) {
 					return false;
@@ -80,11 +80,11 @@ public class TeamUtils {
 	}
 
 	public static AbstractTeam getLastTeam() {
-		MinecraftServer server = UHCMod.UHCServer;
+		MinecraftServer server = UHCMod.UHC_SERVER;
 		AbstractTeam team = null;
 
 		for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
-			if (playerEntity.interactionManager.getGameMode() == GameMode.SURVIVAL) {
+			if (PlayerUtils.isPlayerSurvival(playerEntity)) {
 				team = playerEntity.getScoreboardTeam();
 			}
 		}
@@ -120,7 +120,7 @@ public class TeamUtils {
 	}
 
 	public static void checkAllTeamsReady() {
-		MinecraftServer server = UHCMod.UHCServer;
+		MinecraftServer server = UHCMod.UHC_SERVER;
 		ServerScoreboard scoreboard = server.getScoreboard();
 		for (Team team : scoreboard.getTeams()) {
 			boolean teamHasMember = false;
@@ -141,7 +141,7 @@ public class TeamUtils {
 	public static int forceAddPlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
 		ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
 		Team team = TeamArgumentType.getTeam(context, "team");
-		UHCMod.UHCServer.getScoreboard().addPlayerToTeam(player.getEntityName(), team);
+		UHCMod.UHC_SERVER.getScoreboard().addPlayerToTeam(player.getEntityName(), team);
 		player.sendMessage(new LiteralText("You have been added to team ").append(team.getFormattedName()), false);
 		context.getSource().sendFeedback(new LiteralText("Successfully added to team"), false);
 		player.networkHandler.sendPacket(new TitleS2CPacket(new LiteralText("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
@@ -154,22 +154,22 @@ public class TeamUtils {
 		}
 		player.setHealth(player.getMaxHealth());
 		PlayerUtils.setPlayerPlaying(player, true);
-		team.getPlayerList().forEach(s ->
-			PlayerUtils.forEveryPlayer(playerEntity -> {
-				if (playerEntity.getEntityName().equals(s) && playerEntity.interactionManager.getGameMode() == GameMode.SURVIVAL) {
-					player.teleport(
-						playerEntity.getWorld(),
-						playerEntity.getX(),
-						playerEntity.getY(),
-						playerEntity.getZ(),
-						playerEntity.getYaw(),
-						playerEntity.getPitch()
-					);
-					player.changeGameMode(GameMode.SURVIVAL);
-				}
 
-			})
-		);
+		for (ServerPlayerEntity playerEntity : UHCMod.UHC_SERVER.getPlayerManager().getPlayerList()) {
+			if (team.getPlayerList().contains(playerEntity.getEntityName()) && PlayerUtils.isPlayerSurvival(playerEntity) && !player.equals(playerEntity)) {
+				player.teleport(
+					playerEntity.getWorld(),
+					playerEntity.getX(),
+					playerEntity.getY(),
+					playerEntity.getZ(),
+					playerEntity.getYaw(),
+					playerEntity.getPitch()
+				);
+				break;
+			}
+		}
+
+		player.changeGameMode(GameMode.SURVIVAL);
 		return 1;
 	}
 }

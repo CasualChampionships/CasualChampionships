@@ -32,7 +32,7 @@ public class PortalForcerMixin {
      */
     @Inject(method = "method_31119", at = @At("RETURN"), cancellable = true)
     private void onReturn(PointOfInterest pointOfInterest, CallbackInfoReturnable<Boolean> cir) {
-        ServerWorld world = this.isNether ? UHCMod.UHCServer.getWorld(World.NETHER) : UHCMod.UHCServer.getOverworld();
+        ServerWorld world = this.isNether ? UHCMod.UHC_SERVER.getWorld(World.NETHER) : UHCMod.UHC_SERVER.getOverworld();
         if (world != null) {
             cir.setReturnValue(cir.getReturnValue() && world.getWorldBorder().contains(pointOfInterest.getPos()));
         }

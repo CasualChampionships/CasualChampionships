@@ -39,7 +39,7 @@ public record Phase(Runnable runnable, int phaseNumber) {
 
     private static void lobby() {
         GameManager.generateLobby();
-        PlayerUtils.forEveryPlayer(playerEntity -> playerEntity.teleport(UHCMod.UHCServer.getOverworld(), 0, 253, 0, 0, 0));
+        PlayerUtils.forEveryPlayer(playerEntity -> playerEntity.teleport(UHCMod.UHC_SERVER.getOverworld(), 0, 253, 0, 0, 0));
     }
 
     private static void ready() {

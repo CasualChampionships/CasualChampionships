@@ -13,12 +13,12 @@ import net.minecraft.world.border.WorldBorder;
 
 public class WorldBoarderManager {
 
-    private static final MinecraftServer server = UHCMod.UHCServer;
+    private static final MinecraftServer SERVER = UHCMod.UHC_SERVER;
     public static float grace = 300000;
 
     public static void moveWorldBorders(double newSize, long time) {
-        server.execute(() ->
-            server.getWorlds().forEach(serverWorld -> {
+        SERVER.execute(() ->
+            SERVER.getWorlds().forEach(serverWorld -> {
                 WorldBorder border = serverWorld.getWorldBorder();
                 if (time != 0) {
                     border.interpolateSize(border.getSize(), newSize, time * 1000);
@@ -45,7 +45,7 @@ public class WorldBoarderManager {
                 }
                 boolean shouldContinue = true;
                 while (shouldContinue) {
-                    float size = (float) UHCMod.UHCServer.getOverworld().getWorldBorder().getSize();
+                    float size = (float) UHCMod.UHC_SERVER.getOverworld().getWorldBorder().getSize();
                     Stage currentStage = Stage.getStage(size);
                     if (currentStage == null) {
                         break;
@@ -73,11 +73,11 @@ public class WorldBoarderManager {
     }
 
     public enum Stage {
-        FIRST(6128, 3064, 1500),
+        FIRST(6128, 3064, 1800),
         SECOND(3064, 1532),
-        THIRD(1532, 766, 1000),
-        FOURTH(766, 383, 900),
-        FIFTH(383, 180, 800),
+        THIRD(1532, 766, 900),
+        FOURTH(766, 383, 800),
+        FIFTH(383, 180, 700),
         SIX(180, 50, 500),
         FINAL(50, 20, 200),
         ;

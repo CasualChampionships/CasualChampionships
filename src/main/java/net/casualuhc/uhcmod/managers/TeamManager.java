@@ -3,7 +3,7 @@ package net.casualuhc.uhcmod.managers;
 import com.google.gson.*;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
-import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
+import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.scoreboard.Scoreboard;
@@ -79,7 +79,7 @@ public class TeamManager {
         catch (IOException e) {
             UHCMod.UHCLogger.error("Error with buffered reader");
         }
-        Scoreboard scoreboard = UHCMod.UHCServer.getScoreboard();
+        Scoreboard scoreboard = UHCMod.UHC_SERVER.getScoreboard();
         // This MUST be done like this or will encounter ConcurrentModificationException
         final Team[] teams = scoreboard.getTeams().toArray(Team[]::new);
         for (Team team : teams) {
@@ -101,16 +101,22 @@ public class TeamManager {
             team.setFriendlyFireAllowed(false);
         }
         TeamUtils.clearNonTeam();
-        Team team = scoreboard.addTeam("Spectator");
-        ((AbstractTeamMixinInterface) team).setEliminated(true);
-        team.setColor(Formatting.DARK_GRAY);
-        TeamUtils.addNonTeam(team);
-        team = scoreboard.addTeam("Operator");
+        Team team = scoreboard.addTeam("Operator");
         ((AbstractTeamMixinInterface) team).setEliminated(true);
         team.setColor(Formatting.WHITE);
         team.setPrefix(new LiteralText("[OP] "));
         scoreboard.addPlayerToTeam("senseiwells", team);
         TeamUtils.addNonTeam(team);
+        team = scoreboard.addTeam("Spectator");
+        ((AbstractTeamMixinInterface) team).setEliminated(true);
+        team.setColor(Formatting.DARK_GRAY);
+        TeamUtils.addNonTeam(team);
+        Team finalTeam = team;
+        PlayerUtils.forEveryPlayer(player -> {
+            if (player.getScoreboardTeam() == null) {
+                scoreboard.addPlayerToTeam(player.getEntityName(), finalTeam);
+            }
+        });
     }
 
     public static Path getPath() {
