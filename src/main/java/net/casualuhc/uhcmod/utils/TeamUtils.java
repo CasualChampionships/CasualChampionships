@@ -5,8 +5,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.TeamArgumentType;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.Team;
@@ -139,6 +144,16 @@ public class TeamUtils {
 		UHCMod.UHCServer.getScoreboard().addPlayerToTeam(player.getEntityName(), team);
 		player.sendMessage(new LiteralText("You have been added to team ").append(team.getFormattedName()), false);
 		context.getSource().sendFeedback(new LiteralText("Successfully added to team"), false);
+		player.networkHandler.sendPacket(new TitleS2CPacket(new LiteralText("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
+		player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL, SoundCategory.MASTER, 1.0F, 1.0F);
+		player.getHungerManager().setSaturationLevel(20F);
+		EntityAttributeInstance instance = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+		if (instance != null) {
+			instance.removeModifier(GameManager.HEALTH_BOOST);
+			instance.addPersistentModifier(new EntityAttributeModifier(GameManager.HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
+		}
+		player.setHealth(player.getMaxHealth());
+		PlayerUtils.setPlayerPlaying(player, true);
 		team.getPlayerList().forEach(s ->
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				if (playerEntity.getEntityName().equals(s) && playerEntity.interactionManager.getGameMode() == GameMode.SURVIVAL) {
@@ -152,6 +167,7 @@ public class TeamUtils {
 					);
 					player.changeGameMode(GameMode.SURVIVAL);
 				}
+
 			})
 		);
 		return 1;

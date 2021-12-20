@@ -2,10 +2,10 @@ package net.casualuhc.uhcmod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.TeamManager;
 import net.casualuhc.uhcmod.managers.WorldBoarderManager;
-import net.casualuhc.uhcmod.utils.GameManagerUtils;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSetting;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
@@ -75,12 +75,6 @@ public class UHCCommand {
 					return 1;
 				})
 			)
-			.then(literal("vote")
-				.executes(context -> {
-					Phase.VOTING.run();
-					return 1;
-				})
-			)
 			.then(literal("start")
 				.executes(context -> {
 					Phase.READY.run();
@@ -96,12 +90,16 @@ public class UHCCommand {
 					.executes(context -> {
 						GameManager.setCurrentPhase(Phase.ACTIVE);
 						WorldBoarderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
-						GameManagerUtils.setUHCGamerules();
+						GameManager.setUHCGamerules();
 						return 1;
 					})
 				)
 			)
 			.then(literal("config")
+				.then(literal("worldborder")
+					.then(getWorldBorderStagesStart())
+					.then(getWorldBorderStagesEnd())
+				)
 				.then(literal("pvp")
 					.then(literal("true").executes(context -> {
 						context.getSource().getServer().setPvpEnabled(true);
@@ -118,9 +116,51 @@ public class UHCCommand {
 						return 1;
 					}))
 				)
+				.then(literal("removeglow")
+					.executes(context -> {
+						PlayerUtils.forEveryPlayer(player -> player.setGlowing(false));
+						return 1;
+					})
+				)
 				.then(getGameRuleCommand())
 			)
 		);
+	}
+
+	private static LiteralArgumentBuilder<ServerCommandSource> getWorldBorderStagesStart() {
+		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("forcestart");
+		for (WorldBoarderManager.Stage stage : WorldBoarderManager.Stage.values()) {
+			commandBuilder.then(literal(stage.name())
+				.executes(context -> {
+					if (GameManager.isPhase(Phase.ACTIVE)) {
+						Phase.getPhaseThreadGroup().interrupt();
+						WorldBoarderManager.moveWorldBorders(stage.getStartSize(), 0);
+						WorldBoarderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
+						return 1;
+					}
+					throw new SimpleCommandExceptionType(new LiteralText("Cannot change world border now")).create();
+				})
+			);
+		}
+		return commandBuilder;
+	}
+
+	private static LiteralArgumentBuilder<ServerCommandSource> getWorldBorderStagesEnd() {
+		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("forceend");
+		for (WorldBoarderManager.Stage stage : WorldBoarderManager.Stage.values()) {
+			commandBuilder.then(literal(stage.name())
+					.executes(context -> {
+						if (GameManager.isPhase(Phase.ACTIVE)) {
+							Phase.getPhaseThreadGroup().interrupt();
+							WorldBoarderManager.moveWorldBorders(stage.getEndSize(), 0);
+							WorldBoarderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
+							return 1;
+						}
+						throw new SimpleCommandExceptionType(new LiteralText("Cannot change world border now")).create();
+					})
+			);
+		}
+		return commandBuilder;
 	}
 
 	private static LiteralArgumentBuilder<ServerCommandSource> getGameRuleCommand() {

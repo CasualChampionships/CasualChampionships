@@ -16,6 +16,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class PlayerUtils {
@@ -24,6 +26,8 @@ public class PlayerUtils {
 	private static final MutableText HEADER = new LiteralText("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
 	private static final MutableText FOOTER = new LiteralText("\nServer Hosted By CloudTech").formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
+
+	private static final Map<String, Boolean> isPlayerPlayingMap = new HashMap<>();
 	
 	public static void updateActionBar(ServerPlayerEntity playerEntity) {
 		if (playerEntity.getWorld().getTime() % 20 == 0 && displayTab) {
@@ -199,5 +203,14 @@ public class PlayerUtils {
 
 	public static void messageEveryPlayer(Text text) {
 		forEveryPlayer(playerEntity -> playerEntity.sendMessage(text, false));
+	}
+
+	public static void setPlayerPlaying(ServerPlayerEntity player, boolean isPlaying) {
+		isPlayerPlayingMap.put(player.getUuidAsString(), isPlaying);
+	}
+
+	public static boolean isPlayerPlaying(ServerPlayerEntity player) {
+		Boolean isPlaying = isPlayerPlayingMap.get(player.getUuidAsString());
+		return isPlaying != null && isPlaying;
 	}
 }

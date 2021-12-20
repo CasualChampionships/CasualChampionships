@@ -98,6 +98,7 @@ public class TeamManager {
             for (String memberName : teamManager.members) {
                 scoreboard.addPlayerToTeam(memberName, team);
             }
+            team.setFriendlyFireAllowed(false);
         }
         TeamUtils.clearNonTeam();
         Team team = scoreboard.addTeam("Spectator");

@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.utils.GameManagerUtils;
+import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,9 +16,9 @@ public class MinecraftServerMixin {
         UHCMod.UHCServer = (MinecraftServer) (Object) this;
     }
 
-    @Inject(method = "loadWorld", at = @At("TAIL"))
-    private void postServerLoad(CallbackInfo ci) {
-        GameManagerUtils.setDescriptor((MinecraftServer) (Object) this);
+    @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerMetadata;setDescription(Lnet/minecraft/text/Text;)V", shift = At.Shift.AFTER))
+    private void afterDescriptionSet(CallbackInfo ci) {
+        GameManager.setDescriptor((MinecraftServer) (Object) this);
     }
 
     @Inject(method = "shutdown", at = @At("TAIL"))

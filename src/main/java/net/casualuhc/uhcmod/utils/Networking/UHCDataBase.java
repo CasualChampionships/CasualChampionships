@@ -18,6 +18,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.StatHandler;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.GameMode;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -139,7 +140,11 @@ public class UHCDataBase {
 		Thread thread = new Thread(() -> {
 			boolean running = true;
 			while (running) {
-				PlayerUtils.forEveryPlayer(this::updateStats);
+				PlayerUtils.forEveryPlayer(player -> {
+					if (player.interactionManager.getGameMode() == GameMode.SURVIVAL && PlayerUtils.isPlayerPlaying(player)) {
+						this.updateStats(player);
+					}
+				});
 				if (GameManager.isPhase(Phase.END)) {
 					return;
 				}

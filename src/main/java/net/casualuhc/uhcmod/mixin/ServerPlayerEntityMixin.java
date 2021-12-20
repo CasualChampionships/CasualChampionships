@@ -1,15 +1,14 @@
 package net.casualuhc.uhcmod.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.managers.VoteManager;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -48,8 +47,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     private Direction direction;
     @Unique
     private boolean coordsBoolean = false;
-    @Unique
-    private final VoteManager voteManager = new VoteManager();
 
     public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
         super(world, pos, yaw, profile);
@@ -62,9 +59,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     @Final
     public ServerPlayerInteractionManager interactionManager;
 
+    @Shadow protected abstract void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition);
+
     @Inject(method = "onDeath", at = @At("HEAD"))
     private void onDeathPre(DamageSource source, CallbackInfo ci) {
-        UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().getString());
+        // UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().getString());
         Entity entity = source.getSource();
         if (GameManager.isPhase(Phase.ACTIVE)) {
             if (entity instanceof ServerPlayerEntity player && player.interactionManager.getGameMode() == GameMode.SURVIVAL) {
@@ -129,11 +128,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     @Override
     public WorldBorder getWorldBorder() {
         return this.worldBorder;
-    }
-
-    @Override
-    public VoteManager getVoteManager() {
-        return this.voteManager;
     }
 
     // Setters

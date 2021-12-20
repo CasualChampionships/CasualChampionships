@@ -59,7 +59,7 @@ public abstract class ServerWorldMixin {
                 }
             }
         }
-        else if (player.getScoreboardTeam() == null){
+        else if (player.getScoreboardTeam() == null || !PlayerUtils.isPlayerPlaying(player)){
             player.changeGameMode(GameMode.SPECTATOR);
         }
         if (player.getScoreboardTeam() == null) {

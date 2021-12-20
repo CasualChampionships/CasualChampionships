@@ -26,6 +26,6 @@ public class UHCMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        UHCSocketClient.connect();
+        // UHCSocketClient.connect();
     }
 }
