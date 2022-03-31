@@ -12,7 +12,7 @@ import org.lwjgl.system.CallbackI;
 public class Spectator {
     private static ServerPlayerEntity cameraman;
 
-    public static void spectate(ServerPlayerEntity from, ServerPlayerEntity player){
+    public static void spectate(ServerPlayerEntity from, ServerPlayerEntity player) {
         if (!from.isSpectator())
             return;
         from.teleport(

@@ -14,6 +14,9 @@ import java.util.Set;
 @Mixin(ServerEntityManager.class)
 public class ServerEntityManagerMixin {
 
+    /**
+     * These mobs will have no AI
+     */
     private static final Set<EntityType<?>> DISABLED_ENTITIES = Set.of(
         EntityType.PIG,
         EntityType.COW,

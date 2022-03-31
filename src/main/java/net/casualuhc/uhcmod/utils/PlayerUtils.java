@@ -11,21 +11,26 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class PlayerUtils {
 
+	public static boolean displayTab = true;
 	private static final MutableText HEADER = new LiteralText("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
-	private static final MutableText FOOTER = new LiteralText("\nServer Hosted By CloudTech").formatted(Formatting.AQUA, Formatting.BOLD);
+	private static final MutableText FOOTER = new LiteralText("\nServer Hosted By KiwiTech").formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
+
+	private static final Map<String, Boolean> isPlayerPlayingMap = new HashMap<>();
 	
 	public static void updateActionBar(ServerPlayerEntity playerEntity) {
-		if (playerEntity.getServerWorld().getTime() % 20 == 0) {
+		if (playerEntity.getWorld().getTime() % 20 == 0 && displayTab) {
 			float ticksPerSecond = 1000 / Math.max(50, UHCMod.calculateMSPT());
 			Formatting formatting = ticksPerSecond == 20 ? Formatting.DARK_GREEN : ticksPerSecond > 15 ? Formatting.YELLOW : ticksPerSecond > 10 ? Formatting.RED : Formatting.DARK_RED;
 			playerEntity.networkHandler.sendPacket(new PlayerListHeaderS2CPacket(
@@ -34,10 +39,6 @@ public class PlayerUtils {
 			));
 		}
 
-		// Only non spectators
-		if (playerEntity.isSpectator()) {
-			return;
-		}
 		ServerPlayerMixinInterface Iplayer = (ServerPlayerMixinInterface) playerEntity;
 		World entityWorld = playerEntity.getEntityWorld();
 		WorldBorder border = entityWorld.getWorldBorder();
@@ -62,7 +63,8 @@ public class PlayerUtils {
 			playerEntity.sendMessage(new LiteralText(locationInfo), true);
 		}
 	}
-	
+
+	// By Kman
 	public static void updateWorldBorderArrow(ServerPlayerEntity playerEntity) {
 		ServerPlayerMixinInterface Iplayer = (ServerPlayerMixinInterface) playerEntity;
 		World entityWorld = playerEntity.getEntityWorld();
@@ -189,8 +191,8 @@ public class PlayerUtils {
 	}
 
 	public static void forEveryPlayer(Consumer<ServerPlayerEntity> consumer) {
-		UHCMod.UHCServer.execute(() -> {
-			for (ServerPlayerEntity playerEntity : UHCMod.UHCServer.getPlayerManager().getPlayerList()) {
+		UHCMod.UHC_SERVER.execute(() -> {
+			for (ServerPlayerEntity playerEntity : UHCMod.UHC_SERVER.getPlayerManager().getPlayerList()) {
 				consumer.accept(playerEntity);
 			}
 		});
@@ -198,5 +200,18 @@ public class PlayerUtils {
 
 	public static void messageEveryPlayer(Text text) {
 		forEveryPlayer(playerEntity -> playerEntity.sendMessage(text, false));
+	}
+
+	public static void setPlayerPlaying(ServerPlayerEntity player, boolean isPlaying) {
+		isPlayerPlayingMap.put(player.getUuidAsString(), isPlaying);
+	}
+
+	public static boolean isPlayerPlaying(ServerPlayerEntity player) {
+		Boolean isPlaying = isPlayerPlayingMap.get(player.getUuidAsString());
+		return isPlaying != null && isPlaying;
+	}
+
+	public static boolean isPlayerSurvival(ServerPlayerEntity player) {
+		return player.interactionManager.getGameMode() == GameMode.SURVIVAL;
 	}
 }

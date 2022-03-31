@@ -1,13 +1,14 @@
 package net.casualuhc.uhcmod.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.managers.VoteManager;
+import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -45,8 +46,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     private Direction direction;
     @Unique
     private boolean coordsBoolean = false;
-    @Unique
-    private final VoteManager voteManager = new VoteManager();
 
     public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
         super(world, pos, yaw, profile);
@@ -59,18 +58,23 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     @Final
     public ServerPlayerInteractionManager interactionManager;
 
+    @Shadow protected abstract void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition);
+
     @Inject(method = "onDeath", at = @At("HEAD"))
     private void onDeathPre(DamageSource source, CallbackInfo ci) {
-        UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().getString());
+        // UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().getString());
     }
 
     @Inject(method = "onDeath", at = @At("TAIL"))
     private void onDeathPost(DamageSource source, CallbackInfo ci) {
         if (GameManager.isPhase(Phase.ACTIVE)) {
+            UHCDataBase.INSTANCE.updateStats((ServerPlayerEntity) (Object) this);
             this.dropItem(new ItemStack(Items.GOLDEN_APPLE), true, false);
             AbstractTeam team = this.getScoreboardTeam();
             this.interactionManager.changeGameMode(GameMode.SPECTATOR);
-            if (team != null && !TeamUtils.teamHasAlive(team)) {
+            AbstractTeamMixinInterface iTeam = (AbstractTeamMixinInterface) team;
+            if (team != null && !TeamUtils.teamHasAlive(team) && !iTeam.isEliminated()) {
+                iTeam.setEliminated(true);
                 PlayerUtils.forEveryPlayer(playerEntity -> {
                     playerEntity.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 0.5f, 1);
                     playerEntity.sendMessage(new LiteralText("%s has been ELIMINATED!".formatted(team.getName())).formatted(team.getColor(), Formatting.BOLD), false);
@@ -83,6 +87,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
         if (GameManager.isPhase(Phase.END)) {
             this.interactionManager.changeGameMode(GameMode.SPECTATOR);
         }
+    }
+
+    @Inject(method = "onDisconnect", at = @At("TAIL"))
+    private void onDisconnect(CallbackInfo ci) {
+        UHCDataBase.INSTANCE.updateStats((ServerPlayerEntity) (Object) this);
     }
 
     // Getters
@@ -110,11 +119,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Se
     @Override
     public WorldBorder getWorldBorder() {
         return this.worldBorder;
-    }
-
-    @Override
-    public VoteManager getVoteManager() {
-        return this.voteManager;
     }
 
     // Setters

@@ -16,9 +16,7 @@ public class UHCWebSocketClient extends WebSocketClient {
     }
 
     @Override
-    public void onOpen(ServerHandshake handshakedata) {
-        NET_LOGGER.info("Connection to Discord bot has been established");
-//        UHCMod.UHCSocketClient.send("Connected!");
+    public void onOpen(ServerHandshake handShakeData) {
     }
 
     @Override
@@ -37,7 +35,7 @@ public class UHCWebSocketClient extends WebSocketClient {
             super.send(text);
         }
         catch (WebsocketNotConnectedException e) {
-            NET_LOGGER.error("WebSocket Not Connected: {}", e.toString());
+
         }
     }
 

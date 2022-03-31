@@ -10,6 +10,8 @@ public class AbstractTeamMixin implements AbstractTeamMixinInterface {
 
 	@Unique
 	private boolean ready = false;
+	@Unique
+	private boolean isEliminated = false;
 
 	@Override
 	public boolean isReady() {
@@ -19,5 +21,15 @@ public class AbstractTeamMixin implements AbstractTeamMixinInterface {
 	@Override
 	public void setReady(boolean isReady) {
 		this.ready = isReady;
+	}
+
+	@Override
+	public boolean isEliminated() {
+		return this.isEliminated;
+	}
+
+	@Override
+	public void setEliminated(boolean isEliminated) {
+		this.isEliminated = isEliminated;
 	}
 }

@@ -40,11 +40,11 @@ public abstract class ServerWorldMixin {
 
     @Inject(method = "onPlayerConnected", at = @At("HEAD"))
     private void onPlayerConnected(ServerPlayerEntity player, CallbackInfo ci) {
-        Scoreboard scoreboard = UHCMod.UHCServer.getScoreboard();
+        Scoreboard scoreboard = UHCMod.UHC_SERVER.getScoreboard();
         if (!GameManager.isGameActive()) {
             if (!player.hasPermissionLevel(2)) {
-                player.changeGameMode(GameMode.SURVIVAL);
-                player.teleport(UHCMod.UHCServer.getOverworld(), 0, 253, 0, 0, 0);
+                player.changeGameMode(GameMode.ADVENTURE);
+                player.teleport(UHCMod.UHC_SERVER.getOverworld(), 0, 253, 0, 0, 0);
                 player.sendMessage(new LiteralText("Welcome to Casual UHC!").formatted(Formatting.GOLD), false);
             }
             else {
@@ -58,7 +58,7 @@ public abstract class ServerWorldMixin {
                 }
             }
         }
-        else if (player.getScoreboardTeam() == null){
+        else if (player.getScoreboardTeam() == null || !PlayerUtils.isPlayerPlaying(player)){
             player.changeGameMode(GameMode.SPECTATOR);
         }
         if (player.getScoreboardTeam() == null) {

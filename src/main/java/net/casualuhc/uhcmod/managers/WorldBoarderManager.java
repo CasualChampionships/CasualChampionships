@@ -1,7 +1,6 @@
 package net.casualuhc.uhcmod.managers;
 
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.utils.GameManagerUtils;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
@@ -14,12 +13,12 @@ import net.minecraft.world.border.WorldBorder;
 
 public class WorldBoarderManager {
 
-    private static final MinecraftServer server = UHCMod.UHCServer;
+    private static final MinecraftServer SERVER = UHCMod.UHC_SERVER;
     public static float grace = 300000;
 
-    private static void moveWorldBorders(double newSize, long time) {
-        server.execute(() ->
-            server.getWorlds().forEach(serverWorld -> {
+    public static void moveWorldBorders(double newSize, long time) {
+        SERVER.execute(() ->
+            SERVER.getWorlds().forEach(serverWorld -> {
                 WorldBorder border = serverWorld.getWorldBorder();
                 if (time != 0) {
                     border.interpolateSize(border.getSize(), newSize, time * 1000);
@@ -34,6 +33,7 @@ public class WorldBoarderManager {
     public static void startWorldBorders(ThreadGroup threadGroup, final boolean ignoreGrace) {
         Thread thread = new Thread(threadGroup, () -> {
             try {
+                Thread.sleep(200);
                 if (!ignoreGrace) {
                     int minutes = (int) ((grace * GameSettings.WORLD_BORDER_SPEED.getValue()) / 60000);
                     PlayerUtils.messageEveryPlayer(new LiteralText("World border will start moving in %d minutes".formatted(minutes)).formatted(Formatting.GREEN));
@@ -45,7 +45,7 @@ public class WorldBoarderManager {
                 }
                 boolean shouldContinue = true;
                 while (shouldContinue) {
-                    float size = (float) UHCMod.UHCServer.getOverworld().getWorldBorder().getSize();
+                    float size = (float) UHCMod.UHC_SERVER.getOverworld().getWorldBorder().getSize();
                     Stage currentStage = Stage.getStage(size);
                     if (currentStage == null) {
                         break;
@@ -53,14 +53,16 @@ public class WorldBoarderManager {
                     long time = (long) (currentStage.getTime(size) * GameSettings.WORLD_BORDER_SPEED.getValue());
                     moveWorldBorders(currentStage.getEndSize(), time);
                     long sleepTime = time * 1000;
-                    Thread.sleep((long) (sleepTime + (sleepTime * 0.05)));
+                    Thread.sleep((long) (sleepTime + (sleepTime * 0.01)));
                     if (!GameManager.isPhase(Phase.ACTIVE)) {
                         shouldContinue = false;
                     }
                     if (currentStage == Stage.FINAL) {
-                        GameManagerUtils.worldBorderFinishedPre();
+                        UHCMod.UHCLogger.info("Hit final border");
+                        GameManager.worldBorderFinishedPre();
                         Thread.sleep(300000);
-                        GameManagerUtils.worldBorderFinishedPost();
+                        GameManager.worldBorderFinishedPost();
+                        break;
                     }
                 }
             }
@@ -70,14 +72,14 @@ public class WorldBoarderManager {
         thread.start();
     }
 
-    private enum Stage {
-        FIRST(6128, 3064, 2000),
+    public enum Stage {
+        FIRST(6128, 3064, 1800),
         SECOND(3064, 1532),
-        THIRD(1532, 766, 1000),
-        FOURTH(766, 383, 900),
-        FIFTH(383, 180, 800),
-        SIX(180, 50, 1000),
-        FINAL(50, 20, 3000),
+        THIRD(1532, 766, 900),
+        FOURTH(766, 383, 800),
+        FIFTH(383, 180, 700),
+        SIX(180, 50, 500),
+        FINAL(50, 20, 200),
         ;
 
         private final float startSize;
@@ -94,6 +96,10 @@ public class WorldBoarderManager {
             this(startSize, endSize, (long) (startSize - endSize));
         }
 
+        public float getStartSize() {
+            return this.startSize;
+        }
+
         public float getEndSize() {
             return this.endSize;
         }
@@ -104,6 +110,9 @@ public class WorldBoarderManager {
         }
 
         public static Stage getStage(float size) {
+            if (size == FINAL.endSize) {
+                return FINAL;
+            }
             for (Stage stage : Stage.values()) {
                 if (size <= stage.startSize && size > stage.endSize) {
                     return stage;

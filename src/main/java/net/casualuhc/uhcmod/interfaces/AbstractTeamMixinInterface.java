@@ -6,4 +6,7 @@ public interface AbstractTeamMixinInterface {
 
 	void setReady(boolean isReady);
 
+	boolean isEliminated();
+
+	void setEliminated(boolean isEliminated);
 }
