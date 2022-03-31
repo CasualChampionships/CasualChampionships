@@ -17,7 +17,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class TeamManager {
@@ -26,9 +28,9 @@ public class TeamManager {
     private final String name;
     private final String colour;
     private final String prefix;
-    private final String[] members;
+    private final List<String> members;
 
-    private TeamManager(String name, String colour, String prefix, String[] members) {
+    private TeamManager(String name, String colour, String prefix, List<String> members) {
         this.name = name;
         this.colour = colour;
         this.prefix = prefix;
@@ -67,8 +69,13 @@ public class TeamManager {
             String teamName = json.get("name").getAsString();
             String colour = json.get("colour").getAsString();
             String prefix = "[%s]".formatted(json.get("prefix").getAsString());
-            String[] members = json.get("members").getAsString().split(":");
-            new TeamManager(teamName, colour, prefix, members);
+            JsonArray members = json.get("members").getAsJsonArray();
+
+            List<String> memberList = new ArrayList<>();
+            for (JsonElement member : members) {
+                memberList.add(member.getAsString());
+            }
+            new TeamManager(teamName, colour, prefix, memberList);
         }
     }
 
