@@ -11,6 +11,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.TeamManager;
+import net.casualuhc.uhcmod.utils.Config;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -41,10 +42,10 @@ public class UHCDataBase {
 	public static final UHCDataBase INSTANCE = new UHCDataBase();
 
 	private UHCDataBase() {
-		this.mongoClient = new MongoClient(new MongoClientURI("mongodb+srv://admin:Q9RtqgHBcxXW6h2@cluster0.w6iug.mongodb.net/UHC?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"));
+		this.mongoClient = new MongoClient(new MongoClientURI(Config.MONGO_URI));
 		MongoDatabase database = this.mongoClient.getDatabase("UHC");
-		this.playerStats = database.getCollection("test_player_stats");
-		this.totalPlayerStats = database.getCollection("total_player_stats");
+		this.playerStats = database.getCollection(Config.IS_DEV ? "test_player_stats" : "player_stats");
+		this.totalPlayerStats = database.getCollection(Config.IS_DEV ? "test_total_player_stats" : "total_player_stats");
 		this.teamConfig = database.getCollection("teams");
 	}
 
@@ -63,6 +64,9 @@ public class UHCDataBase {
 		});
 	}
 
+	/**
+	 * This should only be called when the UHC ends
+	 */
 	public void updateTotalDataBase() {
 		this.executor.execute(() -> {
 			for (Document document : this.playerStats.find()) {

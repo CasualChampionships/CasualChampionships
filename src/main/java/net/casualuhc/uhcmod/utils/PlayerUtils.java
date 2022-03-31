@@ -24,7 +24,7 @@ public class PlayerUtils {
 
 	public static boolean displayTab = true;
 	private static final MutableText HEADER = new LiteralText("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
-	private static final MutableText FOOTER = new LiteralText("\nServer Hosted By CloudTech").formatted(Formatting.AQUA, Formatting.BOLD);
+	private static final MutableText FOOTER = new LiteralText("\nServer Hosted By KiwiTech").formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
 
 	private static final Map<String, Boolean> isPlayerPlayingMap = new HashMap<>();
@@ -39,10 +39,6 @@ public class PlayerUtils {
 			));
 		}
 
-		// Only non spectators
-		if (playerEntity.isSpectator()) {
-			return;
-		}
 		ServerPlayerMixinInterface Iplayer = (ServerPlayerMixinInterface) playerEntity;
 		World entityWorld = playerEntity.getEntityWorld();
 		WorldBorder border = entityWorld.getWorldBorder();
@@ -67,7 +63,8 @@ public class PlayerUtils {
 			playerEntity.sendMessage(new LiteralText(locationInfo), true);
 		}
 	}
-	
+
+	// By Kman
 	public static void updateWorldBorderArrow(ServerPlayerEntity playerEntity) {
 		ServerPlayerMixinInterface Iplayer = (ServerPlayerMixinInterface) playerEntity;
 		World entityWorld = playerEntity.getEntityWorld();

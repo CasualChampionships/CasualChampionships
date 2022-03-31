@@ -25,7 +25,7 @@ public class AbstractTeamMixin implements AbstractTeamMixinInterface {
 
 	@Override
 	public boolean isEliminated() {
-		return isEliminated;
+		return this.isEliminated;
 	}
 
 	@Override

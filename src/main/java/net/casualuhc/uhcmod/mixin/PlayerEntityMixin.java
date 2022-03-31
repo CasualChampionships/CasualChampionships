@@ -14,6 +14,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerEntity.class)
 public class PlayerEntityMixin {
+	/**
+	 * We only count attacking damage to other players...
+	 */
 	@Unique
 	private boolean wasPlayer = false;
 

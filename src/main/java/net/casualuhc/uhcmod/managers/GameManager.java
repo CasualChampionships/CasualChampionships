@@ -9,14 +9,12 @@ import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
-import net.minecraft.resource.ReloadableResourceManagerImpl;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
@@ -28,28 +26,22 @@ import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
-import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class GameManager {
     public static final UUID HEALTH_BOOST = UUID.fromString("a61b8a4f-a4f5-4b7f-b787-d10ba4ad3d57");
-    public static final Identifier LOBBY = new Identifier("uhcmod", "lobby");
 
     private static Phase currentPhase = Phase.NONE;
     public static boolean nonOpJoin = false;
-
 
     public static boolean isReadyForPlayers() {
         return currentPhase.phaseNumber() >= 2 && nonOpJoin;
@@ -84,7 +76,7 @@ public class GameManager {
             }
             NbtCompound nbtStructure = NbtIo.readCompressed(inputStream) ;
             Structure lobbyStructure = server.getStructureManager().createStructure(nbtStructure);
-            BlockPos pos = new BlockPos(0, 200, 0);
+            BlockPos pos = new BlockPos(-25, 250, -25);
             lobbyStructure.place(server.getOverworld(), pos, pos, new StructurePlacementData(), new Random(), 3);
             PlayerUtils.messageEveryPlayer(new LiteralText(ChatColour.GREEN + "Successfully generated lobby!"));
         }
@@ -96,10 +88,13 @@ public class GameManager {
 
     public static void setBeforeGamerules() {
         MinecraftServer server = UHCMod.UHC_SERVER;
-        server.getGameRules().get(GameRules.NATURAL_REGENERATION).set(true, server);
-        server.getGameRules().get(GameRules.DO_INSOMNIA).set(false, server);
-        server.getGameRules().get(GameRules.DO_FIRE_TICK).set(false, server);
-        server.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(false, server);
+        GameRules gameRules = server.getGameRules();
+        gameRules.get(GameRules.NATURAL_REGENERATION).set(true, server);
+        gameRules.get(GameRules.DO_INSOMNIA).set(false, server);
+        gameRules.get(GameRules.DO_FIRE_TICK).set(false, server);
+        gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(false, server);
+        gameRules.get(GameRules.ANNOUNCE_ADVANCEMENTS).set(false, server);
+        gameRules.get(GameRules.FALL_DAMAGE).set(false, server);
         server.setDifficulty(Difficulty.PEACEFUL, true);
         server.getOverworld().setTimeOfDay(6000); // 6000 = noon
         server.getOverworld().setWeather(999999, 0, false, false);
@@ -121,6 +116,9 @@ public class GameManager {
             commandManager.execute(source, "/carpet commandProfile ops");
             commandManager.execute(source, "/carpet commandScript ops");
             commandManager.execute(source, "/carpet lightEngineMaxBatchSize 500");
+            commandManager.execute(source, "/carpet structureBlockLimit 256");
+            commandManager.execute(source, "/carpet fillLimit 1000000");
+            commandManager.execute(source, "/carpet fillUpdates false");
             commandManager.execute(source, "/carpet setDefault commandLog ops");
             commandManager.execute(source, "/carpet setDefault commandDistance ops");
             commandManager.execute(source, "/carpet setDefault commandInfo ops");
@@ -128,6 +126,7 @@ public class GameManager {
             commandManager.execute(source, "/carpet setDefault commandProfile ops");
             commandManager.execute(source, "/carpet setDefault commandScript ops");
             commandManager.execute(source, "/carpet setDefault lightEngineMaxBatchSize 500");
+            commandManager.execute(source, "/carpet setDefault structureBlockLimit 256");
         }
     }
 
@@ -139,9 +138,11 @@ public class GameManager {
 
     public static void setUHCGamerules() {
         MinecraftServer server = UHCMod.UHC_SERVER;
-        server.getGameRules().get(GameRules.NATURAL_REGENERATION).set(false, server);
-        server.getGameRules().get(GameRules.DO_FIRE_TICK).set(true, server);
-        server.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
+        GameRules gameRules = server.getGameRules();
+        gameRules.get(GameRules.NATURAL_REGENERATION).set(false, server);
+        gameRules.get(GameRules.DO_FIRE_TICK).set(true, server);
+        gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
+        gameRules.get(GameRules.FALL_DAMAGE).set(true, server);
         server.setDifficulty(Difficulty.HARD, true);
         ((IntRuleMixinInterface) server.getGameRules().get(GameRules.RANDOM_TICK_SPEED)).setIntegerValue(3, server);
         if (UHCMod.isCarpetInstalled) {
@@ -154,6 +155,7 @@ public class GameManager {
     public static void startCountDown(ThreadGroup threadGroup) {
         // Pushing to a new thread to countdown
         Thread countDownThread = new Thread(threadGroup, () -> {
+            PlayerUtils.messageEveryPlayer(new LiteralText("Please stand still during the countdown so you don't fall when you get teleported!").formatted(Formatting.GOLD));
             for (int i = 10; i > 0; i--) {
                 final int countDown = i;
                 PlayerUtils.forEveryPlayer(playerEntity -> {
@@ -195,8 +197,7 @@ public class GameManager {
                 }
             });
             server.execute(() -> {
-                server.getCommandManager().execute(server.getCommandSource(), "/fill 17 250 17 -18 255 -17 minecraft:air");
-                server.getCommandManager().execute(server.getCommandSource(), "/kill @e[tag=lobby]");
+                server.getCommandManager().execute(server.getCommandSource(), "/fill 24 250 24 -25 289 -25 air");
                 server.getCommandManager().execute(server.getCommandSource(), "/spreadplayers 0 0 500 2900 true @e[type=player]");
                 Phase.ACTIVE.run();
             });
@@ -241,13 +242,15 @@ public class GameManager {
             UHCMod.UHCLogger.error("Last team was null!");
             return;
         }
-        UHCDataBase.INSTANCE.incrementWinDataBase(team.getName());
-        UHCDataBase.INSTANCE.updateTotalDataBase();
+
         Thread thread = new Thread(threadGroup, () -> {
+            UHCDataBase.INSTANCE.incrementWinDataBase(team.getName());
             PlayerUtils.forEveryPlayer(playerEntity -> {
                 playerEntity.setGlowing(false);
                 playerEntity.networkHandler.sendPacket(new TitleS2CPacket(new LiteralText("%s has won!".formatted(team.getName())).formatted(team.getColor())));
+                UHCDataBase.INSTANCE.updateStats(playerEntity);
             });
+            UHCDataBase.INSTANCE.updateTotalDataBase();
             for (int i = 0; i < 10; i++) {
                 try {
                     PlayerUtils.forEveryPlayer(playerEntity -> {

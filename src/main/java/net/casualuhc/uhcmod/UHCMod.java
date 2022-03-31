@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod;
 
+import net.casualuhc.uhcmod.utils.Config;
 import net.casualuhc.uhcmod.utils.Networking.UHCWebSocketClient;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -22,6 +23,11 @@ public class UHCMod implements ModInitializer {
     public static float calculateMSPT() {
         msPerTick = (float) (MathHelper.average(UHC_SERVER.lastTickLengths) * 1.0E-6F);
         return msPerTick;
+    }
+
+    public static void onServerStart(MinecraftServer server) {
+        UHC_SERVER = server;
+        Config.readConfigs();
     }
 
     @Override
