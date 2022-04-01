@@ -5,7 +5,10 @@ import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.effect.HealthBoostStatusEffect;
+import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
@@ -41,6 +44,7 @@ public abstract class ServerWorldMixin {
     @Inject(method = "onPlayerConnected", at = @At("HEAD"))
     private void onPlayerConnected(ServerPlayerEntity player, CallbackInfo ci) {
         Scoreboard scoreboard = UHCMod.UHC_SERVER.getScoreboard();
+        player.markHealthDirty();
         if (!GameManager.isGameActive()) {
             if (!player.hasPermissionLevel(2)) {
                 player.changeGameMode(GameMode.ADVENTURE);

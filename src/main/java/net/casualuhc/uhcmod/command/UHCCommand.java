@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.TeamManager;
-import net.casualuhc.uhcmod.managers.WorldBoarderManager;
+import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSetting;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
@@ -93,7 +93,7 @@ public class UHCCommand {
 				.then(literal("quiet")
 					.executes(context -> {
 						GameManager.setCurrentPhase(Phase.ACTIVE);
-						WorldBoarderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
+						WorldBorderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
 						GameManager.setUHCGamerules();
 						return 1;
 					})
@@ -106,6 +106,10 @@ public class UHCCommand {
 				})
 			)
 			.then(literal("config")
+				.executes(context -> {
+					context.getSource().getPlayer().openHandledScreen(GameSettings.createScreenFactory(0));
+					return 1;
+				})
 				.then(literal("worldborder")
 					.then(getWorldBorderStagesStart())
 					.then(getWorldBorderStagesEnd())
@@ -123,26 +127,32 @@ public class UHCCommand {
 				)
 				.then(literal("pvp")
 					.then(literal("true").executes(context -> {
-						context.getSource().getServer().setPvpEnabled(true);
+						GameSettings.PVP.setValue(true);
 						return 1;
 					}))
 					.then(literal("false").executes(context -> {
-						context.getSource().getServer().setPvpEnabled(false);
+						GameSettings.PVP.setValue(false);
 						return 1;
 					}))
 				)
 				.then(literal("tab")
 					.then(literal("toggle").executes(context -> {
-						PlayerUtils.displayTab = !PlayerUtils.displayTab;
+						GameSettings.DISPLAY_TAB.setValue(!GameSettings.DISPLAY_TAB.getValue());
 						return 1;
 					}))
 				)
 				.then(literal("floodgate")
 					.then(literal("open")
-						.executes(context -> changeOpJoin(context.getSource(), true))
+						.executes(context -> {
+							GameSettings.FLOODGATE.setValue(true);
+							return 1;
+						})
 					)
 					.then(literal("close")
-						.executes(context -> changeOpJoin(context.getSource(), false))
+						.executes(context -> {
+							GameSettings.FLOODGATE.setValue(false);
+							return 1;
+						})
 					)
 				)
 				.then(literal("removeglow")
@@ -171,23 +181,17 @@ public class UHCCommand {
 		);
 	}
 
-	private static int changeOpJoin(ServerCommandSource source, boolean enable) {
-		GameManager.nonOpJoin = enable;
-		source.sendFeedback(new LiteralText("The floodgates are %s".formatted(enable ? "open" : "closed")), false);
-		return 1;
-	}
-
 	private static final CommandSyntaxException CANNOT_MODIFY_WB = new SimpleCommandExceptionType(new LiteralText("Cannot change world border now")).create();
 
 	private static LiteralArgumentBuilder<ServerCommandSource> getWorldBorderStagesStart() {
 		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("forcestart");
-		for (WorldBoarderManager.Stage stage : WorldBoarderManager.Stage.values()) {
+		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
 			commandBuilder.then(literal(stage.name())
 				.executes(context -> {
 					if (GameManager.isPhase(Phase.ACTIVE)) {
 						Phase.getPhaseThreadGroup().interrupt();
-						WorldBoarderManager.moveWorldBorders(stage.getStartSize(), 0);
-						WorldBoarderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
+						WorldBorderManager.moveWorldBorders(stage.getStartSize(), 0);
+						WorldBorderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
 						return 1;
 					}
 					throw CANNOT_MODIFY_WB;
@@ -199,13 +203,13 @@ public class UHCCommand {
 
 	private static LiteralArgumentBuilder<ServerCommandSource> getWorldBorderStagesEnd() {
 		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("forceend");
-		for (WorldBoarderManager.Stage stage : WorldBoarderManager.Stage.values()) {
+		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
 			commandBuilder.then(literal(stage.name())
 				.executes(context -> {
 					if (GameManager.isPhase(Phase.ACTIVE)) {
 						Phase.getPhaseThreadGroup().interrupt();
-						WorldBoarderManager.moveWorldBorders(stage.getEndSize(), 0);
-						WorldBoarderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
+						WorldBorderManager.moveWorldBorders(stage.getEndSize(), 0);
+						WorldBorderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
 						return 1;
 					}
 					throw CANNOT_MODIFY_WB;
@@ -220,10 +224,10 @@ public class UHCCommand {
 		for (Map.Entry<String, GameSetting<?>> gameSettingEntry : GameSettings.gameSettingMap.entrySet()) {
 			String settingName = gameSettingEntry.getKey();
 			LiteralArgumentBuilder<ServerCommandSource> commandArgument = literal(settingName);
-			for (String argument : gameSettingEntry.getValue().getOptions().keySet()) {
-				commandArgument.then(literal(argument).executes(context -> {
+			for (GameSetting.NamedItemStack argument : gameSettingEntry.getValue().getOptions().keySet()) {
+				commandArgument.then(literal(argument.name).executes(context -> {
 					ServerPlayerEntity playerEntity = context.getSource().getPlayer();
-					gameSettingEntry.getValue().setValueFromOption(argument);
+					gameSettingEntry.getValue().setValueFromOption(argument.name);
 					playerEntity.sendMessage(new LiteralText("Set %s for %s".formatted(argument, settingName)).formatted(Formatting.GREEN), false);
 					return 1;
 				}));

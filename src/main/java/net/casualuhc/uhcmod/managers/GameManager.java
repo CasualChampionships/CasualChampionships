@@ -105,7 +105,7 @@ public class GameManager {
             serverWorld.getWorldBorder().setCenter(0, 0);
             serverWorld.getWorldBorder().setSize(6128);
         });
-        server.setPvpEnabled(false);
+        GameSettings.PVP.setValue(false);
         if (UHCMod.isCarpetInstalled) {
             CommandManager commandManager = server.getCommandManager();
             ServerCommandSource source = server.getCommandSource();
@@ -225,8 +225,7 @@ public class GameManager {
                     return;
                 }
             }
-            MinecraftServer server = UHCMod.UHC_SERVER;
-            server.setPvpEnabled(true);
+            GameSettings.PVP.setValue(true);
             PlayerUtils.forEveryPlayer(playerEntity -> {
                 playerEntity.sendMessage(new LiteralText("Grace Period is now over! Good Luck!").formatted(Formatting.RED, Formatting.BOLD), false);
                 playerEntity.playSound(SoundEvents.ENTITY_ENDER_DRAGON_AMBIENT, SoundCategory.MASTER, 1f ,1f);

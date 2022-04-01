@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod.mixin;
 
+import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.minecraft.block.entity.BrewingStandBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -14,6 +15,6 @@ public class BrewingStandBlockEntityMixin {
 	 */
 	@Redirect(method = "canCraft", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isEmpty()Z", ordinal = 0))
 	private static boolean isValid(ItemStack itemStack) {
-		return itemStack.isEmpty() || itemStack.getItem() == Items.GLOWSTONE_DUST || itemStack.getItem() == Items.GLISTERING_MELON_SLICE;
+		return GameSettings.OP_POTIONS.getValue() ? itemStack.isEmpty() : itemStack.isEmpty() || itemStack.getItem() == Items.GLOWSTONE_DUST || itemStack.getItem() == Items.GLISTERING_MELON_SLICE;
 	}
 }

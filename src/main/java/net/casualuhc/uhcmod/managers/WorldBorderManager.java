@@ -11,7 +11,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.border.WorldBorder;
 
-public class WorldBoarderManager {
+public class WorldBorderManager {
 
     private static final MinecraftServer SERVER = UHCMod.UHC_SERVER;
     public static float grace = 300000;
@@ -47,12 +47,20 @@ public class WorldBoarderManager {
                 while (shouldContinue) {
                     float size = (float) UHCMod.UHC_SERVER.getOverworld().getWorldBorder().getSize();
                     Stage currentStage = Stage.getStage(size);
+                    GameSettings.WORLD_BORDER_STAGE.setValueQuietly(currentStage);
+
                     if (currentStage == null) {
                         break;
                     }
+
                     long time = (long) (currentStage.getTime(size) * GameSettings.WORLD_BORDER_SPEED.getValue());
                     moveWorldBorders(currentStage.getEndSize(), time);
                     long sleepTime = time * 1000;
+
+                    if (Thread.interrupted()) {
+                        break;
+                    }
+
                     Thread.sleep((long) (sleepTime + (sleepTime * 0.01)));
                     if (!GameManager.isPhase(Phase.ACTIVE)) {
                         shouldContinue = false;

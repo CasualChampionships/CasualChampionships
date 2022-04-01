@@ -1,26 +1,42 @@
 package net.casualuhc.uhcmod.utils.GameSetting;
 
+import net.casualuhc.uhcmod.UHCMod;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class GameSetting<T> {
-
-    private final String name;
-    private final Map<String, T> options;
+    private final NamedItemStack namedItemStack;
+    private final Map<NamedItemStack, T> options;
+    private final Consumer<GameSetting<T>> callback;
     private T value;
 
-    protected GameSetting(String name, Map<String, T> options, T defaultValue) {
-        this.name = name;
+    protected GameSetting(NamedItemStack name, Map<NamedItemStack, T> options, T defaultValue, Consumer<GameSetting<T>> callback) {
+        this.namedItemStack = name;
         this.options = options;
-        this.value = defaultValue;
-        GameSettings.gameSettingMap.put(name, this);
+        this.callback = callback;
+        this.setValueQuietly(defaultValue);
+        GameSettings.gameSettingMap.put(name.name, this);
     }
 
-    @SuppressWarnings("unused")
     public String getName() {
-        return this.name;
+        return this.namedItemStack.name;
     }
 
-    public Map<String, T> getOptions() {
+    public ItemStack getStack() {
+        return this.namedItemStack.stack;
+    }
+
+    public Map<NamedItemStack, T> getOptions() {
         return this.options;
     }
 
@@ -29,21 +45,113 @@ public class GameSetting<T> {
     }
 
     public void setValueFromOption(String option) {
-        T newValue = this.options.get(option);
+        T newValue = this.options.get(new NamedItemStack(option, Items.AIR));
         if (newValue != null) {
-            this.value = newValue;
+            this.setValue(newValue);
+        }
+    }
+
+    public void setValue(T value) {
+        this.setValueQuietly(value);
+        if (this.callback != null) {
+            this.callback.accept(this);
+        }
+    }
+
+    public void setValueQuietly(T value) {
+        this.value = value;
+        this.resetSelected();
+        UHCMod.UHCLogger.info("Config '%s' has been set to '%s'".formatted(this.getName(), this.value));
+    }
+
+    public void resetSelected() {
+        boolean hasSelection = false;
+        for (Map.Entry<NamedItemStack, T> entry : this.options.entrySet()) {
+            if (!hasSelection && this.value.equals(entry.getValue())) {
+                NbtCompound nbtCompound = entry.getKey().stack.getOrCreateNbt();
+                NbtList dummyList = new NbtList();
+                dummyList.add(new NbtCompound());
+                nbtCompound.put(ItemStack.ENCHANTMENTS_KEY, dummyList);
+                continue;
+            }
+            entry.getKey().stack.removeSubNbt(ItemStack.ENCHANTMENTS_KEY);
         }
     }
 
     public static class DoubleGameSetting extends GameSetting<Double> {
-        public DoubleGameSetting(String name, Map<String, Double> options, Double defaultValue) {
-            super(name, options, defaultValue);
+        public DoubleGameSetting(NamedItemStack name, Map<NamedItemStack, Double> options, Double defaultValue) {
+            this(name, options, defaultValue, null);
+        }
+
+        public DoubleGameSetting(NamedItemStack name, Map<NamedItemStack, Double> options, Double defaultValue, Consumer<GameSetting<Double>> callback) {
+            super(name, options, defaultValue, callback);
         }
     }
 
     public static class BooleanGameSetting extends GameSetting<Boolean> {
-        public BooleanGameSetting(String name, Map<String, Boolean> options, Boolean defaultValue) {
-            super(name, options, defaultValue);
+        public BooleanGameSetting(NamedItemStack name, Map<NamedItemStack, Boolean> options, Boolean defaultValue) {
+            this(name, options, defaultValue, null);
+        }
+
+        public BooleanGameSetting(NamedItemStack name, Map<NamedItemStack, Boolean> options, Boolean defaultValue, Consumer<GameSetting<Boolean>> callback) {
+            super(name, options, defaultValue, callback);
+        }
+    }
+
+    public static class EnumGameSetting<E extends Enum<?>> extends GameSetting<E> {
+        public EnumGameSetting(NamedItemStack name, Map<NamedItemStack, E> options, E defaultValue, Consumer<GameSetting<E>> callback) {
+            super(name, options, defaultValue, callback);
+        }
+    }
+
+    public static class NamedItemStack {
+        static Function<String, Text> defaultFormatter = string -> {
+            StringBuilder builder = new StringBuilder();
+
+            String[] strings = string.split("_");
+            for (String sub : strings) {
+                builder.append(sub.substring(0, 1).toUpperCase()).append(sub.substring(1)).append(" ");
+            }
+
+            return new LiteralText(builder.toString().trim()).formatted(Formatting.BOLD, Formatting.GOLD);
+        };
+
+        public final String name;
+        public final ItemStack stack;
+
+        private NamedItemStack(String name, Item item) {
+            this(name, item, defaultFormatter);
+        }
+
+        private NamedItemStack(String name, Item item, Function<String, Text> nameFunction) {
+            this.name = name;
+            this.stack = item.getDefaultStack();
+
+            this.stack.setCustomName(nameFunction.apply(name));
+        }
+
+        public static NamedItemStack of(String name, Item item) {
+            return new NamedItemStack(name, item);
+        }
+
+        public static NamedItemStack of(String name, Item item, Function<String, Text> function) {
+            return new NamedItemStack(name, item, function);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof NamedItemStack namedStack) {
+                return this.name.equals(namedStack.name);
+            }
+            if (obj instanceof String) {
+                return this.name.equals(obj);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.name.hashCode();
         }
     }
 }

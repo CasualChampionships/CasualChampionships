@@ -1,11 +1,13 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.minecraft.network.MessageType;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -58,5 +60,10 @@ public class ServerPlayNetworkHandlerMixin {
 		}
 		TranslatableText text = new TranslatableText("chat.type.text", this.player.getDisplayName(), this.rawString.substring(1));
 		instance.broadcast(text, MessageType.CHAT, sender);
+	}
+
+	@Redirect(method = "onClickSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;isSpectator()Z"))
+	private boolean canClick(ServerPlayerEntity instance) {
+		return !(instance.currentScreenHandler instanceof GameSettings.FakeScreen) && instance.isSpectator();
 	}
 }

@@ -3,7 +3,7 @@ package net.casualuhc.uhcmod.utils;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.TeamManager;
-import net.casualuhc.uhcmod.managers.WorldBoarderManager;
+import net.casualuhc.uhcmod.managers.WorldBorderManager;
 
 public record Phase(Runnable runnable, int phaseNumber) {
 
@@ -52,7 +52,7 @@ public record Phase(Runnable runnable, int phaseNumber) {
     }
 
     private static void active() {
-        WorldBoarderManager.startWorldBorders(PHASE_THREAD_GROUP, false);
+        WorldBorderManager.startWorldBorders(PHASE_THREAD_GROUP, false);
         GameManager.startPVPCountdown(PHASE_THREAD_GROUP);
         GameManager.setUHCGamerules();
     }
