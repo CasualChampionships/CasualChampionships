@@ -23,7 +23,7 @@ public class Config {
 	}
 
 	public static void readConfigs() {
-		try {
+		ExceptionUtils.runSafe(() -> {
 			if (Files.exists(CONFIG_PATH)) {
 				String string = Files.readString(CONFIG_PATH);
 				JsonObject config = GSON.fromJson(string, JsonObject.class);
@@ -31,9 +31,8 @@ public class Config {
 				IS_DEV = config.get("dev").getAsBoolean();
 				return;
 			}
-		}
-		catch (IOException ignored) { }
-		UHCMod.UHCLogger.error("Failed to read config");
+			UHCMod.UHCLogger.error("Failed to read config");
+		});
 	}
 
 	/*

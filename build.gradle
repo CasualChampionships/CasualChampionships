@@ -37,6 +37,10 @@ dependencies {
     include group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 }
 
+loom {
+    accessWidenerPath = file("src/main/resources/uhcmod.accesswidener")
+}
+
 processResources {
     inputs.property "version", project.version
 

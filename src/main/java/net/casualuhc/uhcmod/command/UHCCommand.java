@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.TeamManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
+import net.casualuhc.uhcmod.utils.Event.Events;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSetting;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
@@ -55,53 +56,53 @@ public class UHCCommand {
 			.then(literal("phase")
 				.then(literal("cancel")
 					.executes(context -> {
-						GameManager.setCurrentPhase(Phase.LOBBY);
+						GameManager.INSTANCE.setCurrentPhase(Phase.LOBBY);
 						return 1;
 					})
 				)
 				.then(literal("current")
 					.executes(context -> {
 						ServerPlayerEntity player = context.getSource().getPlayer();
-						player.sendMessage(new LiteralText("Current phase is: %d".formatted(GameManager.getCurrentPhase().phaseNumber())), false);
+						player.sendMessage(new LiteralText("Current phase is: %d".formatted(GameManager.INSTANCE.getCurrentPhase().ordinal())), false);
 						return 1;
 					})
 				)
 			)
 			.then(literal("setup")
 				.executes(context -> {
-					Phase.SETUP.run();
+					Events.ON_SETUP.trigger();
 					return 1;
 				})
 			)
 			.then(literal("lobby")
 				.executes(context -> {
-					Phase.LOBBY.run();
+					Events.ON_LOBBY.trigger();
 					return 1;
 				})
 			)
 			.then(literal("start")
 				.executes(context -> {
-					Phase.READY.run();
+					Events.ON_READY.trigger();
 					return 1;
 				})
 				.then(literal("force")
 					.executes(context -> {
-						Phase.START.run();
+						Events.ON_START.trigger();
 						return 1;
 					})
 				)
 				.then(literal("quiet")
 					.executes(context -> {
-						GameManager.setCurrentPhase(Phase.ACTIVE);
-						WorldBorderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
-						GameManager.setUHCGamerules();
+						GameManager.INSTANCE.setCurrentPhase(Phase.ACTIVE);
+						Events.GRACE_PERIOD_FINISH.trigger();
+						GameManager.INSTANCE.setUHCGamerules();
 						return 1;
 					})
 				)
 			)
 			.then(literal("endgame")
 				.executes(context -> {
-					Phase.END.run();
+					Events.ON_END.trigger();
 					return 1;
 				})
 			)
@@ -115,10 +116,9 @@ public class UHCCommand {
 					.then(getWorldBorderStagesEnd())
 					.then(literal("stop")
 						.executes(context -> {
-							if (!GameManager.isPhase(Phase.ACTIVE)) {
+							if (!GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
 								throw CANNOT_MODIFY_WB;
 							}
-							Phase.getPhaseThreadGroup().interrupt();
 							context.getSource().getServer().getWorlds().forEach(serverWorld -> serverWorld.getWorldBorder().setSize(serverWorld.getWorldBorder().getSize()));
 							context.getSource().sendFeedback(new LiteralText("Border stopped"), false);
 							return 1;
@@ -168,8 +168,8 @@ public class UHCCommand {
 							player.getHungerManager().setSaturationLevel(20F);
 							EntityAttributeInstance instance = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 							if (instance != null) {
-								instance.removeModifier(GameManager.HEALTH_BOOST);
-								instance.addPersistentModifier(new EntityAttributeModifier(GameManager.HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
+								instance.removeModifier(PlayerUtils.HEALTH_BOOST);
+								instance.addPersistentModifier(new EntityAttributeModifier(PlayerUtils.HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
 							}
 							player.setHealth(player.getMaxHealth());
 							return 1;
@@ -188,10 +188,9 @@ public class UHCCommand {
 		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
 			commandBuilder.then(literal(stage.name())
 				.executes(context -> {
-					if (GameManager.isPhase(Phase.ACTIVE)) {
-						Phase.getPhaseThreadGroup().interrupt();
+					if (GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
 						WorldBorderManager.moveWorldBorders(stage.getStartSize(), 0);
-						WorldBorderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
+						WorldBorderManager.startWorldBorders();
 						return 1;
 					}
 					throw CANNOT_MODIFY_WB;
@@ -206,10 +205,9 @@ public class UHCCommand {
 		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
 			commandBuilder.then(literal(stage.name())
 				.executes(context -> {
-					if (GameManager.isPhase(Phase.ACTIVE)) {
-						Phase.getPhaseThreadGroup().interrupt();
+					if (GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
 						WorldBorderManager.moveWorldBorders(stage.getEndSize(), 0);
-						WorldBorderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
+						WorldBorderManager.startWorldBorders();
 						return 1;
 					}
 					throw CANNOT_MODIFY_WB;

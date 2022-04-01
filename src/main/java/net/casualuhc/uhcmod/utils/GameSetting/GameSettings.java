@@ -75,7 +75,7 @@ public class GameSettings {
             onOffMap.get(),
             false,
             booleanSetting -> {
-                GameManager.nonOpJoin = booleanSetting.getValue();
+                GameManager.INSTANCE.setFloodgates(booleanSetting.getValue());
             }
         );
 
@@ -116,10 +116,9 @@ public class GameSettings {
             }},
             Stage.FIRST,
             stageSetting -> {
-                if (GameManager.isPhase(Phase.ACTIVE)) {
-                    Phase.getPhaseThreadGroup().interrupt();
+                if (GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
                     WorldBorderManager.moveWorldBorders(stageSetting.getValue().getStartSize(), 0);
-                    WorldBorderManager.startWorldBorders(Phase.getPhaseThreadGroup(), true);
+                    WorldBorderManager.startWorldBorders();
                     return;
                 }
                 UHCMod.UHCLogger.error("Could not set World border since game is not active");

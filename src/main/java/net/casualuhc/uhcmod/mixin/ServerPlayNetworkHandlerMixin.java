@@ -40,7 +40,7 @@ public class ServerPlayNetworkHandlerMixin {
 	@Redirect(method = "handleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Ljava/util/function/Function;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
 	private void onBroadcastMessage(PlayerManager instance, Text serverMessage, Function<ServerPlayerEntity, Text> playerMessageFactory, MessageType type, UUID sender) {
 		Team team = (Team) this.player.getScoreboardTeam();
-		if (!GameManager.isPhase(Phase.ACTIVE) || TeamUtils.isNonTeam(team)) {
+		if (!GameManager.INSTANCE.isPhase(Phase.ACTIVE) || TeamUtils.isNonTeam(team)) {
 			instance.broadcast(serverMessage, playerMessageFactory, type, sender);
 			return;
 		}

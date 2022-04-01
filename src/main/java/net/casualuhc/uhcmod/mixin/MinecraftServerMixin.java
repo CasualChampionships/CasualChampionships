@@ -18,12 +18,13 @@ public class MinecraftServerMixin {
 
     @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerMetadata;setDescription(Lnet/minecraft/text/Text;)V", shift = At.Shift.AFTER))
     private void afterDescriptionSet(CallbackInfo ci) {
-        GameManager.setDescriptor((MinecraftServer) (Object) this);
+        GameManager.INSTANCE.setDescriptor((MinecraftServer) (Object) this);
     }
 
     @Inject(method = "shutdown", at = @At("TAIL"))
     private void onShutdown(CallbackInfo ci) {
         UHCMod.UHCLogger.info("Stopping threads...");
         UHCDataBase.INSTANCE.shutdown();
+        GameManager.INSTANCE.shutdown();
     }
 }

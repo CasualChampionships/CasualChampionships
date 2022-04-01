@@ -27,7 +27,7 @@ public abstract class PlayerManagerMixin {
 
     @Inject(method = "checkCanJoin", at = @At("HEAD"), cancellable = true)
     private void onCheckJoin(SocketAddress address, GameProfile profile, CallbackInfoReturnable<Text> cir) {
-        if (!GameManager.isReadyForPlayers() && !this.isOperator(profile)) {
+        if (!GameManager.INSTANCE.isReadyForPlayers() && !this.isOperator(profile)) {
             cir.setReturnValue(new LiteralText("UHC isn't quite ready yet..."));
         }
     }

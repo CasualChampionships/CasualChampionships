@@ -1,11 +1,20 @@
 package net.casualuhc.uhcmod.utils;
 
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
+import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.minecraft.block.Blocks;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -18,18 +27,54 @@ import net.minecraft.world.border.WorldBorder;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class PlayerUtils {
-
-	public static boolean displayTab = true;
 	private static final MutableText HEADER = new LiteralText("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
 	private static final MutableText FOOTER = new LiteralText("\nServer Hosted By KiwiTech").formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
 
 	private static final Map<String, Boolean> isPlayerPlayingMap = new HashMap<>();
+
+	public static final UUID HEALTH_BOOST = UUID.fromString("a61b8a4f-a4f5-4b7f-b787-d10ba4ad3d57");
+	public static boolean displayTab = true;
+
+	static {
+		Events.ON_PLAYER_DEATH.addListener(PlayerUtils::handlePlayerDeath);
+
+		Events.ON_PLAYER_TICK.addListener(player -> {
+			updateActionBar(player);
+			updateWorldBorderArrow(player);
+		});
+	}
+
+	private static void handlePlayerDeath(ServerPlayerEntity player) {
+		if (GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
+			UHCDataBase.INSTANCE.updateStats(player);
+			player.dropItem(new ItemStack(Items.GOLDEN_APPLE), true, false);
+			AbstractTeam team = player.getScoreboardTeam();
+			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
+			AbstractTeamMixinInterface iTeam = (AbstractTeamMixinInterface) team;
+			if (team != null && !TeamUtils.teamHasAlive(team) && !iTeam.isEliminated()) {
+				iTeam.setEliminated(true);
+				PlayerUtils.forEveryPlayer(playerEntity -> {
+					playerEntity.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 0.5f, 1);
+					playerEntity.sendMessage(
+						new LiteralText("%s has been ELIMINATED!".formatted(team.getName())).formatted(team.getColor(), Formatting.BOLD), false
+					);
+				});
+			}
+			if (TeamUtils.isLastTeam()) {
+				Events.ON_END.trigger();
+			}
+		}
+		if (GameManager.INSTANCE.isPhase(Phase.END)) {
+			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
+		}
+	}
 	
-	public static void updateActionBar(ServerPlayerEntity playerEntity) {
+	private static void updateActionBar(ServerPlayerEntity playerEntity) {
 		if (playerEntity.getWorld().getTime() % 20 == 0 && displayTab) {
 			float ticksPerSecond = 1000 / Math.max(50, UHCMod.calculateMSPT());
 			Formatting formatting = ticksPerSecond == 20 ? Formatting.DARK_GREEN : ticksPerSecond > 15 ? Formatting.YELLOW : ticksPerSecond > 10 ? Formatting.RED : Formatting.DARK_RED;
@@ -65,7 +110,7 @@ public class PlayerUtils {
 	}
 
 	// By Kman
-	public static void updateWorldBorderArrow(ServerPlayerEntity playerEntity) {
+	private static void updateWorldBorderArrow(ServerPlayerEntity playerEntity) {
 		ServerPlayerMixinInterface Iplayer = (ServerPlayerMixinInterface) playerEntity;
 		World entityWorld = playerEntity.getEntityWorld();
 		WorldBorder Iborder = Iplayer.getWorldBorder();
@@ -162,7 +207,6 @@ public class PlayerUtils {
 		else if (Iplayer.getAlready()) {
 			Iplayer.setAlready(false);
 			Iplayer.setTime(99);
-			
 		}
 	}
 

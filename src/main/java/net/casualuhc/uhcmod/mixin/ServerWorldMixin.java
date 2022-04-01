@@ -33,19 +33,11 @@ public abstract class ServerWorldMixin {
         ci.setReturnValue(!Objects.requireNonNull(player.getEntityWorld().getServer()).isSpawnProtected(player.getEntityWorld().getServer().getWorld(player.getEntityWorld().getRegistryKey()), pos, player) && Math.abs(pos.getX()) < 30000000 && Math.abs(pos.getZ()) < 30000000);
     }
 
-    @Inject(at = @At("HEAD"), method = "tickEntity")
-    public void tickEntity(Entity entity, CallbackInfo ci) {
-        if (entity instanceof ServerPlayerEntity player) {
-            PlayerUtils.updateActionBar(player);
-            PlayerUtils.updateWorldBorderArrow(player);
-        }
-    }
-
     @Inject(method = "onPlayerConnected", at = @At("HEAD"))
     private void onPlayerConnected(ServerPlayerEntity player, CallbackInfo ci) {
         Scoreboard scoreboard = UHCMod.UHC_SERVER.getScoreboard();
         player.markHealthDirty();
-        if (!GameManager.isGameActive()) {
+        if (!GameManager.INSTANCE.isGameActive()) {
             if (!player.hasPermissionLevel(2)) {
                 player.changeGameMode(GameMode.ADVENTURE);
                 player.teleport(UHCMod.UHC_SERVER.getOverworld(), 0, 253, 0, 0, 0);

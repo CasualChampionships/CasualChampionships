@@ -10,6 +10,7 @@
     "IntRuleMixin",
     "MinecraftDedicatedServerMixin",
     "MinecraftServerMixin",
+    "MovingAreaMixin",
     "PlayerEntityMixin",
     "PlayerManagerMixin",
     "PortalForcerMixin",

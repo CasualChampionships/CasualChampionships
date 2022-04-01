@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod;
 
+import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.casualuhc.uhcmod.utils.Config;
 import net.casualuhc.uhcmod.utils.Networking.UHCWebSocketClient;
 import net.fabricmc.api.ModInitializer;
@@ -28,6 +29,7 @@ public class UHCMod implements ModInitializer {
     public static void onServerStart(MinecraftServer server) {
         UHC_SERVER = server;
         Config.readConfigs();
+        WorldBorderManager.noop();
     }
 
     @Override

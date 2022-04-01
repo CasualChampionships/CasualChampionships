@@ -36,7 +36,7 @@ public class ReadyCommand {
 	}
 
 	private static int ready(CommandContext<ServerCommandSource> context, boolean isReady) throws CommandSyntaxException {
-		if (!GameManager.isPhase(Phase.READY)) {
+		if (!GameManager.INSTANCE.isPhase(Phase.READY)) {
 			throw new SimpleCommandExceptionType(new LiteralText("You cannot ready now!")).create();
 		}
 		AbstractTeam team = context.getSource().getPlayer().getScoreboardTeam();

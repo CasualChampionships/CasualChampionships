@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.Event.Events;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.TeamArgumentType;
@@ -71,7 +72,7 @@ public class TeamUtils {
 		for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
 			if (PlayerUtils.isPlayerSurvival(playerEntity)) {
 				team = team == null ? playerEntity.getScoreboardTeam() : team;
-				if (team != playerEntity.getScoreboardTeam()) {
+				if (!TeamUtils.isNonTeam(team) && team != playerEntity.getScoreboardTeam()) {
 					return false;
 				}
 			}
@@ -135,7 +136,7 @@ public class TeamUtils {
 				return;
 			}
 		}
-		Phase.START.run();
+		Events.ON_START.trigger();
 	}
 
 	public static int forceAddPlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -149,8 +150,8 @@ public class TeamUtils {
 		player.getHungerManager().setSaturationLevel(20F);
 		EntityAttributeInstance instance = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 		if (instance != null) {
-			instance.removeModifier(GameManager.HEALTH_BOOST);
-			instance.addPersistentModifier(new EntityAttributeModifier(GameManager.HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
+			instance.removeModifier(PlayerUtils.HEALTH_BOOST);
+			instance.addPersistentModifier(new EntityAttributeModifier(PlayerUtils.HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
 		}
 		player.setHealth(player.getMaxHealth());
 		PlayerUtils.setPlayerPlaying(player, true);

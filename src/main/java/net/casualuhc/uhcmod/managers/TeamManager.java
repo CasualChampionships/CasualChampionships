@@ -3,6 +3,7 @@ package net.casualuhc.uhcmod.managers;
 import com.google.gson.*;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
+import net.casualuhc.uhcmod.utils.ExceptionUtils;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.fabricmc.loader.api.FabricLoader;
@@ -80,12 +81,7 @@ public class TeamManager {
     }
 
     public static void createTeams() {
-        try {
-            load();
-        }
-        catch (IOException e) {
-            UHCMod.UHCLogger.error("Error with buffered reader");
-        }
+        ExceptionUtils.runSafe(TeamManager::load);
         Scoreboard scoreboard = UHCMod.UHC_SERVER.getScoreboard();
         // This MUST be done like this or will encounter ConcurrentModificationException
         final Team[] teams = scoreboard.getTeams().toArray(Team[]::new);
