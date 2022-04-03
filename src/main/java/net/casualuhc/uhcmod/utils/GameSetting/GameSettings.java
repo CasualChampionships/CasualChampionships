@@ -29,7 +29,7 @@ public class GameSettings {
     public static final Map<String, GameSetting<?>> gameSettingMap = new LinkedHashMap<>();
 
     public static final GameSetting.DoubleGameSetting WORLD_BORDER_SPEED, HEALTH;
-    public static final GameSetting.BooleanGameSetting END_GAME_GLOW, PLAYER_DROPS_GAPPLE_ON_DEATH, FLOODGATE, DISPLAY_TAB, PVP, OP_POTIONS;
+    public static final GameSetting.BooleanGameSetting END_GAME_GLOW, FRIENDLY_PLAYER_GLOW, PLAYER_DROPS_GAPPLE_ON_DEATH, FLOODGATE, DISPLAY_TAB, PVP, OP_POTIONS;
     public static final GameSetting.EnumGameSetting<Stage> WORLD_BORDER_STAGE;
 
     static {
@@ -60,6 +60,12 @@ public class GameSettings {
 
         END_GAME_GLOW = new GameSetting.BooleanGameSetting(
             NamedItemStack.of("end_game_glow", Items.SPECTRAL_ARROW),
+            onOffMap.get(),
+            true
+        );
+
+        FRIENDLY_PLAYER_GLOW = new GameSetting.BooleanGameSetting(
+            NamedItemStack.of("friendly_player_glow", Items.GOLDEN_CARROT),
             onOffMap.get(),
             true
         );

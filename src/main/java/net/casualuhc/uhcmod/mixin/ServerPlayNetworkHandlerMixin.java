@@ -5,9 +5,11 @@ import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.minecraft.entity.Entity;
 import net.minecraft.network.MessageType;
+import net.minecraft.network.Packet;
+import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -65,5 +67,17 @@ public class ServerPlayNetworkHandlerMixin {
 	@Redirect(method = "onClickSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;isSpectator()Z"))
 	private boolean canClick(ServerPlayerEntity instance) {
 		return !(instance.currentScreenHandler instanceof GameSettings.FakeScreen) && instance.isSpectator();
+	}
+
+	@ModifyVariable(method = "sendPacket(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", at = @At("HEAD"), argsOnly = true)
+	private Packet<?> onSendPacket(Packet<?> packet) {
+		if (packet instanceof EntityTrackerUpdateS2CPacket trackerUpdate) {
+			Entity glowingEntity = this.player.getWorld().getEntityById(trackerUpdate.id());
+			if (glowingEntity instanceof ServerPlayerEntity glowingPlayer) {
+				packet = PlayerUtils.handleTrackerUpdatePacketForTeamGlowing(glowingPlayer, this.player, trackerUpdate);
+			}
+		}
+
+		return packet;
 	}
 }

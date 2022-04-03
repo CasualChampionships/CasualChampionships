@@ -1,3 +1,5 @@
 accessWidener v1 named
+accessible field net/minecraft/entity/Entity FLAGS Lnet/minecraft/entity/data/TrackedData;
+accessible field net/minecraft/entity/Entity GLOWING_FLAG_INDEX I
 accessible class net/minecraft/world/border/WorldBorder$MovingArea
 accessible class net/minecraft/world/border/WorldBorder$Area

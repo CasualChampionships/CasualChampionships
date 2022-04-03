@@ -1,14 +1,19 @@
 package net.casualuhc.uhcmod.utils;
 
+import io.netty.buffer.Unpooled;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.data.DataTracker;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.scoreboard.AbstractTeam;
@@ -26,6 +31,7 @@ import net.minecraft.world.border.WorldBorder;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -49,12 +55,17 @@ public class PlayerUtils {
 		});
 	}
 
+	public static void forceUpdateGlowing() {
+		forEveryPlayer(PlayerUtils::forceUpdateGlowingFlag);
+	}
+
 	private static void handlePlayerDeath(ServerPlayerEntity player) {
 		if (GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
 			UHCDataBase.INSTANCE.updateStats(player);
 			player.dropItem(new ItemStack(Items.GOLDEN_APPLE), true, false);
 			AbstractTeam team = player.getScoreboardTeam();
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
+			forceUpdateGlowingFlag(player);
 			AbstractTeamMixinInterface iTeam = (AbstractTeamMixinInterface) team;
 			if (team != null && !TeamUtils.teamHasAlive(team) && !iTeam.isEliminated()) {
 				iTeam.setEliminated(true);
@@ -73,7 +84,7 @@ public class PlayerUtils {
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
 		}
 	}
-	
+
 	private static void updateActionBar(ServerPlayerEntity playerEntity) {
 		if (playerEntity.getWorld().getTime() % 20 == 0 && displayTab) {
 			float ticksPerSecond = 1000 / Math.max(50, UHCMod.calculateMSPT());
@@ -87,7 +98,7 @@ public class PlayerUtils {
 		ServerPlayerMixinInterface Iplayer = (ServerPlayerMixinInterface) playerEntity;
 		World entityWorld = playerEntity.getEntityWorld();
 		WorldBorder border = entityWorld.getWorldBorder();
-		
+
 		// Update location on action bar
 		if (Iplayer.getCoordsBoolean()) {
 			switch (playerEntity.getMovementDirection().getHorizontal()) {
@@ -115,13 +126,13 @@ public class PlayerUtils {
 		World entityWorld = playerEntity.getEntityWorld();
 		WorldBorder Iborder = Iplayer.getWorldBorder();
 		WorldBorder border = entityWorld.getWorldBorder();
-		
+
 		double playerX = playerEntity.getX();
 		double playerZ = playerEntity.getZ();
-		
+
 		int playerBlockX = playerEntity.getBlockX();
 		int playerBlockZ = playerEntity.getBlockZ();
-		
+
 		if (!playerEntity.isSpectator()) {
 			// Checking to see if the players is behind the world boarder
 			if (border.getDistanceInsideBorder(playerEntity) + 0.2 < 0) {
@@ -224,7 +235,7 @@ public class PlayerUtils {
 			1
 		));
 	}
-	
+
 	private static void sendWorldBorderPackets(ServerPlayerEntity playerEntity, WorldBorder border) {
 		playerEntity.networkHandler.sendPacket(new WorldBorderInterpolateSizeS2CPacket(border));
 		playerEntity.networkHandler.sendPacket(new WorldBorderCenterChangedS2CPacket(border));
@@ -257,5 +268,63 @@ public class PlayerUtils {
 
 	public static boolean isPlayerSurvival(ServerPlayerEntity player) {
 		return player.interactionManager.getGameMode() == GameMode.SURVIVAL;
+	}
+
+	public static void forceUpdateGlowingFlag(ServerPlayerEntity player) {
+		// force update the dirty flag in the tracker entry
+		player.setGlowing(!player.isGlowing());
+		player.setGlowing(!player.isGlowing());
+	}
+
+	@SuppressWarnings("unchecked")
+	public static EntityTrackerUpdateS2CPacket handleTrackerUpdatePacketForTeamGlowing(
+			ServerPlayerEntity glowingPlayer,
+			ServerPlayerEntity observingPlayer,
+			EntityTrackerUpdateS2CPacket packet
+	) {
+		if (!GameSettings.FRIENDLY_PLAYER_GLOW.getValue()) {
+			return packet;
+		}
+		if (!GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
+			return packet;
+		}
+
+		if (!PlayerUtils.isPlayerSurvival(glowingPlayer)) {
+			return packet;
+		}
+
+		AbstractTeam glowingTeam = glowingPlayer.getScoreboardTeam();
+		AbstractTeam observingTeam = observingPlayer.getScoreboardTeam();
+		if (glowingTeam != observingTeam) {
+			return packet;
+		}
+
+		List<DataTracker.Entry<?>> trackedValues = packet.getTrackedValues();
+		if (trackedValues == null) {
+			return packet;
+		}
+		if (trackedValues.stream().noneMatch(value -> value.getData() == Entity.FLAGS)) {
+			return packet;
+		}
+
+		// make a copy of the packet, because other players are sent the same instance of
+		// the packet and may not be on the same team
+		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+		packet.write(buf);
+		packet = new EntityTrackerUpdateS2CPacket(buf);
+		trackedValues = packet.getTrackedValues();
+		assert trackedValues != null;
+
+		for (DataTracker.Entry<?> trackedValue : trackedValues) {
+			// need to compare ids because they're not the same instance once re-serialized
+			if (trackedValue.getData().getId() == Entity.FLAGS.getId()) {
+				DataTracker.Entry<Byte> byteTrackedValue = (DataTracker.Entry<Byte>) trackedValue;
+				byte flags = byteTrackedValue.get();
+				flags |= 1 << Entity.GLOWING_FLAG_INDEX;
+				byteTrackedValue.set(flags);
+			}
+		}
+
+		return packet;
 	}
 }

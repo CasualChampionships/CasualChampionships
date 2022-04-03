@@ -36,10 +36,12 @@ public enum Phase {
             GameManager.INSTANCE.setCurrentPhase(ACTIVE);
             GameManager.INSTANCE.startGracePeriod();
             GameManager.INSTANCE.setUHCGamerules();
+            PlayerUtils.forceUpdateGlowing();
         });
         Events.ON_END.addListener(v -> {
             GameManager.INSTANCE.setCurrentPhase(END);
             GameManager.INSTANCE.endUHC();
+            PlayerUtils.forceUpdateGlowing();
         });
     }
 }
