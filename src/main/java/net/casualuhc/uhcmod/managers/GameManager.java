@@ -178,8 +178,10 @@ public class GameManager {
 	}
 
 	public void worldBorderComplete() {
+		UHCMod.UHCLogger.info("World Border Completed");
         this.EXECUTOR.schedule(() -> {
 			if (GameSettings.END_GAME_GLOW.getValue()) {
+				UHCMod.UHCLogger.info("Players are now glowing");
 				PlayerUtils.forEveryPlayer(playerEntity -> {
 					if (PlayerUtils.isPlayerSurvival(playerEntity)) {
 						playerEntity.setGlowing(true);
