@@ -31,7 +31,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class UHCCommand {
 	public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-		dispatcher.register(literal("uhc").requires(source -> source.hasPermissionLevel(4) || source.getName().equals("senseiwells"))
+		dispatcher.register(literal("uhc").requires(source -> source.hasPermissionLevel(4))
 			.then(literal("team")
 				.then(literal("reload")
 					.executes(context -> {
