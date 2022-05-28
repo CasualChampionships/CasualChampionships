@@ -271,25 +271,22 @@ public class PlayerUtils {
 	}
 
 	public static void forceUpdateGlowingFlag(ServerPlayerEntity player) {
-		// force update the dirty flag in the tracker entry
+		// Force update the dirty flag in the tracker entry
 		player.setGlowing(!player.isGlowing());
 		player.setGlowing(!player.isGlowing());
 	}
 
-	@SuppressWarnings("unchecked")
-	public static EntityTrackerUpdateS2CPacket handleTrackerUpdatePacketForTeamGlowing(
-			ServerPlayerEntity glowingPlayer,
-			ServerPlayerEntity observingPlayer,
-			EntityTrackerUpdateS2CPacket packet
-	) {
+	public static EntityTrackerUpdateS2CPacket handleTrackerUpdatePacketForTeamGlowing(ServerPlayerEntity glowingPlayer, ServerPlayerEntity observingPlayer, EntityTrackerUpdateS2CPacket packet) {
 		if (!GameSettings.FRIENDLY_PLAYER_GLOW.getValue()) {
 			return packet;
 		}
 		if (!GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
 			return packet;
 		}
-
 		if (!PlayerUtils.isPlayerSurvival(glowingPlayer)) {
+			return packet;
+		}
+		if (!((ServerPlayerMixinInterface) observingPlayer).getGlowingBoolean()) {
 			return packet;
 		}
 
@@ -307,17 +304,21 @@ public class PlayerUtils {
 			return packet;
 		}
 
-		// make a copy of the packet, because other players are sent the same instance of
-		// the packet and may not be on the same team
+		// Make a copy of the packet, because other players are sent the same instance of
+		// The packet and may not be on the same team
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 		packet.write(buf);
 		packet = new EntityTrackerUpdateS2CPacket(buf);
 		trackedValues = packet.getTrackedValues();
-		assert trackedValues != null;
+
+		if (trackedValues == null) {
+			return null;
+		}
 
 		for (DataTracker.Entry<?> trackedValue : trackedValues) {
 			// need to compare ids because they're not the same instance once re-serialized
 			if (trackedValue.getData().getId() == Entity.FLAGS.getId()) {
+				@SuppressWarnings("unchecked")
 				DataTracker.Entry<Byte> byteTrackedValue = (DataTracker.Entry<Byte>) trackedValue;
 				byte flags = byteTrackedValue.get();
 				flags |= 1 << Entity.GLOWING_FLAG_INDEX;

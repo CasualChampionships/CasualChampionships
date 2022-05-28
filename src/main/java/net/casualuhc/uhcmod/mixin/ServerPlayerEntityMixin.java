@@ -24,6 +24,8 @@ public class ServerPlayerEntityMixin implements ServerPlayerMixinInterface {
     private Direction direction;
     @Unique
     private boolean coordsBoolean = false;
+    @Unique
+    private boolean glowingBoolean = true;
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
@@ -75,6 +77,16 @@ public class ServerPlayerEntityMixin implements ServerPlayerMixinInterface {
     @Override
     public void setCoordsBoolean(boolean coordsBoolean) {
         this.coordsBoolean = coordsBoolean;
+    }
+
+    @Override
+    public boolean getGlowingBoolean() {
+        return this.glowingBoolean;
+    }
+
+    @Override
+    public void setGlowingBoolean(boolean glowingBoolean) {
+        this.glowingBoolean = glowingBoolean;
     }
 
     @Override

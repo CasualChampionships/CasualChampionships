@@ -16,6 +16,9 @@ public interface ServerPlayerMixinInterface {
 
     void setCoordsBoolean(boolean coordsBoolean);
 
+    boolean getGlowingBoolean();
+
+    void setGlowingBoolean(boolean glowingBoolean);
 
     void setDirection(Direction direction);
 

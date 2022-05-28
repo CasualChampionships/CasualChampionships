@@ -14,7 +14,6 @@ import net.minecraft.util.math.Vec3d;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class PosCommand {
-
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("pos").requires(source -> source.getEntity() != null).executes(PosCommand::sendPosition));
     }

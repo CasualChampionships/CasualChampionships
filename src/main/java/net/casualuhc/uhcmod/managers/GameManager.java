@@ -80,10 +80,12 @@ public class GameManager {
 		return this.currentPhase.equals(phase);
 	}
 
+	public void execute(Runnable runnable, long time, TimeUnit timeUnit) {
+		this.FUTURES.add(this.EXECUTOR.schedule(runnable, time, timeUnit));
+	}
+
     public void shutdown() {
-        this.EXECUTOR.shutdown();
-		this.FUTURES.forEach(scheduledFuture -> scheduledFuture.cancel(true));
-		this.FUTURES.clear();
+        this.EXECUTOR.shutdownNow();
     }
 
 	public void startCountDown() {

@@ -1,14 +1,9 @@
 package net.casualuhc.uhcmod.mixin;
 
-
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.HealthBoostStatusEffect;
-import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
@@ -25,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin {
@@ -36,7 +32,6 @@ public abstract class ServerWorldMixin {
     @Inject(method = "onPlayerConnected", at = @At("HEAD"))
     private void onPlayerConnected(ServerPlayerEntity player, CallbackInfo ci) {
         Scoreboard scoreboard = UHCMod.UHC_SERVER.getScoreboard();
-        player.markHealthDirty();
         if (!GameManager.INSTANCE.isGameActive()) {
             if (!player.hasPermissionLevel(2)) {
                 player.changeGameMode(GameMode.ADVENTURE);
@@ -63,5 +58,8 @@ public abstract class ServerWorldMixin {
                 scoreboard.addPlayerToTeam(player.getEntityName(), spectator);
             }
         }
+
+        // idk...
+        GameManager.INSTANCE.execute(player::markHealthDirty, 1, TimeUnit.SECONDS);
     }
 }

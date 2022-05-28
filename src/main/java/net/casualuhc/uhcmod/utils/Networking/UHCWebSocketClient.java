@@ -34,7 +34,7 @@ public class UHCWebSocketClient extends WebSocketClient {
         try {
             super.send(text);
         }
-        catch (WebsocketNotConnectedException e) {
+        catch (WebsocketNotConnectedException ignore) {
 
         }
     }

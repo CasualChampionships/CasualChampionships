@@ -26,5 +26,6 @@ public class CommandManagerMixin {
         CoordsCommand.register(this.dispatcher);
         UHCCommand.register(this.dispatcher);
         ReadyCommand.register(this.dispatcher);
+        TeamGlowingCommand.register(this.dispatcher);
     }
 }

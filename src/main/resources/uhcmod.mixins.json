@@ -13,7 +13,6 @@
     "MovingAreaMixin",
     "PlayerEntityMixin",
     "PlayerManagerMixin",
-    "PortalForcerMixin",
     "ServerEntityManagerMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
