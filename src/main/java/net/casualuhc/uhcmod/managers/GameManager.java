@@ -133,7 +133,7 @@ public class GameManager {
 			});
 
 			server.execute(() -> {
-				server.getCommandManager().execute(server.getCommandSource(), "/fill 24 250 24 -25 289 -25 air");
+				server.getCommandManager().execute(server.getCommandSource(), "/fill 27 240 26 -32 316 -31 air");
 				server.getCommandManager().execute(server.getCommandSource(), "/spreadplayers 0 0 500 2900 true @e[type=player]");
 				Events.ON_ACTIVE.trigger();
 			});
@@ -234,7 +234,7 @@ public class GameManager {
 			}
 			NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
 			Structure lobbyStructure = UHCMod.UHC_SERVER.getStructureManager().createStructure(nbtStructure);
-			BlockPos pos = new BlockPos(-25, 250, -25);
+			BlockPos pos = new BlockPos(-26, 242, -26);
 			lobbyStructure.place(UHCMod.UHC_SERVER.getOverworld(), pos, pos, new StructurePlacementData(), new Random(), 3);
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				playerEntity.teleport(UHCMod.UHC_SERVER.getOverworld(), 0, 253, 0, 0, 0);

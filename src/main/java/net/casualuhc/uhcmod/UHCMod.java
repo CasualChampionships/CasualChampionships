@@ -1,10 +1,13 @@
 package net.casualuhc.uhcmod;
 
+import net.casualuhc.uhcmod.features.GoldenHeadRecipe;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.casualuhc.uhcmod.utils.Config;
 import net.casualuhc.uhcmod.utils.Networking.UHCWebSocketClient;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.SpecialRecipeSerializer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.LogManager;

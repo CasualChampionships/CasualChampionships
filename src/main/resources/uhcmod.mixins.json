@@ -5,19 +5,24 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AbstractTeamMixin",
+    "BowItemMixin",
     "BrewingStandBlockEntityMixin",
     "CommandManagerMixin",
     "IntRuleMixin",
+    "LeavesBlockMixin",
     "MinecraftDedicatedServerMixin",
     "MinecraftServerMixin",
     "MovingAreaMixin",
     "PlayerEntityMixin",
     "PlayerManagerMixin",
+    "RecipeManagerMixin",
     "ServerEntityManagerMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
     "ServerWorldMixin",
-    "SpreadPlayersCommandMixin"
+    "SkullItemMixin",
+    "SpreadPlayersCommandMixin",
+    "SynchronizeRecipeS2CPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

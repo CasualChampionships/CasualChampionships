@@ -13,6 +13,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.SkullItem;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
@@ -62,7 +64,12 @@ public class PlayerUtils {
 	private static void handlePlayerDeath(ServerPlayerEntity player) {
 		if (GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
 			UHCDataBase.INSTANCE.updateStats(player);
-			player.dropItem(new ItemStack(Items.GOLDEN_APPLE), true, false);
+			if (GameSettings.PLAYER_DROPS_GAPPLE_ON_DEATH.getValue()) {
+				player.dropItem(Items.GOLDEN_APPLE.getDefaultStack(), true, false);
+			}
+			if (GameSettings.PLAYER_DROPS_HEAD_ON_DEATH.getValue()) {
+				player.dropItem(generatePlayerHead(player.getEntityName()), true, false);
+			}
 			AbstractTeam team = player.getScoreboardTeam();
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
 			forceUpdateGlowingFlag(player);
@@ -83,6 +90,19 @@ public class PlayerUtils {
 		if (GameManager.INSTANCE.isPhase(Phase.END)) {
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
 		}
+	}
+
+	public static ItemStack generatePlayerHead(String playerName) {
+		NbtCompound compound = new NbtCompound();
+		compound.putString("id", "player_head");
+		compound.putByte("Count", (byte) 1);
+
+		NbtCompound playerData = new NbtCompound();
+		playerData.putString(SkullItem.SKULL_OWNER_KEY, playerName);
+
+		compound.put("tag", playerData);
+
+		return ItemStack.fromNbt(compound);
 	}
 
 	private static void updateActionBar(ServerPlayerEntity playerEntity) {

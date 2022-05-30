@@ -11,7 +11,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.GenericContainerScreenHandler;
@@ -30,17 +29,17 @@ public class GameSettings {
 	public static final Map<String, GameSetting<?>> gameSettingMap = new LinkedHashMap<>();
 
 	public static final GameSetting.DoubleGameSetting WORLD_BORDER_SPEED, HEALTH;
-	public static final GameSetting.BooleanGameSetting END_GAME_GLOW, FRIENDLY_PLAYER_GLOW, PLAYER_DROPS_GAPPLE_ON_DEATH, FLOODGATE, DISPLAY_TAB, PVP, OP_POTIONS;
+	public static final GameSetting.BooleanGameSetting END_GAME_GLOW, FRIENDLY_PLAYER_GLOW, PLAYER_DROPS_GAPPLE_ON_DEATH, FLOODGATE, DISPLAY_TAB, PVP, OP_POTIONS, BOW_COOLDOWN, PLAYER_DROPS_HEAD_ON_DEATH;
 	public static final GameSetting.EnumGameSetting<Stage> WORLD_BORDER_STAGE;
 
 	static {
 		WORLD_BORDER_SPEED = new GameSetting.DoubleGameSetting(
 			NamedItemStack.of("border_speed", Items.DIAMOND_BOOTS),
 			new LinkedHashMap<>() {{
-				this.put(NamedItemStack.of("insane", Items.CAKE), 40D);
-				this.put(NamedItemStack.of("fast", Items.GREEN_STAINED_GLASS_PANE), 1.1D);
+				this.put(NamedItemStack.of("insane", Items.CAKE), 1 / 40D);
+				this.put(NamedItemStack.of("fast", Items.GREEN_STAINED_GLASS_PANE), 0.9D);
 				this.put(NamedItemStack.of("normal", Items.YELLOW_STAINED_GLASS_PANE), 1.0D);
-				this.put(NamedItemStack.of("slow", Items.RED_STAINED_GLASS_PANE), 0.9D);
+				this.put(NamedItemStack.of("slow", Items.RED_STAINED_GLASS_PANE), 1.1D);
 			}},
 			1.0D
 		);
@@ -75,7 +74,7 @@ public class GameSettings {
 		PLAYER_DROPS_GAPPLE_ON_DEATH = new GameSetting.BooleanGameSetting(
 			NamedItemStack.of("player_drops_gapple_on_death", Items.GOLDEN_APPLE),
 			onOffMap.get(),
-			true
+			false
 		);
 
 		FLOODGATE = new GameSetting.BooleanGameSetting(
@@ -109,6 +108,18 @@ public class GameSettings {
 			NamedItemStack.of("op_potions", Items.SPLASH_POTION),
 			onOffMap.get(),
 			false
+		);
+
+		BOW_COOLDOWN = new GameSetting.BooleanGameSetting(
+			NamedItemStack.of("bow_cooldown", Items.BOW),
+			onOffMap.get(),
+			true
+		);
+
+		PLAYER_DROPS_HEAD_ON_DEATH = new GameSetting.BooleanGameSetting(
+			NamedItemStack.of("player_head_drops", Items.PLAYER_HEAD),
+			onOffMap.get(),
+			true
 		);
 
 		WORLD_BORDER_STAGE = new GameSetting.EnumGameSetting<>(
