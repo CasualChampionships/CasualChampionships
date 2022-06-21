@@ -11,7 +11,7 @@ import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import static net.minecraft.server.command.CommandManager.literal;
@@ -37,19 +37,19 @@ public class ReadyCommand {
 
 	private static int ready(CommandContext<ServerCommandSource> context, boolean isReady) throws CommandSyntaxException {
 		if (!GameManager.INSTANCE.isPhase(Phase.READY)) {
-			throw new SimpleCommandExceptionType(new LiteralText("You cannot ready now!")).create();
+			throw new SimpleCommandExceptionType(Text.literal("You cannot ready now!")).create();
 		}
 		AbstractTeam team = context.getSource().getPlayer().getScoreboardTeam();
 		if (team == null || team.getName().equals("Spectator")) {
-			throw new SimpleCommandExceptionType(new LiteralText("You are not on a team!")).create();
+			throw new SimpleCommandExceptionType(Text.literal("You are not on a team!")).create();
 		}
 		AbstractTeamMixinInterface ITeam = (AbstractTeamMixinInterface) team;
 		if (ITeam.isReady()) {
-			throw new SimpleCommandExceptionType(new LiteralText("You have already readied up!")).create();
+			throw new SimpleCommandExceptionType(Text.literal("You have already readied up!")).create();
 		}
 		ITeam.setReady(isReady);
 		String readyText = "%s %s ready!".formatted(team.getName(), isReady ? "is" : "is not");
-		PlayerUtils.messageEveryPlayer(new LiteralText(readyText).formatted(team.getColor(), Formatting.BOLD));
+		PlayerUtils.messageEveryPlayer(Text.literal(readyText).formatted(team.getColor(), Formatting.BOLD));
 		TeamUtils.checkAllTeamsReady();
 		return 1;
 	}

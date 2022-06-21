@@ -3,7 +3,6 @@ package net.casualuhc.uhcmod.mixin;
 import com.mojang.authlib.GameProfile;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.minecraft.server.PlayerManager;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.world.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,7 +27,7 @@ public abstract class PlayerManagerMixin {
     @Inject(method = "checkCanJoin", at = @At("HEAD"), cancellable = true)
     private void onCheckJoin(SocketAddress address, GameProfile profile, CallbackInfoReturnable<Text> cir) {
         if (!GameManager.INSTANCE.isReadyForPlayers() && !this.isOperator(profile)) {
-            cir.setReturnValue(new LiteralText("UHC isn't quite ready yet..."));
+            cir.setReturnValue(Text.literal("UHC isn't quite ready yet..."));
         }
     }
 }

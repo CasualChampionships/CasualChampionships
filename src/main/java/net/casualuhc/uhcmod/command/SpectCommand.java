@@ -10,15 +10,14 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class SpectCommand {
 
-    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(new TranslatableText("You need to be dead to spectate!"));
+    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(Text.literal("You need to be dead to spectate!"));
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher){
         LiteralArgumentBuilder<ServerCommandSource> s = literal("s")
@@ -43,7 +42,7 @@ public class SpectCommand {
         ServerPlayerEntity entity = EntityArgumentType.getPlayer(context, "player");
 
         if (entity == null) {
-            throw new SimpleCommandExceptionType(new LiteralText("Invalid Argument!")).create();
+            throw new SimpleCommandExceptionType(Text.literal("Invalid Argument!")).create();
         }
 
         Spectator.spectate(player, entity);

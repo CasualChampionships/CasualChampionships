@@ -19,12 +19,13 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.structure.Structure;
+import net.minecraft.structure.StructureTemplate;
 import net.minecraft.structure.StructurePlacementData;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
@@ -33,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -90,7 +90,7 @@ public class GameManager {
 
 	public void startCountDown() {
 		PlayerUtils.messageEveryPlayer(
-			new LiteralText("Please stand still during the countdown so you don't fall when you get teleported!").formatted(Formatting.GOLD)
+				Text.literal("Please stand still during the countdown so you don't fall when you get teleported!").formatted(Formatting.GOLD)
 		);
 
 		// We repeat the code with interval 1 second
@@ -98,7 +98,7 @@ public class GameManager {
 		ScheduledFuture<?> future = this.EXECUTOR.scheduleAtFixedRate(() -> {
 			int i = integer.getAndDecrement();
 			PlayerUtils.forEveryPlayer(playerEntity -> {
-				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(new LiteralText(String.valueOf(i)).formatted(Formatting.GREEN)));
+				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal(String.valueOf(i)).formatted(Formatting.GREEN)));
 				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 1.0F, 3.0F);
 			});
 		}, 0, 1, TimeUnit.SECONDS);
@@ -107,7 +107,7 @@ public class GameManager {
         this.FUTURES.add(this.EXECUTOR.schedule(() -> {
 			future.cancel(true);
 			PlayerUtils.forEveryPlayer(playerEntity -> {
-				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(new LiteralText("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
+				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
 				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL, SoundCategory.MASTER, 1.0F, 1.0F);
 				playerEntity.getHungerManager().setSaturationLevel(20F);
 				EntityAttributeInstance instance = playerEntity.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
@@ -123,7 +123,7 @@ public class GameManager {
 				if (!TeamUtils.isNonTeam(playerEntity.getScoreboardTeam()) && !playerEntity.isSpectator()) {
 					((ServerPlayerMixinInterface) playerEntity).setCoordsBoolean(true);
 					playerEntity.changeGameMode(GameMode.SURVIVAL);
-					playerEntity.sendMessage(new LiteralText("You can disable the coordinates above your hotbar by using /coords"), false);
+					playerEntity.sendMessage(Text.literal("You can disable the coordinates above your hotbar by using /coords"), false);
 					playerEntity.getInventory().clear();
 					PlayerUtils.setPlayerPlaying(playerEntity, true);
 				}
@@ -133,8 +133,8 @@ public class GameManager {
 			});
 
 			server.execute(() -> {
-				server.getCommandManager().execute(server.getCommandSource(), "/fill 27 240 26 -32 316 -31 air");
-				server.getCommandManager().execute(server.getCommandSource(), "/spreadplayers 0 0 500 2900 true @e[type=player]");
+				server.getCommandManager().execute(server.getCommandSource(), "fill 27 240 26 -32 316 -31 air");
+				server.getCommandManager().execute(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
 				Events.ON_ACTIVE.trigger();
 			});
 		}, 10, TimeUnit.SECONDS));
@@ -143,7 +143,7 @@ public class GameManager {
 	public void startGracePeriod() {
 		PlayerUtils.forEveryPlayer(playerEntity -> {
 			playerEntity.sendMessage(
-				new LiteralText("Grace Period will end in 10 minutes, once grace period is over PVP will be enabled and world border will start moving")
+				Text.literal("Grace Period will end in 10 minutes, once grace period is over PVP will be enabled and world border will start moving")
 					.formatted(Formatting.GOLD),
 				false
 			);
@@ -155,7 +155,7 @@ public class GameManager {
 			int i = integer.addAndGet(-2);
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				playerEntity.sendMessage(
-					new LiteralText("Grace Period will end in %s minutes".formatted(i))
+					Text.literal("Grace Period will end in %s minutes".formatted(i))
 						.formatted(Formatting.GOLD),
 					false
 				);
@@ -168,7 +168,7 @@ public class GameManager {
 			future.cancel(true);
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				playerEntity.sendMessage(
-					new LiteralText("Grace Period is now over, PVP is enabled and world border has started! Good Luck!")
+					Text.literal("Grace Period is now over, PVP is enabled and world border has started! Good Luck!")
 						.formatted(Formatting.RED, Formatting.BOLD),
 					false
 				);
@@ -202,7 +202,7 @@ public class GameManager {
 		UHCDataBase.INSTANCE.incrementWinDataBase(team.getName());
 		PlayerUtils.forEveryPlayer(playerEntity -> {
 			playerEntity.setGlowing(false);
-			playerEntity.networkHandler.sendPacket(new TitleS2CPacket(new LiteralText("%s has won!".formatted(team.getName())).formatted(team.getColor())));
+			playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("%s has won!".formatted(team.getName())).formatted(team.getColor())));
 			UHCDataBase.INSTANCE.updateStats(playerEntity);
 		});
 		UHCDataBase.INSTANCE.updateTotalDataBase();
@@ -233,12 +233,12 @@ public class GameManager {
 				throw new IOException("Could not find lobby structure");
 			}
 			NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
-			Structure lobbyStructure = UHCMod.UHC_SERVER.getStructureManager().createStructure(nbtStructure);
+			StructureTemplate lobbyStructure = UHCMod.UHC_SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
 			BlockPos pos = new BlockPos(-26, 242, -26);
-			lobbyStructure.place(UHCMod.UHC_SERVER.getOverworld(), pos, pos, new StructurePlacementData(), new Random(), 3);
+			lobbyStructure.place(UHCMod.UHC_SERVER.getOverworld(), pos, pos, new StructurePlacementData(), Random.create(), 3);
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				playerEntity.teleport(UHCMod.UHC_SERVER.getOverworld(), 0, 253, 0, 0, 0);
-				playerEntity.sendMessage(new LiteralText(ChatColour.GREEN + "Successfully generated lobby!"), false);
+				playerEntity.sendMessage(Text.literal(ChatColour.GREEN + "Successfully generated lobby!"), false);
 			});
 		});
 	}
@@ -266,30 +266,30 @@ public class GameManager {
 		if (UHCMod.isCarpetInstalled) {
 			CommandManager commandManager = server.getCommandManager();
 			ServerCommandSource source = server.getCommandSource();
-			commandManager.execute(source, "/carpet commandLog ops");
-			commandManager.execute(source, "/carpet commandDistance ops");
-			commandManager.execute(source, "/carpet commandInfo ops");
-			commandManager.execute(source, "/carpet commandPerimeterInfo ops");
-			commandManager.execute(source, "/carpet commandProfile ops");
-			commandManager.execute(source, "/carpet commandScript ops");
-			commandManager.execute(source, "/carpet lightEngineMaxBatchSize 500");
-			commandManager.execute(source, "/carpet structureBlockLimit 256");
-			commandManager.execute(source, "/carpet fillLimit 1000000");
-			commandManager.execute(source, "/carpet fillUpdates false");
-			commandManager.execute(source, "/carpet setDefault commandLog ops");
-			commandManager.execute(source, "/carpet setDefault commandDistance ops");
-			commandManager.execute(source, "/carpet setDefault commandInfo ops");
-			commandManager.execute(source, "/carpet setDefault commandPerimeterInfo ops");
-			commandManager.execute(source, "/carpet setDefault commandProfile ops");
-			commandManager.execute(source, "/carpet setDefault commandScript ops");
-			commandManager.execute(source, "/carpet setDefault lightEngineMaxBatchSize 500");
-			commandManager.execute(source, "/carpet setDefault structureBlockLimit 256");
+			commandManager.execute(source, "carpet commandLog ops");
+			commandManager.execute(source, "carpet commandDistance ops");
+			commandManager.execute(source, "carpet commandInfo ops");
+			commandManager.execute(source, "carpet commandPerimeterInfo ops");
+			commandManager.execute(source, "carpet commandProfile ops");
+			commandManager.execute(source, "carpet commandScript ops");
+			commandManager.execute(source, "carpet lightEngineMaxBatchSize 500");
+			commandManager.execute(source, "carpet structureBlockLimit 256");
+			commandManager.execute(source, "carpet fillLimit 1000000");
+			commandManager.execute(source, "carpet fillUpdates false");
+			commandManager.execute(source, "carpet setDefault commandLog ops");
+			commandManager.execute(source, "carpet setDefault commandDistance ops");
+			commandManager.execute(source, "carpet setDefault commandInfo ops");
+			commandManager.execute(source, "carpet setDefault commandPerimeterInfo ops");
+			commandManager.execute(source, "carpet setDefault commandProfile ops");
+			commandManager.execute(source, "carpet setDefault commandScript ops");
+			commandManager.execute(source, "carpet setDefault lightEngineMaxBatchSize 500");
+			commandManager.execute(source, "carpet setDefault structureBlockLimit 256");
 		}
 	}
 
 	public void setDescriptor(MinecraftServer server) {
-		MutableText description = new LiteralText("            %s፠ %sWelcome to Casual UHC! %s፠\n".formatted(ChatColour.GOLD, ChatColour.AQUA, ChatColour.GOLD))
-			.append(new LiteralText("     Yes, it's back! Is your team prepared?").formatted(Formatting.DARK_AQUA));
+		MutableText description = Text.literal("            %s፠ %sWelcome to Casual UHC! %s፠\n".formatted(ChatColour.GOLD, ChatColour.AQUA, ChatColour.GOLD))
+			.append(Text.literal("     Yes, it's back! Is your team prepared?").formatted(Formatting.DARK_AQUA));
 		server.getServerMetadata().setDescription(description);
 	}
 
@@ -305,7 +305,7 @@ public class GameManager {
 		if (UHCMod.isCarpetInstalled) {
 			CommandManager commandManager = server.getCommandManager();
 			ServerCommandSource source = server.getCommandSource();
-			commandManager.execute(source, "/spawn mobcaps set 7");
+			commandManager.execute(source, "spawn mobcaps set 7");
 		}
 	}
 }

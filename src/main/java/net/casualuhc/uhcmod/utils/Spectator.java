@@ -6,8 +6,7 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
-import org.lwjgl.system.CallbackI;
+import net.minecraft.text.Text;
 
 public class Spectator {
     private static ServerPlayerEntity cameraman;
@@ -27,7 +26,7 @@ public class Spectator {
 
     public static void spectate(ServerPlayerEntity from) throws CommandSyntaxException {
         if (cameraman == null) {
-            throw new SimpleCommandExceptionType(new LiteralText("Cameraman has not been set!")).create();
+            throw new SimpleCommandExceptionType(Text.literal("Cameraman has not been set!")).create();
         }
         spectate(from, cameraman);
     }
@@ -35,7 +34,7 @@ public class Spectator {
     public static void spectate(ServerPlayerEntity from, Team team) throws CommandSyntaxException {
         ServerPlayerEntity player = getAnyAlive(from.server, team);
         if (player == null) {
-            throw new SimpleCommandExceptionType(new LiteralText("There are no players to spectate!")).create();
+            throw new SimpleCommandExceptionType(Text.literal("There are no players to spectate!")).create();
         }
         spectate(from, player);
     }

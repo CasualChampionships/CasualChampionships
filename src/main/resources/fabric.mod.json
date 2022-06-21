@@ -28,6 +28,6 @@
   "accessWidener" : "uhcmod.accesswidener",
   "depends": {
     "fabricloader": ">=0.11.1",
-    "minecraft": "1.18.*"
+    "minecraft": "1.19.*"
   }
 }

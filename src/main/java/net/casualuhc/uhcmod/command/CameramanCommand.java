@@ -8,7 +8,7 @@ import net.casualuhc.uhcmod.utils.Spectator;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
 import static net.minecraft.server.command.CommandManager.literal;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -26,7 +26,7 @@ public class CameramanCommand {
         ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
 
         if (player == null) {
-            throw new SimpleCommandExceptionType(new LiteralText("Invalid Argument!")).create();
+            throw new SimpleCommandExceptionType(Text.literal("Invalid Argument!")).create();
         }
 
         Spectator.setCameraman(player);

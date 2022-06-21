@@ -17,7 +17,6 @@ import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
 import java.util.LinkedHashMap;
@@ -170,15 +169,15 @@ public class GameSettings {
 		}
 
 		for (int i = 1; i < 8; i++) {
-			inventory.setStack(i, Items.GRAY_STAINED_GLASS.getDefaultStack().setCustomName(new LiteralText("")));
+			inventory.setStack(i, Items.GRAY_STAINED_GLASS.getDefaultStack().setCustomName(Text.literal("")));
 		}
 
-		inventory.setStack(0, Items.RED_STAINED_GLASS.getDefaultStack().setCustomName(new LiteralText("Previous")));
-		inventory.setStack(8, Items.GREEN_STAINED_GLASS.getDefaultStack().setCustomName(new LiteralText("Next")));
+		inventory.setStack(0, Items.RED_STAINED_GLASS.getDefaultStack().setCustomName(Text.literal("Previous")));
+		inventory.setStack(8, Items.GREEN_STAINED_GLASS.getDefaultStack().setCustomName(Text.literal("Next")));
 
 		return new SimpleNamedScreenHandlerFactory((syncId, inv, player) -> {
 			return new FakeScreen(syncId, inv, inventory, page);
-		}, new LiteralText("Config Screen"));
+		}, Text.literal("Config Screen"));
 	}
 
 	public static class FakeScreen extends GenericContainerScreenHandler {
@@ -210,8 +209,8 @@ public class GameSettings {
 				return;
 			}
 
-			String ruleName = ruleStack.getName().asString().toLowerCase().replace(" ", "_");
-			String optionName = clickedStack.getName().asString().toLowerCase().replace(" ", "_");
+			String ruleName = ruleStack.getName().getString().toLowerCase().replace(" ", "_");
+			String optionName = clickedStack.getName().getString().toLowerCase().replace(" ", "_");
 			GameSetting<?> setting = gameSettingMap.get(ruleName);
 			if (setting != null) {
 				setting.setValueFromOption(optionName);

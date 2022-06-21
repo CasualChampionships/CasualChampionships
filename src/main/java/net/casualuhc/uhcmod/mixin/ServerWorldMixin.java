@@ -9,7 +9,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
@@ -36,7 +36,7 @@ public abstract class ServerWorldMixin {
             if (!player.hasPermissionLevel(2)) {
                 player.changeGameMode(GameMode.ADVENTURE);
                 player.teleport(UHCMod.UHC_SERVER.getOverworld(), 0, 253, 0, 0, 0);
-                player.sendMessage(new LiteralText("Welcome to Casual UHC!").formatted(Formatting.GOLD), false);
+                player.sendMessage(Text.literal("Welcome to Casual UHC!").formatted(Formatting.GOLD), false);
             }
             else {
                 player.changeGameMode(GameMode.CREATIVE);

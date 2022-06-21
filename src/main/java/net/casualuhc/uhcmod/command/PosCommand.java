@@ -8,7 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 
 import static net.minecraft.server.command.CommandManager.literal;
@@ -28,10 +28,10 @@ public class PosCommand {
         AbstractTeam abstractTeam = entity.getScoreboardTeam();
 
         if (abstractTeam != null) {
-            manager.execute(source, String.format("/tm I'm at %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
+            manager.execute(source, String.format("tm I'm at %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
         }
         else {
-            throw new SimpleCommandExceptionType(new LiteralText("§c[ERROR] You can only run this command if you are alive and in a team!")).create();
+            throw new SimpleCommandExceptionType(Text.literal("§c[ERROR] You can only run this command if you are alive and in a team!")).create();
         }
         return 0;
     }

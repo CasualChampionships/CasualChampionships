@@ -6,7 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -116,7 +115,7 @@ public class GameSetting<T> {
 				builder.append(sub.substring(0, 1).toUpperCase()).append(sub.substring(1)).append(" ");
 			}
 
-			return new LiteralText(builder.toString().trim()).formatted(Formatting.BOLD, Formatting.GOLD);
+			return Text.literal(builder.toString().trim()).formatted(Formatting.BOLD, Formatting.GOLD);
 		};
 
 		public final String name;

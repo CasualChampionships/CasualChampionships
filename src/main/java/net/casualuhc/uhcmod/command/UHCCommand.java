@@ -21,7 +21,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Map;
@@ -63,7 +63,7 @@ public class UHCCommand {
 				.then(literal("current")
 					.executes(context -> {
 						ServerPlayerEntity player = context.getSource().getPlayer();
-						player.sendMessage(new LiteralText("Current phase is: %d".formatted(GameManager.INSTANCE.getCurrentPhase().ordinal())), false);
+						player.sendMessage(Text.literal("Current phase is: %d".formatted(GameManager.INSTANCE.getCurrentPhase().ordinal())), false);
 						return 1;
 					})
 				)
@@ -120,7 +120,7 @@ public class UHCCommand {
 								throw CANNOT_MODIFY_WB;
 							}
 							context.getSource().getServer().getWorlds().forEach(serverWorld -> serverWorld.getWorldBorder().setSize(serverWorld.getWorldBorder().getSize()));
-							context.getSource().sendFeedback(new LiteralText("Border stopped"), false);
+							context.getSource().sendFeedback(Text.literal("Border stopped"), false);
 							return 1;
 						})
 					)
@@ -181,7 +181,7 @@ public class UHCCommand {
 		);
 	}
 
-	private static final CommandSyntaxException CANNOT_MODIFY_WB = new SimpleCommandExceptionType(new LiteralText("Cannot change world border now")).create();
+	private static final CommandSyntaxException CANNOT_MODIFY_WB = new SimpleCommandExceptionType(Text.literal("Cannot change world border now")).create();
 
 	private static LiteralArgumentBuilder<ServerCommandSource> getWorldBorderStagesStart() {
 		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("forcestart");
@@ -226,7 +226,7 @@ public class UHCCommand {
 				commandArgument.then(literal(argument.name).executes(context -> {
 					ServerPlayerEntity playerEntity = context.getSource().getPlayer();
 					gameSettingEntry.getValue().setValueFromOption(argument.name);
-					playerEntity.sendMessage(new LiteralText("Set %s for %s".formatted(argument, settingName)).formatted(Formatting.GREEN), false);
+					playerEntity.sendMessage(Text.literal("Set %s for %s".formatted(argument, settingName)).formatted(Formatting.GREEN), false);
 					return 1;
 				}));
 			}

@@ -9,7 +9,7 @@ import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.JsonHelper;
 
@@ -93,7 +93,7 @@ public class TeamManager {
             if (team == null) {
                 team = scoreboard.addTeam(teamManager.name);
             }
-            team.setPrefix(new LiteralText("%s ".formatted(teamManager.prefix)));
+            team.setPrefix(Text.literal("%s ".formatted(teamManager.prefix)));
             Formatting formatting = Formatting.byName(teamManager.colour);
             if (formatting != null) {
                 team.setColor(formatting);
@@ -107,7 +107,7 @@ public class TeamManager {
         Team team = scoreboard.addTeam("Operator");
         ((AbstractTeamMixinInterface) team).setEliminated(true);
         team.setColor(Formatting.WHITE);
-        team.setPrefix(new LiteralText("[OP] "));
+        team.setPrefix(Text.literal("[OP] "));
         scoreboard.addPlayerToTeam("senseiwells", team);
         TeamUtils.addNonTeam(team);
         team = scoreboard.addTeam("Spectator");

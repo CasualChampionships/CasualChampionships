@@ -4,7 +4,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
-import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.Event.Events;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.minecraft.command.argument.EntityArgumentType;
@@ -22,7 +21,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.ClickEvent;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
@@ -93,9 +91,9 @@ public class TeamUtils {
 	}
 
 	public static void sendReadyMessage() {
-		Text yesMessage = new LiteralText("[YES]").formatted(Formatting.BOLD, Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes")));
-		Text noMessage = new LiteralText("[NO]").formatted(Formatting.BOLD, Formatting.RED).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no")));
-		Text readyMessage = new LiteralText(
+		Text yesMessage = Text.literal("[YES]").formatted(Formatting.BOLD, Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes")));
+		Text noMessage = Text.literal("[NO]").formatted(Formatting.BOLD, Formatting.RED).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no")));
+		Text readyMessage = Text.literal(
 			"""
 			%s══════════════════%s
 			
@@ -143,9 +141,9 @@ public class TeamUtils {
 		ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
 		Team team = TeamArgumentType.getTeam(context, "team");
 		UHCMod.UHC_SERVER.getScoreboard().addPlayerToTeam(player.getEntityName(), team);
-		player.sendMessage(new LiteralText("You have been added to team ").append(team.getFormattedName()), false);
-		context.getSource().sendFeedback(new LiteralText("Successfully added to team"), false);
-		player.networkHandler.sendPacket(new TitleS2CPacket(new LiteralText("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
+		player.sendMessage(Text.literal("You have been added to team ").append(team.getFormattedName()), false);
+		context.getSource().sendFeedback(Text.literal("Successfully added to team"), false);
+		player.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
 		player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL, SoundCategory.MASTER, 1.0F, 1.0F);
 		player.getHungerManager().setSaturationLevel(20F);
 		EntityAttributeInstance instance = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);

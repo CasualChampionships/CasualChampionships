@@ -6,62 +6,78 @@ import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.MessageType;
 import net.minecraft.network.Packet;
+import net.minecraft.network.message.MessageType;
+import net.minecraft.network.message.SignedMessage;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.server.PlayerManager;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.filter.FilteredMessage;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.*;
+import net.minecraft.text.Text;
+import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.UUID;
-import java.util.function.Function;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 @Mixin(ServerPlayNetworkHandler.class)
-public class ServerPlayNetworkHandlerMixin {
+public abstract class ServerPlayNetworkHandlerMixin {
+	@Shadow @Final static Logger LOGGER;
+	@Shadow public ServerPlayerEntity player;
+	@Shadow @Final private MinecraftServer server;
 
-	@Unique
-	private String rawString;
+	@Shadow protected abstract void checkForSpam();
 
-	@Shadow
-	public ServerPlayerEntity player;
-
-	@ModifyVariable(method = "handleMessage", at = @At("STORE"), ordinal = 0)
-	private String onGetRawString(String rawString) {
-		this.rawString = rawString;
-		return rawString;
-	}
-
-	@Redirect(method = "handleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Ljava/util/function/Function;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"))
-	private void onBroadcastMessage(PlayerManager instance, Text serverMessage, Function<ServerPlayerEntity, Text> playerMessageFactory, MessageType type, UUID sender) {
+	@Redirect(method = "handleMessage", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;thenAcceptAsync(Ljava/util/function/Consumer;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", remap = false), allow = 1)
+	private CompletableFuture<Void> customHandleMessage(
+			CompletableFuture<FilteredMessage<SignedMessage>> future,
+			Consumer<? super FilteredMessage<SignedMessage>> action,
+			Executor executor,
+			ChatMessageC2SPacket packet
+	) {
 		Team team = (Team) this.player.getScoreboardTeam();
-		if (!GameManager.INSTANCE.isPhase(Phase.ACTIVE) || TeamUtils.isNonTeam(team)) {
-			instance.broadcast(serverMessage, playerMessageFactory, type, sender);
-			return;
-		}
-		if (!this.rawString.startsWith("!")) {
-			PlayerUtils.forEveryPlayer(playerEntity -> {
-				if (team.isEqual(playerEntity.getScoreboardTeam())) {
-					playerEntity.sendSystemMessage(new TranslatableText(
-						"chat.type.team.text",
-						team.getFormattedName().fillStyle(Style.EMPTY.withHoverEvent(
-							new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableText("chat.type.team.hover"))
-						)),
-						this.player.getDisplayName(), new LiteralText(this.rawString)), sender
-					);
-				}
-			});
-			return;
-		}
-		TranslatableText text = new TranslatableText("chat.type.text", this.player.getDisplayName(), this.rawString.substring(1));
-		instance.broadcast(text, MessageType.CHAT, sender);
+		boolean isGlobalChat = !GameManager.INSTANCE.isPhase(Phase.ACTIVE) || TeamUtils.isNonTeam(team) || packet.getChatMessage().startsWith("!");
+
+		// do not apply async like vanilla, that's a race condition
+		// also vanilla has a race condition because mojang doesn't know how to multithread
+		return future.thenApply(message -> {
+			if (!message.raw().verify(this.player)) {
+				LOGGER.warn("{} sent message with invalid signature: '{}'", this.player.getName().getString(), message.raw().signedContent().getString());
+				return null;
+			}
+
+			if (isGlobalChat) {
+				this.server.getPlayerManager().broadcast(message, this.player, MessageType.CHAT);
+			} else {
+				PlayerUtils.forEveryPlayer(playerEntity -> {
+					if (playerEntity == this.player) {
+						playerEntity.sendMessage(Text.translatable(
+								"chat.type.team.sent",
+								team.getFormattedName(),
+								playerEntity.getDisplayName(),
+								message.raw().getContent()
+						));
+					} else if (team.isEqual(playerEntity.getScoreboardTeam())) {
+						playerEntity.sendChatMessage(
+								message.raw(),
+								this.player.asMessageSender().withTeamName(team.getFormattedName()),
+								MessageType.TEAM_MSG_COMMAND
+						);
+					}
+				});
+			}
+			this.checkForSpam();
+			return null;
+		});
 	}
 
 	@Redirect(method = "onClickSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;isSpectator()Z"))

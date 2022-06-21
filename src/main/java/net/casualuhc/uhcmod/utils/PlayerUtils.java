@@ -22,7 +22,6 @@ import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -39,8 +38,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class PlayerUtils {
-	private static final MutableText HEADER = new LiteralText("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
-	private static final MutableText FOOTER = new LiteralText("\nServer Hosted By KiwiTech").formatted(Formatting.AQUA, Formatting.BOLD);
+	private static final MutableText HEADER = Text.literal("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
+	private static final MutableText FOOTER = Text.literal("\nServer Hosted By KiwiTech").formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
 
 	private static final Map<String, Boolean> isPlayerPlayingMap = new HashMap<>();
@@ -79,7 +78,7 @@ public class PlayerUtils {
 				PlayerUtils.forEveryPlayer(playerEntity -> {
 					playerEntity.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 0.5f, 1);
 					playerEntity.sendMessage(
-						new LiteralText("%s has been ELIMINATED!".formatted(team.getName())).formatted(team.getColor(), Formatting.BOLD), false
+						Text.literal("%s has been ELIMINATED!".formatted(team.getName())).formatted(team.getColor(), Formatting.BOLD), false
 					);
 				});
 			}
@@ -111,7 +110,7 @@ public class PlayerUtils {
 			Formatting formatting = ticksPerSecond == 20 ? Formatting.DARK_GREEN : ticksPerSecond > 15 ? Formatting.YELLOW : ticksPerSecond > 10 ? Formatting.RED : Formatting.DARK_RED;
 			playerEntity.networkHandler.sendPacket(new PlayerListHeaderS2CPacket(
 				HEADER,
-				new LiteralText("\nServer TPS: ").append(new LiteralText(decimalFormat.format(ticksPerSecond)).formatted(formatting)).append(FOOTER)
+				Text.literal("\nServer TPS: ").append(Text.literal(decimalFormat.format(ticksPerSecond)).formatted(formatting)).append(FOOTER)
 			));
 		}
 
@@ -136,7 +135,7 @@ public class PlayerUtils {
 				((int) border.getSize() / 2)
 			);
 
-			playerEntity.sendMessage(new LiteralText(locationInfo), true);
+			playerEntity.sendMessage(Text.literal(locationInfo), true);
 		}
 	}
 
@@ -221,8 +220,8 @@ public class PlayerUtils {
 
 				// The big title and subtitle msg packets -- sent every 100 game ticks
 				if (Iplayer.getTime() % 100 == 0) {
-					LiteralText title = new LiteralText("§cYou're outside the border!");
-					LiteralText subTitle = new LiteralText("§cTravel " + "§a" + Iplayer.getDirection() + " §cto get to safety!");
+					MutableText title = Text.literal("§cYou're outside the border!");
+					MutableText subTitle = Text.literal("§cTravel " + "§a" + Iplayer.getDirection() + " §cto get to safety!");
 					playerEntity.networkHandler.sendPacket(new TitleS2CPacket(title));
 					playerEntity.networkHandler.sendPacket(new SubtitleS2CPacket(subTitle));
 				}

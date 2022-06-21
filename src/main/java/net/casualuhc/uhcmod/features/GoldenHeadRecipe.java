@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -35,7 +35,7 @@ public class GoldenHeadRecipe extends SpecialCraftingRecipe {
 	@Override
 	public ItemStack craft(CraftingInventory inventory) {
 		ItemStack stack = PlayerUtils.generatePlayerHead("PhantomTupac");
-		stack.setCustomName(new LiteralText("Golden Head").formatted(Formatting.GOLD).styled(s -> s.withItalic(false)));
+		stack.setCustomName(Text.literal("Golden Head").formatted(Formatting.GOLD).styled(s -> s.withItalic(false)));
 		return stack;
 	}
 

@@ -1,10 +1,11 @@
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
+    id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
 }
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -31,10 +32,9 @@ dependencies {
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
 
-    packImplementation 'org.mongodb:mongo-java-driver:3.12.10'
-    include 'org.java-websocket:Java-WebSocket:1.5.2'
-    modImplementation 'org.java-websocket:Java-WebSocket:1.5.2'
-    include group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    packImplementation 'org.mongodb:mongo-java-driver:3.12.11'
+    include 'org.java-websocket:Java-WebSocket:1.5.3'
+    modImplementation 'org.java-websocket:Java-WebSocket:1.5.3'
 }
 
 loom {
@@ -55,7 +55,7 @@ processResources {
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 
-    it.options.release = 16
+    it.options.release = 17
 }
 
 java {
