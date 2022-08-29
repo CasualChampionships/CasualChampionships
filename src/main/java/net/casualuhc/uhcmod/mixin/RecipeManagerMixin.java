@@ -2,7 +2,7 @@ package net.casualuhc.uhcmod.mixin;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
-import net.casualuhc.uhcmod.features.UHCRecipeManager;
+import net.casualuhc.uhcmod.UHCMod;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.recipe.RecipeType;
@@ -21,7 +21,7 @@ import java.util.Map;
 public class RecipeManagerMixin {
 	@Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)V", at = @At(value = "INVOKE", target = "Ljava/util/Map;entrySet()Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
 	private void preApply(Map<Identifier, JsonElement> map, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci, Map<RecipeType<?>, ImmutableMap.Builder<Identifier, Recipe<?>>> map2, ImmutableMap.Builder<Identifier, Recipe<?>> builder) {
-		for (Recipe<?> recipe : UHCRecipeManager.getCustomRecipes()) {
+		for (Recipe<?> recipe : UHCMod.getCustomRecipes()) {
 			map2.computeIfAbsent(recipe.getType(), recipeType -> ImmutableMap.builder()).put(recipe.getId(), recipe);
 			builder.put(recipe.getId(), recipe);
 		}

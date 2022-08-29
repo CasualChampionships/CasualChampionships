@@ -5,6 +5,8 @@ import net.casualuhc.uhcmod.utils.Event.Events;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Pair;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,12 +41,12 @@ public class ServerPlayerEntityMixin implements ServerPlayerMixinInterface {
 
     @Inject(method = "onDeath", at = @At("TAIL"))
     private void onDeathPost(DamageSource source, CallbackInfo ci) {
-        Events.ON_PLAYER_DEATH.trigger((ServerPlayerEntity) (Object) this);
+        Events.ON_PLAYER_DEATH.trigger(new Pair<>((ServerPlayerEntity) (Object) this, source));
     }
 
     @Inject(method = "onDisconnect", at = @At("TAIL"))
     private void onDisconnect(CallbackInfo ci) {
-        UHCDataBase.INSTANCE.updateStats((ServerPlayerEntity) (Object) this);
+        UHCDataBase.updateStats((ServerPlayerEntity) (Object) this);
     }
 
     // Getters

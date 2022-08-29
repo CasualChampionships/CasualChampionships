@@ -34,7 +34,7 @@ public class SpectCommand {
     }
 
     private static int spectatePlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        ServerPlayerEntity player = context.getSource().getPlayer();
+        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
         if (!player.isSpectator()) {
             throw NOT_SPECTATOR.create();
         }
@@ -50,7 +50,7 @@ public class SpectCommand {
     }
 
     private static int spectateTeammate(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        ServerPlayerEntity player = context.getSource().getPlayer();
+        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
         if (!player.isSpectator()) {
             throw NOT_SPECTATOR.create();
         }
@@ -61,7 +61,7 @@ public class SpectCommand {
     }
 
     private static int spectateCameraman(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        ServerPlayerEntity player = context.getSource().getPlayer();
+        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
         if (!player.isSpectator()) {
             throw NOT_SPECTATOR.create();
         }

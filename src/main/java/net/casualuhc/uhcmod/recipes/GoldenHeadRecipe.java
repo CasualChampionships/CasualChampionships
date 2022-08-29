@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.features;
+package net.casualuhc.uhcmod.recipes;
 
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.minecraft.inventory.CraftingInventory;

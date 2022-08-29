@@ -28,9 +28,8 @@ public class PosCommand {
         AbstractTeam abstractTeam = entity.getScoreboardTeam();
 
         if (abstractTeam != null) {
-            manager.execute(source, String.format("tm I'm at %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
-        }
-        else {
+            manager.executeWithPrefix(source, String.format("tm I'm at %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
+        } else {
             throw new SimpleCommandExceptionType(Text.literal("§c[ERROR] You can only run this command if you are alive and in a team!")).create();
         }
         return 0;

@@ -14,7 +14,9 @@ import java.util.List;
 
 @Mixin(SynchronizeRecipesS2CPacket.class)
 public abstract class SynchronizeRecipeS2CPacketMixin {
-	@Shadow @Final private List<Recipe<?>> recipes;
+	@Shadow
+	@Final
+	private List<Recipe<?>> recipes;
 
 	@Inject(method = "write", at = @At("HEAD"), cancellable = true)
 	private void onWrite(PacketByteBuf buf, CallbackInfo ci) {

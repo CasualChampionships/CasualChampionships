@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(AbstractTeam.class)
 public class AbstractTeamMixin implements AbstractTeamMixinInterface {
-
 	@Unique
 	private boolean ready = false;
 	@Unique

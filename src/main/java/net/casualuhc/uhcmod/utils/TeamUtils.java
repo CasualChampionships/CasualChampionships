@@ -1,11 +1,13 @@
 package net.casualuhc.uhcmod.utils;
 
+import com.google.gson.*;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.utils.Event.Events;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.TeamArgumentType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -13,6 +15,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.scoreboard.AbstractTeam;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
@@ -23,36 +26,34 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.JsonHelper;
 import net.minecraft.world.GameMode;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 public class TeamUtils {
+	private static final Set<AbstractTeam> IGNORED_TEAMS = new HashSet<>();
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-	private static final Set<AbstractTeam> nonTeams = new HashSet<>();
-
-	public static boolean isNonTeam(AbstractTeam team) {
-		return team == null || nonTeams.contains(team);
-	}
-
-	public static void addNonTeam(AbstractTeam team) {
-		nonTeams.add(team);
-	}
-
-	public static void clearNonTeam() {
-		nonTeams.clear();
+	public static boolean shouldIgnoreTeam(AbstractTeam team) {
+		return team == null || IGNORED_TEAMS.contains(team);
 	}
 
 	public static void unReadyAllTeams() {
-		for (Team team : UHCMod.UHC_SERVER.getScoreboard().getTeams()) {
-			((AbstractTeamMixinInterface) team).setReady(false);
+		for (Team team : UHCMod.SERVER.getScoreboard().getTeams()) {
+			setReady(team, false);
 		}
 	}
 
 	public static boolean teamHasAlive(AbstractTeam team) {
-		MinecraftServer server = UHCMod.UHC_SERVER;
+		MinecraftServer server = UHCMod.SERVER;
 		Collection<String> playerNames = team.getPlayerList();
 		for (String playerName : playerNames) {
 			ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerName);
@@ -64,13 +65,13 @@ public class TeamUtils {
 	}
 
 	public static boolean isLastTeam() {
-		MinecraftServer server = UHCMod.UHC_SERVER;
+		MinecraftServer server = UHCMod.SERVER;
 		AbstractTeam team = null;
 
 		for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
 			if (PlayerUtils.isPlayerSurvival(playerEntity)) {
 				team = team == null ? playerEntity.getScoreboardTeam() : team;
-				if (!TeamUtils.isNonTeam(team) && team != playerEntity.getScoreboardTeam()) {
+				if (!TeamUtils.shouldIgnoreTeam(team) && team != playerEntity.getScoreboardTeam()) {
 					return false;
 				}
 			}
@@ -79,11 +80,11 @@ public class TeamUtils {
 	}
 
 	public static AbstractTeam getLastTeam() {
-		MinecraftServer server = UHCMod.UHC_SERVER;
+		MinecraftServer server = UHCMod.SERVER;
 		AbstractTeam team = null;
 
 		for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
-			if (PlayerUtils.isPlayerSurvival(playerEntity)) {
+			if (PlayerUtils.isPlayerPlayingInSurvival(playerEntity)) {
 				team = playerEntity.getScoreboardTeam();
 			}
 		}
@@ -110,7 +111,7 @@ public class TeamUtils {
 		);
 		PlayerUtils.forEveryPlayer(playerEntity -> {
 			AbstractTeam team = playerEntity.getScoreboardTeam();
-			if (TeamUtils.isNonTeam(team)) {
+			if (TeamUtils.shouldIgnoreTeam(team)) {
 				return;
 			}
 			playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 1f, 1f);
@@ -119,7 +120,7 @@ public class TeamUtils {
 	}
 
 	public static void checkAllTeamsReady() {
-		MinecraftServer server = UHCMod.UHC_SERVER;
+		MinecraftServer server = UHCMod.SERVER;
 		ServerScoreboard scoreboard = server.getScoreboard();
 		for (Team team : scoreboard.getTeams()) {
 			boolean teamHasMember = false;
@@ -130,7 +131,7 @@ public class TeamUtils {
 					teamHasMember = true;
 				}
 			}
-			if (teamHasMember && !((AbstractTeamMixinInterface) team).isReady() && !TeamUtils.isNonTeam(team)) {
+			if (teamHasMember && !isReady(team) && !shouldIgnoreTeam(team)) {
 				return;
 			}
 		}
@@ -140,7 +141,7 @@ public class TeamUtils {
 	public static int forceAddPlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
 		ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
 		Team team = TeamArgumentType.getTeam(context, "team");
-		UHCMod.UHC_SERVER.getScoreboard().addPlayerToTeam(player.getEntityName(), team);
+		UHCMod.SERVER.getScoreboard().addPlayerToTeam(player.getEntityName(), team);
 		player.sendMessage(Text.literal("You have been added to team ").append(team.getFormattedName()), false);
 		context.getSource().sendFeedback(Text.literal("Successfully added to team"), false);
 		player.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
@@ -154,7 +155,7 @@ public class TeamUtils {
 		player.setHealth(player.getMaxHealth());
 		PlayerUtils.setPlayerPlaying(player, true);
 
-		for (ServerPlayerEntity playerEntity : UHCMod.UHC_SERVER.getPlayerManager().getPlayerList()) {
+		for (ServerPlayerEntity playerEntity : UHCMod.SERVER.getPlayerManager().getPlayerList()) {
 			if (team.getPlayerList().contains(playerEntity.getEntityName()) && PlayerUtils.isPlayerSurvival(playerEntity) && !player.equals(playerEntity)) {
 				player.teleport(
 					playerEntity.getWorld(),
@@ -170,5 +171,92 @@ public class TeamUtils {
 
 		player.changeGameMode(GameMode.SURVIVAL);
 		return 1;
+	}
+
+	public static void createTeams() {
+		Scoreboard scoreboard = UHCMod.SERVER.getScoreboard();
+		for (Team team : scoreboard.getTeams().stream().toList()) {
+			scoreboard.removeTeam(team);
+		}
+		reloadTeams();
+		IGNORED_TEAMS.clear();
+
+		Team operatorTeam = scoreboard.addTeam("Operator");
+		setEliminated(operatorTeam, true);
+		operatorTeam.setColor(Formatting.WHITE);
+		operatorTeam.setPrefix(Text.literal("[OP] "));
+		scoreboard.addPlayerToTeam("senseiwells", operatorTeam);
+		IGNORED_TEAMS.add(operatorTeam);
+
+		Team spectatorTeam = scoreboard.addTeam("Spectator");
+		spectatorTeam.setColor(Formatting.DARK_GRAY);
+		setEliminated(spectatorTeam, true);
+		IGNORED_TEAMS.add(spectatorTeam);
+
+		PlayerUtils.forEveryPlayer(player -> {
+			if (player.getScoreboardTeam() == null) {
+				scoreboard.addPlayerToTeam(player.getEntityName(), spectatorTeam);
+			}
+		});
+	}
+
+	public static Path getPath() {
+		return FabricLoader.getInstance().getConfigDir().resolve("Teams.json");
+	}
+
+	public static boolean isEliminated(AbstractTeam team) {
+		return ((AbstractTeamMixinInterface) team).isEliminated();
+	}
+
+	public static void setEliminated(AbstractTeam team, boolean eliminated) {
+		((AbstractTeamMixinInterface) team).setEliminated(eliminated);
+	}
+
+	public static boolean isReady(AbstractTeam team) {
+		return ((AbstractTeamMixinInterface) team).isReady();
+	}
+
+	public static void setReady(AbstractTeam team, boolean ready) {
+		((AbstractTeamMixinInterface) team).setReady(ready);
+	}
+
+	private static void reloadTeams() {
+		Path path = getPath();
+		File file = path.toFile();
+		if (file.exists()) {
+			try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
+				JsonArray jsonArray = GSON.fromJson(bufferedReader, JsonArray.class);
+				for (JsonElement jsonElement : jsonArray) {
+					JsonObject jsonObject = JsonHelper.asObject(jsonElement, "entry");
+					createTeamFromJson(jsonObject);
+				}
+			} catch (JsonParseException | IOException e) {
+				UHCMod.LOGGER.error("Could not read teams", e);
+			}
+		}
+	}
+
+	private static void createTeamFromJson(JsonObject json) {
+		if (json.has("name") && json.has("colour") && json.has("prefix") && json.has("members")) {
+			String teamName = json.get("name").getAsString();
+			String colour = json.get("colour").getAsString();
+			String prefix = "[%s] ".formatted(json.get("prefix").getAsString());
+			JsonArray members = json.get("members").getAsJsonArray();
+
+			Scoreboard scoreboard = UHCMod.SERVER.getScoreboard();
+			Team team = scoreboard.getTeam(teamName);
+			if (team == null) {
+				team = scoreboard.addTeam(teamName);
+			}
+			team.setPrefix(Text.literal(prefix));
+			Formatting formatting = Formatting.byName(colour);
+			if (formatting != null) {
+				team.setColor(formatting);
+			}
+			for (JsonElement member : members) {
+				scoreboard.addPlayerToTeam(member.getAsString(), team);
+			}
+			team.setFriendlyFireAllowed(false);
+		}
 	}
 }

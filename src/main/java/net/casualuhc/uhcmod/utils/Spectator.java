@@ -15,7 +15,7 @@ public class Spectator {
         if (!from.isSpectator())
             return;
         from.teleport(
-            (ServerWorld) player.world,
+            player.getWorld(),
             player.getX(),
             player.getY(),
             player.getZ(),

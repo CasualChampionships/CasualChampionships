@@ -28,7 +28,7 @@ public class ReadyCommand {
 			)
 			.then(literal("reset").requires(source -> source.hasPermissionLevel(4))
 				.executes(context -> {
-					context.getSource().getServer().getScoreboard().getTeams().forEach(team -> ((AbstractTeamMixinInterface) team).setReady(false));
+					context.getSource().getServer().getScoreboard().getTeams().forEach(team -> TeamUtils.setReady(team, false));
 					return 1;
 				})
 			)
@@ -36,18 +36,17 @@ public class ReadyCommand {
 	}
 
 	private static int ready(CommandContext<ServerCommandSource> context, boolean isReady) throws CommandSyntaxException {
-		if (!GameManager.INSTANCE.isPhase(Phase.READY)) {
+		if (!GameManager.isPhase(Phase.READY)) {
 			throw new SimpleCommandExceptionType(Text.literal("You cannot ready now!")).create();
 		}
-		AbstractTeam team = context.getSource().getPlayer().getScoreboardTeam();
-		if (team == null || team.getName().equals("Spectator")) {
+		AbstractTeam team = context.getSource().getPlayerOrThrow().getScoreboardTeam();
+		if (TeamUtils.shouldIgnoreTeam(team)) {
 			throw new SimpleCommandExceptionType(Text.literal("You are not on a team!")).create();
 		}
-		AbstractTeamMixinInterface ITeam = (AbstractTeamMixinInterface) team;
-		if (ITeam.isReady()) {
+		if (TeamUtils.isReady(team)) {
 			throw new SimpleCommandExceptionType(Text.literal("You have already readied up!")).create();
 		}
-		ITeam.setReady(isReady);
+		TeamUtils.setReady(team, true);
 		String readyText = "%s %s ready!".formatted(team.getName(), isReady ? "is" : "is not");
 		PlayerUtils.messageEveryPlayer(Text.literal(readyText).formatted(team.getColor(), Formatting.BOLD));
 		TeamUtils.checkAllTeamsReady();

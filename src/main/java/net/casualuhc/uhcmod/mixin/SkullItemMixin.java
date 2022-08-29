@@ -53,7 +53,7 @@ public class SkullItemMixin extends WallStandingBlockItem {
 			}
 		}
 
-		this.addStatusEffect(player, StatusEffects.REGENERATION, 60, isGolden ? 3 : 2);
+		this.addStatusEffect(player, StatusEffects.REGENERATION, isGolden ? 50 : 60, isGolden ? 3 : 2);
 		this.addStatusEffect(player, StatusEffects.SPEED, (isGolden ? 20 : 15) * 20, 1);
 		this.addStatusEffect(player, StatusEffects.SATURATION, 5, 4);
 

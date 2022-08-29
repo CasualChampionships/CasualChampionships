@@ -2,7 +2,6 @@ package net.casualuhc.uhcmod.utils;
 
 import io.netty.buffer.Unpooled;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
 import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.Event.Events;
@@ -10,6 +9,7 @@ import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -25,7 +25,9 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
@@ -51,7 +53,7 @@ public class PlayerUtils {
 		Events.ON_PLAYER_DEATH.addListener(PlayerUtils::handlePlayerDeath);
 
 		Events.ON_PLAYER_TICK.addListener(player -> {
-			updateActionBar(player);
+			updateInfo(player);
 			updateWorldBorderArrow(player);
 		});
 	}
@@ -60,21 +62,24 @@ public class PlayerUtils {
 		forEveryPlayer(PlayerUtils::forceUpdateGlowingFlag);
 	}
 
-	private static void handlePlayerDeath(ServerPlayerEntity player) {
-		if (GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
-			UHCDataBase.INSTANCE.updateStats(player);
+	private static void handlePlayerDeath(Pair<ServerPlayerEntity, DamageSource> pair) {
+		ServerPlayerEntity player = pair.getLeft();
+		if (GameManager.isPhase(Phase.ACTIVE)) {
+			UHCDataBase.updateStats(player);
 			if (GameSettings.PLAYER_DROPS_GAPPLE_ON_DEATH.getValue()) {
 				player.dropItem(Items.GOLDEN_APPLE.getDefaultStack(), true, false);
 			}
 			if (GameSettings.PLAYER_DROPS_HEAD_ON_DEATH.getValue()) {
-				player.dropItem(generatePlayerHead(player.getEntityName()), true, false);
+				ItemStack playerHead = generatePlayerHead(player.getEntityName());
+				if (!(pair.getRight().getAttacker() instanceof ServerPlayerEntity attacker) || !attacker.getInventory().insertStack(playerHead)) {
+					player.dropItem(playerHead, true, false);
+				}
 			}
 			AbstractTeam team = player.getScoreboardTeam();
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
 			forceUpdateGlowingFlag(player);
-			AbstractTeamMixinInterface iTeam = (AbstractTeamMixinInterface) team;
-			if (team != null && !TeamUtils.teamHasAlive(team) && !iTeam.isEliminated()) {
-				iTeam.setEliminated(true);
+			if (team != null && !TeamUtils.teamHasAlive(team) && !TeamUtils.isEliminated(team)) {
+				TeamUtils.setEliminated(team, true);
 				PlayerUtils.forEveryPlayer(playerEntity -> {
 					playerEntity.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 0.5f, 1);
 					playerEntity.sendMessage(
@@ -86,7 +91,7 @@ public class PlayerUtils {
 				Events.ON_END.trigger();
 			}
 		}
-		if (GameManager.INSTANCE.isPhase(Phase.END)) {
+		if (GameManager.isPhase(Phase.END)) {
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
 		}
 	}
@@ -104,9 +109,9 @@ public class PlayerUtils {
 		return ItemStack.fromNbt(compound);
 	}
 
-	private static void updateActionBar(ServerPlayerEntity playerEntity) {
+	private static void updateInfo(ServerPlayerEntity playerEntity) {
 		if (playerEntity.getWorld().getTime() % 20 == 0 && displayTab) {
-			float ticksPerSecond = 1000 / Math.max(50, UHCMod.calculateMSPT());
+			float ticksPerSecond = 1000 / Math.max(50, UHCUtil.calculateMSPT());
 			Formatting formatting = ticksPerSecond == 20 ? Formatting.DARK_GREEN : ticksPerSecond > 15 ? Formatting.YELLOW : ticksPerSecond > 10 ? Formatting.RED : Formatting.DARK_RED;
 			playerEntity.networkHandler.sendPacket(new PlayerListHeaderS2CPacket(
 				HEADER,
@@ -121,10 +126,10 @@ public class PlayerUtils {
 		// Update location on action bar
 		if (Iplayer.getCoordsBoolean()) {
 			switch (playerEntity.getMovementDirection().getHorizontal()) {
-				case 0 -> Iplayer.setDirection(ServerPlayerMixinInterface.Direction.SOUTH);
-				case 1 -> Iplayer.setDirection(ServerPlayerMixinInterface.Direction.WEST);
-				case 2 -> Iplayer.setDirection(ServerPlayerMixinInterface.Direction.NORTH);
-				case 3 -> Iplayer.setDirection(ServerPlayerMixinInterface.Direction.EAST);
+				case 0 -> Iplayer.setDirection(Direction.SOUTH);
+				case 1 -> Iplayer.setDirection(Direction.WEST);
+				case 2 -> Iplayer.setDirection(Direction.NORTH);
+				case 3 -> Iplayer.setDirection(Direction.EAST);
 			}
 			String locationInfo = "(%d, %d, %d) | Direction: %s | Distance to WB: %d | WB radius: %d".formatted(
 				playerEntity.getBlockX(),
@@ -171,7 +176,7 @@ public class PlayerUtils {
 					// Checking to see if the player is closer to the west world border -- handing particle stuff (arrow)
 					if (playerX - border.getBoundWest() > border.getBoundEast() - playerX) {
 						Iplayer.getWorldBorder().setCenter(border.getSize(), border.getCenterZ());
-						Iplayer.setDirection(ServerPlayerMixinInterface.Direction.WEST);
+						Iplayer.setDirection(Direction.WEST);
 
 						for (int x = 0; x < 15; x++) {
 							sendParticles(playerEntity, playerBlockX + 0.2 + (float) x / 45, bottomBlockY, playerBlockZ + 0.5 + (float) x / 30);
@@ -179,22 +184,20 @@ public class PlayerUtils {
 							sendParticles(playerEntity, playerBlockX + 0.2 + (float) x / 20, bottomBlockY, playerBlockZ + 0.5);
 						}
 						// Checking to see if the player is closer to the east world border -- handing particle stuff (arrow)
-					}
-					else {
+					} else {
 						Iplayer.getWorldBorder().setCenter(-1 * border.getSize(), border.getCenterZ());
-						Iplayer.setDirection(ServerPlayerMixinInterface.Direction.EAST);
+						Iplayer.setDirection(Direction.EAST);
 						for (int x = 0; x < 15; x++) {
 							sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 45, bottomBlockY, playerBlockZ + 0.5 + (float) x / 30);
 							sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 45, bottomBlockY, playerBlockZ + 0.5 - (float) x / 30);
 							sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 20, bottomBlockY, playerBlockZ + 0.5);
 						}
 					}
-				}
-				else {
+				} else {
 					// Checking to see if the player is closer to the north world border -- handing particle stuff (arrow)
 					if (playerZ - border.getBoundNorth() > border.getBoundSouth() - playerZ) {
 						Iplayer.getWorldBorder().setCenter(border.getCenterX(), border.getSize());
-						Iplayer.setDirection(ServerPlayerMixinInterface.Direction.NORTH);
+						Iplayer.setDirection(Direction.NORTH);
 
 						for (int x = 0; x < 15; x++) {
 							sendParticles(playerEntity, playerBlockX + 0.5 + (float) x / 30, bottomBlockY, playerBlockZ + 0.2 + (float) x / 45);
@@ -202,10 +205,9 @@ public class PlayerUtils {
 							sendParticles(playerEntity, playerBlockX + 0.5, bottomBlockY, playerBlockZ + 0.2 + (float) x / 20);
 						}
 						// Checking to see if the player is closer to the south world border -- handing particle stuff (arrow)
-					}
-					else {
+					} else {
 						Iplayer.getWorldBorder().setCenter(border.getCenterX(), -1 * border.getSize());
-						Iplayer.setDirection(ServerPlayerMixinInterface.Direction.SOUTH);
+						Iplayer.setDirection(Direction.SOUTH);
 						for (int x = 0; x < 15; x++) {
 							sendParticles(playerEntity, playerBlockX + 0.5 + (float) x / 30, bottomBlockY, playerBlockZ + 0.8 - (float) x / 45);
 							sendParticles(playerEntity, playerBlockX + 0.5 - (float) x / 30, bottomBlockY, playerBlockZ + 0.8 - (float) x / 45);
@@ -226,15 +228,13 @@ public class PlayerUtils {
 					playerEntity.networkHandler.sendPacket(new SubtitleS2CPacket(subTitle));
 				}
 				// The player is within the world border so we sent the correct packets one time to remove the fake world border
-			}
-			else if (Iplayer.getAlready()) {
+			} else if (Iplayer.getAlready()) {
 				Iplayer.setAlready(false);
 				Iplayer.setTime(99);
 				sendWorldBorderPackets(playerEntity, playerEntity.world.getWorldBorder());
 			}
 			// The edge case where the player dies from the world border and is put into spectator mode. Sends correct world border packet one time
-		}
-		else if (Iplayer.getAlready()) {
+		} else if (Iplayer.getAlready()) {
 			Iplayer.setAlready(false);
 			Iplayer.setTime(99);
 		}
@@ -265,8 +265,8 @@ public class PlayerUtils {
 	}
 
 	public static void forEveryPlayer(Consumer<ServerPlayerEntity> consumer) {
-		UHCMod.UHC_SERVER.execute(() -> {
-			for (ServerPlayerEntity playerEntity : UHCMod.UHC_SERVER.getPlayerManager().getPlayerList()) {
+		UHCMod.SERVER.execute(() -> {
+			for (ServerPlayerEntity playerEntity : UHCMod.SERVER.getPlayerManager().getPlayerList()) {
 				consumer.accept(playerEntity);
 			}
 		});
@@ -289,8 +289,12 @@ public class PlayerUtils {
 		return player.interactionManager.getGameMode() == GameMode.SURVIVAL;
 	}
 
+	public static boolean isPlayerPlayingInSurvival(ServerPlayerEntity player) {
+		return isPlayerPlaying(player) && isPlayerSurvival(player);
+	}
+
 	public static void forceUpdateGlowingFlag(ServerPlayerEntity player) {
-		// Force update the dirty flag in the tracker entry
+		// Force updates the dirty flag in the tracker entry
 		player.setGlowing(!player.isGlowing());
 		player.setGlowing(!player.isGlowing());
 	}
@@ -299,7 +303,7 @@ public class PlayerUtils {
 		if (!GameSettings.FRIENDLY_PLAYER_GLOW.getValue()) {
 			return packet;
 		}
-		if (!GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
+		if (!GameManager.isPhase(Phase.ACTIVE)) {
 			return packet;
 		}
 		if (!PlayerUtils.isPlayerSurvival(glowingPlayer)) {
@@ -335,7 +339,7 @@ public class PlayerUtils {
 		}
 
 		for (DataTracker.Entry<?> trackedValue : trackedValues) {
-			// need to compare ids because they're not the same instance once re-serialized
+			// Need to compare ids because they're not the same instance once re-serialized
 			if (trackedValue.getData().getId() == Entity.FLAGS.getId()) {
 				@SuppressWarnings("unchecked")
 				DataTracker.Entry<Byte> byteTrackedValue = (DataTracker.Entry<Byte>) trackedValue;

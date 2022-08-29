@@ -4,14 +4,12 @@ import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.utils.Event.Events;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Phase;
+import net.casualuhc.uhcmod.utils.Scheduler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.WorldBorder;
 
-import java.util.concurrent.TimeUnit;
-
 public class WorldBorderManager {
-	private static final MinecraftServer SERVER = UHCMod.UHC_SERVER;
-	private static Stage currentStage = Stage.FIRST;
+	private static final MinecraftServer SERVER = UHCMod.SERVER;
 
 	static {
 		Events.GRACE_PERIOD_FINISH.addListener(v -> {
@@ -20,64 +18,57 @@ public class WorldBorderManager {
 		});
 
 		Events.WORLD_BORDER_FINISH_SHRINKING.addListener(v -> {
-			currentStage = currentStage.getNextStage();
-			if (currentStage == null || !GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
+			Stage nextStage = GameSettings.WORLD_BORDER_STAGE.getValue().getNextStage();
+			if (nextStage == null || !GameManager.isPhase(Phase.ACTIVE)) {
 				return;
 			}
 
-			GameSettings.WORLD_BORDER_STAGE.setValueQuietly(currentStage);
-			if (currentStage == Stage.END) {
+			GameSettings.WORLD_BORDER_STAGE.setValueQuietly(nextStage);
+			if (nextStage == Stage.END) {
 				Events.WORLD_BORDER_COMPLETE.trigger();
 				return;
 			}
 
-			GameManager.INSTANCE.execute(() -> {
-				UHCMod.UHC_SERVER.execute(() -> {
-					double size = UHCMod.UHC_SERVER.getOverworld().getWorldBorder().getSize();
-					long time = (long) (currentStage.getTime(size) * GameSettings.WORLD_BORDER_SPEED.getValue());
-					moveWorldBorders(currentStage.getEndSize(), time);
-				});
-			}, 10, TimeUnit.SECONDS);
+			GameManager.schedulePhaseTask(Scheduler.secondsToTicks(10), () -> {
+				double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
+				moveWorldBorders(nextStage.getEndSize(), nextStage.getTime(size));
+			});
 		});
 
 		Events.WORLD_BORDER_COMPLETE.addListener(v -> {
-			GameManager.INSTANCE.worldBorderComplete();
+			GameManager.worldBorderComplete();
 		});
 	}
 
 	public static void noop() { }
 
 	public static void startWorldBorders() {
-		UHCMod.UHC_SERVER.execute(() -> {
-			double size = UHCMod.UHC_SERVER.getOverworld().getWorldBorder().getSize();
-			currentStage = Stage.getStage(size);
-			if (currentStage == null) {
-				currentStage = Stage.FIRST;
-				moveWorldBorders(Stage.FIRST.getStartSize(), 0);
-			}
+		double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
+		Stage stage = Stage.getStage(size);
+		if (stage == null) {
+			stage = Stage.FIRST;
+			moveWorldBorders(Stage.FIRST.getStartSize(), 0);
+		}
 
-			GameSettings.WORLD_BORDER_STAGE.setValueQuietly(currentStage);
-			if (currentStage == Stage.END) {
-				Events.WORLD_BORDER_COMPLETE.trigger();
-				return;
-			}
+		GameSettings.WORLD_BORDER_STAGE.setValueQuietly(stage);
+		if (stage == Stage.END) {
+			Events.WORLD_BORDER_COMPLETE.trigger();
+			return;
+		}
 
-			long time = (long) (currentStage.getTime(size) * GameSettings.WORLD_BORDER_SPEED.getValue());
-			moveWorldBorders(currentStage.getEndSize(), time);
-		});
+		moveWorldBorders(stage.getEndSize(), stage.getTime(size));
 	}
 
 	public static void moveWorldBorders(double newSize, long time) {
-		SERVER.execute(() ->
-			SERVER.getWorlds().forEach(serverWorld -> {
-				WorldBorder border = serverWorld.getWorldBorder();
-				if (time != 0) {
-					border.interpolateSize(border.getSize(), newSize, time * 1000);
-					return;
-				}
-				border.setSize(newSize);
-			})
-		);
+		long modifiedTime = (long) (time * GameSettings.WORLD_BORDER_SPEED.getValue());
+		SERVER.getWorlds().forEach(world -> {
+			WorldBorder border = world.getWorldBorder();
+			if (modifiedTime != 0) {
+				border.interpolateSize(border.getSize(), newSize, modifiedTime * 1000);
+				return;
+			}
+			border.setSize(newSize);
+		});
 	}
 
 	public enum Stage {

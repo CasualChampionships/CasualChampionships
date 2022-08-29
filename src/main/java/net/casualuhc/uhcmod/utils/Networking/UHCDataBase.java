@@ -10,9 +10,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.managers.TeamManager;
 import net.casualuhc.uhcmod.utils.Config;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.Stat;
@@ -33,130 +33,149 @@ import java.util.function.Function;
 import static com.mongodb.client.model.Filters.eq;
 
 public class UHCDataBase {
-	public final MongoClient mongoClient;
-	private final MongoCollection<Document> playerStats;
-	private final MongoCollection<Document> totalPlayerStats;
-	private final MongoCollection<Document> teamConfig;
-	private final ExecutorService executor = Executors.newSingleThreadExecutor();
+	private static final MongoClient CLIENT;
+	private static final MongoCollection<Document> PLAYER_STATS;
+	private static final MongoCollection<Document> COMBINED_STATS;
+	private static final MongoCollection<Document> TEAM_CONFIG;
+	private static final ExecutorService EXECUTOR;
 
-	public static final UHCDataBase INSTANCE = new UHCDataBase();
-
-	private UHCDataBase() {
-		this.mongoClient = new MongoClient(new MongoClientURI(Config.MONGO_URI));
-		MongoDatabase database = this.mongoClient.getDatabase("UHC");
-		this.playerStats = database.getCollection(Config.IS_DEV ? "test_player_stats" : "player_stats");
-		this.totalPlayerStats = database.getCollection(Config.IS_DEV ? "test_total_player_stats" : "total_player_stats");
-		this.teamConfig = database.getCollection("teams");
+	static {
+		if (Config.hasMongo()) {
+			CLIENT = new MongoClient(new MongoClientURI(Config.MONGO_URI));
+			MongoDatabase database = CLIENT.getDatabase("UHC");
+			PLAYER_STATS = database.getCollection(Config.IS_DEV ? "test_player_stats" : "player_stats");
+			COMBINED_STATS = database.getCollection(Config.IS_DEV ? "test_total_player_stats" : "total_player_stats");
+			TEAM_CONFIG = database.getCollection("teams");
+			EXECUTOR = Executors.newSingleThreadExecutor();
+		} else {
+			CLIENT = null;
+			PLAYER_STATS = null;
+			COMBINED_STATS = null;
+			TEAM_CONFIG = null;
+			EXECUTOR = null;
+		}
 	}
 
-	public void updateStatDatabase(final String name, final UHCStat stat, final Object newValue) {
-		this.executor.execute(() -> {
-			Bson filter = eq("name", name);
-			MongoCursor<Document> cursor = this.playerStats.find(filter).cursor();
-			boolean hasDocument = cursor.hasNext();
-			Document document = hasDocument ? cursor.next() : this.createDefaultStat(name);
-			document.replace(stat.name, newValue);
-			if (hasDocument) {
-				this.playerStats.replaceOne(filter, document);
-				return;
-			}
-			this.playerStats.insertOne(document);
-		});
+	private UHCDataBase() { }
+
+	public static void updateStatDatabase(final String name, final UHCStat stat, final Object newValue) {
+		if (hasMongo()) {
+			EXECUTOR.execute(() -> {
+				Bson filter = eq("name", name);
+				MongoCursor<Document> cursor = PLAYER_STATS.find(filter).cursor();
+				boolean hasDocument = cursor.hasNext();
+				Document document = hasDocument ? cursor.next() : createDefaultStat(name);
+				document.replace(stat.name, newValue);
+				if (hasDocument) {
+					PLAYER_STATS.replaceOne(filter, document);
+					return;
+				}
+				PLAYER_STATS.insertOne(document);
+			});
+		}
 	}
 
 	/**
 	 * This should only be called when the UHC ends
 	 */
-	public void updateTotalDataBase() {
-		this.executor.execute(() -> {
-			for (Document document : this.playerStats.find()) {
-				String name = document.getString("name");
-				Bson filter = eq("name", name);
-				MongoCursor<Document> totalPlayer = this.totalPlayerStats.find(filter).cursor();
-				if (!totalPlayer.hasNext()) {
-					this.totalPlayerStats.insertOne(document);
-					continue;
-				}
-				Document totalPlayerDocument = totalPlayer.next();
-				for (UHCStat stat : UHCStat.values()) {
-					int statValue = document.getInteger(stat.name, 0);
-					if (statValue <= 0) {
+	public static void updateTotalDataBase() {
+		if (hasMongo()) {
+			EXECUTOR.execute(() -> {
+				for (Document document : PLAYER_STATS.find()) {
+					String name = document.getString("name");
+					Bson filter = eq("name", name);
+					MongoCursor<Document> totalPlayer = COMBINED_STATS.find(filter).cursor();
+					if (!totalPlayer.hasNext()) {
+						COMBINED_STATS.insertOne(document);
 						continue;
 					}
-					int totalStatValue = totalPlayerDocument.getInteger(stat.name, 0) + statValue;
-					totalPlayerDocument.replace(stat.name, totalStatValue);
+					Document totalPlayerDocument = totalPlayer.next();
+					for (UHCStat stat : UHCStat.values()) {
+						int statValue = document.getInteger(stat.name, 0);
+						if (statValue <= 0) {
+							continue;
+						}
+						int totalStatValue = totalPlayerDocument.getInteger(stat.name, 0) + statValue;
+						totalPlayerDocument.replace(stat.name, totalStatValue);
+					}
+					COMBINED_STATS.replaceOne(filter, totalPlayerDocument);
 				}
-				this.totalPlayerStats.replaceOne(filter, totalPlayerDocument);
-			}
-		});
-	}
-
-	public void updateStats(ServerPlayerEntity player) {
-		if (!PlayerUtils.isPlayerSurvival(player) || !PlayerUtils.isPlayerPlaying(player)) {
-			return;
-		}
-		StatHandler handler = player.getStatHandler();
-		String playerName = player.getEntityName();
-		for (UHCStat stat : UHCStat.values()) {
-			int statValue = stat.applyModifier(handler.getStat(stat.statValue));
-			this.updateStatDatabase(playerName, stat, statValue);
+			});
 		}
 	}
 
-	public void downloadTeamFromDataBase() {
-		this.executor.execute(() -> {
-			try {
-				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				List<JsonObject> jsonObjects = new ArrayList<>();
-				for (Document document : this.teamConfig.find()) {
-					jsonObjects.add(gson.fromJson(document.toJson(), JsonObject.class));
+	public static void updateStats(ServerPlayerEntity player) {
+		if (hasMongo() && PlayerUtils.isPlayerPlayingInSurvival(player)) {
+			StatHandler handler = player.getStatHandler();
+			String playerName = player.getEntityName();
+			for (UHCStat stat : UHCStat.values()) {
+				int statValue = stat.applyModifier(handler.getStat(stat.statValue));
+				updateStatDatabase(playerName, stat, statValue);
+			}
+		}
+	}
+
+	public static void downloadTeamFromDataBase() {
+		if (hasMongo()) {
+			EXECUTOR.execute(() -> {
+				try {
+					Gson gson = new GsonBuilder().setPrettyPrinting().create();
+					List<JsonObject> jsonObjects = new ArrayList<>();
+					for (Document document : TEAM_CONFIG.find()) {
+						jsonObjects.add(gson.fromJson(document.toJson(), JsonObject.class));
+					}
+					File teamJsonFile = TeamUtils.getPath().toFile();
+					try (FileWriter fileWriter = new FileWriter(teamJsonFile)) {
+						fileWriter.write(gson.toJson(jsonObjects));
+						fileWriter.flush();
+					}
+					UHCMod.LOGGER.info("Successfully downloaded Teams.json");
+				} catch (MongoException | ClassCastException | IOException ignored) {
+					UHCMod.LOGGER.error("Could not download Teams.json");
 				}
-				File teamJsonFile = TeamManager.getPath().toFile();
-				try (FileWriter fileWriter = new FileWriter(teamJsonFile)) {
-					fileWriter.write(gson.toJson(jsonObjects));
-					fileWriter.flush();
+			});
+		}
+	}
+
+	public static void incrementWinDataBase(String teamName) {
+		if (hasMongo()) {
+			EXECUTOR.execute(() -> {
+				Bson filter = eq("name", teamName);
+				MongoCursor<Document> cursor = TEAM_CONFIG.find(filter).cursor();
+				if (!cursor.hasNext()) {
+					UHCMod.LOGGER.error("Winning team cannot be found");
+					return;
 				}
-				UHCMod.UHCLogger.info("Successfully downloaded Teams.json");
-			}
-			catch (MongoException | ClassCastException | IOException ignored) {
-				UHCMod.UHCLogger.error("Could not download Teams.json");
-			}
-		});
+				Document document = cursor.next();
+				int currentWins = document.getInteger("wins");
+				document.replace("wins", currentWins + 1);
+				TEAM_CONFIG.replaceOne(filter, document);
+			});
+		}
 	}
 
-	public void incrementWinDataBase(String teamName) {
-		this.executor.execute(() -> {
-			Bson filter = eq("name", teamName);
-			MongoCursor<Document> cursor = this.teamConfig.find(filter).cursor();
-			if (!cursor.hasNext()) {
-				UHCMod.UHCLogger.error("Winning team cannot be found");
-				return;
-			}
-			Document document = cursor.next();
-			int currentWins = document.getInteger("wins");
-			document.replace("wins", currentWins + 1);
-			this.teamConfig.replaceOne(filter, document);
-		});
+	public static void shutdown() {
+		if (hasMongo()) {
+			EXECUTOR.execute(CLIENT::close);
+			EXECUTOR.shutdown();
+		}
 	}
 
-	public void shutdown() {
-		this.executor.execute(this.mongoClient::close);
-		this.executor.shutdown();
-	}
-
-	private Document createDefaultStat(String name) {
-		Document document = new Document("_id", this.playerStats.countDocuments()).append("name", name);
+	private static Document createDefaultStat(String name) {
+		Document document = new Document("_id", PLAYER_STATS.countDocuments()).append("name", name);
 		for (UHCStat stat : UHCStat.values()) {
 			document.append(stat.name, 0);
 		}
 		return document;
 	}
 
-	private static final Function<Integer, Integer> DIVIDE_TEN = (integer) -> integer / 10;
+	private static boolean hasMongo() {
+		return CLIENT == null;
+	}
 
 	private enum UHCStat {
-		DAMAGE_DEALT("damage dealt", Stats.CUSTOM.getOrCreateStat(Stats.DAMAGE_DEALT), DIVIDE_TEN),
-		DAMAGE_TAKEN("damage taken", Stats.CUSTOM.getOrCreateStat(Stats.DAMAGE_TAKEN), DIVIDE_TEN),
+		DAMAGE_DEALT("damage dealt", Stats.CUSTOM.getOrCreateStat(Stats.DAMAGE_DEALT), i -> i / 10),
+		DAMAGE_TAKEN("damage taken", Stats.CUSTOM.getOrCreateStat(Stats.DAMAGE_TAKEN), i -> i / 10),
 		KILLS("kills", Stats.KILLED.getOrCreateStat(EntityType.PLAYER), null),
 		DEATHS("deaths", Stats.CUSTOM.getOrCreateStat(Stats.DEATHS), null),
 		;

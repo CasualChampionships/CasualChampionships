@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod.interfaces;
 
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.border.WorldBorder;
 
 public interface ServerPlayerMixinInterface {
@@ -25,11 +26,4 @@ public interface ServerPlayerMixinInterface {
     Direction getDirection();
 
     WorldBorder getWorldBorder();
-
-    enum Direction {
-        NORTH,
-        SOUTH,
-        EAST,
-        WEST
-    }
 }

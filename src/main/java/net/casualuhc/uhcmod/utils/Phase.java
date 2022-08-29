@@ -1,7 +1,6 @@
 package net.casualuhc.uhcmod.utils;
 
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.managers.TeamManager;
 import net.casualuhc.uhcmod.utils.Event.Events;
 
 public enum Phase {
@@ -15,32 +14,32 @@ public enum Phase {
 
     static {
         Events.ON_SETUP.addListener(v -> {
-            GameManager.INSTANCE.setCurrentPhase(SETUP);
-            GameManager.INSTANCE.setBeforeGamerules();
-            TeamManager.createTeams();
+            GameManager.setPhase(SETUP);
+            GameManager.setBeforeGamerules();
+            TeamUtils.createTeams();
         });
         Events.ON_LOBBY.addListener(v -> {
-            GameManager.INSTANCE.setCurrentPhase(LOBBY);
-            GameManager.INSTANCE.generateLobby();
+            GameManager.setPhase(LOBBY);
+            GameManager.generateLobby();
         });
         Events.ON_READY.addListener(v -> {
-            GameManager.INSTANCE.setCurrentPhase(READY);
+            GameManager.setPhase(READY);
             TeamUtils.unReadyAllTeams();
             TeamUtils.sendReadyMessage();
         });
         Events.ON_START.addListener(v -> {
-            GameManager.INSTANCE.setCurrentPhase(START);
-            GameManager.INSTANCE.startCountDown();
+            GameManager.setPhase(START);
+            GameManager.startCountDown();
         });
         Events.ON_ACTIVE.addListener(v -> {
-            GameManager.INSTANCE.setCurrentPhase(ACTIVE);
-            GameManager.INSTANCE.startGracePeriod();
-            GameManager.INSTANCE.setUHCGamerules();
+            GameManager.setPhase(ACTIVE);
+            GameManager.startGracePeriod();
+            GameManager.setUHCGamerules();
             PlayerUtils.forceUpdateGlowing();
         });
         Events.ON_END.addListener(v -> {
-            GameManager.INSTANCE.setCurrentPhase(END);
-            GameManager.INSTANCE.endUHC();
+            GameManager.setPhase(END);
+            GameManager.endUHC();
             PlayerUtils.forceUpdateGlowing();
         });
     }

@@ -17,11 +17,6 @@
   "license": "MIT",
   "icon": "assets/uhcmod/icon.png",
   "environment": "*",
-  "entrypoints": {
-    "main": [
-      "net.casualuhc.uhcmod.UHCMod"
-    ]
-  },
   "mixins": [
     "uhcmod.mixins.json"
   ],

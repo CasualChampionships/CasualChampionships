@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.managers.TeamManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.casualuhc.uhcmod.utils.Event.Events;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSetting;
@@ -19,12 +18,11 @@ import net.minecraft.command.argument.TeamArgumentType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-
-import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -35,7 +33,7 @@ public class UHCCommand {
 			.then(literal("team")
 				.then(literal("reload")
 					.executes(context -> {
-						TeamManager.createTeams();
+						TeamUtils.createTeams();
 						return 1;
 					})
 				)
@@ -48,7 +46,7 @@ public class UHCCommand {
 				)
 				.then(literal("download")
 					.executes(context -> {
-						UHCDataBase.INSTANCE.downloadTeamFromDataBase();
+						UHCDataBase.downloadTeamFromDataBase();
 						return 1;
 					})
 				)
@@ -56,14 +54,15 @@ public class UHCCommand {
 			.then(literal("phase")
 				.then(literal("cancel")
 					.executes(context -> {
-						GameManager.INSTANCE.setCurrentPhase(Phase.LOBBY);
+						GameManager.setPhase(Phase.LOBBY);
 						return 1;
 					})
 				)
 				.then(literal("current")
 					.executes(context -> {
-						ServerPlayerEntity player = context.getSource().getPlayer();
-						player.sendMessage(Text.literal("Current phase is: %d".formatted(GameManager.INSTANCE.getCurrentPhase().ordinal())), false);
+						context.getSource().sendFeedback(
+							Text.literal("Current phase is: %d".formatted(GameManager.getPhase().ordinal())), false
+						);
 						return 1;
 					})
 				)
@@ -93,9 +92,9 @@ public class UHCCommand {
 				)
 				.then(literal("quiet")
 					.executes(context -> {
-						GameManager.INSTANCE.setCurrentPhase(Phase.ACTIVE);
+						GameManager.setPhase(Phase.ACTIVE);
 						Events.GRACE_PERIOD_FINISH.trigger();
-						GameManager.INSTANCE.setUHCGamerules();
+						GameManager.setUHCGamerules();
 						return 1;
 					})
 				)
@@ -108,7 +107,7 @@ public class UHCCommand {
 			)
 			.then(literal("config")
 				.executes(context -> {
-					context.getSource().getPlayer().openHandledScreen(GameSettings.createScreenFactory(0));
+					context.getSource().getPlayerOrThrow().openHandledScreen(GameSettings.createScreenFactory(0));
 					return 1;
 				})
 				.then(literal("worldborder")
@@ -116,11 +115,11 @@ public class UHCCommand {
 					.then(getWorldBorderStagesEnd())
 					.then(literal("stop")
 						.executes(context -> {
-							if (!GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
+							if (!GameManager.isPhase(Phase.ACTIVE)) {
 								throw CANNOT_MODIFY_WB;
 							}
 							context.getSource().getServer().getWorlds().forEach(serverWorld -> serverWorld.getWorldBorder().setSize(serverWorld.getWorldBorder().getSize()));
-							context.getSource().sendFeedback(Text.literal("Border stopped"), false);
+							context.getSource().sendFeedback(Text.literal("Border Stopped"), false);
 							return 1;
 						})
 					)
@@ -188,7 +187,7 @@ public class UHCCommand {
 		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
 			commandBuilder.then(literal(stage.name())
 				.executes(context -> {
-					if (GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
+					if (GameManager.isPhase(Phase.ACTIVE)) {
 						WorldBorderManager.moveWorldBorders(stage.getStartSize(), 0);
 						WorldBorderManager.startWorldBorders();
 						return 1;
@@ -205,7 +204,7 @@ public class UHCCommand {
 		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
 			commandBuilder.then(literal(stage.name())
 				.executes(context -> {
-					if (GameManager.INSTANCE.isPhase(Phase.ACTIVE)) {
+					if (GameManager.isPhase(Phase.ACTIVE)) {
 						WorldBorderManager.moveWorldBorders(stage.getEndSize(), 0);
 						WorldBorderManager.startWorldBorders();
 						return 1;
@@ -219,14 +218,17 @@ public class UHCCommand {
 
 	private static LiteralArgumentBuilder<ServerCommandSource> getGameRuleCommand() {
 		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("gamerule");
-		for (Map.Entry<String, GameSetting<?>> gameSettingEntry : GameSettings.gameSettingMap.entrySet()) {
-			String settingName = gameSettingEntry.getKey();
+
+		for (GameSetting<?> setting : GameSettings.RULES.values()) {
+			String settingName = setting.getName().replaceAll(" ", "_").toLowerCase();
 			LiteralArgumentBuilder<ServerCommandSource> commandArgument = literal(settingName);
-			for (GameSetting.NamedItemStack argument : gameSettingEntry.getValue().getOptions().keySet()) {
-				commandArgument.then(literal(argument.name).executes(context -> {
-					ServerPlayerEntity playerEntity = context.getSource().getPlayer();
-					gameSettingEntry.getValue().setValueFromOption(argument.name);
-					playerEntity.sendMessage(Text.literal("Set %s for %s".formatted(argument, settingName)).formatted(Formatting.GREEN), false);
+			for (ItemStack optionStack : setting.getOptions().keySet()) {
+				String optionName = optionStack.getName().getString().replaceAll(" ", "_").toLowerCase();
+				commandArgument.then(literal(optionName).executes(context -> {
+					setting.setValueFromOption(optionStack);
+					context.getSource().sendFeedback(
+						Text.literal("Set %s for %s".formatted(optionName, settingName)).formatted(Formatting.GREEN), false
+					);
 					return 1;
 				}));
 			}

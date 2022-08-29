@@ -19,7 +19,7 @@ public class Event<T> {
 
 	public void trigger(T eventValue) {
 		// Make sure everything is on main thread
-		UHCMod.UHC_SERVER.execute(() -> {
+		UHCMod.SERVER.execute(() -> {
 			this.callbacks.forEach(c -> c.accept(eventValue));
 		});
 	}
