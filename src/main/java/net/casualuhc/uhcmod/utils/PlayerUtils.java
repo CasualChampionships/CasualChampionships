@@ -2,9 +2,10 @@ package net.casualuhc.uhcmod.utils;
 
 import io.netty.buffer.Unpooled;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.Data.PlayerExtension;
+import net.casualuhc.uhcmod.utils.Event.EventHandler;
+import net.casualuhc.uhcmod.utils.Event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.minecraft.block.Blocks;
@@ -25,7 +26,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
@@ -50,11 +50,17 @@ public class PlayerUtils {
 	public static boolean displayTab = true;
 
 	static {
-		Events.ON_PLAYER_DEATH.addListener(PlayerUtils::handlePlayerDeath);
+		EventHandler.register(new MinecraftEvents() {
+			@Override
+			public void onPlayerTick(ServerPlayerEntity player) {
+				updateInfo(player);
+				updateWorldBorderArrow(player);
+			}
 
-		Events.ON_PLAYER_TICK.addListener(player -> {
-			updateInfo(player);
-			updateWorldBorderArrow(player);
+			@Override
+			public void onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+				PlayerUtils.handlePlayerDeath(player, source);
+			}
 		});
 	}
 
@@ -62,8 +68,7 @@ public class PlayerUtils {
 		forEveryPlayer(PlayerUtils::forceUpdateGlowingFlag);
 	}
 
-	private static void handlePlayerDeath(Pair<ServerPlayerEntity, DamageSource> pair) {
-		ServerPlayerEntity player = pair.getLeft();
+	private static void handlePlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		if (GameManager.isPhase(Phase.ACTIVE)) {
 			UHCDataBase.updateStats(player);
 			if (GameSettings.PLAYER_DROPS_GAPPLE_ON_DEATH.getValue()) {
@@ -71,7 +76,7 @@ public class PlayerUtils {
 			}
 			if (GameSettings.PLAYER_DROPS_HEAD_ON_DEATH.getValue()) {
 				ItemStack playerHead = generatePlayerHead(player.getEntityName());
-				if (!(pair.getRight().getAttacker() instanceof ServerPlayerEntity attacker) || !attacker.getInventory().insertStack(playerHead)) {
+				if (!(source.getAttacker() instanceof ServerPlayerEntity attacker) || !attacker.getInventory().insertStack(playerHead)) {
 					player.dropItem(playerHead, true, false);
 				}
 			}
@@ -88,12 +93,19 @@ public class PlayerUtils {
 				});
 			}
 			if (TeamUtils.isLastTeam()) {
-				Events.ON_END.trigger();
+				EventHandler.onEnd();
 			}
 		}
 		if (GameManager.isPhase(Phase.END)) {
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
 		}
+		sendWorldBorderPackets(player, player.world.getWorldBorder());
+	}
+
+	public static ItemStack generateGoldenHead() {
+		ItemStack stack = generatePlayerHead("PhantomTupac");
+		stack.setCustomName(Text.literal("Golden Head").formatted(Formatting.GOLD).styled(s -> s.withItalic(false)));
+		return stack;
 	}
 
 	public static ItemStack generatePlayerHead(String playerName) {
@@ -119,23 +131,17 @@ public class PlayerUtils {
 			));
 		}
 
-		ServerPlayerMixinInterface Iplayer = (ServerPlayerMixinInterface) playerEntity;
+		PlayerExtension extension = PlayerExtension.get(playerEntity);
 		World entityWorld = playerEntity.getEntityWorld();
 		WorldBorder border = entityWorld.getWorldBorder();
 
 		// Update location on action bar
-		if (Iplayer.getCoordsBoolean()) {
-			switch (playerEntity.getMovementDirection().getHorizontal()) {
-				case 0 -> Iplayer.setDirection(Direction.SOUTH);
-				case 1 -> Iplayer.setDirection(Direction.WEST);
-				case 2 -> Iplayer.setDirection(Direction.NORTH);
-				case 3 -> Iplayer.setDirection(Direction.EAST);
-			}
+		if (extension.displayCoords) {
 			String locationInfo = "(%d, %d, %d) | Direction: %s | Distance to WB: %d | WB radius: %d".formatted(
 				playerEntity.getBlockX(),
 				playerEntity.getBlockY(),
 				playerEntity.getBlockZ(),
-				Iplayer.getDirection(),
+				playerEntity.getHorizontalFacing(),
 				((int) border.getDistanceInsideBorder(playerEntity)),
 				((int) border.getSize() / 2)
 			);
@@ -146,9 +152,8 @@ public class PlayerUtils {
 
 	// By Kman
 	private static void updateWorldBorderArrow(ServerPlayerEntity playerEntity) {
-		ServerPlayerMixinInterface Iplayer = (ServerPlayerMixinInterface) playerEntity;
+		PlayerExtension playerExtension = PlayerExtension.get(playerEntity);
 		World entityWorld = playerEntity.getEntityWorld();
-		WorldBorder Iborder = Iplayer.getWorldBorder();
 		WorldBorder border = entityWorld.getWorldBorder();
 
 		double playerX = playerEntity.getX();
@@ -157,86 +162,76 @@ public class PlayerUtils {
 		int playerBlockX = playerEntity.getBlockX();
 		int playerBlockZ = playerEntity.getBlockZ();
 
-		if (!playerEntity.isSpectator()) {
-			// Checking to see if the players is behind the world boarder
-			if (border.getDistanceInsideBorder(playerEntity) + 0.2 < 0) {
-				// Setting some pre-stuff
-				Iplayer.setAlready(true);
-				Iplayer.setTime(Iplayer.getTime() + 1);
-				int bottomBlockY = 0;
-				// Trying to get the first non air block to put the arrow on to make it look nicer if they are jumping
-				for (int y = playerEntity.getBlockY(); y > 0; y--) {
-					if (!entityWorld.getBlockState(new BlockPos(playerBlockX, y, playerBlockZ)).equals(Blocks.AIR.getDefaultState())) {
-						bottomBlockY = y + 1;
-						break;
-					}
+		if (playerEntity.isSpectator()) {
+			return;
+		}
+
+		// Checking to see if the players is behind the world boarder
+		if (border.getDistanceInsideBorder(playerEntity) + 0.2 < 0) {
+			int bottomBlockY = 0;
+			// Trying to get the first non-air block to put the arrow on to make it look nicer if they are jumping
+			for (int y = playerEntity.getBlockY(); y > 0; y--) {
+				if (!entityWorld.getBlockState(new BlockPos(playerBlockX, y, playerBlockZ)).equals(Blocks.AIR.getDefaultState())) {
+					bottomBlockY = y + 1;
+					break;
 				}
-				// Checking to see the players is closer the wb on the x than the z
-				if (playerX * playerX >= playerZ * playerZ) {
-					// Checking to see if the player is closer to the west world border -- handing particle stuff (arrow)
-					if (playerX - border.getBoundWest() > border.getBoundEast() - playerX) {
-						Iplayer.getWorldBorder().setCenter(border.getSize(), border.getCenterZ());
-						Iplayer.setDirection(Direction.WEST);
-
-						for (int x = 0; x < 15; x++) {
-							sendParticles(playerEntity, playerBlockX + 0.2 + (float) x / 45, bottomBlockY, playerBlockZ + 0.5 + (float) x / 30);
-							sendParticles(playerEntity, playerBlockX + 0.2 + (float) x / 45, bottomBlockY, playerBlockZ + 0.5 - (float) x / 30);
-							sendParticles(playerEntity, playerBlockX + 0.2 + (float) x / 20, bottomBlockY, playerBlockZ + 0.5);
-						}
-						// Checking to see if the player is closer to the east world border -- handing particle stuff (arrow)
-					} else {
-						Iplayer.getWorldBorder().setCenter(-1 * border.getSize(), border.getCenterZ());
-						Iplayer.setDirection(Direction.EAST);
-						for (int x = 0; x < 15; x++) {
-							sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 45, bottomBlockY, playerBlockZ + 0.5 + (float) x / 30);
-							sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 45, bottomBlockY, playerBlockZ + 0.5 - (float) x / 30);
-							sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 20, bottomBlockY, playerBlockZ + 0.5);
-						}
-					}
-				} else {
-					// Checking to see if the player is closer to the north world border -- handing particle stuff (arrow)
-					if (playerZ - border.getBoundNorth() > border.getBoundSouth() - playerZ) {
-						Iplayer.getWorldBorder().setCenter(border.getCenterX(), border.getSize());
-						Iplayer.setDirection(Direction.NORTH);
-
-						for (int x = 0; x < 15; x++) {
-							sendParticles(playerEntity, playerBlockX + 0.5 + (float) x / 30, bottomBlockY, playerBlockZ + 0.2 + (float) x / 45);
-							sendParticles(playerEntity, playerBlockX + 0.5 - (float) x / 30, bottomBlockY, playerBlockZ + 0.2 + (float) x / 45);
-							sendParticles(playerEntity, playerBlockX + 0.5, bottomBlockY, playerBlockZ + 0.2 + (float) x / 20);
-						}
-						// Checking to see if the player is closer to the south world border -- handing particle stuff (arrow)
-					} else {
-						Iplayer.getWorldBorder().setCenter(border.getCenterX(), -1 * border.getSize());
-						Iplayer.setDirection(Direction.SOUTH);
-						for (int x = 0; x < 15; x++) {
-							sendParticles(playerEntity, playerBlockX + 0.5 + (float) x / 30, bottomBlockY, playerBlockZ + 0.8 - (float) x / 45);
-							sendParticles(playerEntity, playerBlockX + 0.5 - (float) x / 30, bottomBlockY, playerBlockZ + 0.8 - (float) x / 45);
-							sendParticles(playerEntity, playerBlockX + 0.5, bottomBlockY, playerBlockZ + 0.8 - (float) x / 20);
-						}
-					}
-				}
-				// Sending fake world border packets to the player
-				Iplayer.getWorldBorder().setSize(border.getSize() + 1);
-
-				sendWorldBorderPackets(playerEntity, Iborder);
-
-				// The big title and subtitle msg packets -- sent every 100 game ticks
-				if (Iplayer.getTime() % 100 == 0) {
-					MutableText title = Text.literal("§cYou're outside the border!");
-					MutableText subTitle = Text.literal("§cTravel " + "§a" + Iplayer.getDirection() + " §cto get to safety!");
-					playerEntity.networkHandler.sendPacket(new TitleS2CPacket(title));
-					playerEntity.networkHandler.sendPacket(new SubtitleS2CPacket(subTitle));
-				}
-				// The player is within the world border so we sent the correct packets one time to remove the fake world border
-			} else if (Iplayer.getAlready()) {
-				Iplayer.setAlready(false);
-				Iplayer.setTime(99);
-				sendWorldBorderPackets(playerEntity, playerEntity.world.getWorldBorder());
 			}
-			// The edge case where the player dies from the world border and is put into spectator mode. Sends correct world border packet one time
-		} else if (Iplayer.getAlready()) {
-			Iplayer.setAlready(false);
-			Iplayer.setTime(99);
+			Direction direction;
+			// Checking to see the players is closer the wb on the x than the z
+			if (playerX * playerX >= playerZ * playerZ) {
+				// Checking to see if the player is closer to the west world border -- handing particle stuff (arrow)
+				if (playerX - border.getBoundWest() > border.getBoundEast() - playerX) {
+					playerExtension.worldBorder.setCenter(border.getSize(), border.getCenterZ());
+					direction = Direction.WEST;
+
+					for (int x = 0; x < 15; x++) {
+						sendParticles(playerEntity, playerBlockX + 0.2 + (float) x / 45, bottomBlockY, playerBlockZ + 0.5 + (float) x / 30);
+						sendParticles(playerEntity, playerBlockX + 0.2 + (float) x / 45, bottomBlockY, playerBlockZ + 0.5 - (float) x / 30);
+						sendParticles(playerEntity, playerBlockX + 0.2 + (float) x / 20, bottomBlockY, playerBlockZ + 0.5);
+					}
+					// Checking to see if the player is closer to the east world border -- handing particle stuff (arrow)
+				} else {
+					playerExtension.worldBorder.setCenter(-1 * border.getSize(), border.getCenterZ());
+					direction = Direction.EAST;
+					for (int x = 0; x < 15; x++) {
+						sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 45, bottomBlockY, playerBlockZ + 0.5 + (float) x / 30);
+						sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 45, bottomBlockY, playerBlockZ + 0.5 - (float) x / 30);
+						sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 20, bottomBlockY, playerBlockZ + 0.5);
+					}
+				}
+			} else {
+				// Checking to see if the player is closer to the north world border -- handing particle stuff (arrow)
+				if (playerZ - border.getBoundNorth() > border.getBoundSouth() - playerZ) {
+					playerExtension.worldBorder.setCenter(border.getCenterX(), border.getSize());
+					direction = Direction.NORTH;
+
+					for (int x = 0; x < 15; x++) {
+						sendParticles(playerEntity, playerBlockX + 0.5 + (float) x / 30, bottomBlockY, playerBlockZ + 0.2 + (float) x / 45);
+						sendParticles(playerEntity, playerBlockX + 0.5 - (float) x / 30, bottomBlockY, playerBlockZ + 0.2 + (float) x / 45);
+						sendParticles(playerEntity, playerBlockX + 0.5, bottomBlockY, playerBlockZ + 0.2 + (float) x / 20);
+					}
+					// Checking to see if the player is closer to the south world border -- handing particle stuff (arrow)
+				} else {
+					playerExtension.worldBorder.setCenter(border.getCenterX(), -1 * border.getSize());
+					direction = Direction.SOUTH;
+					for (int x = 0; x < 15; x++) {
+						sendParticles(playerEntity, playerBlockX + 0.5 + (float) x / 30, bottomBlockY, playerBlockZ + 0.8 - (float) x / 45);
+						sendParticles(playerEntity, playerBlockX + 0.5 - (float) x / 30, bottomBlockY, playerBlockZ + 0.8 - (float) x / 45);
+						sendParticles(playerEntity, playerBlockX + 0.5, bottomBlockY, playerBlockZ + 0.8 - (float) x / 20);
+					}
+				}
+			}
+			// Sending fake world border packets to the player
+			playerExtension.worldBorder.setSize(border.getSize() + 1);
+			sendWorldBorderPackets(playerEntity, playerExtension.worldBorder);
+
+			// The big title and subtitle msg packets -- sent every 100 game ticks
+			if (UHCMod.SERVER.getTicks() % 100 == 0) {
+				MutableText title = Text.literal("You're outside the border!").formatted(Formatting.RED);
+				MutableText subTitle = Text.literal("§cTravel §a" + direction + " §cto get to safety!");
+				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(title));
+				playerEntity.networkHandler.sendPacket(new SubtitleS2CPacket(subTitle));
+			}
 		}
 	}
 
@@ -309,7 +304,7 @@ public class PlayerUtils {
 		if (!PlayerUtils.isPlayerSurvival(glowingPlayer)) {
 			return packet;
 		}
-		if (!((ServerPlayerMixinInterface) observingPlayer).getGlowingBoolean()) {
+		if (!PlayerExtension.get(observingPlayer).shouldGlow) {
 			return packet;
 		}
 

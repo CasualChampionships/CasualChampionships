@@ -62,15 +62,16 @@ public class UHCDataBase {
 		if (hasMongo()) {
 			EXECUTOR.execute(() -> {
 				Bson filter = eq("name", name);
-				MongoCursor<Document> cursor = PLAYER_STATS.find(filter).cursor();
-				boolean hasDocument = cursor.hasNext();
-				Document document = hasDocument ? cursor.next() : createDefaultStat(name);
-				document.replace(stat.name, newValue);
-				if (hasDocument) {
-					PLAYER_STATS.replaceOne(filter, document);
-					return;
+				try (MongoCursor<Document> cursor = PLAYER_STATS.find(filter).cursor()) {
+					boolean hasDocument = cursor.hasNext();
+					Document document = hasDocument ? cursor.next() : createDefaultStat(name);
+					document.replace(stat.name, newValue);
+					if (hasDocument) {
+						PLAYER_STATS.replaceOne(filter, document);
+						return;
+					}
+					PLAYER_STATS.insertOne(document);
 				}
-				PLAYER_STATS.insertOne(document);
 			});
 		}
 	}
@@ -84,21 +85,22 @@ public class UHCDataBase {
 				for (Document document : PLAYER_STATS.find()) {
 					String name = document.getString("name");
 					Bson filter = eq("name", name);
-					MongoCursor<Document> totalPlayer = COMBINED_STATS.find(filter).cursor();
-					if (!totalPlayer.hasNext()) {
-						COMBINED_STATS.insertOne(document);
-						continue;
-					}
-					Document totalPlayerDocument = totalPlayer.next();
-					for (UHCStat stat : UHCStat.values()) {
-						int statValue = document.getInteger(stat.name, 0);
-						if (statValue <= 0) {
+					try (MongoCursor<Document> totalPlayer = COMBINED_STATS.find(filter).cursor()) {
+						if (!totalPlayer.hasNext()) {
+							COMBINED_STATS.insertOne(document);
 							continue;
 						}
-						int totalStatValue = totalPlayerDocument.getInteger(stat.name, 0) + statValue;
-						totalPlayerDocument.replace(stat.name, totalStatValue);
+						Document totalPlayerDocument = totalPlayer.next();
+						for (UHCStat stat : UHCStat.values()) {
+							int statValue = document.getInteger(stat.name, 0);
+							if (statValue <= 0) {
+								continue;
+							}
+							int totalStatValue = totalPlayerDocument.getInteger(stat.name, 0) + statValue;
+							totalPlayerDocument.replace(stat.name, totalStatValue);
+						}
+						COMBINED_STATS.replaceOne(filter, totalPlayerDocument);
 					}
-					COMBINED_STATS.replaceOne(filter, totalPlayerDocument);
 				}
 			});
 		}
@@ -141,15 +143,16 @@ public class UHCDataBase {
 		if (hasMongo()) {
 			EXECUTOR.execute(() -> {
 				Bson filter = eq("name", teamName);
-				MongoCursor<Document> cursor = TEAM_CONFIG.find(filter).cursor();
-				if (!cursor.hasNext()) {
-					UHCMod.LOGGER.error("Winning team cannot be found");
-					return;
+				try (MongoCursor<Document> cursor = TEAM_CONFIG.find(filter).cursor()) {
+					if (!cursor.hasNext()) {
+						UHCMod.LOGGER.error("Winning team cannot be found");
+						return;
+					}
+					Document document = cursor.next();
+					int currentWins = document.getInteger("wins");
+					document.replace("wins", currentWins + 1);
+					TEAM_CONFIG.replaceOne(filter, document);
 				}
-				Document document = cursor.next();
-				int currentWins = document.getInteger("wins");
-				document.replace("wins", currentWins + 1);
-				TEAM_CONFIG.replaceOne(filter, document);
 			});
 		}
 	}

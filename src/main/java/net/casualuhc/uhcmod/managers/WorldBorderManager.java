@@ -1,7 +1,8 @@
 package net.casualuhc.uhcmod.managers;
 
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.Event.EventHandler;
+import net.casualuhc.uhcmod.utils.Event.UHCEvents;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.Scheduler;
@@ -12,31 +13,36 @@ public class WorldBorderManager {
 	private static final MinecraftServer SERVER = UHCMod.SERVER;
 
 	static {
-		Events.GRACE_PERIOD_FINISH.addListener(v -> {
-			GameSettings.PVP.setValue(true);
-			startWorldBorders();
-		});
-
-		Events.WORLD_BORDER_FINISH_SHRINKING.addListener(v -> {
-			Stage nextStage = GameSettings.WORLD_BORDER_STAGE.getValue().getNextStage();
-			if (nextStage == null || !GameManager.isPhase(Phase.ACTIVE)) {
-				return;
+		EventHandler.register(new UHCEvents() {
+			@Override
+			public void onGracePeriodEnd() {
+				GameSettings.PVP.setValue(true);
+				startWorldBorders();
 			}
 
-			GameSettings.WORLD_BORDER_STAGE.setValueQuietly(nextStage);
-			if (nextStage == Stage.END) {
-				Events.WORLD_BORDER_COMPLETE.trigger();
-				return;
+			@Override
+			public void onWorldBorderFinishShrinking() {
+				Stage nextStage = GameSettings.WORLD_BORDER_STAGE.getValue().getNextStage();
+				if (nextStage == null || !GameManager.isPhase(Phase.ACTIVE)) {
+					return;
+				}
+
+				GameSettings.WORLD_BORDER_STAGE.setValueQuietly(nextStage);
+				if (nextStage == Stage.END) {
+					EventHandler.onWorldBorderComplete();
+					return;
+				}
+
+				GameManager.schedulePhaseTask(Scheduler.secondsToTicks(10), () -> {
+					double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
+					moveWorldBorders(nextStage.getEndSize(), nextStage.getTime(size));
+				});
 			}
 
-			GameManager.schedulePhaseTask(Scheduler.secondsToTicks(10), () -> {
-				double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
-				moveWorldBorders(nextStage.getEndSize(), nextStage.getTime(size));
-			});
-		});
-
-		Events.WORLD_BORDER_COMPLETE.addListener(v -> {
-			GameManager.worldBorderComplete();
+			@Override
+			public void onWorldBorderComplete() {
+				GameManager.worldBorderComplete();
+			}
 		});
 	}
 
@@ -52,7 +58,7 @@ public class WorldBorderManager {
 
 		GameSettings.WORLD_BORDER_STAGE.setValueQuietly(stage);
 		if (stage == Stage.END) {
-			Events.WORLD_BORDER_COMPLETE.trigger();
+			EventHandler.onWorldBorderComplete();
 			return;
 		}
 

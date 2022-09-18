@@ -4,11 +4,11 @@
   "package": "net.casualuhc.uhcmod.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AbstractTeamMixin",
     "BowItemMixin",
     "BrewingStandBlockEntityMixin",
     "CommandManagerMixin",
     "IntRuleMixin",
+    "KillCommandMixin",
     "LeavesBlockMixin",
     "MinecraftDedicatedServerMixin",
     "MinecraftServerMixin",

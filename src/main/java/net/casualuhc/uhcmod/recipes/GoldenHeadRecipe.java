@@ -34,9 +34,7 @@ public class GoldenHeadRecipe extends SpecialCraftingRecipe {
 
 	@Override
 	public ItemStack craft(CraftingInventory inventory) {
-		ItemStack stack = PlayerUtils.generatePlayerHead("PhantomTupac");
-		stack.setCustomName(Text.literal("Golden Head").formatted(Formatting.GOLD).styled(s -> s.withItalic(false)));
-		return stack;
+		return PlayerUtils.generateGoldenHead();
 	}
 
 	@Override

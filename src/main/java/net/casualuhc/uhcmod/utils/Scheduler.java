@@ -1,7 +1,10 @@
 package net.casualuhc.uhcmod.utils;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.Event.EventHandler;
+import net.casualuhc.uhcmod.utils.Event.MinecraftEvents;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -11,14 +14,19 @@ public class Scheduler {
 	private static int tickCount = 0;
 
 	static {
-		Events.ON_SERVER_TICK.addListener(server -> {
-			Queue<Task> queue = TASKS.remove(tickCount++);
-			if (queue != null) {
-				queue.forEach(Task::run);
-				queue.clear();
+		EventHandler.register(new MinecraftEvents() {
+			@Override
+			public void onServerTick(MinecraftServer server) {
+				Queue<Task> queue = TASKS.remove(tickCount++);
+				if (queue != null) {
+					queue.forEach(Task::run);
+					queue.clear();
+				}
 			}
 		});
 	}
+
+	private Scheduler() { }
 
 	public static int minutesToTicks(int minutes) {
 		return secondsToTicks(minutes * 60);

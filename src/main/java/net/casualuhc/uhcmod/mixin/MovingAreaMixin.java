@@ -1,6 +1,6 @@
 package net.casualuhc.uhcmod.mixin;
 
-import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.Event.EventHandler;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,7 +25,7 @@ public abstract class MovingAreaMixin {
 	@Inject(method = "getAreaInstance", at = @At("HEAD"))
 	private void onGetInstance(CallbackInfoReturnable<WorldBorder.Area> cir) {
 		if (this.getSizeLerpTime() <= 0 && ++counter == 3) {
-			Events.WORLD_BORDER_FINISH_SHRINKING.trigger();
+			EventHandler.onWorldBorderFinishShrinking();
 			counter = 0;
 		}
 	}

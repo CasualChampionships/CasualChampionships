@@ -3,7 +3,7 @@ package net.casualuhc.uhcmod.mixin;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.features.UHCMessageDecorator;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.Event.EventHandler;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.minecraft.network.message.MessageDecorator;
 import net.minecraft.server.MinecraftServer;
@@ -29,7 +29,7 @@ public class MinecraftServerMixin {
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-        Events.ON_SERVER_TICK.trigger((MinecraftServer) (Object) this);
+        EventHandler.onServerTick((MinecraftServer) (Object) this);
     }
 
     @Inject(method = "shutdown", at = @At("TAIL"))

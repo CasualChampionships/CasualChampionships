@@ -1,6 +1,5 @@
 package net.casualuhc.uhcmod.utils.GameSetting;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.GameManager;
@@ -24,7 +23,6 @@ import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,23 +30,21 @@ import java.util.Map;
 public class GameSettings {
 	public static final Map<ItemStack, GameSetting<?>> RULES = new LinkedHashMap<>();
 
-	public static final GameSetting.DoubleGameSetting
-		WORLD_BORDER_SPEED,
-		HEALTH;
+	public static final GameSetting.DoubleGameSetting WORLD_BORDER_SPEED;
+	public static final GameSetting.DoubleGameSetting HEALTH;
 
-	public static final GameSetting.BooleanGameSetting
-		END_GAME_GLOW,
-		FRIENDLY_PLAYER_GLOW,
-		PLAYER_DROPS_GAPPLE_ON_DEATH,
-		FLOODGATE,
-		DISPLAY_TAB,
-		PVP,
-		OP_POTIONS,
-		BOW_COOLDOWN,
-		PLAYER_DROPS_HEAD_ON_DEATH;
+	public static final GameSetting.BooleanGameSetting END_GAME_GLOW;
+	public static final GameSetting.BooleanGameSetting FRIENDLY_PLAYER_GLOW;
+	public static final GameSetting.BooleanGameSetting PLAYER_DROPS_GAPPLE_ON_DEATH;
+	public static final GameSetting.BooleanGameSetting FLOODGATE;
+	public static final GameSetting.BooleanGameSetting DISPLAY_TAB;
+	public static final GameSetting.BooleanGameSetting PVP;
+	public static final GameSetting.BooleanGameSetting OP_POTIONS;
+	public static final GameSetting.BooleanGameSetting BOW_COOLDOWN;
+	public static final GameSetting.BooleanGameSetting PLAYER_DROPS_HEAD_ON_DEATH;
+	public static final GameSetting.BooleanGameSetting TESTING;
 
-	public static final GameSetting.EnumGameSetting<Stage>
-		WORLD_BORDER_STAGE;
+	public static final GameSetting.EnumGameSetting<Stage> WORLD_BORDER_STAGE;
 
 	static {
 		WORLD_BORDER_SPEED = new GameSetting.DoubleGameSetting(
@@ -127,6 +123,12 @@ public class GameSettings {
 			named(Items.PLAYER_HEAD, "Player Head Drops"),
 			getBooleanRuleOptions(),
 			true
+		);
+
+		TESTING = new GameSetting.BooleanGameSetting(
+			named(Items.REDSTONE_BLOCK, "Testing"),
+			getBooleanRuleOptions(),
+			false
 		);
 
 		WORLD_BORDER_STAGE = new GameSetting.EnumGameSetting<>(

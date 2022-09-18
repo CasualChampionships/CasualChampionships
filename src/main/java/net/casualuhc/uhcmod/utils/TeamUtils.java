@@ -4,8 +4,8 @@ import com.google.gson.*;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.interfaces.AbstractTeamMixinInterface;
-import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.Data.TeamExtension;
+import net.casualuhc.uhcmod.utils.Event.EventHandler;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.argument.EntityArgumentType;
@@ -135,7 +135,7 @@ public class TeamUtils {
 				return;
 			}
 		}
-		Events.ON_START.trigger();
+		EventHandler.onStart();
 	}
 
 	public static int forceAddPlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -205,19 +205,19 @@ public class TeamUtils {
 	}
 
 	public static boolean isEliminated(AbstractTeam team) {
-		return ((AbstractTeamMixinInterface) team).isEliminated();
+		return TeamExtension.get(team).isEliminated;
 	}
 
 	public static void setEliminated(AbstractTeam team, boolean eliminated) {
-		((AbstractTeamMixinInterface) team).setEliminated(eliminated);
+		TeamExtension.get(team).isEliminated = eliminated;
 	}
 
 	public static boolean isReady(AbstractTeam team) {
-		return ((AbstractTeamMixinInterface) team).isReady();
+		return TeamExtension.get(team).isReady;
 	}
 
 	public static void setReady(AbstractTeam team, boolean ready) {
-		((AbstractTeamMixinInterface) team).setReady(ready);
+		TeamExtension.get(team).isReady = ready;
 	}
 
 	private static void reloadTeams() {

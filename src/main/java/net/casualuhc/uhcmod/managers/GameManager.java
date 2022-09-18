@@ -2,9 +2,9 @@ package net.casualuhc.uhcmod.managers;
 
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.interfaces.IntRuleMixinInterface;
-import net.casualuhc.uhcmod.interfaces.ServerPlayerMixinInterface;
 import net.casualuhc.uhcmod.utils.*;
-import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.Data.PlayerExtension;
+import net.casualuhc.uhcmod.utils.Event.EventHandler;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
 import net.minecraft.block.Blocks;
@@ -99,7 +99,7 @@ public class GameManager {
 
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				if (!TeamUtils.shouldIgnoreTeam(playerEntity.getScoreboardTeam()) && !playerEntity.isSpectator()) {
-					((ServerPlayerMixinInterface) playerEntity).setCoordsBoolean(true);
+					PlayerExtension.get(playerEntity).displayCoords = true;
 					playerEntity.changeGameMode(GameMode.SURVIVAL);
 					playerEntity.sendMessage(Text.literal("You can disable the coordinates above your hotbar by using /coords"), false);
 					playerEntity.getInventory().clear();
@@ -118,7 +118,7 @@ public class GameManager {
 			}
 
 			server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
-			Events.ON_ACTIVE.trigger();
+			EventHandler.onActive();
 		});
 	}
 
@@ -145,7 +145,7 @@ public class GameManager {
 			});
 		});
 
-		schedule(minutesToTicks(10), () -> {
+		schedulePhaseTask(minutesToTicks(10), () -> {
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				playerEntity.sendMessage(
 					Text.literal("Grace Period is now over, PVP is enabled and world border has started! Good Luck!")
@@ -155,7 +155,7 @@ public class GameManager {
 				playerEntity.playSound(SoundEvents.ENTITY_ENDER_DRAGON_AMBIENT, SoundCategory.MASTER, 1.0F, 1.0F);
 			});
 
-			Events.GRACE_PERIOD_FINISH.trigger();
+			EventHandler.onGracePeriodEnd();
 		});
 	}
 

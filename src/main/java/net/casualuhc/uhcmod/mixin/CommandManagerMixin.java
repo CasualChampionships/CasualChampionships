@@ -28,5 +28,6 @@ public class CommandManagerMixin {
         UHCCommand.register(this.dispatcher);
         ReadyCommand.register(this.dispatcher);
         TeamGlowingCommand.register(this.dispatcher);
+        KitCommand.register(this.dispatcher);
     }
 }

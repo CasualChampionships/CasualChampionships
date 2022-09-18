@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
-import net.casualuhc.uhcmod.utils.Event.Events;
+import net.casualuhc.uhcmod.utils.Event.EventHandler;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSetting;
 import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
 import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
@@ -69,31 +69,31 @@ public class UHCCommand {
 			)
 			.then(literal("setup")
 				.executes(context -> {
-					Events.ON_SETUP.trigger();
+					EventHandler.onSetup();
 					return 1;
 				})
 			)
 			.then(literal("lobby")
 				.executes(context -> {
-					Events.ON_LOBBY.trigger();
+					EventHandler.onLobby();
 					return 1;
 				})
 			)
 			.then(literal("start")
 				.executes(context -> {
-					Events.ON_READY.trigger();
+					EventHandler.onReady();
 					return 1;
 				})
 				.then(literal("force")
 					.executes(context -> {
-						Events.ON_START.trigger();
+						EventHandler.onStart();
 						return 1;
 					})
 				)
 				.then(literal("quiet")
 					.executes(context -> {
 						GameManager.setPhase(Phase.ACTIVE);
-						Events.GRACE_PERIOD_FINISH.trigger();
+						EventHandler.onGracePeriodEnd();
 						GameManager.setUHCGamerules();
 						return 1;
 					})
@@ -101,7 +101,7 @@ public class UHCCommand {
 			)
 			.then(literal("endgame")
 				.executes(context -> {
-					Events.ON_END.trigger();
+					EventHandler.onEnd();
 					return 1;
 				})
 			)
