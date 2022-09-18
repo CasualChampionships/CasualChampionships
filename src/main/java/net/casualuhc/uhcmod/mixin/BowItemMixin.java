@@ -1,6 +1,6 @@
 package net.casualuhc.uhcmod.mixin;
 
-import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
+import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;

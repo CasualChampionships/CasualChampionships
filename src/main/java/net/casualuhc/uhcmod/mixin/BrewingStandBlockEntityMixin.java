@@ -1,6 +1,6 @@
 package net.casualuhc.uhcmod.mixin;
 
-import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
+import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.minecraft.block.entity.BrewingStandBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;

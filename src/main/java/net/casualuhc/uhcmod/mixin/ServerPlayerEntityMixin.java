@@ -1,19 +1,44 @@
 package net.casualuhc.uhcmod.mixin;
 
-import net.casualuhc.uhcmod.utils.Event.EventHandler;
-import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
+import com.mojang.authlib.GameProfile;
+import net.casualuhc.uhcmod.features.UHCAdvancements;
+import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.utils.event.EventHandler;
+import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerEntity.class)
-public class ServerPlayerEntityMixin {
+public abstract class ServerPlayerEntityMixin extends PlayerEntity {
+    @Unique
+    private int halfHealthTicks = 0;
+
+    public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile, @Nullable PlayerPublicKey publicKey) {
+        super(world, pos, yaw, gameProfile, publicKey);
+    }
+
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
-        EventHandler.onPlayerTick((ServerPlayerEntity) (Object) this);
+        ServerPlayerEntity thisPlayer = (ServerPlayerEntity) (Object) this;
+        if (PlayerUtils.isPlayerPlayingInSurvival(thisPlayer) && this.getHealth() <= 1.0F) {
+            this.halfHealthTicks++;
+            if (this.halfHealthTicks == 1200) {
+                PlayerUtils.grantAdvancement(thisPlayer, UHCAdvancements.ON_THE_EDGE);
+            }
+        } else {
+            this.halfHealthTicks = 0;
+        }
+        EventHandler.onPlayerTick(thisPlayer);
     }
 
     @Inject(method = "onDeath", at = @At("HEAD"))

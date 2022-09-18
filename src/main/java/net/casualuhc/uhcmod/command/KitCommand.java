@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
+import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;

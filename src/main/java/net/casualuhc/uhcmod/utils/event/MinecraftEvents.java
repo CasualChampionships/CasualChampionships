@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.utils.Event;
+package net.casualuhc.uhcmod.utils.event;
 
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.MinecraftServer;

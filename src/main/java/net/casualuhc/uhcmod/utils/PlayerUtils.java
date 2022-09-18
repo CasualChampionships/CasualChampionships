@@ -2,12 +2,16 @@ package net.casualuhc.uhcmod.utils;
 
 import io.netty.buffer.Unpooled;
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.utils.Data.PlayerExtension;
-import net.casualuhc.uhcmod.utils.Event.EventHandler;
-import net.casualuhc.uhcmod.utils.Event.MinecraftEvents;
-import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
-import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
+import net.casualuhc.uhcmod.utils.data.PlayerExtension;
+import net.casualuhc.uhcmod.utils.event.EventHandler;
+import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
+import net.casualuhc.uhcmod.utils.event.UHCEvents;
+import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
+import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
+import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
@@ -62,6 +66,13 @@ public class PlayerUtils {
 				PlayerUtils.handlePlayerDeath(player, source);
 			}
 		});
+		EventHandler.register(new UHCEvents() {
+			@Override
+			public void onStart() {
+				UHCMod.SERVER.getAdvancementLoader().getAdvancements().forEach(a -> forEveryPlayer(p -> revokeAdvancement(p, a)));
+				forEveryPlayer(p -> grantAdvancement(p, UHCAdvancements.ROOT));
+			}
+		});
 	}
 
 	public static void forceUpdateGlowing() {
@@ -70,13 +81,23 @@ public class PlayerUtils {
 
 	private static void handlePlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		if (GameManager.isPhase(Phase.ACTIVE)) {
+			if (GameManager.tryFirstDeath()) {
+				grantAdvancement(player, UHCAdvancements.EARLY_EXIT);
+			}
 			UHCDataBase.updateStats(player);
 			if (GameSettings.PLAYER_DROPS_GAPPLE_ON_DEATH.getValue()) {
 				player.dropItem(Items.GOLDEN_APPLE.getDefaultStack(), true, false);
 			}
 			if (GameSettings.PLAYER_DROPS_HEAD_ON_DEATH.getValue()) {
 				ItemStack playerHead = generatePlayerHead(player.getEntityName());
-				if (!(source.getAttacker() instanceof ServerPlayerEntity attacker) || !attacker.getInventory().insertStack(playerHead)) {
+				if (source.getAttacker() instanceof ServerPlayerEntity attacker) {
+					if (GameManager.tryFirstKill()) {
+						grantAdvancement(attacker, UHCAdvancements.FIRST_BLOOD);
+					}
+					if (!attacker.getInventory().insertStack(playerHead)) {
+						player.dropItem(playerHead, true, false);
+					}
+				} else {
 					player.dropItem(playerHead, true, false);
 				}
 			}
@@ -119,6 +140,24 @@ public class PlayerUtils {
 		compound.put("tag", playerData);
 
 		return ItemStack.fromNbt(compound);
+	}
+
+	public static void grantAdvancement(ServerPlayerEntity player, Advancement advancement) {
+		AdvancementProgress advancementProgress = player.getAdvancementTracker().getProgress(advancement);
+		if (!advancementProgress.isDone()) {
+			for (String string : advancementProgress.getUnobtainedCriteria()) {
+				player.getAdvancementTracker().grantCriterion(advancement, string);
+			}
+		}
+	}
+
+	public static void revokeAdvancement(ServerPlayerEntity player, Advancement advancement) {
+		AdvancementProgress advancementProgress = player.getAdvancementTracker().getProgress(advancement);
+		if (advancementProgress.isAnyObtained()) {
+			for (String string : advancementProgress.getObtainedCriteria()) {
+				player.getAdvancementTracker().revokeCriterion(advancement, string);
+			}
+		}
 	}
 
 	private static void updateInfo(ServerPlayerEntity playerEntity) {

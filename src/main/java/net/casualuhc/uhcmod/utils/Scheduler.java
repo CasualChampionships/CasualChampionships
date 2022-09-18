@@ -1,10 +1,9 @@
 package net.casualuhc.uhcmod.utils;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.casualuhc.uhcmod.utils.Event.EventHandler;
-import net.casualuhc.uhcmod.utils.Event.MinecraftEvents;
+import net.casualuhc.uhcmod.utils.event.EventHandler;
+import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.ArrayDeque;
 import java.util.Queue;

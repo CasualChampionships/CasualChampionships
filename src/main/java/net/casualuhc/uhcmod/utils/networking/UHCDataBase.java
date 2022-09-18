@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.utils.Networking;
+package net.casualuhc.uhcmod.utils.networking;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

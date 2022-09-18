@@ -1,7 +1,8 @@
 package net.casualuhc.uhcmod;
 
+import net.casualuhc.uhcmod.features.GoldenHeadRecipe;
+import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
-import net.casualuhc.uhcmod.recipes.GoldenHeadRecipe;
 import net.casualuhc.uhcmod.utils.Config;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.recipe.Recipe;
@@ -20,6 +21,7 @@ public class UHCMod {
     public static void onServerStart(MinecraftServer server) {
         SERVER = server;
         Config.noop();
+        UHCAdvancements.noop();
         WorldBorderManager.noop();
     }
 

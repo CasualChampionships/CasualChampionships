@@ -2,7 +2,7 @@ package net.casualuhc.uhcmod.mixin;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
+import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.KillCommand;
 import net.minecraft.server.command.ServerCommandSource;

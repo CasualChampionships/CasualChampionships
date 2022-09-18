@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.utils.GameSetting;
+package net.casualuhc.uhcmod.utils.gamesettings;
 
 import net.casualuhc.uhcmod.UHCMod;
 import net.minecraft.item.ItemStack;

@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.utils.Data;
+package net.casualuhc.uhcmod.utils.data;
 
 import net.minecraft.scoreboard.AbstractTeam;
 

@@ -1,8 +1,8 @@
 package net.casualuhc.uhcmod.utils;
 
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.utils.Event.EventHandler;
-import net.casualuhc.uhcmod.utils.Event.UHCEvents;
+import net.casualuhc.uhcmod.utils.event.EventHandler;
+import net.casualuhc.uhcmod.utils.event.UHCEvents;
 
 public enum Phase {
     NONE,
@@ -38,6 +38,7 @@ public enum Phase {
             @Override
             public void onStart() {
                 GameManager.setPhase(START);
+                GameManager.resetAdvancementTrackers();
                 GameManager.startCountDown();
             }
 

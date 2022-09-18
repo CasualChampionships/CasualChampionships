@@ -1,8 +1,9 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
+import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.Scheduler;
 import net.minecraft.entity.player.PlayerEntity;
@@ -10,23 +11,17 @@ import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin {
@@ -68,6 +63,12 @@ public abstract class ServerWorldMixin {
                 if (spectator != null) {
                     scoreboard.addPlayerToTeam(player.getEntityName(), spectator);
                 }
+            }
+            if (PlayerUtils.isPlayerPlayingInSurvival(player)) {
+                // Wait for player to load in
+                Scheduler.schedule(Scheduler.secondsToTicks(5), () -> {
+                    PlayerUtils.grantAdvancement(player, UHCAdvancements.COMBAT_LOGGER);
+                });
             }
         }
 

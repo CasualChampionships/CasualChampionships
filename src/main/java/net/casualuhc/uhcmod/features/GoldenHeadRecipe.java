@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.recipes;
+package net.casualuhc.uhcmod.features;
 
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.minecraft.inventory.CraftingInventory;
@@ -6,8 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 

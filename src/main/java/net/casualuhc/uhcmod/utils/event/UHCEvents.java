@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.utils.Event;
+package net.casualuhc.uhcmod.utils.event;
 
 public interface UHCEvents {
 	default void onSetup() { }

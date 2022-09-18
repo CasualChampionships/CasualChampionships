@@ -1,12 +1,13 @@
 package net.casualuhc.uhcmod.managers;
 
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.interfaces.IntRuleMixinInterface;
 import net.casualuhc.uhcmod.utils.*;
-import net.casualuhc.uhcmod.utils.Data.PlayerExtension;
-import net.casualuhc.uhcmod.utils.Event.EventHandler;
-import net.casualuhc.uhcmod.utils.GameSetting.GameSettings;
-import net.casualuhc.uhcmod.utils.Networking.UHCDataBase;
+import net.casualuhc.uhcmod.utils.data.PlayerExtension;
+import net.casualuhc.uhcmod.utils.event.EventHandler;
+import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
+import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -46,6 +47,9 @@ public class GameManager {
 	private static final List<Task> currentTasks = new LinkedList<>();
 	private static Phase phase = Phase.NONE;
 
+	private static boolean firstKill;
+	private static boolean firstDeath;
+
 	private GameManager() { }
 
 	public static boolean isReadyForPlayers() {
@@ -68,6 +72,27 @@ public class GameManager {
 
 	public static boolean isPhase(Phase checkPhase) {
 		return phase.equals(checkPhase);
+	}
+
+	public static void resetAdvancementTrackers() {
+		firstKill = true;
+		firstDeath = true;
+	}
+
+	public static boolean tryFirstKill() {
+		if (firstKill) {
+			firstKill = false;
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean tryFirstDeath() {
+		if (firstDeath) {
+			firstDeath = false;
+			return true;
+		}
+		return false;
 	}
 
 	public static void startCountDown() {
@@ -179,6 +204,13 @@ public class GameManager {
 			UHCMod.LOGGER.error("Last team was null!");
 			return;
 		}
+
+		PlayerUtils.forEveryPlayer(player -> {
+			if (player.getScoreboardTeam() == team) {
+				PlayerUtils.grantAdvancement(player, UHCAdvancements.WINNER);
+			}
+		});
+
 		UHCDataBase.incrementWinDataBase(team.getName());
 		PlayerUtils.forEveryPlayer(playerEntity -> {
 			playerEntity.setGlowing(false);
@@ -201,6 +233,7 @@ public class GameManager {
 				});
 			});
 		});
+
 	}
 
 	public static void generateLobby() {
@@ -229,7 +262,7 @@ public class GameManager {
 		gameRules.get(GameRules.DO_INSOMNIA).set(false, server);
 		gameRules.get(GameRules.DO_FIRE_TICK).set(false, server);
 		gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(false, server);
-		gameRules.get(GameRules.ANNOUNCE_ADVANCEMENTS).set(false, server);
+		gameRules.get(GameRules.ANNOUNCE_ADVANCEMENTS).set(true, server);
 		gameRules.get(GameRules.FALL_DAMAGE).set(false, server);
 		server.setDifficulty(Difficulty.PEACEFUL, true);
 		server.getOverworld().setTimeOfDay(6000); // 6000 = noon

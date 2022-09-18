@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.utils.GameSetting;
+package net.casualuhc.uhcmod.utils.gamesettings;
 
 import com.google.common.collect.ImmutableMap;
 import net.casualuhc.uhcmod.UHCMod;

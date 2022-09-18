@@ -4,6 +4,7 @@
   "package": "net.casualuhc.uhcmod.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AdvancementManagerMixin",
     "BowItemMixin",
     "BrewingStandBlockEntityMixin",
     "CommandManagerMixin",
@@ -13,6 +14,7 @@
     "MinecraftDedicatedServerMixin",
     "MinecraftServerMixin",
     "MovingAreaMixin",
+    "PlayerAdvancementTrackerMixin",
     "PlayerEntityMixin",
     "PlayerManagerMixin",
     "RecipeManagerMixin",
