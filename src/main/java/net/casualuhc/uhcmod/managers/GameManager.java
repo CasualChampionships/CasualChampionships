@@ -136,11 +136,16 @@ public class GameManager {
 
 			MinecraftServer server = UHCMod.SERVER;
 			ServerWorld world = server.getOverworld();
-			for (BlockPos pos : BlockPos.iterate(27, 240, 26, -32, 316, -31)) {
+			for (BlockPos pos : BlockPos.iterate(-32, 240, -31, 27, 316, 26)) {
 				BlockEntity blockEntity = world.getBlockEntity(pos);
 				Clearable.clear(blockEntity);
 				world.setBlockState(pos, Blocks.AIR.getDefaultState());
 			}
+			world.iterateEntities().forEach(e -> {
+				if (e.getScoreboardTags().contains("uhc")) {
+					e.kill();
+				}
+			});
 
 			server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
 			EventHandler.onActive();
@@ -264,6 +269,7 @@ public class GameManager {
 		gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(false, server);
 		gameRules.get(GameRules.ANNOUNCE_ADVANCEMENTS).set(true, server);
 		gameRules.get(GameRules.FALL_DAMAGE).set(false, server);
+		gameRules.get(GameRules.DROWNING_DAMAGE).set(false, server);
 		server.setDifficulty(Difficulty.PEACEFUL, true);
 		server.getOverworld().setTimeOfDay(6000); // 6000 = noon
 		server.getOverworld().setWeather(999999, 0, false, false);
@@ -312,6 +318,7 @@ public class GameManager {
 		gameRules.get(GameRules.DO_FIRE_TICK).set(true, server);
 		gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
 		gameRules.get(GameRules.FALL_DAMAGE).set(true, server);
+		gameRules.get(GameRules.DROWNING_DAMAGE).set(true, server);
 		server.setDifficulty(Difficulty.HARD, true);
 		((IntRuleMixinInterface) server.getGameRules().get(GameRules.RANDOM_TICK_SPEED)).setIntegerValue(3, server);
 		if (UHCMod.HAS_CARPET) {

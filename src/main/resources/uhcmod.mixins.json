@@ -18,6 +18,7 @@
     "PlayerEntityMixin",
     "PlayerManagerMixin",
     "RecipeManagerMixin",
+    "RedstoneWireBlockMixin",
     "ServerEntityManagerMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",

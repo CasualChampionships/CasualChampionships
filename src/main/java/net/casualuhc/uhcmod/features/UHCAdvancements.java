@@ -30,6 +30,7 @@ public class UHCAdvancements {
 	public static final Advancement COMBAT_LOGGER;
 	public static final Advancement ON_THE_EDGE;
 	public static final Advancement THATS_NOT_DUSTLESS;
+	public static final Advancement PARKOUR_MASTER;
 
 	static {
 		ROOT = Advancement.Builder.create().display(
@@ -115,7 +116,16 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/thats_not_dustless"));
 
-		UHC_ADVANCEMENTS = ImmutableSet.of(ROOT, FIRST_BLOOD, EARLY_EXIT, MOSTLY_HARMLESS, HEAVY_HITTER, WINNER, COMBAT_LOGGER, ON_THE_EDGE, THATS_NOT_DUSTLESS);
+		PARKOUR_MASTER = Advancement.Builder.create().parent(ROOT).display(
+			Items.LEATHER_BOOTS,
+			Text.literal("Parkour Master"),
+			Text.literal("Complete the parkour in the lobby"),
+			null,
+			AdvancementFrame.CHALLENGE,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/parkour_master"));
+
+		UHC_ADVANCEMENTS = ImmutableSet.of(ROOT, FIRST_BLOOD, EARLY_EXIT, MOSTLY_HARMLESS, HEAVY_HITTER, WINNER, COMBAT_LOGGER, ON_THE_EDGE, THATS_NOT_DUSTLESS, PARKOUR_MASTER);
 
 		EventHandler.register(new UHCEvents() {
 			@Override

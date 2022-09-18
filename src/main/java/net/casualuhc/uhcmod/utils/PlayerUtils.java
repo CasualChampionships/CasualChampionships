@@ -30,6 +30,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
@@ -47,6 +48,7 @@ public class PlayerUtils {
 	private static final MutableText HEADER = Text.literal("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
 	private static final MutableText FOOTER = Text.literal("\nServer Hosted By KiwiTech").formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
+	private static final ItemStack GOLDEN_HEAD = Util.make(generatePlayerHead("PhantomTupac"), i -> i.setCustomName(Text.literal("Golden Head").formatted(Formatting.GOLD).styled(s -> s.withItalic(false))));
 
 	private static final Map<String, Boolean> isPlayerPlayingMap = new HashMap<>();
 
@@ -124,9 +126,7 @@ public class PlayerUtils {
 	}
 
 	public static ItemStack generateGoldenHead() {
-		ItemStack stack = generatePlayerHead("PhantomTupac");
-		stack.setCustomName(Text.literal("Golden Head").formatted(Formatting.GOLD).styled(s -> s.withItalic(false)));
-		return stack;
+		return GOLDEN_HEAD.copy();
 	}
 
 	public static ItemStack generatePlayerHead(String playerName) {

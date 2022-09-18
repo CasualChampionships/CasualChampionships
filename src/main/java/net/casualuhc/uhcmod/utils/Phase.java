@@ -38,13 +38,13 @@ public enum Phase {
             @Override
             public void onStart() {
                 GameManager.setPhase(START);
-                GameManager.resetAdvancementTrackers();
                 GameManager.startCountDown();
             }
 
             @Override
             public void onActive() {
                 GameManager.setPhase(ACTIVE);
+                GameManager.resetAdvancementTrackers();
                 GameManager.startGracePeriod();
                 GameManager.setUHCGamerules();
                 PlayerUtils.forceUpdateGlowing();
