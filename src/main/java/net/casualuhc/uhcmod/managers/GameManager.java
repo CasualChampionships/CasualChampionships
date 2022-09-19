@@ -8,8 +8,10 @@ import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -149,13 +151,13 @@ public class GameManager {
 			for (BlockPos pos : BlockPos.iterate(-32, 240, -31, 27, 316, 26)) {
 				BlockEntity blockEntity = world.getBlockEntity(pos);
 				Clearable.clear(blockEntity);
-				world.setBlockState(pos, Blocks.AIR.getDefaultState());
+				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 			}
-			world.iterateEntities().forEach(e -> {
-				if (e.getScoreboardTags().contains("uhc")) {
-					e.kill();
+			for (Entity entity : world.iterateEntities()) {
+				if (entity.getScoreboardTags().contains("uhc")) {
+					entity.kill();
 				}
-			});
+			}
 
 			server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
 			EventHandler.onActive();

@@ -271,6 +271,11 @@ public class PlayerUtils {
 				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(title));
 				playerEntity.networkHandler.sendPacket(new SubtitleS2CPacket(subTitle));
 			}
+
+			playerExtension.wasInWorldBorder = true;
+		} else if (playerExtension.wasInWorldBorder) {
+			playerExtension.wasInWorldBorder = false;
+			sendWorldBorderPackets(playerEntity, border);
 		}
 	}
 

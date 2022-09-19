@@ -12,6 +12,7 @@ public class PlayerExtension {
 
 	public final WorldBorder worldBorder = new WorldBorder();
 
+	public boolean wasInWorldBorder = false;
 	public boolean displayCoords = false;
 	public boolean shouldGlow = true;
 	public int damageDealt = 0;

@@ -1,11 +1,11 @@
 package net.casualuhc.uhcmod.managers;
 
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.utils.Phase;
+import net.casualuhc.uhcmod.utils.Scheduler;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
-import net.casualuhc.uhcmod.utils.Phase;
-import net.casualuhc.uhcmod.utils.Scheduler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.WorldBorder;
 

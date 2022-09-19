@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.utils;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.minecraft.server.MinecraftServer;
@@ -16,6 +17,7 @@ public class Scheduler {
 		EventHandler.register(new MinecraftEvents() {
 			@Override
 			public void onServerTick(MinecraftServer server) {
+				// UHCMod.LOGGER.info("{}", tickCount);
 				Queue<Task> queue = TASKS.remove(tickCount++);
 				if (queue != null) {
 					queue.forEach(Task::run);
