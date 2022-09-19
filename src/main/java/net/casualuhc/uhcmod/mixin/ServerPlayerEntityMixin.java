@@ -9,10 +9,14 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,6 +26,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     @Unique
     private int halfHealthTicks = 0;
+
+    @Shadow
+    @Final
+    public ServerPlayerInteractionManager interactionManager;
 
     public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile, @Nullable PlayerPublicKey publicKey) {
         super(world, pos, yaw, gameProfile, publicKey);
@@ -54,5 +62,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     @Inject(method = "onDisconnect", at = @At("TAIL"))
     private void onDisconnect(CallbackInfo ci) {
         UHCDataBase.updateStats((ServerPlayerEntity) (Object) this);
+    }
+
+    @Override
+    protected void tickInVoid() {
+        if (this.interactionManager.getGameMode() != GameMode.SPECTATOR) {
+            super.tickInVoid();
+        }
     }
 }

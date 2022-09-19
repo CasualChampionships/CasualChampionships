@@ -32,6 +32,7 @@ public class GameSettings {
 
 	public static final GameSetting.DoubleGameSetting WORLD_BORDER_SPEED;
 	public static final GameSetting.DoubleGameSetting HEALTH;
+	public static final GameSetting.DoubleGameSetting BOW_COOLDOWN;
 
 	public static final GameSetting.BooleanGameSetting END_GAME_GLOW;
 	public static final GameSetting.BooleanGameSetting FRIENDLY_PLAYER_GLOW;
@@ -40,7 +41,6 @@ public class GameSettings {
 	public static final GameSetting.BooleanGameSetting DISPLAY_TAB;
 	public static final GameSetting.BooleanGameSetting PVP;
 	public static final GameSetting.BooleanGameSetting OP_POTIONS;
-	public static final GameSetting.BooleanGameSetting BOW_COOLDOWN;
 	public static final GameSetting.BooleanGameSetting PLAYER_DROPS_HEAD_ON_DEATH;
 	public static final GameSetting.BooleanGameSetting TESTING;
 
@@ -65,6 +65,19 @@ public class GameSettings {
 				named(Items.GREEN_STAINED_GLASS_PANE, "Triple"), 2.0D,
 				named(Items.YELLOW_STAINED_GLASS_PANE, "double"), 1.0D,
 				named(Items.RED_STAINED_GLASS_PANE, "Normal"), 0.0D
+			),
+			1.0D
+		);
+
+		BOW_COOLDOWN = new GameSetting.DoubleGameSetting(
+			named(Items.BOW, "Bow Cooldown"),
+			ImmutableMap.of(
+				named(Items.CLOCK, "None"), 0.0D,
+				named(Items.CLOCK, "0.5 Seconds"), 0.5D,
+				named(Items.CLOCK, "1 Second"), 1.0D,
+				named(Items.CLOCK, "2 Seconds"), 2.0D,
+				named(Items.CLOCK, "3 Seconds"), 3.0D,
+				named(Items.CLOCK, "5 Seconds"), 5.0D
 			),
 			1.0D
 		);
@@ -111,12 +124,6 @@ public class GameSettings {
 			PotionUtil.setPotion(named(Items.SPLASH_POTION, "Op Potions"), Potions.STRONG_HEALING),
 			getBooleanRuleOptions(),
 			false
-		);
-
-		BOW_COOLDOWN = new GameSetting.BooleanGameSetting(
-			named(Items.BOW, "Bow Cooldown"),
-			getBooleanRuleOptions(),
-			true
 		);
 
 		PLAYER_DROPS_HEAD_ON_DEATH = new GameSetting.BooleanGameSetting(

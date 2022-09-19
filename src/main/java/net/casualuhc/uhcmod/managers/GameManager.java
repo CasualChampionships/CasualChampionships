@@ -49,6 +49,7 @@ public class GameManager {
 
 	private static boolean firstKill;
 	private static boolean firstDeath;
+	private static boolean firstCraft;
 
 	private GameManager() { }
 
@@ -77,6 +78,7 @@ public class GameManager {
 	public static void resetAdvancementTrackers() {
 		firstKill = true;
 		firstDeath = true;
+		firstCraft = true;
 	}
 
 	public static boolean tryFirstKill() {
@@ -90,6 +92,14 @@ public class GameManager {
 	public static boolean tryFirstDeath() {
 		if (firstDeath) {
 			firstDeath = false;
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean tryFirstCraft() {
+		if (firstCraft) {
+			firstCraft = false;
 			return true;
 		}
 		return false;
@@ -120,9 +130,7 @@ public class GameManager {
 					instance.addPersistentModifier(new EntityAttributeModifier(PlayerUtils.HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
 				}
 				playerEntity.setHealth(playerEntity.getMaxHealth());
-			});
 
-			PlayerUtils.forEveryPlayer(playerEntity -> {
 				if (!TeamUtils.shouldIgnoreTeam(playerEntity.getScoreboardTeam()) && !playerEntity.isSpectator()) {
 					PlayerExtension.get(playerEntity).displayCoords = true;
 					playerEntity.changeGameMode(GameMode.SURVIVAL);
@@ -132,6 +140,8 @@ public class GameManager {
 				} else {
 					playerEntity.changeGameMode(GameMode.SPECTATOR);
 				}
+
+				playerEntity.dismountVehicle();
 			});
 
 			MinecraftServer server = UHCMod.SERVER;

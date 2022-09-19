@@ -31,6 +31,8 @@ public class UHCAdvancements {
 	public static final Advancement ON_THE_EDGE;
 	public static final Advancement THATS_NOT_DUSTLESS;
 	public static final Advancement PARKOUR_MASTER;
+	public static final Advancement WORLD_RECORD_PACE;
+	public static final Advancement THATS_EMBARRASSING;
 
 	static {
 		ROOT = Advancement.Builder.create().display(
@@ -125,7 +127,25 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/parkour_master"));
 
-		UHC_ADVANCEMENTS = ImmutableSet.of(ROOT, FIRST_BLOOD, EARLY_EXIT, MOSTLY_HARMLESS, HEAVY_HITTER, WINNER, COMBAT_LOGGER, ON_THE_EDGE, THATS_NOT_DUSTLESS, PARKOUR_MASTER);
+		WORLD_RECORD_PACE = Advancement.Builder.create().parent(ROOT).display(
+			PotionUtil.setPotion(Items.SPLASH_POTION.getDefaultStack(), Potions.SWIFTNESS),
+			Text.literal("World Record Pace!"),
+			Text.literal("Be the first to craft a crafting table"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/world_record_pace"));
+
+		THATS_EMBARRASSING = Advancement.Builder.create().parent(ROOT).display(
+			Items.SWEET_BERRIES,
+			Text.literal("That's embarrassing"),
+			Text.literal("Take damage from a sweet berry bush"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/thats_embarrassing"));
+
+		UHC_ADVANCEMENTS = ImmutableSet.of(ROOT, FIRST_BLOOD, EARLY_EXIT, MOSTLY_HARMLESS, HEAVY_HITTER, WINNER, COMBAT_LOGGER, ON_THE_EDGE, THATS_NOT_DUSTLESS, PARKOUR_MASTER, WORLD_RECORD_PACE, THATS_EMBARRASSING);
 
 		EventHandler.register(new UHCEvents() {
 			@Override

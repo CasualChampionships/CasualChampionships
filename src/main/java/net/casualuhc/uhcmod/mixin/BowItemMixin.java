@@ -20,8 +20,8 @@ public abstract class BowItemMixin extends RangedWeaponItem {
 
 	@Inject(method = "onStoppedUsing", at = @At("TAIL"))
 	private void onShootArrow(ItemStack stack, World world, LivingEntity user, int remainingUseTicks, CallbackInfo ci) {
-		if (GameSettings.BOW_COOLDOWN.getValue() && user instanceof PlayerEntity playerEntity) {
-			playerEntity.getItemCooldownManager().set(this, 100);
+		if (user instanceof PlayerEntity playerEntity) {
+			playerEntity.getItemCooldownManager().set(this, (int) (GameSettings.BOW_COOLDOWN.getValue() * 20));
 		}
 	}
 }
