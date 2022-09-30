@@ -190,6 +190,7 @@ public class TeamUtils {
 
 		Team spectatorTeam = scoreboard.addTeam("Spectator");
 		spectatorTeam.setColor(Formatting.DARK_GRAY);
+		spectatorTeam.setCollisionRule(AbstractTeam.CollisionRule.NEVER);
 		setEliminated(spectatorTeam, true);
 		IGNORED_TEAMS.add(spectatorTeam);
 
@@ -257,6 +258,7 @@ public class TeamUtils {
 				scoreboard.addPlayerToTeam(member.getAsString(), team);
 			}
 			team.setFriendlyFireAllowed(false);
+			team.setCollisionRule(AbstractTeam.CollisionRule.NEVER);
 		}
 	}
 }

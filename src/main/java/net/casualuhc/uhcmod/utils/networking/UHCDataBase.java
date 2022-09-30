@@ -136,6 +136,8 @@ public class UHCDataBase {
 					UHCMod.LOGGER.error("Could not download Teams.json");
 				}
 			});
+		} else {
+			UHCMod.LOGGER.info("There was no mongo to download from");
 		}
 	}
 
@@ -173,7 +175,7 @@ public class UHCDataBase {
 	}
 
 	private static boolean hasMongo() {
-		return CLIENT == null;
+		return CLIENT != null;
 	}
 
 	private enum UHCStat {

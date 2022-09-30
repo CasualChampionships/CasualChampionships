@@ -138,6 +138,7 @@ public class GameManager {
 					playerEntity.changeGameMode(GameMode.SURVIVAL);
 					playerEntity.sendMessage(Text.literal("You can disable the coordinates above your hotbar by using /coords"), false);
 					playerEntity.getInventory().clear();
+					playerEntity.setExperienceLevel(0);
 					PlayerUtils.setPlayerPlaying(playerEntity, true);
 				} else {
 					playerEntity.changeGameMode(GameMode.SPECTATOR);
@@ -282,6 +283,7 @@ public class GameManager {
 		gameRules.get(GameRules.ANNOUNCE_ADVANCEMENTS).set(true, server);
 		gameRules.get(GameRules.FALL_DAMAGE).set(false, server);
 		gameRules.get(GameRules.DROWNING_DAMAGE).set(false, server);
+		gameRules.get(GameRules.DO_ENTITY_DROPS).set(false, server);
 		server.setDifficulty(Difficulty.PEACEFUL, true);
 		server.getOverworld().setTimeOfDay(6000); // 6000 = noon
 		server.getOverworld().setWeather(999999, 0, false, false);
@@ -331,6 +333,7 @@ public class GameManager {
 		gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
 		gameRules.get(GameRules.FALL_DAMAGE).set(true, server);
 		gameRules.get(GameRules.DROWNING_DAMAGE).set(true, server);
+		gameRules.get(GameRules.DO_ENTITY_DROPS).set(true, server);
 		server.setDifficulty(Difficulty.HARD, true);
 		((IntRuleMixinInterface) server.getGameRules().get(GameRules.RANDOM_TICK_SPEED)).setIntegerValue(3, server);
 		if (UHCMod.HAS_CARPET) {
