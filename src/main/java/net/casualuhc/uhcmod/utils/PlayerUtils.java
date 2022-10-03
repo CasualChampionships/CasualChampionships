@@ -29,6 +29,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.scoreboard.AbstractTeam;
+import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -110,6 +112,9 @@ public class PlayerUtils {
 			}
 			AbstractTeam team = player.getScoreboardTeam();
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
+			PlayerExtension.get(player).trueTeam = team;
+			ServerScoreboard scoreboard = player.getWorld().getServer().getScoreboard();
+			scoreboard.addPlayerToTeam(player.getEntityName(), scoreboard.getTeam("Spectator"));
 			forceUpdateGlowingFlag(player);
 			if (team != null && !TeamUtils.teamHasAlive(team) && !TeamUtils.isEliminated(team)) {
 				TeamUtils.setEliminated(team, true);

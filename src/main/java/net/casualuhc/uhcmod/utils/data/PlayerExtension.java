@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.utils.data;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.world.border.WorldBorder;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ public class PlayerExtension {
 	private static final Map<UUID, PlayerExtension> PLAYERS = new HashMap<>();
 
 	public final WorldBorder worldBorder = new WorldBorder();
+	public AbstractTeam trueTeam = null;
 
 	public boolean wasInWorldBorder = false;
 	public boolean displayCoords = false;

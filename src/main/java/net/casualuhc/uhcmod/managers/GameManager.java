@@ -224,7 +224,7 @@ public class GameManager {
 		}
 
 		PlayerUtils.forEveryPlayer(player -> {
-			if (player.getScoreboardTeam() == team) {
+			if (player.getScoreboardTeam() == team || PlayerExtension.get(player).trueTeam == team) {
 				PlayerUtils.grantAdvancement(player, UHCAdvancements.WINNER);
 			}
 		});

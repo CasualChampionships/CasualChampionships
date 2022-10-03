@@ -186,12 +186,14 @@ public class TeamUtils {
 		operatorTeam.setColor(Formatting.WHITE);
 		operatorTeam.setPrefix(Text.literal("[OP] "));
 		scoreboard.addPlayerToTeam("senseiwells", operatorTeam);
+		operatorTeam.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
 		IGNORED_TEAMS.add(operatorTeam);
 
 		Team spectatorTeam = scoreboard.addTeam("Spectator");
 		spectatorTeam.setColor(Formatting.DARK_GRAY);
 		spectatorTeam.setCollisionRule(AbstractTeam.CollisionRule.NEVER);
 		setEliminated(spectatorTeam, true);
+		spectatorTeam.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
 		IGNORED_TEAMS.add(spectatorTeam);
 
 		PlayerUtils.forEveryPlayer(player -> {
