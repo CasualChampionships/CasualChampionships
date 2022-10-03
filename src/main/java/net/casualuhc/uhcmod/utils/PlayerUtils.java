@@ -14,6 +14,7 @@ import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
@@ -21,6 +22,7 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
+import net.minecraft.item.PlaceableOnWaterItem;
 import net.minecraft.item.SkullItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -396,12 +398,19 @@ public class PlayerUtils {
 
 	public static boolean detectFlexibleBlockPlacement(World world, BlockPos pos, Direction side, BlockState oldState, ItemUsageContext context) {
 		ItemPlacementContext placementContext = new ItemPlacementContext(context);
+		boolean fluidsSolid = context.getStack().getItem() instanceof PlaceableOnWaterItem;
 
-		if (!oldState.canReplace(placementContext)) {
+		if (!oldState.canReplace(placementContext) || (fluidsSolid && oldState.getFluidState().isStill())) {
 			pos = pos.offset(side);
+		} else {
+			ShapeContext shapeContext = context.getPlayer() == null ? ShapeContext.absent() : ShapeContext.of(context.getPlayer());
+			if (!oldState.getOutlineShape(world, pos, shapeContext).isEmpty()) {
+				return false;
+			}
 		}
 		for (Direction dir : Direction.values()) {
-			if (!world.getBlockState(pos.offset(dir)).canReplace(placementContext)) {
+			BlockState neighbor = world.getBlockState(pos.offset(dir));
+			if (!neighbor.canReplace(placementContext) || (fluidsSolid && neighbor.getFluidState().isStill())) {
 				return false;
 			}
 		}
