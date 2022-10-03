@@ -12,11 +12,14 @@ import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementProgress;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.item.SkullItem;
 import net.minecraft.nbt.NbtCompound;
@@ -389,5 +392,19 @@ public class PlayerUtils {
 		}
 
 		return packet;
+	}
+
+	public static boolean detectFlexibleBlockPlacement(World world, BlockPos pos, Direction side, BlockState oldState, ItemUsageContext context) {
+		ItemPlacementContext placementContext = new ItemPlacementContext(context);
+
+		if (!oldState.canReplace(placementContext)) {
+			pos = pos.offset(side);
+		}
+		for (Direction dir : Direction.values()) {
+			if (!world.getBlockState(pos.offset(dir)).canReplace(placementContext)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
