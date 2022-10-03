@@ -18,10 +18,15 @@ public class PlayerExtension {
 	public boolean displayCoords = false;
 	public boolean shouldGlow = true;
 	public int damageDealt = 0;
+	public int relogs = 0;
 
 	private PlayerExtension() { }
 
 	public static PlayerExtension get(PlayerEntity player) {
 		return PLAYERS.computeIfAbsent(player.getUuid(), u -> new PlayerExtension());
+	}
+
+	public static void reset() {
+		PLAYERS.clear();
 	}
 }

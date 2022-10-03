@@ -2,6 +2,7 @@ package net.casualuhc.uhcmod.mixin;
 
 import com.mojang.authlib.GameProfile;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
+import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
@@ -69,5 +70,16 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
         if (this.interactionManager.getGameMode() != GameMode.SPECTATOR) {
             super.tickInVoid();
         }
+    }
+
+    @Override
+    public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource) {
+        if (super.handleFallDamage(fallDistance, damageMultiplier, damageSource)) {
+            if (GameManager.ticksSinceStart() < 1200) {
+                PlayerUtils.grantAdvancement((ServerPlayerEntity) (Object) this, UHCAdvancements.BROKEN_ANKLES);
+            }
+            return true;
+        }
+        return false;
     }
 }

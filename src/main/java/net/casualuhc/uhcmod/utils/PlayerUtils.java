@@ -112,6 +112,7 @@ public class PlayerUtils {
 			}
 			AbstractTeam team = player.getScoreboardTeam();
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
+			player.setSpawnPoint(player.world.getRegistryKey(), player.getBlockPos(), player.getSpawnAngle(), true, false);
 			PlayerExtension.get(player).trueTeam = team;
 			ServerScoreboard scoreboard = player.getWorld().getServer().getScoreboard();
 			scoreboard.addPlayerToTeam(player.getEntityName(), scoreboard.getTeam("Spectator"));

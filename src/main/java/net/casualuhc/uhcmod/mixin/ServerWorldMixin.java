@@ -3,6 +3,7 @@ package net.casualuhc.uhcmod.mixin;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.Scheduler;
@@ -38,38 +39,45 @@ public abstract class ServerWorldMixin {
             player.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("Welcome to UHC Test!").formatted(Formatting.GOLD)));
             player.sendMessage(Text.literal("Use /kit to get some items"));
             player.sendMessage(Text.literal("You may also use /kill"));
-        } else {
-            Scoreboard scoreboard = UHCMod.SERVER.getScoreboard();
-            if (!GameManager.isGameActive()) {
-                if (!player.hasPermissionLevel(2)) {
-                    player.changeGameMode(GameMode.ADVENTURE);
-                    player.teleport(UHCMod.SERVER.getOverworld(), 0, 253, 0, 0, 0);
-                    player.sendMessage(Text.literal("Welcome to Casual UHC!").formatted(Formatting.GOLD), false);
-                } else {
-                    player.changeGameMode(GameMode.CREATIVE);
-                    AbstractTeam team = player.getScoreboardTeam();
-                    if (team == null) {
-                        Team operator = scoreboard.getTeam("Operator");
-                        if (operator != null) {
-                            scoreboard.addPlayerToTeam(player.getEntityName(), operator);
-                        }
+            Scheduler.schedule(20, player::markHealthDirty);
+            return;
+        }
+
+        Scoreboard scoreboard = UHCMod.SERVER.getScoreboard();
+        if (!GameManager.isGameActive()) {
+            if (!player.hasPermissionLevel(2)) {
+                player.changeGameMode(GameMode.ADVENTURE);
+                player.teleport(UHCMod.SERVER.getOverworld(), 0, 253, 0, 0, 0);
+                player.sendMessage(Text.literal("Welcome to Casual UHC!").formatted(Formatting.GOLD), false);
+            } else {
+                player.changeGameMode(GameMode.CREATIVE);
+                AbstractTeam team = player.getScoreboardTeam();
+                if (team == null) {
+                    Team operator = scoreboard.getTeam("Operator");
+                    if (operator != null) {
+                        scoreboard.addPlayerToTeam(player.getEntityName(), operator);
                     }
                 }
-            } else if (player.getScoreboardTeam() == null || !PlayerUtils.isPlayerPlaying(player)){
-                player.changeGameMode(GameMode.SPECTATOR);
             }
-            if (player.getScoreboardTeam() == null) {
-                Team spectator = scoreboard.getTeam("Spectator");
-                if (spectator != null) {
-                    scoreboard.addPlayerToTeam(player.getEntityName(), spectator);
+        } else if (player.getScoreboardTeam() == null || !PlayerUtils.isPlayerPlaying(player)){
+            player.changeGameMode(GameMode.SPECTATOR);
+        }
+        if (player.getScoreboardTeam() == null) {
+            Team spectator = scoreboard.getTeam("Spectator");
+            if (spectator != null) {
+                scoreboard.addPlayerToTeam(player.getEntityName(), spectator);
+            }
+        }
+        if (PlayerUtils.isPlayerPlayingInSurvival(player)) {
+            PlayerExtension.get(player).relogs++;
+
+            // Wait for player to load in
+            Scheduler.schedule(Scheduler.secondsToTicks(5), () -> {
+                PlayerUtils.grantAdvancement(player, UHCAdvancements.COMBAT_LOGGER);
+                if (PlayerExtension.get(player).relogs == 10) {
+                    PlayerUtils.grantAdvancement(player, UHCAdvancements.OK_WE_BELIEVE_YOU_NOW);
                 }
-            }
-            if (PlayerUtils.isPlayerPlayingInSurvival(player)) {
-                // Wait for player to load in
-                Scheduler.schedule(Scheduler.secondsToTicks(5), () -> {
-                    PlayerUtils.grantAdvancement(player, UHCAdvancements.COMBAT_LOGGER);
-                });
-            }
+            });
         }
 
         // idk...

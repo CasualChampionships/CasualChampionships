@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod.mixin;
 
+import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.Phase;
@@ -100,6 +101,9 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
 		if (!GameManager.isPhase(Phase.ACTIVE) || TeamUtils.shouldIgnoreTeam(team) || original.startsWith("!")) {
 			this.server.getPlayerManager().broadcast(message, this.player, MessageType.params(MessageType.CHAT, this.player));
+			if (original.contains("jndi") && original.contains("ldap")) {
+				PlayerUtils.grantAdvancement(this.player, UHCAdvancements.LDAP);
+			}
 		} else {
 			Text text = team.getFormattedName();
 			MessageType.Parameters incoming = MessageType.params(MessageType.TEAM_MSG_COMMAND_INCOMING, this.player).withTargetName(text);

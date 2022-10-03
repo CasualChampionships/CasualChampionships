@@ -22,7 +22,7 @@ public abstract class ItemStackMixin {
 
 	@Inject(method = "onCraft", at = @At("HEAD"))
 	private void onCraft(World world, PlayerEntity player, int amount, CallbackInfo ci) {
-		if (player instanceof ServerPlayerEntity serverPlayer && GameManager.tryFirstCraft() && this.getItem() == Items.CRAFTING_TABLE) {
+		if (player instanceof ServerPlayerEntity serverPlayer && this.getItem() == Items.CRAFTING_TABLE && GameManager.tryFirstCraft()) {
 			PlayerUtils.grantAdvancement(serverPlayer, UHCAdvancements.WORLD_RECORD_PACE);
 		}
 	}

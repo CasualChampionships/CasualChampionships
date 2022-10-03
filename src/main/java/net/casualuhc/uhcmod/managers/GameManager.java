@@ -6,6 +6,7 @@ import net.casualuhc.uhcmod.interfaces.IntRuleMixinInterface;
 import net.casualuhc.uhcmod.utils.*;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
+import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
 import net.minecraft.block.Block;
@@ -49,9 +50,19 @@ public class GameManager {
 	private static final List<Task> currentTasks = new LinkedList<>();
 	private static Phase phase = Phase.NONE;
 
+	private static int ticks;
 	private static boolean firstKill;
 	private static boolean firstDeath;
 	private static boolean firstCraft;
+
+	static {
+		EventHandler.register(new MinecraftEvents() {
+			@Override
+			public void onServerTick(MinecraftServer server) {
+				ticks++;
+			}
+		});
+	}
 
 	private GameManager() { }
 
@@ -77,7 +88,8 @@ public class GameManager {
 		return phase.equals(checkPhase);
 	}
 
-	public static void resetAdvancementTrackers() {
+	public static void resetTrackers() {
+		ticks = 0;
 		firstKill = true;
 		firstDeath = true;
 		firstCraft = true;
@@ -107,6 +119,10 @@ public class GameManager {
 		return false;
 	}
 
+	public static int ticksSinceStart() {
+		return ticks;
+	}
+
 	public static void startCountDown() {
 		PlayerUtils.messageEveryPlayer(
 			Text.literal("Please stand still during the countdown so you don't fall when you get teleported!").formatted(Formatting.GOLD)
@@ -134,6 +150,9 @@ public class GameManager {
 				playerEntity.setHealth(playerEntity.getMaxHealth());
 
 				if (!TeamUtils.shouldIgnoreTeam(playerEntity.getScoreboardTeam()) && !playerEntity.isSpectator()) {
+					if (playerEntity.getScoreboardTeam().getPlayerList().size() == 1) {
+						PlayerUtils.grantAdvancement(playerEntity, UHCAdvancements.SOLOIST);
+					}
 					PlayerExtension.get(playerEntity).displayCoords = true;
 					playerEntity.changeGameMode(GameMode.SURVIVAL);
 					playerEntity.sendMessage(Text.literal("You can disable the coordinates above your hotbar by using /coords"), false);
@@ -265,6 +284,9 @@ public class GameManager {
 			BlockPos pos = new BlockPos(-26, 242, -26);
 			lobbyStructure.place(UHCMod.SERVER.getOverworld(), pos, pos, new StructurePlacementData(), Random.create(), 3);
 			PlayerUtils.forEveryPlayer(playerEntity -> {
+				if (!playerEntity.hasPermissionLevel(2)) {
+					playerEntity.interactionManager.changeGameMode(GameMode.ADVENTURE);
+				}
 				playerEntity.teleport(UHCMod.SERVER.getOverworld(), 0, 253, 0, 0, 0);
 				playerEntity.sendMessage(Text.literal(ChatColour.GREEN + "Successfully generated lobby!"), false);
 			});

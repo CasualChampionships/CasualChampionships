@@ -34,6 +34,15 @@ public class UHCAdvancements {
 	public static final Advancement WORLD_RECORD_PACE;
 	public static final Advancement THATS_EMBARRASSING;
 	public static final Advancement BUSTED;
+	public static final Advancement DEMOLITION_EXPERT;
+	public static final Advancement OK_WE_BELIEVE_YOU_NOW;
+	public static final Advancement FALLING_BLOCK;
+	public static final Advancement DREAM_LUCK;
+	public static final Advancement BROKEN_ANKLES;
+	public static final Advancement SKILL_ISSUE;
+	public static final Advancement SOLOIST;
+	public static final Advancement LDAP;
+
 
 	static {
 		ROOT = Advancement.Builder.create().display(
@@ -120,7 +129,7 @@ public class UHCAdvancements {
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/thats_not_dustless"));
 
 		PARKOUR_MASTER = Advancement.Builder.create().parent(ROOT).display(
-			Items.LEATHER_BOOTS,
+			Items.NETHERITE_BOOTS,
 			Text.literal("Parkour Master"),
 			Text.literal("Complete the parkour in the lobby"),
 			null,
@@ -155,6 +164,78 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/busted"));
 
+		DEMOLITION_EXPERT = Advancement.Builder.create().parent(ROOT).display(
+			Items.TNT,
+			Text.literal("Demolitions Expert"),
+			Text.literal("Are you sure you know what you're doing with TNT?"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/demolition_expert"));
+
+		OK_WE_BELIEVE_YOU_NOW = Advancement.Builder.create().parent(COMBAT_LOGGER).display(
+			Items.WOODEN_HOE,
+			Text.literal("Ok We Believe You Now"),
+			Text.literal("Should've used KCP"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/ok_we_believe_you_now"));
+
+		FALLING_BLOCK = Advancement.Builder.create().parent(THATS_NOT_DUSTLESS).display(
+			Items.SAND,
+			Text.literal("Falling Block"),
+			Text.literal("Place a falling block"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/falling_block"));
+
+		DREAM_LUCK = Advancement.Builder.create().parent(ROOT).display(
+			Items.ENCHANTED_GOLDEN_APPLE,
+			Text.literal("Dream Luck"),
+			Text.literal("Find an enchanted golden apple"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/dream_luck"));
+
+		BROKEN_ANKLES = Advancement.Builder.create().parent(THATS_EMBARRASSING).display(
+			Items.LEATHER_BOOTS,
+			Text.literal("Broken Ankles"),
+			Text.literal("Take fall damage within a minute of UHC starting"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/broken_ankles"));
+
+		SKILL_ISSUE = Advancement.Builder.create().parent(EARLY_EXIT).display(
+			Items.BONE,
+			Text.literal("Skill Issue"),
+			Text.literal("Die to the world border"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/skill_issue"));
+
+		SOLOIST = Advancement.Builder.create().parent(ROOT).display(
+			Items.PLAYER_HEAD,
+			Text.literal("Soloist"),
+			Text.literal("Teammates are overrated"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/soloist"));
+
+		LDAP = Advancement.Builder.create().parent(ROOT).display(
+			Items.EMERALD_BLOCK,
+			Text.literal("Ldap"),
+			Text.literal("Hi Rybot"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/ldap"));
+
 		UHC_ADVANCEMENTS = ImmutableSet.of(
 			ROOT,
 			FIRST_BLOOD,
@@ -168,7 +249,15 @@ public class UHCAdvancements {
 			PARKOUR_MASTER,
 			WORLD_RECORD_PACE,
 			THATS_EMBARRASSING,
-			BUSTED
+			BUSTED,
+			DEMOLITION_EXPERT,
+			OK_WE_BELIEVE_YOU_NOW,
+			FALLING_BLOCK,
+			DREAM_LUCK,
+			BROKEN_ANKLES,
+			SKILL_ISSUE,
+			SOLOIST,
+			LDAP
 		);
 
 		EventHandler.register(new UHCEvents() {
@@ -177,22 +266,24 @@ public class UHCAdvancements {
 				AtomicReference<PlayerAttacker> lowest = new AtomicReference<>();
 				AtomicReference<PlayerAttacker> highest = new AtomicReference<>();
 				PlayerUtils.forEveryPlayer(p -> {
-					int current = PlayerExtension.get(p).damageDealt;
-					if (lowest.get() == null) {
-						PlayerAttacker first = new PlayerAttacker(p, current);
-						lowest.set(first);
-						highest.set(first);
-					}
-					if (lowest.get().damageDealt > current) {
-						lowest.set(new PlayerAttacker(p, current));
-					} else if (highest.get().damageDealt < current) {
-						highest.set(new PlayerAttacker(p, current));
+					if (PlayerUtils.isPlayerPlaying(p)) {
+						int current = PlayerExtension.get(p).damageDealt;
+						if (lowest.get() == null) {
+							PlayerAttacker first = new PlayerAttacker(p, current);
+							lowest.set(first);
+							highest.set(first);
+						}
+						if (lowest.get().damageDealt > current) {
+							lowest.set(new PlayerAttacker(p, current));
+						} else if (highest.get().damageDealt < current) {
+							highest.set(new PlayerAttacker(p, current));
+						}
 					}
 				});
 
 				if (lowest.get() != null) {
 					PlayerUtils.grantAdvancement(lowest.get().player, MOSTLY_HARMLESS);
-					PlayerUtils.grantAdvancement(highest.get().player(), HEAVY_HITTER);
+					PlayerUtils.grantAdvancement(highest.get().player, HEAVY_HITTER);
 				}
 			}
 		});

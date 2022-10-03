@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.utils;
 
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 
@@ -44,7 +45,8 @@ public enum Phase {
             @Override
             public void onActive() {
                 GameManager.setPhase(ACTIVE);
-                GameManager.resetAdvancementTrackers();
+                PlayerExtension.reset();
+                GameManager.resetTrackers();
                 GameManager.startGracePeriod();
                 GameManager.setUHCGamerules();
                 PlayerUtils.forceUpdateGlowing();

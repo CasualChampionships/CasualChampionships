@@ -8,10 +8,13 @@
     "BowItemMixin",
     "BrewingStandBlockEntityMixin",
     "CommandManagerMixin",
+    "FallingBlockMixin",
     "IntRuleMixin",
     "ItemStackMixin",
     "KillCommandMixin",
     "LeavesBlockMixin",
+    "LivingEntityMixin",
+    "LootableContainerBlockEntityMixin",
     "MinecraftDedicatedServerMixin",
     "MinecraftServerMixin",
     "MovingAreaMixin",
@@ -28,7 +31,8 @@
     "SkullItemMixin",
     "SpreadPlayersCommandMixin",
     "SweetBerryBushBlockMixin",
-    "SynchronizeRecipeS2CPacketMixin"
+    "SynchronizeRecipeS2CPacketMixin",
+    "TntBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1
