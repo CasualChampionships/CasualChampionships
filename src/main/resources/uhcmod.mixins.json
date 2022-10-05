@@ -21,6 +21,7 @@
     "PlayerAdvancementTrackerMixin",
     "PlayerEntityMixin",
     "PlayerManagerMixin",
+    "PortalForcerMixin",
     "RecipeManagerMixin",
     "RedstoneWireBlockMixin",
     "ServerEntityManagerMixin",

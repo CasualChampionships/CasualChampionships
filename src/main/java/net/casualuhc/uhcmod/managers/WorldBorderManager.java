@@ -12,6 +12,8 @@ import net.minecraft.world.border.WorldBorder;
 public class WorldBorderManager {
 	private static final MinecraftServer SERVER = UHCMod.SERVER;
 
+	public static final int PORTAL_ESCAPE_TIME_SECONDS = 30;
+
 	static {
 		EventHandler.register(new UHCEvents() {
 			@Override
