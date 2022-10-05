@@ -42,6 +42,7 @@ public class GameSettings {
 	public static final GameSetting.BooleanGameSetting PVP;
 	public static final GameSetting.BooleanGameSetting OP_POTIONS;
 	public static final GameSetting.BooleanGameSetting PLAYER_DROPS_HEAD_ON_DEATH;
+	public static final GameSetting.BooleanGameSetting GENERATE_PORTAL;
 	public static final GameSetting.BooleanGameSetting TESTING;
 
 	public static final GameSetting.EnumGameSetting<Stage> WORLD_BORDER_STAGE;
@@ -128,6 +129,12 @@ public class GameSettings {
 
 		PLAYER_DROPS_HEAD_ON_DEATH = new GameSetting.BooleanGameSetting(
 			named(Items.PLAYER_HEAD, "Player Head Drops"),
+			getBooleanRuleOptions(),
+			true
+		);
+
+		GENERATE_PORTAL = new GameSetting.BooleanGameSetting(
+			named(Items.CRYING_OBSIDIAN, "Generate Nether Portals"),
 			getBooleanRuleOptions(),
 			true
 		);

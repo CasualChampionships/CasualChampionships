@@ -23,5 +23,4 @@ public class KillCommandMixin {
 		argumentBuilder.requires(s -> s.hasPermissionLevel(2));
 		return argumentBuilder;
 	}
-
 }

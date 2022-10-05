@@ -45,10 +45,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class PlayerUtils {
@@ -187,16 +184,16 @@ public class PlayerUtils {
 
 		// Update location on action bar
 		if (extension.displayCoords) {
-			String locationInfo = "(%d, %d, %d) | Direction: %s | Distance to WB: %d | WB radius: %d".formatted(
-				playerEntity.getBlockX(),
-				playerEntity.getBlockY(),
-				playerEntity.getBlockZ(),
-				playerEntity.getHorizontalFacing(),
-				((int) border.getDistanceInsideBorder(playerEntity)),
-				((int) border.getSize() / 2)
-			);
+			MutableText coords = Text.literal("(" + playerEntity.getBlockX() + ", " + playerEntity.getBlockY() + ", " + playerEntity.getBlockZ() + ")");
+			String direction = "Direction: " + playerEntity.getHorizontalFacing().asString().toUpperCase(Locale.ROOT);
+			int borderRadius = ((int) border.getSize() / 2);
+			String radius = "WB Radius: " + borderRadius;
+			int distanceToBorder = ((int) border.getDistanceInsideBorder(playerEntity));
+			double distancePercent = distanceToBorder / (double) borderRadius;
+			Formatting formatting = distancePercent > 0.4 ? Formatting.DARK_GREEN : distancePercent > 0.2 ? Formatting.YELLOW : distancePercent > 0.1 ? Formatting.RED : Formatting.DARK_RED;
+			Text distanceToWb = Text.literal("Distance to WB: ").append(Text.literal(String.valueOf(distanceToBorder)).formatted(formatting));
 
-			playerEntity.sendMessage(Text.literal(locationInfo), true);
+			playerEntity.sendMessage(coords.append(" | ").append(direction).append(" | ").append(distanceToWb).append(" | ").append(radius), true);
 		}
 	}
 

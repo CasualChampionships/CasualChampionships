@@ -16,6 +16,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
@@ -33,10 +35,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Clearable;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -155,6 +159,7 @@ public class GameManager {
 					}
 					PlayerExtension.get(playerEntity).displayCoords = true;
 					playerEntity.changeGameMode(GameMode.SURVIVAL);
+					playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, secondsToTicks(5), 4, true, false));
 					playerEntity.sendMessage(Text.literal("You can disable the coordinates above your hotbar by using /coords"), false);
 					playerEntity.getInventory().clear();
 					playerEntity.setExperienceLevel(0);
@@ -171,7 +176,7 @@ public class GameManager {
 			for (BlockPos pos : BlockPos.iterate(-32, 240, -31, 27, 316, 26)) {
 				BlockEntity blockEntity = world.getBlockEntity(pos);
 				Clearable.clear(blockEntity);
-				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS, 0);
 			}
 			for (Entity entity : world.iterateEntities()) {
 				if (entity.getScoreboardTags().contains("uhc")) {
@@ -231,6 +236,14 @@ public class GameManager {
 						playerEntity.setGlowing(true);
 					}
 				});
+			}
+			if (GameSettings.GENERATE_PORTAL.getValue()) {
+				ServerWorld overworld = UHCMod.SERVER.getOverworld();
+				overworld.getPortalForcer().createPortal(BlockPos.ORIGIN, Direction.Axis.X);
+				ServerWorld nether = UHCMod.SERVER.getWorld(World.NETHER);
+				if (nether != null) {
+					nether.getPortalForcer().createPortal(BlockPos.ORIGIN, Direction.Axis.X);
+				}
 			}
 		});
 	}
@@ -358,6 +371,7 @@ public class GameManager {
 		gameRules.get(GameRules.DO_ENTITY_DROPS).set(true, server);
 		server.setDifficulty(Difficulty.HARD, true);
 		((IntRuleMixinInterface) server.getGameRules().get(GameRules.RANDOM_TICK_SPEED)).setIntegerValue(3, server);
+		server.getOverworld().setTimeOfDay(0);
 		if (UHCMod.HAS_CARPET) {
 			CommandManager commandManager = server.getCommandManager();
 			ServerCommandSource source = server.getCommandSource();
