@@ -42,7 +42,7 @@ public class UHCAdvancements {
 	public static final Advancement SKILL_ISSUE;
 	public static final Advancement SOLOIST;
 	public static final Advancement LDAP;
-
+	public static final Advancement NOT_NOW;
 
 	static {
 		ROOT = Advancement.Builder.create().display(
@@ -51,9 +51,7 @@ public class UHCAdvancements {
 			Text.literal("Advancements to achieve during UHC!"),
 			new Identifier("textures/gui/advancements/backgrounds/adventure.png"),
 			AdvancementFrame.TASK,
-			false,
-			false,
-			false
+			false, false, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/root"));
 
 		FIRST_BLOOD = Advancement.Builder.create().parent(ROOT).display(
@@ -236,6 +234,15 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/ldap"));
 
+		NOT_NOW = Advancement.Builder.create().parent(ROOT).display(
+			Items.NETHERITE_SWORD,
+			Text.literal("Not Now"),
+			Text.literal("Sensei's words echoed... There's a time and a place for everything, but not now."),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/not_now"));
+
 		UHC_ADVANCEMENTS = ImmutableSet.of(
 			ROOT,
 			FIRST_BLOOD,
@@ -257,7 +264,8 @@ public class UHCAdvancements {
 			BROKEN_ANKLES,
 			SKILL_ISSUE,
 			SOLOIST,
-			LDAP
+			LDAP,
+			NOT_NOW
 		);
 
 		EventHandler.register(new UHCEvents() {

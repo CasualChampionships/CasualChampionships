@@ -17,6 +17,7 @@ public class PlayerExtension {
 	public boolean wasInWorldBorder = false;
 	public boolean displayCoords = false;
 	public boolean shouldGlow = true;
+	public boolean fullbright = true;
 	public int damageDealt = 0;
 	public int relogs = 0;
 

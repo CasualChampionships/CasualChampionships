@@ -29,5 +29,7 @@ public class CommandManagerMixin {
         ReadyCommand.register(this.dispatcher);
         TeamGlowingCommand.register(this.dispatcher);
         KitCommand.register(this.dispatcher);
+        FullBrightCommand.register(this.dispatcher);
+        DuelCommand.register(this.dispatcher);
     }
 }

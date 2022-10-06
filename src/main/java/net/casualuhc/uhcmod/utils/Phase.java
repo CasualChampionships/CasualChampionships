@@ -50,6 +50,7 @@ public enum Phase {
                 GameManager.startGracePeriod();
                 GameManager.setUHCGamerules();
                 PlayerUtils.forceUpdateGlowing();
+                PlayerUtils.forceUpdateFullBright();
             }
 
             @Override

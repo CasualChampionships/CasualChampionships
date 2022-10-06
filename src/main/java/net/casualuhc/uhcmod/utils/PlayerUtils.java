@@ -18,6 +18,8 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
@@ -83,6 +85,19 @@ public class PlayerUtils {
 
 	public static void forceUpdateGlowing() {
 		forEveryPlayer(PlayerUtils::forceUpdateGlowingFlag);
+	}
+
+	public static void forceUpdateFullBright() {
+		forEveryPlayer(PlayerUtils::updateFullBright);
+	}
+
+	public static void updateFullBright(ServerPlayerEntity player) {
+		PlayerExtension extension = PlayerExtension.get(player);
+		if (extension.fullbright) {
+			player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
+		} else {
+			player.removeStatusEffect(StatusEffects.NIGHT_VISION);
+		}
 	}
 
 	private static void handlePlayerDeath(ServerPlayerEntity player, DamageSource source) {
