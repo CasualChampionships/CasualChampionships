@@ -8,6 +8,7 @@
     "BowItemMixin",
     "BrewingStandBlockEntityMixin",
     "CommandManagerMixin",
+    "EntityMixin",
     "FallingBlockMixin",
     "IntRuleMixin",
     "ItemStackMixin",

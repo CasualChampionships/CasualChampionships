@@ -23,7 +23,7 @@ public class PortalForcerMixin {
             return border.contains(pos);
         }
         double margin = shrinkingSpeed * (WorldBorderManager.PORTAL_ESCAPE_TIME_SECONDS * 1000);
-        margin = Math.min(margin, border.getSize() * 0.5);
+        margin = Math.min(margin, border.getSize() * 0.5 - 1);
         return pos.getX() >= border.getBoundWest() + margin && pos.getX() + 1 <= border.getBoundEast() - margin
             && pos.getZ() >= border.getBoundNorth() + margin && pos.getZ() + 1 <= border.getBoundSouth() - margin;
     }
