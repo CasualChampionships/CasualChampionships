@@ -21,6 +21,7 @@
     "PlayerAdvancementTrackerMixin",
     "PlayerEntityMixin",
     "PlayerManagerMixin",
+    "PortalForcerMixin",
     "RecipeManagerMixin",
     "RedstoneWireBlockMixin",
     "ServerEntityManagerMixin",
@@ -32,8 +33,7 @@
     "SpreadPlayersCommandMixin",
     "SweetBerryBushBlockMixin",
     "SynchronizeRecipeS2CPacketMixin",
-    "TntBlockMixin",
-    "WorldBorderMixin"
+    "TntBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1
