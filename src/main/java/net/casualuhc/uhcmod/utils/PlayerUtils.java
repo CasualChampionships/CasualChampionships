@@ -76,7 +76,7 @@ public class PlayerUtils {
 		});
 		EventHandler.register(new UHCEvents() {
 			@Override
-			public void onStart() {
+			public void onSetup() {
 				UHCMod.SERVER.getAdvancementLoader().getAdvancements().forEach(a -> forEveryPlayer(p -> revokeAdvancement(p, a)));
 				forEveryPlayer(p -> grantAdvancement(p, UHCAdvancements.ROOT));
 			}

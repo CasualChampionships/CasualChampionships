@@ -43,6 +43,7 @@ public class UHCAdvancements {
 	public static final Advancement SOLOIST;
 	public static final Advancement LDAP;
 	public static final Advancement NOT_NOW;
+	public static final Advancement OFFICIALLY_BORED;
 
 	static {
 		ROOT = Advancement.Builder.create().display(
@@ -72,7 +73,7 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/early_exit"));
 
-		MOSTLY_HARMLESS = Advancement.Builder.create().parent(ROOT).display(
+		MOSTLY_HARMLESS = Advancement.Builder.create().parent(EARLY_EXIT).display(
 			Items.FEATHER,
 			Text.literal("Mostly Harmless"),
 			Text.literal("Least damage dealt to other players"),
@@ -81,7 +82,7 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/mostly_harmless"));
 
-		HEAVY_HITTER = Advancement.Builder.create().parent(ROOT).display(
+		HEAVY_HITTER = Advancement.Builder.create().parent(FIRST_BLOOD).display(
 			Items.ANVIL,
 			Text.literal("Heavy Hitter"),
 			Text.literal("Most damage dealt to other players"),
@@ -90,7 +91,7 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/heavy_hitter"));
 
-		WINNER = Advancement.Builder.create().parent(ROOT).display(
+		WINNER = Advancement.Builder.create().parent(FIRST_BLOOD).display(
 			Items.TOTEM_OF_UNDYING,
 			Text.literal("WINNER!"),
 			Text.literal("Congratulations on winning the UHC!"),
@@ -107,15 +108,6 @@ public class UHCAdvancements {
 			AdvancementFrame.TASK,
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/combat_logger"));
-
-		ON_THE_EDGE = Advancement.Builder.create().parent(ROOT).display(
-			PotionUtil.setPotion(Items.SPLASH_POTION.getDefaultStack(), Potions.STRONG_HARMING),
-			Text.literal("Living Life On The Edge"),
-			Text.literal("Surviving 60 seconds on half a heart"),
-			null,
-			AdvancementFrame.TASK,
-			true, true, false
-		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/on_the_edge"));
 
 		THATS_NOT_DUSTLESS = Advancement.Builder.create().parent(ROOT).display(
 			Items.REDSTONE,
@@ -146,7 +138,7 @@ public class UHCAdvancements {
 
 		THATS_EMBARRASSING = Advancement.Builder.create().parent(ROOT).display(
 			Items.SWEET_BERRIES,
-			Text.literal("That's embarrassing"),
+			Text.literal("That's Embarrassing"),
 			Text.literal("Take damage from a sweet berry bush"),
 			null,
 			AdvancementFrame.TASK,
@@ -162,7 +154,7 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/busted"));
 
-		DEMOLITION_EXPERT = Advancement.Builder.create().parent(ROOT).display(
+		DEMOLITION_EXPERT = Advancement.Builder.create().parent(EARLY_EXIT).display(
 			Items.TNT,
 			Text.literal("Demolitions Expert"),
 			Text.literal("Are you sure you know what you're doing with TNT?"),
@@ -189,7 +181,7 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/falling_block"));
 
-		DREAM_LUCK = Advancement.Builder.create().parent(ROOT).display(
+		DREAM_LUCK = Advancement.Builder.create().parent(BUSTED).display(
 			Items.ENCHANTED_GOLDEN_APPLE,
 			Text.literal("Dream Luck"),
 			Text.literal("Find an enchanted golden apple"),
@@ -206,6 +198,15 @@ public class UHCAdvancements {
 			AdvancementFrame.TASK,
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/broken_ankles"));
+
+		ON_THE_EDGE = Advancement.Builder.create().parent(BROKEN_ANKLES).display(
+			PotionUtil.setPotion(Items.SPLASH_POTION.getDefaultStack(), Potions.STRONG_HARMING),
+			Text.literal("Living Life On The Edge"),
+			Text.literal("Surviving 60 seconds on half a heart"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/on_the_edge"));
 
 		SKILL_ISSUE = Advancement.Builder.create().parent(EARLY_EXIT).display(
 			Items.BONE,
@@ -225,15 +226,6 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/soloist"));
 
-		LDAP = Advancement.Builder.create().parent(ROOT).display(
-			Items.EMERALD_BLOCK,
-			Text.literal("Ldap"),
-			Text.literal("Hi Rybot"),
-			null,
-			AdvancementFrame.TASK,
-			true, true, false
-		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/ldap"));
-
 		NOT_NOW = Advancement.Builder.create().parent(ROOT).display(
 			Items.NETHERITE_SWORD,
 			Text.literal("Not Now"),
@@ -242,6 +234,24 @@ public class UHCAdvancements {
 			AdvancementFrame.TASK,
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/not_now"));
+
+		LDAP = Advancement.Builder.create().parent(NOT_NOW).display(
+			Items.EMERALD_BLOCK,
+			Text.literal("Ldap"),
+			Text.literal("Hi Katie <3"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/ldap"));
+
+		OFFICIALLY_BORED = Advancement.Builder.create().parent(WORLD_RECORD_PACE).display(
+			Items.COMMAND_BLOCK,
+			Text.literal("Officially Bored"),
+			Text.literal("Beat minesweeper in less than 40 seconds"),
+			null,
+			AdvancementFrame.CHALLENGE,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/officially_bored"));
 
 		UHC_ADVANCEMENTS = ImmutableSet.of(
 			ROOT,
@@ -265,7 +275,8 @@ public class UHCAdvancements {
 			SKILL_ISSUE,
 			SOLOIST,
 			LDAP,
-			NOT_NOW
+			NOT_NOW,
+			OFFICIALLY_BORED
 		);
 
 		EventHandler.register(new UHCEvents() {

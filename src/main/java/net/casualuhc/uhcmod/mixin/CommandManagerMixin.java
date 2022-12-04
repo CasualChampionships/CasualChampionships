@@ -31,5 +31,6 @@ public class CommandManagerMixin {
         KitCommand.register(this.dispatcher);
         FullBrightCommand.register(this.dispatcher);
         DuelCommand.register(this.dispatcher);
+        MinesweeperCommand.register(this.dispatcher);
     }
 }

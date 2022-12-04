@@ -6,6 +6,7 @@ import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.casualuhc.uhcmod.utils.screen.CustomScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.message.*;
@@ -56,7 +57,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
 	@Redirect(method = "onClickSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;isSpectator()Z"))
 	private boolean canClick(ServerPlayerEntity instance) {
-		return !GameSettings.isRuleScreen(instance.currentScreenHandler) && instance.isSpectator();
+		return !(instance.currentScreenHandler instanceof CustomScreen) && instance.isSpectator();
 	}
 
 	@ModifyVariable(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At("HEAD"), argsOnly = true)
