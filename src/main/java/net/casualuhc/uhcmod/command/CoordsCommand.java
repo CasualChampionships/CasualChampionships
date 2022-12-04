@@ -7,7 +7,6 @@ import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 
 public class CoordsCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -18,7 +17,6 @@ public class CoordsCommand {
         ServerPlayerEntity entity = context.getSource().getPlayerOrThrow();
         PlayerExtension extension = PlayerExtension.get(entity);
         extension.displayCoords = !extension.displayCoords;
-        entity.sendMessage(Text.literal(""), true);
         return 1;
     }
 }

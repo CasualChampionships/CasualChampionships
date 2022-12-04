@@ -28,8 +28,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.structure.StructureTemplate;
 import net.minecraft.structure.StructurePlacementData;
+import net.minecraft.structure.StructureTemplate;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Clearable;
@@ -284,6 +284,10 @@ public class GameManager {
 			});
 		});
 
+		schedule(minutesToTicks(1), () -> {
+			EventHandler.onSetup();
+			EventHandler.onLobby();
+		});
 	}
 
 	public static void generateLobby() {

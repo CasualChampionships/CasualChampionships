@@ -32,6 +32,7 @@
     "ServerWorldMixin",
     "SkullItemMixin",
     "SpreadPlayersCommandMixin",
+    "StructureSetsMixin",
     "SweetBerryBushBlockMixin",
     "SynchronizeRecipeS2CPacketMixin",
     "TntBlockMixin"
