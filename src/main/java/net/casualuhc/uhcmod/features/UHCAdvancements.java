@@ -4,10 +4,13 @@ import com.google.common.collect.ImmutableSet;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
+import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
+import net.casualuhc.uhcmod.utils.screen.MinesweeperScreen;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.advancement.criterion.ImpossibleCriterion;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
@@ -44,6 +47,7 @@ public class UHCAdvancements {
 	public static final Advancement LDAP;
 	public static final Advancement NOT_NOW;
 	public static final Advancement OFFICIALLY_BORED;
+	public static final Advancement DISTRACTED;
 
 	static {
 		ROOT = Advancement.Builder.create().display(
@@ -253,6 +257,15 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/officially_bored"));
 
+		DISTRACTED = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
+			Items.CHAIN_COMMAND_BLOCK,
+			Text.literal("Distracted"),
+			Text.literal("Die while playing minesweeper"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/distracted"));
+
 		UHC_ADVANCEMENTS = ImmutableSet.of(
 			ROOT,
 			FIRST_BLOOD,
@@ -276,7 +289,8 @@ public class UHCAdvancements {
 			SOLOIST,
 			LDAP,
 			NOT_NOW,
-			OFFICIALLY_BORED
+			OFFICIALLY_BORED,
+			DISTRACTED
 		);
 
 		EventHandler.register(new UHCEvents() {
@@ -303,6 +317,15 @@ public class UHCAdvancements {
 				if (lowest.get() != null) {
 					PlayerUtils.grantAdvancement(lowest.get().player, MOSTLY_HARMLESS);
 					PlayerUtils.grantAdvancement(highest.get().player, HEAVY_HITTER);
+				}
+			}
+		});
+
+		EventHandler.register(new MinecraftEvents() {
+			@Override
+			public void onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+				if (player.currentScreenHandler instanceof MinesweeperScreen) {
+					PlayerUtils.grantAdvancement(player, UHCAdvancements.DISTRACTED);
 				}
 			}
 		});

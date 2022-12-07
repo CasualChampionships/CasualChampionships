@@ -114,7 +114,7 @@ public class TeamUtils {
 			if (TeamUtils.shouldIgnoreTeam(team)) {
 				return;
 			}
-			playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 1f, 1f);
+			playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value(), SoundCategory.MASTER, 1f, 1f);
 			playerEntity.sendMessage(readyMessage, false);
 		});
 	}
@@ -145,7 +145,7 @@ public class TeamUtils {
 		player.sendMessage(Text.literal("You have been added to team ").append(team.getFormattedName()), false);
 		context.getSource().sendFeedback(Text.literal("Successfully added to team"), false);
 		player.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
-		player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL, SoundCategory.MASTER, 1.0F, 1.0F);
+		player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(), SoundCategory.MASTER, 1.0F, 1.0F);
 		player.getHungerManager().setSaturationLevel(20F);
 		EntityAttributeInstance instance = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 		if (instance != null) {

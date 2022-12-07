@@ -137,14 +137,14 @@ public class GameManager {
 			int i = integer.getAndDecrement();
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal(String.valueOf(i)).formatted(Formatting.GREEN)));
-				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 1.0F, 3.0F);
+				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 3.0F);
 			});
 		});
 
 		schedulePhaseTask(secondsToTicks(10), () -> {
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
-				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL, SoundCategory.MASTER, 1.0F, 1.0F);
+				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(), SoundCategory.MASTER, 1.0F, 1.0F);
 				playerEntity.getHungerManager().setSaturationLevel(20F);
 				EntityAttributeInstance instance = playerEntity.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 				if (instance != null) {
@@ -196,7 +196,7 @@ public class GameManager {
 					.formatted(Formatting.GOLD),
 				false
 			);
-			playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 1.0F, 1.0F);
+			playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 1.0F);
 		});
 
 		AtomicInteger integer = new AtomicInteger(10);
@@ -208,7 +208,7 @@ public class GameManager {
 						.formatted(Formatting.GOLD),
 					false
 				);
-				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 1.0F, 1.0F);
+				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 1.0F);
 			});
 		});
 

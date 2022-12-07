@@ -381,11 +381,11 @@ public class PlayerUtils {
 			return packet;
 		}
 
-		List<DataTracker.Entry<?>> trackedValues = packet.getTrackedValues();
+		List<DataTracker.SerializedEntry<?>> trackedValues = packet.trackedValues();
 		if (trackedValues == null) {
 			return packet;
 		}
-		if (trackedValues.stream().noneMatch(value -> value.getData() == Entity.FLAGS)) {
+		if (trackedValues.stream().noneMatch(value -> value.handler() == Entity.FLAGS.getType())) {
 			return packet;
 		}
 
@@ -394,20 +394,21 @@ public class PlayerUtils {
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 		packet.write(buf);
 		packet = new EntityTrackerUpdateS2CPacket(buf);
-		trackedValues = packet.getTrackedValues();
+		trackedValues = packet.trackedValues();
 
 		if (trackedValues == null) {
 			return null;
 		}
 
-		for (DataTracker.Entry<?> trackedValue : trackedValues) {
+		for (DataTracker.SerializedEntry<?> trackedValue : trackedValues) {
 			// Need to compare ids because they're not the same instance once re-serialized
-			if (trackedValue.getData().getId() == Entity.FLAGS.getId()) {
+			if (trackedValue.id() == Entity.FLAGS.getId()) {
 				@SuppressWarnings("unchecked")
-				DataTracker.Entry<Byte> byteTrackedValue = (DataTracker.Entry<Byte>) trackedValue;
-				byte flags = byteTrackedValue.get();
+				DataTracker.SerializedEntry<Byte> byteTrackedValue = (DataTracker.SerializedEntry<Byte>) trackedValue;
+				byte flags = byteTrackedValue.value();
 				flags |= 1 << Entity.GLOWING_FLAG_INDEX;
-				byteTrackedValue.set(flags);
+				// ??? TODO:
+				// byteTrackedValue.set(flags);
 			}
 		}
 

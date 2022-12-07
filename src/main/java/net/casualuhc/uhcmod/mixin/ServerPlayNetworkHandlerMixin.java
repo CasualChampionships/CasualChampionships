@@ -9,6 +9,7 @@ import net.casualuhc.uhcmod.utils.TeamUtils;
 import net.casualuhc.uhcmod.utils.screen.CustomScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
+import net.minecraft.network.encryption.PublicPlayerSession;
 import net.minecraft.network.message.*;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
@@ -18,6 +19,7 @@ import net.minecraft.server.filter.FilteredMessage;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,6 +30,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.concurrent.CompletableFuture;
 
+// TODO:
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
 	@Shadow
@@ -54,6 +57,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
 	@Shadow
 	protected abstract CompletableFuture<FilteredMessage> filterText(String text);
+
+	@Shadow private @Nullable PublicPlayerSession session;
 
 	@Redirect(method = "onClickSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;isSpectator()Z"))
 	private boolean canClick(ServerPlayerEntity instance) {
