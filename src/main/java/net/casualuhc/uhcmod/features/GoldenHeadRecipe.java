@@ -6,12 +6,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
+import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
 public class GoldenHeadRecipe extends SpecialCraftingRecipe {
 	public GoldenHeadRecipe() {
-		super(new Identifier("golden_head_recipe"));
+		super(new Identifier("golden_head_recipe"), CraftingRecipeCategory.MISC);
 	}
 
 	@Override

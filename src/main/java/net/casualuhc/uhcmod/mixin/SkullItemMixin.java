@@ -9,11 +9,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.SkullItem;
-import net.minecraft.item.WallStandingBlockItem;
+import net.minecraft.item.VerticallyAttachableBlockItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,9 +22,9 @@ import org.spongepowered.asm.mixin.Unique;
 import java.util.Objects;
 
 @Mixin(SkullItem.class)
-public class SkullItemMixin extends WallStandingBlockItem {
-	public SkullItemMixin(Block standingBlock, Block wallBlock, Settings settings) {
-		super(standingBlock, wallBlock, settings);
+public class SkullItemMixin extends VerticallyAttachableBlockItem {
+	public SkullItemMixin(Block standingBlock, Block wallBlock, Settings settings, Direction verticalAttachmentDirection) {
+		super(standingBlock, wallBlock, settings, verticalAttachmentDirection);
 	}
 
 	@Override

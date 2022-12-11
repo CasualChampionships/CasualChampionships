@@ -64,7 +64,7 @@ public abstract class CustomScreen extends ScreenHandler {;
 	public abstract void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player);
 
 	@Override
-	public final ItemStack transferSlot(PlayerEntity player, int index) {
+	public ItemStack quickMove(PlayerEntity player, int slot) {
 		throw new UnsupportedOperationException("Cannot transfer slots from within a CustomScreen");
 	}
 

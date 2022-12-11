@@ -15,9 +15,4 @@ public class MinecraftDedicatedServerMixin {
 	private void isSpawnProtected(ServerWorld world, BlockPos pos, PlayerEntity player, CallbackInfoReturnable<Boolean> cir) {
 		cir.setReturnValue(false);
 	}
-
-	@Inject(method = "shouldPreviewChat", at = @At("HEAD"), cancellable = true)
-	private void shouldPreviewChat(CallbackInfoReturnable<Boolean> cir) {
-		cir.setReturnValue(true);
-	}
 }
