@@ -3,6 +3,7 @@ package net.casualuhc.uhcmod.mixin;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.Config;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
@@ -47,7 +48,13 @@ public abstract class ServerWorldMixin {
         if (!GameManager.isGameActive()) {
             if (!player.hasPermissionLevel(2)) {
                 player.changeGameMode(GameMode.ADVENTURE);
-                player.teleport(UHCMod.SERVER.getOverworld(), 0, 253, 0, 0, 0);
+                player.teleport(
+                    UHCMod.SERVER.getOverworld(),
+                    Config.LOBBY_SPAWN.getX(),
+                    Config.LOBBY_SPAWN.getY(),
+                    Config.LOBBY_SPAWN.getZ(),
+                    0, 0
+                );
                 player.sendMessage(Text.literal("Welcome to Casual UHC!").formatted(Formatting.GOLD), false);
             } else {
                 player.changeGameMode(GameMode.CREATIVE);

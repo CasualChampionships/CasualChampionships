@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AdvancementManagerMixin",
+    "BoatEntityMixin",
     "BowItemMixin",
     "BrewingStandBlockEntityMixin",
     "CommandManagerMixin",

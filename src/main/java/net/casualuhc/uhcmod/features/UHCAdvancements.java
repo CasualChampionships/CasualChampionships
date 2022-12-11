@@ -44,6 +44,7 @@ public class UHCAdvancements {
 	public static final Advancement LDAP;
 	public static final Advancement NOT_NOW;
 	public static final Advancement OFFICIALLY_BORED;
+	public static final Advancement FIND_THE_BUTTON;
 
 	static {
 		ROOT = Advancement.Builder.create().display(
@@ -253,6 +254,15 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/officially_bored"));
 
+		FIND_THE_BUTTON = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
+			Items.STONE_BUTTON,
+			Text.literal("Find The Button"),
+			Text.literal("Follow the clues to find the button"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/find_the_button"));
+
 		UHC_ADVANCEMENTS = ImmutableSet.of(
 			ROOT,
 			FIRST_BLOOD,
@@ -276,7 +286,8 @@ public class UHCAdvancements {
 			SOLOIST,
 			LDAP,
 			NOT_NOW,
-			OFFICIALLY_BORED
+			OFFICIALLY_BORED,
+			FIND_THE_BUTTON
 		);
 
 		EventHandler.register(new UHCEvents() {

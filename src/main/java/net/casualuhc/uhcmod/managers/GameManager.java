@@ -18,6 +18,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
@@ -36,6 +37,7 @@ import net.minecraft.util.Clearable;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
@@ -44,6 +46,7 @@ import net.minecraft.world.World;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,6 +56,7 @@ import static net.casualuhc.uhcmod.utils.Scheduler.*;
 public class GameManager {
 	private static final List<Task> currentTasks = new LinkedList<>();
 	private static Phase phase = Phase.NONE;
+	private static StructureTemplate lobby;
 
 	private static int ticks;
 	private static boolean firstKill;
@@ -162,6 +166,8 @@ public class GameManager {
 					playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, secondsToTicks(5), 4, true, false));
 					playerEntity.sendMessage(Text.literal("You can disable the coordinates above your hotbar by using /coords"), false);
 					playerEntity.getInventory().clear();
+					playerEntity.playerScreenHandler.clearCraftingSlots();
+					playerEntity.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
 					playerEntity.setExperienceLevel(0);
 					PlayerUtils.setPlayerPlaying(playerEntity, true);
 				} else {
@@ -171,19 +177,8 @@ public class GameManager {
 				playerEntity.dismountVehicle();
 			});
 
+			deleteLobby();
 			MinecraftServer server = UHCMod.SERVER;
-			ServerWorld world = server.getOverworld();
-			for (BlockPos pos : BlockPos.iterate(-32, 240, -31, 27, 316, 26)) {
-				BlockEntity blockEntity = world.getBlockEntity(pos);
-				Clearable.clear(blockEntity);
-				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS, 0);
-			}
-			for (Entity entity : world.iterateEntities()) {
-				if (entity.getScoreboardTags().contains("uhc")) {
-					entity.kill();
-				}
-			}
-
 			server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
 			EventHandler.onActive();
 		});
@@ -292,22 +287,28 @@ public class GameManager {
 
 	public static void generateLobby() {
 		try {
-			InputStream inputStream = GameManager.class.getClassLoader().getResourceAsStream("assets/uhcmod/structures/lobby.nbt");
-			if (inputStream == null) {
-				throw new IOException("Could not find lobby structure");
-			}
-			NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
-			StructureTemplate lobbyStructure = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
-			BlockPos pos = new BlockPos(-26, 242, -26);
-			lobbyStructure.place(UHCMod.SERVER.getOverworld(), pos, pos, new StructurePlacementData(), Random.create(), 3);
+			deleteLobby();
+			Vec3i dimensions = getLobby().getSize();
+			int x = -dimensions.getX() / 2;
+			int y = UHCMod.SERVER.getOverworld().getTopY() - dimensions.getY() - 10;
+			int z = -dimensions.getZ() / 2;
+			BlockPos pos = new BlockPos(x, y ,z);
+			getLobby().place(UHCMod.SERVER.getOverworld(), pos, pos, new StructurePlacementData(), Random.create(), 3);
 			PlayerUtils.forEveryPlayer(playerEntity -> {
 				if (!playerEntity.hasPermissionLevel(2)) {
 					playerEntity.interactionManager.changeGameMode(GameMode.ADVENTURE);
+				} else {
+					playerEntity.sendMessage(Text.literal(ChatColour.GREEN + "Successfully generated lobby!"), false);
 				}
-				playerEntity.teleport(UHCMod.SERVER.getOverworld(), 0, 253, 0, 0, 0);
-				playerEntity.sendMessage(Text.literal(ChatColour.GREEN + "Successfully generated lobby!"), false);
+				playerEntity.teleport(
+					UHCMod.SERVER.getOverworld(),
+					Config.LOBBY_SPAWN.getX(),
+					Config.LOBBY_SPAWN.getY(),
+					Config.LOBBY_SPAWN.getZ(),
+					0, 0
+				);
 			});
-		} catch (IOException e) {
+		} catch (Exception e) {
 			UHCMod.LOGGER.error("Failed to generate lobby", e);
 		}
 	}
@@ -383,12 +384,44 @@ public class GameManager {
 		}
 	}
 
+	public static StructureTemplate getLobby() {
+		if (lobby == null) {
+			try {
+				InputStream inputStream = Files.newInputStream(Config.getConfig("lobby.nbt"));
+				NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
+				lobby = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
+			} catch (Exception e) {
+				throw new IllegalStateException("Failed to load lobby.nbt");
+			}
+		}
+		return lobby;
+	}
+
 	public static void schedulePhaseTask(int ticks, Runnable runnable) {
 		currentTasks.add(schedule(ticks, runnable));
 	}
 
 	public static void scheduleInLoopPhaseTask(int delay, int interval, int until, Runnable runnable) {
 		currentTasks.add(scheduleInLoop(delay, interval, until, runnable));
+	}
+
+	private static void deleteLobby() {
+		ServerWorld world = UHCMod.SERVER.getOverworld();
+		Vec3i dimensions = getLobby().getSize();
+		int startY = world.getTopY() - dimensions.getY() - 11;
+		int endY = world.getTopY();
+		int startX = -(dimensions.getX() / 2 + 1);
+		int startZ = -(dimensions.getZ() / 2 + 1);
+		for (BlockPos pos : BlockPos.iterate(startX, startY, startZ, -startX, endY, -startZ)) {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			Clearable.clear(blockEntity);
+			world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS, 0);
+		}
+		for (Entity entity : world.iterateEntities()) {
+			if (entity != null && entity.getScoreboardTags().contains("uhc")) {
+				entity.kill();
+			}
+		}
 	}
 }
 
