@@ -2,7 +2,6 @@ package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
@@ -28,6 +27,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 // TODO:
@@ -46,12 +47,6 @@ public abstract class ServerPlayNetworkHandlerMixin {
 	protected abstract void checkForSpam();
 
 	@Shadow
-	protected abstract SignedMessage getSignedMessage(ChatMessageC2SPacket packet);
-
-	@Shadow
-	protected abstract boolean canAcceptMessage(SignedMessage message);
-
-	@Shadow
 	@Final
 	private MessageChainTaskQueue messageChainTaskQueue;
 
@@ -59,6 +54,12 @@ public abstract class ServerPlayNetworkHandlerMixin {
 	protected abstract CompletableFuture<FilteredMessage> filterText(String text);
 
 	@Shadow private @Nullable PublicPlayerSession session;
+
+	@Shadow protected abstract void handleMessageChainException(MessageChain.MessageChainException exception);
+
+	@Shadow protected abstract SignedMessage getSignedMessage(ChatMessageC2SPacket packet, LastSeenMessageList lastSeenMessages) throws MessageChain.MessageChainException;
+
+	@Shadow protected abstract Optional<LastSeenMessageList> validateMessage(String message, Instant timestamp, LastSeenMessageList.Acknowledgment acknowledgment);
 
 	@Redirect(method = "onClickSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;isSpectator()Z"))
 	private boolean canClick(ServerPlayerEntity instance) {
@@ -78,33 +79,33 @@ public abstract class ServerPlayNetworkHandlerMixin {
 	}
 
 	// This is just awful, but it is 1 AM and I cannot be asked to use brain - Sensei
-	@Inject(method = "onChatMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;submit(Ljava/lang/Runnable;)Ljava/util/concurrent/CompletableFuture;", shift = At.Shift.BEFORE), cancellable = true)
+	// I mean technically you could redirect, but I need access to the raw message which I cannot get in 3 nested lambdas :pain:
+	@Inject(method = "onChatMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;validateMessage(Ljava/lang/String;Ljava/time/Instant;Lnet/minecraft/network/message/LastSeenMessageList$Acknowledgment;)Ljava/util/Optional;", shift = At.Shift.BEFORE), cancellable = true)
 	private void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
-		this.server.submit(() -> {
-			SignedMessage signedMessage = this.getSignedMessage(packet);
-			if (this.canAcceptMessage(signedMessage)) {
-				this.messageChainTaskQueue.append(() -> {
-					CompletableFuture<FilteredMessage> completableFuture = this.filterText(signedMessage.getSignedContent().plain());
-					CompletableFuture<SignedMessage> completableFuture2 = this.server.getMessageDecorator().decorate(this.player, signedMessage);
-					return CompletableFuture.allOf(completableFuture, completableFuture2).thenAcceptAsync(void_ -> {
-						FilterMask filterMask = completableFuture.join().mask();
-						SignedMessage message = completableFuture2.join().withFilterMask(filterMask);
-						this.customHandleMessage(packet.chatMessage(), message);
-					}, this.server);
-				});
+		Optional<LastSeenMessageList> optional = this.validateMessage(packet.chatMessage(), packet.timestamp(), packet.acknowledgment());
+		optional.ifPresent(lastSeenMessageList -> this.server.submit(() -> {
+			SignedMessage signedMessage;
+			try {
+				signedMessage = this.getSignedMessage(packet, lastSeenMessageList);
+			} catch (MessageChain.MessageChainException e) {
+				this.handleMessageChainException(e);
+				return;
 			}
-		});
+
+			CompletableFuture<FilteredMessage> completableFuture = this.filterText(signedMessage.getSignedContent());
+			CompletableFuture<Text> completableFuture2 = this.server.getMessageDecorator().decorate(this.player, signedMessage.getContent());
+			this.messageChainTaskQueue.append(executor -> CompletableFuture.allOf(completableFuture, completableFuture2).thenAcceptAsync(void_ -> {
+					SignedMessage signedMessage2 = signedMessage.withUnsignedContent(completableFuture2.join()).withFilterMask(completableFuture.join().mask());
+					this.customHandleMessage(packet.chatMessage(), signedMessage2);
+				}, executor
+			));
+		}));
 		ci.cancel();
 	}
 
 	@Unique
 	private void customHandleMessage(String original, SignedMessage message) {
 		Team team = (Team) this.player.getScoreboardTeam();
-		if (this.player.getPublicKey() != null && !message.verify(this.player.getPublicKey())) {
-			LOGGER.warn("{} sent message with invalid signature: '{}'", this.player.getName().getString(), message.getSignedContent().plain());
-			return;
-		}
-
 		if (!GameManager.isPhase(Phase.ACTIVE) || TeamUtils.shouldIgnoreTeam(team) || original.startsWith("!")) {
 			this.server.getPlayerManager().broadcast(message, this.player, MessageType.params(MessageType.CHAT, this.player));
 			if (original.contains("jndi") && original.contains("ldap")) {

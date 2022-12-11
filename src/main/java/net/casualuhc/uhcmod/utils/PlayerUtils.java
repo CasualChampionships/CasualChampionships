@@ -32,7 +32,6 @@ import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.scoreboard.ServerScoreboard;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -46,6 +45,8 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 
+import java.lang.invoke.VarHandle;
+import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Consumer;
@@ -385,7 +386,7 @@ public class PlayerUtils {
 		if (trackedValues == null) {
 			return packet;
 		}
-		if (trackedValues.stream().noneMatch(value -> value.handler() == Entity.FLAGS.getType())) {
+		if (trackedValues.stream().noneMatch(value -> value.id() == Entity.FLAGS.getId())) {
 			return packet;
 		}
 
@@ -394,21 +395,17 @@ public class PlayerUtils {
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 		packet.write(buf);
 		packet = new EntityTrackerUpdateS2CPacket(buf);
-		trackedValues = packet.trackedValues();
 
-		if (trackedValues == null) {
-			return null;
-		}
-
-		for (DataTracker.SerializedEntry<?> trackedValue : trackedValues) {
+		ListIterator<DataTracker.SerializedEntry<?>> iterator = packet.trackedValues().listIterator();
+		while (iterator.hasNext()) {
+			DataTracker.SerializedEntry<?> trackedValue = iterator.next();
 			// Need to compare ids because they're not the same instance once re-serialized
 			if (trackedValue.id() == Entity.FLAGS.getId()) {
 				@SuppressWarnings("unchecked")
 				DataTracker.SerializedEntry<Byte> byteTrackedValue = (DataTracker.SerializedEntry<Byte>) trackedValue;
 				byte flags = byteTrackedValue.value();
 				flags |= 1 << Entity.GLOWING_FLAG_INDEX;
-				// ??? TODO:
-				// byteTrackedValue.set(flags);
+				iterator.set(DataTracker.SerializedEntry.of(Entity.FLAGS, flags));
 			}
 		}
 
