@@ -2,7 +2,6 @@ package net.casualuhc.uhcmod.managers;
 
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.interfaces.IntRuleMixinInterface;
 import net.casualuhc.uhcmod.utils.*;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
@@ -44,7 +43,6 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.LinkedList;
@@ -324,10 +322,12 @@ public class GameManager {
 		gameRules.get(GameRules.FALL_DAMAGE).set(false, server);
 		gameRules.get(GameRules.DROWNING_DAMAGE).set(false, server);
 		gameRules.get(GameRules.DO_ENTITY_DROPS).set(false, server);
+		gameRules.get(GameRules.DO_WEATHER_CYCLE).set(false, server);
+		gameRules.get(GameRules.SNOW_ACCUMULATION_HEIGHT).set(0, server);
+		gameRules.get(GameRules.RANDOM_TICK_SPEED).set(0, server);
 		server.setDifficulty(Difficulty.PEACEFUL, true);
 		server.getOverworld().setTimeOfDay(6000); // 6000 = noon
 		server.getOverworld().setWeather(999999, 0, false, false);
-		((IntRuleMixinInterface) server.getGameRules().get(GameRules.RANDOM_TICK_SPEED)).setIntegerValue(0, server);
 		server.getOverworld().setSpawnPos(new BlockPos(0, 250, 0), 0);
 		server.getOverworld().getWorldBorder().setCenter(0, 0);
 		server.getWorlds().forEach(serverWorld -> {
@@ -374,8 +374,10 @@ public class GameManager {
 		gameRules.get(GameRules.FALL_DAMAGE).set(true, server);
 		gameRules.get(GameRules.DROWNING_DAMAGE).set(true, server);
 		gameRules.get(GameRules.DO_ENTITY_DROPS).set(true, server);
+		gameRules.get(GameRules.DO_WEATHER_CYCLE).set(true, server);
+		gameRules.get(GameRules.SNOW_ACCUMULATION_HEIGHT).set(1, server);
+		gameRules.get(GameRules.RANDOM_TICK_SPEED).set(3, server);
 		server.setDifficulty(Difficulty.HARD, true);
-		((IntRuleMixinInterface) server.getGameRules().get(GameRules.RANDOM_TICK_SPEED)).setIntegerValue(3, server);
 		server.getOverworld().setTimeOfDay(0);
 		if (UHCMod.HAS_CARPET) {
 			CommandManager commandManager = server.getCommandManager();

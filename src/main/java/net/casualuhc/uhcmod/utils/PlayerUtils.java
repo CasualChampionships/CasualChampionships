@@ -449,4 +449,13 @@ public class PlayerUtils {
 		}
 		return true;
 	}
+
+	public static void musicLoop(ServerPlayerEntity player) {
+		if (GameManager.isPhase(Phase.LOBBY) && PlayerExtension.get(player).hasResourcePack) {
+			player.playSound(SoundEvents.MUSIC_DISC_5, SoundCategory.RECORDS, 1.0f, 1.0f);
+			Scheduler.schedule(Scheduler.minutesToTicks(5), () -> {
+				musicLoop(player);
+			});
+		}
+	}
 }

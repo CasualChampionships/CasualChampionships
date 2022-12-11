@@ -5,12 +5,14 @@ import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.Phase;
 import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.screen.CustomScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.encryption.PublicPlayerSession;
 import net.minecraft.network.message.*;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
+import net.minecraft.network.packet.c2s.play.ResourcePackStatusC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
@@ -76,6 +78,11 @@ public abstract class ServerPlayNetworkHandlerMixin {
 		}
 
 		return packet;
+	}
+
+	@Inject(method = "onResourcePackStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V", shift = At.Shift.AFTER))
+	private void onResourcePackStatus(ResourcePackStatusC2SPacket packet, CallbackInfo ci) {
+		PlayerExtension.get(this.player).hasResourcePack = packet.getStatus() == ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED;
 	}
 
 	// This is just awful, but it is 1 AM and I cannot be asked to use brain - Sensei

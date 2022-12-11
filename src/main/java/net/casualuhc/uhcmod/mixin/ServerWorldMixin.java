@@ -15,6 +15,8 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -55,7 +57,6 @@ public abstract class ServerWorldMixin {
                     Config.LOBBY_SPAWN.getZ(),
                     0, 0
                 );
-                player.sendMessage(Text.literal("Welcome to Casual UHC!").formatted(Formatting.GOLD), false);
             } else {
                 player.changeGameMode(GameMode.CREATIVE);
                 AbstractTeam team = player.getScoreboardTeam();
@@ -66,6 +67,8 @@ public abstract class ServerWorldMixin {
                     }
                 }
             }
+            player.sendMessage(Text.literal("Welcome to Casual UHC!").formatted(Formatting.GOLD), false);
+            Scheduler.schedule(Scheduler.secondsToTicks(10), () -> PlayerUtils.musicLoop(player));
         } else if (player.getScoreboardTeam() == null || !PlayerUtils.isPlayerPlaying(player)){
             player.changeGameMode(GameMode.SPECTATOR);
         }
