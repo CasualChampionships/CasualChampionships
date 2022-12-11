@@ -27,6 +27,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.PlaceableOnWaterItem;
 import net.minecraft.item.SkullItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
@@ -45,8 +46,6 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 
-import java.lang.invoke.VarHandle;
-import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Consumer;
@@ -54,8 +53,9 @@ import java.util.function.Consumer;
 public class PlayerUtils {
 	private static final MutableText HEADER = Text.literal("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
 	private static final MutableText FOOTER = Text.literal("\nServer Hosted By KiwiTech").formatted(Formatting.AQUA, Formatting.BOLD);
-	private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
-	private static final ItemStack GOLDEN_HEAD = Util.make(generatePlayerHead("PhantomTupac"), i -> i.setCustomName(Text.literal("Golden Head").formatted(Formatting.GOLD).styled(s -> s.withItalic(false))));
+	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.0");
+	private static final String TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmNhYWQ4NmM3MDhlYjI3NzczYTY0ZjkzNDc5ZTM5ZjA0NDJhNWNlMDg2YjYzMjk2YzdiN2QxY2Y1MTE2MDk1NiJ9fX0=";
+	private static final ItemStack GOLDEN_HEAD = Util.make(generatePlayerHead("PhantomTupac", TEXTURE), i -> i.setCustomName(Text.literal("Golden Head").formatted(Formatting.GOLD).styled(s -> s.withItalic(false))));
 
 	private static final Map<String, Boolean> isPlayerPlayingMap = new HashMap<>();
 
@@ -154,12 +154,29 @@ public class PlayerUtils {
 	}
 
 	public static ItemStack generatePlayerHead(String playerName) {
+		return generatePlayerHead(playerName, null);
+	}
+
+	public static ItemStack generatePlayerHead(String playerName, String texture) {
 		NbtCompound compound = new NbtCompound();
 		compound.putString("id", "player_head");
 		compound.putByte("Count", (byte) 1);
 
+
+		NbtCompound skullData = new NbtCompound();
+		skullData.putString("Name", playerName);
+		if (texture != null) {
+			NbtCompound textureCompound = new NbtCompound();
+			textureCompound.putString("Value", texture);
+			NbtList textures = new NbtList();
+			textures.add(textureCompound);
+			NbtCompound properties = new NbtCompound();
+			properties.put("textures", textures);
+			skullData.put("Properties", properties);
+		}
+
 		NbtCompound playerData = new NbtCompound();
-		playerData.putString(SkullItem.SKULL_OWNER_KEY, playerName);
+		playerData.put(SkullItem.SKULL_OWNER_KEY, skullData);
 
 		compound.put("tag", playerData);
 
@@ -190,7 +207,7 @@ public class PlayerUtils {
 			Formatting formatting = ticksPerSecond == 20 ? Formatting.DARK_GREEN : ticksPerSecond > 15 ? Formatting.YELLOW : ticksPerSecond > 10 ? Formatting.RED : Formatting.DARK_RED;
 			playerEntity.networkHandler.sendPacket(new PlayerListHeaderS2CPacket(
 				HEADER,
-				Text.literal("\nServer TPS: ").append(Text.literal(decimalFormat.format(ticksPerSecond)).formatted(formatting)).append(FOOTER)
+				Text.literal("\nServer TPS: ").append(Text.literal(DECIMAL_FORMAT.format(ticksPerSecond)).formatted(formatting)).append(FOOTER)
 			));
 		}
 
