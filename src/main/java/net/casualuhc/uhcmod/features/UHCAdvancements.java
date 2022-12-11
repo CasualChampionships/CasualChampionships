@@ -47,6 +47,7 @@ public class UHCAdvancements {
 	public static final Advancement LDAP;
 	public static final Advancement NOT_NOW;
 	public static final Advancement OFFICIALLY_BORED;
+	public static final Advancement FIND_THE_BUTTON;
 	public static final Advancement DISTRACTED;
 
 	static {
@@ -257,7 +258,7 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/officially_bored"));
 
-		DISTRACTED = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
+    DISTRACTED = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
 			Items.CHAIN_COMMAND_BLOCK,
 			Text.literal("Distracted"),
 			Text.literal("Die while playing minesweeper"),
@@ -265,6 +266,15 @@ public class UHCAdvancements {
 			AdvancementFrame.TASK,
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/distracted"));
+
+		FIND_THE_BUTTON = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
+			Items.STONE_BUTTON,
+			Text.literal("Find The Button"),
+			Text.literal("Follow the clues to find the button"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/find_the_button"));
 
 		UHC_ADVANCEMENTS = ImmutableSet.of(
 			ROOT,
@@ -290,7 +300,8 @@ public class UHCAdvancements {
 			LDAP,
 			NOT_NOW,
 			OFFICIALLY_BORED,
-			DISTRACTED
+      DISTRACTED,
+			FIND_THE_BUTTON
 		);
 
 		EventHandler.register(new UHCEvents() {

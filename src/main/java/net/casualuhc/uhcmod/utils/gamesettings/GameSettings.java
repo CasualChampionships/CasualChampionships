@@ -42,6 +42,7 @@ public class GameSettings {
 	public static final GameSetting.BooleanGameSetting GENERATE_PORTAL;
 	public static final GameSetting.BooleanGameSetting TESTING;
 	public static final GameSetting.BooleanGameSetting MINESWEEPER_ANNOUNCEMENT;
+	public static final GameSetting.BooleanGameSetting HEADS_CONSUMABLE;
 
 	public static final GameSetting.EnumGameSetting<Stage> WORLD_BORDER_STAGE;
 
@@ -145,6 +146,12 @@ public class GameSettings {
 
 		MINESWEEPER_ANNOUNCEMENT = new GameSetting.BooleanGameSetting(
 			ItemUtil.named(Items.JUKEBOX, "Minesweeper Announcement"),
+			getBooleanRuleOptions(),
+			true
+		);
+
+		HEADS_CONSUMABLE = new GameSetting.BooleanGameSetting(
+			PlayerUtils.generateGoldenHead().setCustomName(Text.of("Consumable Heads")),
 			getBooleanRuleOptions(),
 			true
 		);

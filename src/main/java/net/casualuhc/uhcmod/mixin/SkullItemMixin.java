@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod.mixin;
 
+import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.minecraft.block.Block;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -28,6 +29,9 @@ public class SkullItemMixin extends VerticallyAttachableBlockItem {
 
 	@Override
 	public ActionResult useOnBlock(ItemUsageContext context) {
+		if (!GameSettings.HEADS_CONSUMABLE.getValue()) {
+			return super.useOnBlock(context);
+		}
 		PlayerEntity player = context.getPlayer();
 		if (player != null) {
 			this.giveEffects(player, context.getStack(), context.getHand());
@@ -38,6 +42,9 @@ public class SkullItemMixin extends VerticallyAttachableBlockItem {
 
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+		if (!GameSettings.HEADS_CONSUMABLE.getValue()) {
+			return super.use(world, player, hand);
+		}
 		ItemStack stack = player.getStackInHand(hand);
 		this.giveEffects(player, stack, hand);
 		return TypedActionResult.consume(player.getStackInHand(hand));
