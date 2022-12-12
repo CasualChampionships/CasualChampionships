@@ -1,12 +1,34 @@
 package net.casualuhc.uhcmod.utils.uhc;
 
+import net.minecraft.entity.boss.BossBar;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 public interface Event {
 	Event DEFAULT = new Event() { };
 	Vec3d DEFAULT_SPAWN = new Vec3d(0, 320, 0);
+
+	/**
+	 * Returns the message displayed on the lobby boss bar.
+	 *
+	 * @return the message to display.
+	 */
+	default MutableText getBossBarMessage() {
+		return Text.literal("Welcome to Casual UHC!").formatted(Formatting.BOLD);
+	}
+
+	/**
+	 * Returns the colour the lobby boss bar should be.
+	 *
+	 * @return the boss bar colour.
+	 */
+	default BossBar.Color getBossBarColour() {
+		return BossBar.Color.BLUE;
+	}
 
 	/**
 	 * Returns the resource pack properties

@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -25,12 +26,32 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.TimeZone;
+
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class UHCCommand {
 	public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
 		dispatcher.register(literal("uhc").requires(source -> source.hasPermissionLevel(4))
+			.then(literal("setstart")
+				.then(argument("time", StringArgumentType.greedyString())
+					.executes(context -> {
+						String time = context.getArgument("time", String.class);
+						context.getSource().sendFeedback(
+							Text.literal("Start starting time to: %s in UTC".formatted(time)), false
+						);
+
+						GameManager.setStartTime(LocalTime.parse(time).toEpochSecond(LocalDate.now(), ZoneOffset.UTC) * 1000);
+						return 1;
+					})
+				)
+			)
 			.then(literal("team")
 				.then(literal("reload")
 					.executes(context -> {

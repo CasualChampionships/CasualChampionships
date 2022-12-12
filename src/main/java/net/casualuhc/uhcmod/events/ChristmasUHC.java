@@ -7,11 +7,14 @@ import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.uhc.Event;
 import net.casualuhc.uhcmod.utils.uhc.ItemUtils;
+import net.minecraft.entity.boss.BossBar;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Items;
 import net.minecraft.server.MinecraftServer.ServerResourcePackProperties;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +26,22 @@ public class ChristmasUHC implements Event {
 		"09b7b5f2cd8e5ff163174d38a08d1919ea51b346",
 		false, Text.literal("This texture pack provides some festive features!")
 	);
+
+	@Override
+	public MutableText getBossBarMessage() {
+		return Text.literal("Welcome").formatted(Formatting.RED, Formatting.BOLD)
+			.append(" ")
+			.append(Text.literal("to").formatted(Formatting.WHITE, Formatting.BOLD))
+			.append(" ")
+			.append(Text.literal("Casual").formatted(Formatting.RED, Formatting.BOLD))
+			.append(" ")
+			.append(Text.literal("UHC").formatted(Formatting.WHITE, Formatting.BOLD));
+	}
+
+	@Override
+	public BossBar.Color getBossBarColour() {
+		return BossBar.Color.WHITE;
+	}
 
 	@Nullable
 	@Override

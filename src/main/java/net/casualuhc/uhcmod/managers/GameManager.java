@@ -18,6 +18,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.boss.BossBarManager;
+import net.minecraft.entity.boss.CommandBossBar;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
@@ -30,20 +32,22 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureTemplate;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Clearable;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.casualuhc.uhcmod.utils.scheduling.Scheduler.*;
@@ -54,8 +58,9 @@ public class GameManager {
 
 	private static Phase phase = Phase.NONE;
 	private static StructureTemplate lobby;
-	private static List<BlockPos> musicPositions;
+	private static CommandBossBar bossBar;
 
+	private static long startTime = Long.MAX_VALUE;
 	private static int ticks;
 
 	private GameManager() { }
@@ -125,6 +130,15 @@ public class GameManager {
 	}
 
 	/**
+	 * Sets the UHC start time (from epoch in milliseconds).
+	 *
+	 * @param newStartTime the new start time.
+	 */
+	public static void setStartTime(long newStartTime) {
+		startTime = newStartTime;
+	}
+
+	/**
 	 * Whether the UHC is currently active.
 	 *
 	 * @return whether the UHC is active.
@@ -175,6 +189,13 @@ public class GameManager {
 	static {
 		EventHandler.register(new MinecraftEvents() {
 			@Override
+			public void onPlayerJoin(ServerPlayerEntity player) {
+				if (isPhase(Phase.LOBBY) && bossBar != null) {
+					bossBar.addPlayer(player);
+				}
+			}
+
+			@Override
 			public void onPlayerLeave(ServerPlayerEntity player) {
 				UHCDataBase.updateStats(player);
 			}
@@ -182,6 +203,14 @@ public class GameManager {
 			@Override
 			public void onServerTick(MinecraftServer server) {
 				ticks++;
+				if (isPhase(Phase.LOBBY) && bossBar != null && ticks % 100 == 0 && startTime - 30 * 60 * 1000 < System.currentTimeMillis()) {
+					long millisLeft = startTime - System.currentTimeMillis();
+					float percentLeft = millisLeft / (float) (30 * 60 * 1000);
+					bossBar.setPercent(MathHelper.clamp(1 - percentLeft, 0, 1));
+					long minutesLeft = millisLeft / (60 * 1000);
+					MutableText startTime = minutesLeft <= 0 ? Text.literal("Starting Soon!") : Text.literal("Starting in %d minute%s!".formatted(minutesLeft, minutesLeft == 1 ? "" : "s"));
+					bossBar.setName(Config.CURRENT_EVENT.getBossBarMessage().append(". ").append(startTime.formatted(Formatting.GREEN, Formatting.BOLD)));
+				}
 			}
 		});
 
@@ -189,6 +218,7 @@ public class GameManager {
 			@Override
 			public void onSetup() {
 				setPhase(Phase.SETUP);
+				deleteAllBossBars();
 				UHCUtils.setLobbyGamerules();
 			}
 
@@ -196,11 +226,13 @@ public class GameManager {
 			public void onLobby() {
 				setPhase(Phase.LOBBY);
 				generateLobby();
+				generateBossBar();
 			}
 
 			@Override
 			public void onReady() {
 				setPhase(Phase.READY);
+				hideBossBar();
 			}
 
 			@Override
@@ -357,6 +389,51 @@ public class GameManager {
 		});
 	}
 
+	private static void generateBossBar() {
+		if (bossBar == null) {
+			BossBarManager manager = UHCMod.SERVER.getBossBarManager();
+			Identifier id = Identifier.of("uhc", "lobby");
+			bossBar = manager.get(id);
+			if (bossBar == null) {
+				bossBar = manager.add(id, Config.CURRENT_EVENT.getBossBarMessage());
+			}
+		} else {
+			bossBar.setName(Config.CURRENT_EVENT.getBossBarMessage());
+		}
+		bossBar.setColor(Config.CURRENT_EVENT.getBossBarColour());
+		PlayerManager.forEveryPlayer(p -> {
+			bossBar.addPlayer(p);
+		});
+	}
+
+	private static void hideBossBar() {
+		if (bossBar != null) {
+			bossBar.clearPlayers();
+		}
+	}
+
+	private static void deleteAllBossBars() {
+		BossBarManager manager = UHCMod.SERVER.getBossBarManager();
+		CommandBossBar[] bossBars = manager.getAll().toArray(CommandBossBar[]::new);
+		for (CommandBossBar bar : bossBars) {
+			bar.clearPlayers();
+			manager.remove(bar);
+		}
+	}
+
+	private static StructureTemplate getLobby() {
+		if (lobby == null) {
+			try {
+				InputStream inputStream = Files.newInputStream(Config.getConfig("lobbies").resolve(Config.CURRENT_EVENT.getLobbyName() + ".nbt"));
+				NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
+				lobby = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
+			} catch (Exception e) {
+				throw new IllegalStateException("Failed to load lobby structure");
+			}
+		}
+		return lobby;
+	}
+
 	private static void generateLobby() {
 		try {
 			deleteLobby();
@@ -378,35 +455,6 @@ public class GameManager {
 		} catch (Exception e) {
 			UHCMod.LOGGER.error("Failed to generate lobby", e);
 		}
-	}
-
-	public static StructureTemplate getLobby() {
-		if (lobby == null) {
-			try {
-				InputStream inputStream = Files.newInputStream(Config.getConfig("lobbies").resolve(Config.CURRENT_EVENT.getLobbyName() + ".nbt"));
-				NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
-				lobby = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
-			} catch (Exception e) {
-				throw new IllegalStateException("Failed to load lobby structure");
-			}
-		}
-		return lobby;
-	}
-
-	public static List<BlockPos> getMusicPositions() {
-		if (musicPositions == null) {
-			musicPositions = new ArrayList<>();
-			Vec3i dimensions = getLobby().getSize();
-			int x = -dimensions.getX() / 2;
-			int y = UHCMod.SERVER.getOverworld().getTopY() - dimensions.getY() / 2;
-			int z = -dimensions.getZ() / 2;
-			for (int nx = x; nx < -x; nx += 10) {
-				for (int nz = z; nz < -z; nz += 10) {
-					musicPositions.add(new BlockPos(nx, y, nz));
-				}
-			}
-		}
-		return musicPositions;
 	}
 
 	private static void deleteLobby() {
