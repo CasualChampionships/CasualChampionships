@@ -136,6 +136,10 @@ public class GameManager {
 	 */
 	public static void setStartTime(long newStartTime) {
 		startTime = newStartTime;
+
+		if (startTime - 30 * 60 * 1000 >= System.currentTimeMillis()) {
+			generateBossBar();
+		}
 	}
 
 	/**
@@ -400,6 +404,7 @@ public class GameManager {
 		} else {
 			bossBar.setName(Config.CURRENT_EVENT.getBossBarMessage());
 		}
+		bossBar.setPercent(1);
 		bossBar.setColor(Config.CURRENT_EVENT.getBossBarColour());
 		PlayerManager.forEveryPlayer(p -> {
 			bossBar.addPlayer(p);
