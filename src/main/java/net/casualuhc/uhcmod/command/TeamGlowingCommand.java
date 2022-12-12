@@ -3,8 +3,8 @@ package net.casualuhc.uhcmod.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -18,7 +18,7 @@ public class TeamGlowingCommand {
 		ServerPlayerEntity entity = context.getSource().getPlayerOrThrow();
 		PlayerExtension extension = PlayerExtension.get(entity);
 		extension.shouldGlow = !extension.shouldGlow;
-		PlayerUtils.forceUpdateGlowing();
+		PlayerManager.forceUpdateGlowing();
 		return 1;
 	}
 }

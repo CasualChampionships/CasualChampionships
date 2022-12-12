@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.utils;
+package net.casualuhc.uhcmod.utils.uhc;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -8,6 +8,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 
+// Blame Kerb
+@Deprecated
 public class Spectator {
     private static ServerPlayerEntity cameraman;
 

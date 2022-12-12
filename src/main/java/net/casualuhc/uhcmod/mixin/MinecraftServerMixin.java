@@ -2,7 +2,7 @@ package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.features.UHCMessageDecorator;
-import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.utils.uhc.UHCUtils;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
 import net.minecraft.network.message.MessageDecorator;
@@ -24,7 +24,7 @@ public class MinecraftServerMixin {
 
     @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerMetadata;setDescription(Lnet/minecraft/text/Text;)V", shift = At.Shift.AFTER))
     private void afterDescriptionSet(CallbackInfo ci) {
-        GameManager.setDescriptor((MinecraftServer) (Object) this);
+        UHCUtils.setDescriptor((MinecraftServer) (Object) this);
     }
 
     @Inject(method = "tick", at = @At("TAIL"))

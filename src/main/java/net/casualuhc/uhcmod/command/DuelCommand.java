@@ -2,7 +2,7 @@ package net.casualuhc.uhcmod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -13,7 +13,7 @@ public class DuelCommand {
 		dispatcher.register(literal("duel").executes(c -> {
 			// TODO: Implement duels
 			ServerPlayerEntity player = c.getSource().getPlayerOrThrow();
-			PlayerUtils.grantAdvancement(player, UHCAdvancements.NOT_NOW);
+			PlayerManager.grantAdvancement(player, UHCAdvancements.NOT_NOW);
 			return 1;
 		}));
 	}

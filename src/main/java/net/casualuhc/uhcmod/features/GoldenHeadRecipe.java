@@ -1,6 +1,6 @@
 package net.casualuhc.uhcmod.features;
 
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -33,7 +33,7 @@ public class GoldenHeadRecipe extends SpecialCraftingRecipe {
 
 	@Override
 	public ItemStack craft(CraftingInventory inventory) {
-		return PlayerUtils.generateGoldenHead();
+		return PlayerManager.generateGoldenHead();
 	}
 
 	@Override

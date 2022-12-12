@@ -2,7 +2,8 @@ package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.utils.uhc.OneTimeAchievement;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -22,8 +23,8 @@ public abstract class ItemStackMixin {
 
 	@Inject(method = "onCraft", at = @At("HEAD"))
 	private void onCraft(World world, PlayerEntity player, int amount, CallbackInfo ci) {
-		if (player instanceof ServerPlayerEntity serverPlayer && this.getItem() == Items.CRAFTING_TABLE && GameManager.tryFirstCraft()) {
-			PlayerUtils.grantAdvancement(serverPlayer, UHCAdvancements.WORLD_RECORD_PACE);
+		if (player instanceof ServerPlayerEntity serverPlayer && this.getItem() == Items.CRAFTING_TABLE && GameManager.isUnclaimed(OneTimeAchievement.CRAFT)) {
+			PlayerManager.grantAdvancement(serverPlayer, UHCAdvancements.WORLD_RECORD_PACE);
 		}
 	}
 }

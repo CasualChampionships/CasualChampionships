@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.RedstoneWireBlock;
@@ -23,7 +23,7 @@ public class RedstoneWireBlockMixin extends Block {
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
 		super.onPlaced(world, pos, state, placer, itemStack);
 		if (placer instanceof ServerPlayerEntity player) {
-			PlayerUtils.grantAdvancement(player, UHCAdvancements.THATS_NOT_DUSTLESS);
+			PlayerManager.grantAdvancement(player, UHCAdvancements.THATS_NOT_DUSTLESS);
 		}
 	}
 }

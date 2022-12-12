@@ -1,6 +1,6 @@
 package net.casualuhc.uhcmod.mixin;
 
-import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.casualuhc.uhcmod.managers.TeamManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.SpreadPlayersCommand;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class SpreadPlayersCommandMixin {
 	@Redirect(method = "getMinDistance", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;teleport(DDD)V"))
 	private static void onTeleport(Entity entity, double x, double y, double z) {
-		if (entity instanceof ServerPlayerEntity && !entity.isSpectator() && !TeamUtils.shouldIgnoreTeam(entity.getScoreboardTeam())) {
+		if (entity instanceof ServerPlayerEntity && !entity.isSpectator() && !TeamManager.shouldIgnoreTeam(entity.getScoreboardTeam())) {
 			entity.teleport(x, y, z);
 		}
 	}

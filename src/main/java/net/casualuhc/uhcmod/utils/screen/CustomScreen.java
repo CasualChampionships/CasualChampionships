@@ -1,6 +1,5 @@
 package net.casualuhc.uhcmod.utils.screen;
 
-import net.casualuhc.uhcmod.utils.Scheduler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;

@@ -5,9 +5,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.utils.Phase;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
-import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.casualuhc.uhcmod.utils.uhc.Phase;
+import net.casualuhc.uhcmod.managers.PlayerManager;
+import net.casualuhc.uhcmod.managers.TeamManager;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -27,7 +27,7 @@ public class ReadyCommand {
 			)
 			.then(literal("reset").requires(source -> source.hasPermissionLevel(4))
 				.executes(context -> {
-					context.getSource().getServer().getScoreboard().getTeams().forEach(team -> TeamUtils.setReady(team, false));
+					context.getSource().getServer().getScoreboard().getTeams().forEach(team -> TeamManager.setReady(team, false));
 					return 1;
 				})
 			)
@@ -39,16 +39,16 @@ public class ReadyCommand {
 			throw new SimpleCommandExceptionType(Text.literal("You cannot ready now!")).create();
 		}
 		AbstractTeam team = context.getSource().getPlayerOrThrow().getScoreboardTeam();
-		if (TeamUtils.shouldIgnoreTeam(team)) {
+		if (TeamManager.shouldIgnoreTeam(team)) {
 			throw new SimpleCommandExceptionType(Text.literal("You are not on a team!")).create();
 		}
-		if (TeamUtils.isReady(team)) {
+		if (TeamManager.isReady(team)) {
 			throw new SimpleCommandExceptionType(Text.literal("You have already readied up!")).create();
 		}
-		TeamUtils.setReady(team, true);
+		TeamManager.setReady(team, true);
 		String readyText = "%s %s ready!".formatted(team.getName(), isReady ? "is" : "is not");
-		PlayerUtils.messageEveryPlayer(Text.literal(readyText).formatted(team.getColor(), Formatting.BOLD));
-		TeamUtils.checkAllTeamsReady();
+		PlayerManager.messageEveryPlayer(Text.literal(readyText).formatted(team.getColor(), Formatting.BOLD));
+		TeamManager.checkAllTeamsReady();
 		return 1;
 	}
 }

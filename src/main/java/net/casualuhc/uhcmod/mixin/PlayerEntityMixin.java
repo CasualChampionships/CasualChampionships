@@ -1,6 +1,6 @@
 package net.casualuhc.uhcmod.mixin;
 
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,7 +30,7 @@ public class PlayerEntityMixin {
 
 	@Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;increaseStat(Lnet/minecraft/util/Identifier;I)V"))
 	private void onAttack(PlayerEntity thisPlayer, Identifier stat, int amount) {
-		if (this.wasPlayer && thisPlayer instanceof ServerPlayerEntity player && PlayerUtils.isPlayerPlayingInSurvival(player)) {
+		if (this.wasPlayer && thisPlayer instanceof ServerPlayerEntity player && PlayerManager.isPlayerPlayingInSurvival(player)) {
 			PlayerExtension.get(thisPlayer).damageDealt += amount;
 			thisPlayer.increaseStat(stat, amount);
 			this.wasPlayer = false;

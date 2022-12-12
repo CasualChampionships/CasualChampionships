@@ -1,8 +1,10 @@
 package net.casualuhc.uhcmod.managers;
 
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.utils.Phase;
-import net.casualuhc.uhcmod.utils.Scheduler;
+import net.casualuhc.uhcmod.utils.gamesettings.GameSetting;
+import net.casualuhc.uhcmod.utils.uhc.Config;
+import net.casualuhc.uhcmod.utils.uhc.Phase;
+import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
@@ -11,44 +13,7 @@ import net.minecraft.world.border.WorldBorder;
 
 public class WorldBorderManager {
 	private static final MinecraftServer SERVER = UHCMod.SERVER;
-
 	public static final int PORTAL_ESCAPE_TIME_SECONDS = 30;
-
-	static {
-		EventHandler.register(new UHCEvents() {
-			@Override
-			public void onGracePeriodEnd() {
-				GameSettings.PVP.setValue(true);
-				startWorldBorders();
-			}
-
-			@Override
-			public void onWorldBorderFinishShrinking() {
-				Stage nextStage = GameSettings.WORLD_BORDER_STAGE.getValue().getNextStage();
-				if (nextStage == null || !GameManager.isPhase(Phase.ACTIVE)) {
-					return;
-				}
-
-				GameSettings.WORLD_BORDER_STAGE.setValueQuietly(nextStage);
-				if (nextStage == Stage.END) {
-					EventHandler.onWorldBorderComplete();
-					return;
-				}
-
-				GameManager.schedulePhaseTask(Scheduler.secondsToTicks(10), () -> {
-					double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
-					moveWorldBorders(nextStage.getEndSize(), nextStage.getTime(size));
-				});
-			}
-
-			@Override
-			public void onWorldBorderComplete() {
-				GameManager.worldBorderComplete();
-			}
-		});
-	}
-
-	public static void noop() { }
 
 	public static void startWorldBorders() {
 		double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
@@ -76,6 +41,38 @@ public class WorldBorderManager {
 				return;
 			}
 			border.setSize(newSize);
+		});
+	}
+
+	public static void noop() { }
+
+	static {
+		EventHandler.register(new UHCEvents() {
+			@Override
+			public void onGracePeriodEnd() {
+				startWorldBorders();
+			}
+
+			@Override
+			public void onWorldBorderFinishShrinking() {
+				UHCMod.LOGGER.info("Finished world border: {}", GameSettings.WORLD_BORDER_STAGE.getValue());
+
+				Stage nextStage = GameSettings.WORLD_BORDER_STAGE.getValue().getNextStage();
+				if (nextStage == null || !GameManager.isPhase(Phase.ACTIVE)) {
+					return;
+				}
+
+				GameSettings.WORLD_BORDER_STAGE.setValueQuietly(nextStage);
+				if (nextStage == Stage.END) {
+					EventHandler.onWorldBorderComplete();
+					return;
+				}
+
+				GameManager.schedulePhaseTask(Scheduler.secondsToTicks(10), () -> {
+					double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
+					moveWorldBorders(nextStage.getEndSize(), nextStage.getTime(size));
+				});
+			}
 		});
 	}
 

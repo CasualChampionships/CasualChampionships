@@ -5,6 +5,9 @@ import net.minecraft.scoreboard.AbstractTeam;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class serves to store extra data about {@link AbstractTeam}
+ */
 public class TeamExtension {
 	private static final Map<AbstractTeam, TeamExtension> TEAMS = new HashMap<>();
 

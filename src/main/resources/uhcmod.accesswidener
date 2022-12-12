@@ -1,5 +1,10 @@
 accessWidener v1 named
+
+accessible class net/minecraft/world/border/WorldBorder$Area
+accessible class net/minecraft/world/border/WorldBorder$MovingArea
+accessible class net/minecraft/world/border/WorldBorder$StaticArea
+
+accessible method net/minecraft/world/border/WorldBorder getListeners ()Ljava/util/List;
+
 accessible field net/minecraft/entity/Entity FLAGS Lnet/minecraft/entity/data/TrackedData;
 accessible field net/minecraft/entity/Entity GLOWING_FLAG_INDEX I
-accessible class net/minecraft/world/border/WorldBorder$MovingArea
-accessible class net/minecraft/world/border/WorldBorder$Area

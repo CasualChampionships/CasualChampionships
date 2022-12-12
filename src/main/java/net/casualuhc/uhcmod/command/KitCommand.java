@@ -1,8 +1,8 @@
 package net.casualuhc.uhcmod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.command.CommandManager;
@@ -26,7 +26,7 @@ public class KitCommand {
 				entity.giveItemStack(count(Items.ARROW.getDefaultStack(), 32));
 				entity.giveItemStack(count(Items.OAK_PLANKS.getDefaultStack(), 64));
 				entity.giveItemStack(Items.WATER_BUCKET.getDefaultStack());
-				entity.giveItemStack(count(PlayerUtils.generateGoldenHead(), 2));
+				entity.giveItemStack(count(PlayerManager.generateGoldenHead(), 2));
 				entity.giveItemStack(count(Items.GOLDEN_APPLE.getDefaultStack(), 3));
 				entity.giveItemStack(count(Items.COOKED_PORKCHOP.getDefaultStack(), 32));
 				return 1;

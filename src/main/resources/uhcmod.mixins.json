@@ -18,7 +18,6 @@
     "LootableContainerBlockEntityMixin",
     "MinecraftDedicatedServerMixin",
     "MinecraftServerMixin",
-    "MovingAreaMixin",
     "PlayerAdvancementTrackerMixin",
     "PlayerEntityMixin",
     "PlayerManagerMixin",
@@ -35,7 +34,8 @@
     "StructureSetsMixin",
     "SweetBerryBushBlockMixin",
     "SynchronizeRecipeS2CPacketMixin",
-    "TntBlockMixin"
+    "TntBlockMixin",
+    "WorldBorderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

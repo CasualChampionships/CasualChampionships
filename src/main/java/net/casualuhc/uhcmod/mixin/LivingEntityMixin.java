@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +18,7 @@ public abstract class LivingEntityMixin {
 	@Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z", ordinal = 1, shift = At.Shift.AFTER))
 	private void onWorldBorderDamage(CallbackInfo ci) {
 		if (this.isDead() && (Object) this instanceof ServerPlayerEntity player) {
-			PlayerUtils.grantAdvancement(player, UHCAdvancements.SKILL_ISSUE);
+			PlayerManager.grantAdvancement(player, UHCAdvancements.SKILL_ISSUE);
 		}
 	}
 }

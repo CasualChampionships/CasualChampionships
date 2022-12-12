@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -14,7 +14,7 @@ public class FullBrightCommand {
 			ServerPlayerEntity player = c.getSource().getPlayerOrThrow();
 			PlayerExtension extension = PlayerExtension.get(player);
 			extension.fullbright = !extension.fullbright;
-			PlayerUtils.updateFullBright(player);
+			PlayerManager.updateFullBright(player, false);
 			return 1;
 		}));
 	}

@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FallingBlock;
@@ -23,7 +23,7 @@ public class FallingBlockMixin extends Block {
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
 		super.onPlaced(world, pos, state, placer, itemStack);
 		if (placer instanceof ServerPlayerEntity player && (FallingBlock.canFallThrough(world.getBlockState(pos.down())) || pos.getY() < world.getBottomY())) {
-			PlayerUtils.grantAdvancement(player, UHCAdvancements.FALLING_BLOCK);
+			PlayerManager.grantAdvancement(player, UHCAdvancements.FALLING_BLOCK);
 		}
 	}
 }

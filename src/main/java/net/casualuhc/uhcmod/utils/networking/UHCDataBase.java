@@ -10,9 +10,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.utils.Config;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
-import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
+import net.casualuhc.uhcmod.utils.uhc.Config;
+import net.casualuhc.uhcmod.managers.TeamManager;
 import net.minecraft.entity.EntityType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.Stat;
@@ -107,7 +107,7 @@ public class UHCDataBase {
 	}
 
 	public static void updateStats(ServerPlayerEntity player) {
-		if (hasMongo() && PlayerUtils.isPlayerPlayingInSurvival(player)) {
+		if (hasMongo() && PlayerManager.isPlayerPlayingInSurvival(player)) {
 			StatHandler handler = player.getStatHandler();
 			String playerName = player.getEntityName();
 			for (UHCStat stat : UHCStat.values()) {
@@ -126,7 +126,7 @@ public class UHCDataBase {
 					for (Document document : TEAM_CONFIG.find()) {
 						jsonObjects.add(gson.fromJson(document.toJson(), JsonObject.class));
 					}
-					File teamJsonFile = TeamUtils.getPath().toFile();
+					File teamJsonFile = TeamManager.getPath().toFile();
 					try (FileWriter fileWriter = new FileWriter(teamJsonFile)) {
 						fileWriter.write(gson.toJson(jsonObjects));
 						fileWriter.flush();

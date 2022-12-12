@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SweetBerryBushBlock;
 import net.minecraft.entity.Entity;
@@ -18,7 +18,7 @@ public class SweetBerryBushBlockMixin {
 	@Inject(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z"))
 	private void onEntityDamage(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo ci) {
 		if (entity instanceof ServerPlayerEntity player) {
-			PlayerUtils.grantAdvancement(player, UHCAdvancements.THATS_EMBARRASSING);
+			PlayerManager.grantAdvancement(player, UHCAdvancements.THATS_EMBARRASSING);
 		}
 	}
 }

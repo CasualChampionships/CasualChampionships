@@ -1,11 +1,12 @@
 package net.casualuhc.uhcmod.features;
 
 import com.google.common.collect.ImmutableSet;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
+import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.screen.MinesweeperScreen;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementFrame;
@@ -22,6 +23,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * Class that hard codes all the advancements for UHC.
+ * <p>
+ * Because I don't datapack :).
+ */
 public class UHCAdvancements {
 	private static final Set<Advancement> UHC_ADVANCEMENTS;
 	public static final Advancement ROOT;
@@ -300,7 +306,7 @@ public class UHCAdvancements {
 			LDAP,
 			NOT_NOW,
 			OFFICIALLY_BORED,
-      DISTRACTED,
+      		DISTRACTED,
 			FIND_THE_BUTTON
 		);
 
@@ -309,8 +315,8 @@ public class UHCAdvancements {
 			public void onEnd() {
 				AtomicReference<PlayerAttacker> lowest = new AtomicReference<>();
 				AtomicReference<PlayerAttacker> highest = new AtomicReference<>();
-				PlayerUtils.forEveryPlayer(p -> {
-					if (PlayerUtils.isPlayerPlaying(p)) {
+				PlayerManager.forEveryPlayer(p -> {
+					if (PlayerManager.isPlayerPlaying(p)) {
 						int current = PlayerExtension.get(p).damageDealt;
 						if (lowest.get() == null) {
 							PlayerAttacker first = new PlayerAttacker(p, current);
@@ -326,17 +332,32 @@ public class UHCAdvancements {
 				});
 
 				if (lowest.get() != null) {
-					PlayerUtils.grantAdvancement(lowest.get().player, MOSTLY_HARMLESS);
-					PlayerUtils.grantAdvancement(highest.get().player, HEAVY_HITTER);
+					PlayerManager.grantAdvancement(lowest.get().player, MOSTLY_HARMLESS);
+					PlayerManager.grantAdvancement(highest.get().player, HEAVY_HITTER);
 				}
 			}
 		});
 
 		EventHandler.register(new MinecraftEvents() {
 			@Override
+			public void onPlayerJoin(ServerPlayerEntity player) {
+				if (PlayerManager.isPlayerPlayingInSurvival(player)) {
+					PlayerExtension.get(player).relogs++;
+
+					// Wait for player to load in
+					Scheduler.schedule(Scheduler.secondsToTicks(5), () -> {
+						PlayerManager.grantAdvancement(player, UHCAdvancements.COMBAT_LOGGER);
+						if (PlayerExtension.get(player).relogs == 10) {
+							PlayerManager.grantAdvancement(player, UHCAdvancements.OK_WE_BELIEVE_YOU_NOW);
+						}
+					});
+				}
+			}
+
+			@Override
 			public void onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 				if (player.currentScreenHandler instanceof MinesweeperScreen) {
-					PlayerUtils.grantAdvancement(player, UHCAdvancements.DISTRACTED);
+					PlayerManager.grantAdvancement(player, UHCAdvancements.DISTRACTED);
 				}
 			}
 		});

@@ -1,22 +1,22 @@
-package net.casualuhc.uhcmod.utils;
+package net.casualuhc.uhcmod.utils.uhc;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.common.collect.ImmutableList;
+import com.google.gson.*;
 import net.casualuhc.uhcmod.UHCMod;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.math.BlockPos;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Config {
 	private static final Gson GSON;
 	private static final Path CONFIG_PATH;
 
-	public static final BlockPos LOBBY_SPAWN;
+	public static final List<String> OPERATORS;
+	public static final Event CURRENT_EVENT;
 	public static final String MONGO_URI;
 	public static final boolean IS_DEV;
 
@@ -24,7 +24,8 @@ public class Config {
 		GSON = new GsonBuilder().setPrettyPrinting().create();
 		CONFIG_PATH = getConfig("UHC Config.json");
 
-		BlockPos spawn = BlockPos.ORIGIN;
+		List<String> operators = new ArrayList<>();
+		Event event = Event.DEFAULT;
 		String uri = null;
 		boolean dev = true;
 		try {
@@ -33,28 +34,43 @@ public class Config {
 				JsonObject config = GSON.fromJson(string, JsonObject.class);
 				uri = config.get("mongo").getAsString();
 				dev = config.get("dev").getAsBoolean();
-				JsonArray array = config.get("lobby_spawn").getAsJsonArray();
-				spawn = new BlockPos(
-					array.get(0).getAsInt(),
-					array.get(1).getAsInt(),
-					array.get(2).getAsInt()
-				);
+				config.get("operators").getAsJsonArray().forEach(e -> operators.add(e.getAsString()));
+				JsonElement element = config.get("event");
+				if (element != null && !element.getAsString().equals("default")) {
+					event = UHCMod.getEvent(element.getAsString());
+					if (event == null) {
+						UHCMod.LOGGER.error("Invalid event name: {}", element.getAsString());
+						event = Event.DEFAULT;
+					}
+				}
 			}
 		} catch (Exception e) {
 			UHCMod.LOGGER.error("Failed to read config", e);
 		}
-		LOBBY_SPAWN = spawn;
+		OPERATORS = ImmutableList.copyOf(operators);
+		CURRENT_EVENT = event;
 		MONGO_URI = uri;
 		IS_DEV = dev;
 	}
 
-	public static void noop() { }
-
+	/**
+	 * Whether the UHC has a mongo database.
+	 *
+	 * @return whether mongo exists.
+	 */
 	public static boolean hasMongo() {
 		return MONGO_URI != null;
 	}
 
+	/**
+	 * Gets a file from the config folder.
+	 *
+	 * @param path the subpath.
+	 * @return the Path.
+	 */
 	public static Path getConfig(String path) {
 		return FabricLoader.getInstance().getConfigDir().resolve(path);
 	}
+
+	public static void noop() { }
 }

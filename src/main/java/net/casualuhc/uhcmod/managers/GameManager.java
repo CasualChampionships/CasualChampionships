@@ -1,189 +1,262 @@
 package net.casualuhc.uhcmod.managers;
 
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.features.GoldenHeadRecipe;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.*;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
+import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
+import net.casualuhc.uhcmod.utils.scheduling.Task;
+import net.casualuhc.uhcmod.utils.uhc.Config;
+import net.casualuhc.uhcmod.utils.uhc.OneTimeAchievement;
+import net.casualuhc.uhcmod.utils.uhc.Phase;
+import net.casualuhc.uhcmod.utils.uhc.UHCUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureTemplate;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Clearable;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static net.casualuhc.uhcmod.utils.Scheduler.*;
+import static net.casualuhc.uhcmod.utils.scheduling.Scheduler.*;
 
 public class GameManager {
 	private static final List<Task> currentTasks = new LinkedList<>();
+	private static final Set<OneTimeAchievement> claimed = new HashSet<>();
+
 	private static Phase phase = Phase.NONE;
 	private static StructureTemplate lobby;
+	private static List<BlockPos> musicPositions;
 
 	private static int ticks;
-	private static boolean firstKill;
-	private static boolean firstDeath;
-	private static boolean firstCraft;
-
-	static {
-		EventHandler.register(new MinecraftEvents() {
-			@Override
-			public void onServerTick(MinecraftServer server) {
-				ticks++;
-			}
-		});
-	}
 
 	private GameManager() { }
 
-	public static boolean isReadyForPlayers() {
-		return phase.ordinal() >= 2 && GameSettings.FLOODGATE.getValue();
+	/**
+	 * Checks whether the UHC is at a certain Phase.
+	 *
+	 * @param checkPhase the phase to check against.
+	 * @return whether that is the current phase.
+	 */
+	public static boolean isPhase(Phase checkPhase) {
+		return phase.equals(checkPhase);
 	}
 
-	public static boolean isGameActive() {
-		return phase.ordinal() >= 4;
+	/**
+	 * Gets the current Phase.
+	 *
+	 * @return the current Phase.
+	 */
+	public static Phase getPhase() {
+		return phase;
 	}
 
+	/**
+	 * Sets the current Phase and cancels any tasks that were scheduled for the previous Phase.
+	 *
+	 * @param newPhase the new Phase.
+	 */
 	public static void setPhase(Phase newPhase) {
 		currentTasks.forEach(Task::cancel);
 		currentTasks.clear();
 		phase = newPhase;
 	}
 
-	public static Phase getPhase() {
-		return phase;
+	/**
+	 * Schedules a task that may be cancelled if the Phase changes.
+	 *
+	 * @param ticks the delay before running the task.
+	 * @param runnable the runnable to run.
+	 * @see net.casualuhc.uhcmod.utils.scheduling.Scheduler#schedule(int, Runnable)
+	 */
+	public static void schedulePhaseTask(int ticks, Runnable runnable) {
+		currentTasks.add(schedule(ticks, runnable));
 	}
 
-	public static boolean isPhase(Phase checkPhase) {
-		return phase.equals(checkPhase);
+	/**
+	 * Schedules a task to be run multiple times determined by a given interval util a certain time.
+	 * The task may be cancelled if the Phase changes.
+	 *
+	 * @param delay the amount of ticks to initially delay
+	 * @param interval the interval between executions
+	 * @param duration the duration, this starts after the delay
+	 * @param runnable the runnable to run
+	 * @see net.casualuhc.uhcmod.utils.scheduling.Scheduler#scheduleInLoop(int, int, int, Runnable)
+	 */
+	public static void scheduleInLoopPhaseTask(int delay, int interval, int duration, Runnable runnable) {
+		currentTasks.add(scheduleInLoop(delay, interval, duration, runnable));
 	}
 
-	public static void resetTrackers() {
-		ticks = 0;
-		firstKill = true;
-		firstDeath = true;
-		firstCraft = true;
+	/**
+	 * Checks whether the Server is ready to let players join the server.
+	 *
+	 * @return whether players can join.
+	 */
+	public static boolean isReadyForPlayers() {
+		return phase.ordinal() >= 2 && GameSettings.FLOODGATE.getValue();
 	}
 
-	public static boolean tryFirstKill() {
-		if (firstKill) {
-			firstKill = false;
-			return true;
-		}
-		return false;
+	/**
+	 * Whether the UHC is currently active.
+	 *
+	 * @return whether the UHC is active.
+	 */
+	public static boolean isGameActive() {
+		return phase.ordinal() >= 4;
 	}
 
-	public static boolean tryFirstDeath() {
-		if (firstDeath) {
-			firstDeath = false;
-			return true;
-		}
-		return false;
+	/**
+	 * Checks if a one time achievement is unclaimed.
+	 *
+	 * @param achievement the achievement to check.
+	 * @return whether the achievement is unclaimed.
+	 */
+	public static boolean isUnclaimed(OneTimeAchievement achievement) {
+		return claimed.add(achievement);
 	}
 
-	public static boolean tryFirstCraft() {
-		if (firstCraft) {
-			firstCraft = false;
-			return true;
-		}
-		return false;
-	}
-
-	public static int ticksSinceStart() {
+	/**
+	 * Gets the amount of time since the UHC game started.
+	 *
+	 * @return the uptime in ticks.
+	 */
+	public static int gameUptime() {
 		return ticks;
 	}
 
-	public static void startCountDown() {
-		PlayerUtils.messageEveryPlayer(
-			Text.literal("Please stand still during the countdown so you don't fall when you get teleported!").formatted(Formatting.GOLD)
-		);
+	/**
+	 * Resets the uptime tick counter and the claimed achievements.
+	 */
+	public static void resetTrackers() {
+		ticks = 0;
+		claimed.clear();
+	}
 
+	/**
+	 * Gets all the custom recipes for the UHC.
+	 * @return the custom recipes.
+	 */
+	public static Iterable<Recipe<?>> getCustomRecipes() {
+		return List.of(new GoldenHeadRecipe());
+	}
+
+	public static void noop() { }
+
+	// UHC logic
+
+	static {
+		EventHandler.register(new MinecraftEvents() {
+			@Override
+			public void onPlayerLeave(ServerPlayerEntity player) {
+				UHCDataBase.updateStats(player);
+			}
+
+			@Override
+			public void onServerTick(MinecraftServer server) {
+				ticks++;
+			}
+		});
+
+		EventHandler.register(new UHCEvents() {
+			@Override
+			public void onSetup() {
+				setPhase(Phase.SETUP);
+				UHCUtils.setLobbyGamerules();
+			}
+
+			@Override
+			public void onLobby() {
+				setPhase(Phase.LOBBY);
+				generateLobby();
+			}
+
+			@Override
+			public void onReady() {
+				setPhase(Phase.READY);
+			}
+
+			@Override
+			public void onStart() {
+				setPhase(Phase.START);
+				startCountDown();
+			}
+
+			@Override
+			public void onActive() {
+				setPhase(Phase.ACTIVE);
+				resetTrackers();
+				startGracePeriod();
+				UHCUtils.setUHCGamerules();
+			}
+
+			@Override
+			public void onEnd() {
+				setPhase(Phase.END);
+				endUHC();
+			}
+
+			@Override
+			public void onGracePeriodEnd() {
+				GameSettings.PVP.setValue(true);
+			}
+
+			@Override
+			public void onWorldBorderComplete() {
+				worldBorderComplete();
+			}
+		});
+	}
+
+	private static void startCountDown() {
 		AtomicInteger integer = new AtomicInteger(10);
 		scheduleInLoopPhaseTask(0, secondsToTicks(1), secondsToTicks(10), () -> {
 			int i = integer.getAndDecrement();
-			PlayerUtils.forEveryPlayer(playerEntity -> {
+			PlayerManager.forEveryPlayer(playerEntity -> {
 				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal(String.valueOf(i)).formatted(Formatting.GREEN)));
 				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 3.0F);
 			});
 		});
 
 		schedulePhaseTask(secondsToTicks(10), () -> {
-			PlayerUtils.forEveryPlayer(playerEntity -> {
-				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
-				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(), SoundCategory.MASTER, 1.0F, 1.0F);
-				playerEntity.getHungerManager().setSaturationLevel(20F);
-				EntityAttributeInstance instance = playerEntity.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-				if (instance != null) {
-					instance.removeModifier(PlayerUtils.HEALTH_BOOST);
-					instance.addPersistentModifier(new EntityAttributeModifier(PlayerUtils.HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
-				}
-				playerEntity.setHealth(playerEntity.getMaxHealth());
-
-				if (!TeamUtils.shouldIgnoreTeam(playerEntity.getScoreboardTeam()) && !playerEntity.isSpectator()) {
-					if (playerEntity.getScoreboardTeam().getPlayerList().size() == 1) {
-						PlayerUtils.grantAdvancement(playerEntity, UHCAdvancements.SOLOIST);
-					}
-					PlayerExtension.get(playerEntity).displayCoords = true;
-					playerEntity.changeGameMode(GameMode.SURVIVAL);
-					playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, secondsToTicks(5), 4, true, false));
-					playerEntity.sendMessage(Text.literal("You can disable the coordinates above your hotbar by using /coords"), false);
-					playerEntity.getInventory().clear();
-					playerEntity.playerScreenHandler.clearCraftingSlots();
-					playerEntity.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
-					playerEntity.setExperienceLevel(0);
-					PlayerUtils.setPlayerPlaying(playerEntity, true);
-				} else {
-					playerEntity.changeGameMode(GameMode.SPECTATOR);
-				}
-
-				playerEntity.dismountVehicle();
-			});
-
+			PlayerManager.forEveryPlayer(PlayerManager::setPlayerForUHC);
 			deleteLobby();
+
 			MinecraftServer server = UHCMod.SERVER;
 			server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
 			EventHandler.onActive();
 		});
 	}
 
-	public static void startGracePeriod() {
-		PlayerUtils.forEveryPlayer(playerEntity -> {
+	private static void startGracePeriod() {
+		PlayerManager.forEveryPlayer(playerEntity -> {
 			playerEntity.sendMessage(
 				Text.literal("Grace Period will end in 10 minutes, once grace period is over PVP will be enabled and world border will start moving")
 					.formatted(Formatting.GOLD),
@@ -193,9 +266,9 @@ public class GameManager {
 		});
 
 		AtomicInteger integer = new AtomicInteger(10);
-		scheduleInLoopPhaseTask(minutesToTicks(2), minutesToTicks(2), minutesToTicks(10), () -> {
+		scheduleInLoopPhaseTask(minutesToTicks(2), minutesToTicks(2), minutesToTicks(8), () -> {
 			int i = integer.addAndGet(-2);
-			PlayerUtils.forEveryPlayer(playerEntity -> {
+			PlayerManager.forEveryPlayer(playerEntity -> {
 				playerEntity.sendMessage(
 					Text.literal("Grace Period will end in %s minutes".formatted(i))
 						.formatted(Formatting.GOLD),
@@ -206,7 +279,7 @@ public class GameManager {
 		});
 
 		schedulePhaseTask(minutesToTicks(10), () -> {
-			PlayerUtils.forEveryPlayer(playerEntity -> {
+			PlayerManager.forEveryPlayer(playerEntity -> {
 				playerEntity.sendMessage(
 					Text.literal("Grace Period is now over, PVP is enabled and world border has started! Good Luck!")
 						.formatted(Formatting.RED, Formatting.BOLD),
@@ -219,13 +292,13 @@ public class GameManager {
 		});
 	}
 
-	public static void worldBorderComplete() {
+	private static void worldBorderComplete() {
 		UHCMod.LOGGER.info("World Border Completed");
 		schedulePhaseTask(minutesToTicks(5), () -> {
 			if (GameSettings.END_GAME_GLOW.getValue()) {
 				UHCMod.LOGGER.info("Players are now glowing");
-				PlayerUtils.forEveryPlayer(playerEntity -> {
-					if (PlayerUtils.isPlayerSurvival(playerEntity)) {
+				PlayerManager.forEveryPlayer(playerEntity -> {
+					if (PlayerManager.isPlayerSurvival(playerEntity)) {
 						playerEntity.setGlowing(true);
 					}
 				});
@@ -241,35 +314,36 @@ public class GameManager {
 		});
 	}
 
-	public static void endUHC() {
-		AbstractTeam team = TeamUtils.getLastTeam();
+	private static void endUHC() {
+		AbstractTeam team = TeamManager.getAliveTeam();
 		if (team == null) {
 			UHCMod.LOGGER.error("Last team was null!");
 			return;
 		}
 
-		PlayerUtils.forEveryPlayer(player -> {
+		PlayerManager.forEveryPlayer(player -> {
 			if (player.getScoreboardTeam() == team || PlayerExtension.get(player).trueTeam == team) {
-				PlayerUtils.grantAdvancement(player, UHCAdvancements.WINNER);
+				PlayerManager.grantAdvancement(player, UHCAdvancements.WINNER);
 			}
 		});
 
-		UHCDataBase.incrementWinDataBase(team.getName());
-		PlayerUtils.forEveryPlayer(playerEntity -> {
+		PlayerManager.forEveryPlayer(playerEntity -> {
 			playerEntity.setGlowing(false);
 			playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("%s has won!".formatted(team.getName())).formatted(team.getColor())));
 			UHCDataBase.updateStats(playerEntity);
 		});
+
+		UHCDataBase.incrementWinDataBase(team.getName());
 		UHCDataBase.updateTotalDataBase();
 
 		scheduleInLoopPhaseTask(0, 4, secondsToTicks(5), () -> {
-			PlayerUtils.forEveryPlayer(playerEntity -> {
+			PlayerManager.forEveryPlayer(playerEntity -> {
 				playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST, SoundCategory.MASTER, 0.5f, 1f);
 				playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
 				playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
 			});
 			schedulePhaseTask(6, () -> {
-				PlayerUtils.forEveryPlayer(playerEntity -> {
+				PlayerManager.forEveryPlayer(playerEntity -> {
 					playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_SHOOT, SoundCategory.MASTER, 0.5f, 1f);
 					playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
 					playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
@@ -277,13 +351,13 @@ public class GameManager {
 			});
 		});
 
-		schedule(minutesToTicks(1), () -> {
+		schedulePhaseTask(minutesToTicks(1), () -> {
 			EventHandler.onSetup();
 			EventHandler.onLobby();
 		});
 	}
 
-	public static void generateLobby() {
+	private static void generateLobby() {
 		try {
 			deleteLobby();
 			Vec3i dimensions = getLobby().getSize();
@@ -292,119 +366,47 @@ public class GameManager {
 			int z = -dimensions.getZ() / 2;
 			BlockPos pos = new BlockPos(x, y ,z);
 			getLobby().place(UHCMod.SERVER.getOverworld(), pos, pos, new StructurePlacementData(), Random.create(), 3);
-			PlayerUtils.forEveryPlayer(playerEntity -> {
+			PlayerManager.forEveryPlayer(playerEntity -> {
 				if (!playerEntity.hasPermissionLevel(2)) {
 					playerEntity.interactionManager.changeGameMode(GameMode.ADVENTURE);
 				} else {
-					playerEntity.sendMessage(Text.literal(ChatColour.GREEN + "Successfully generated lobby!"), false);
+					playerEntity.sendMessage(Text.literal("Successfully generated lobby!").formatted(Formatting.GREEN), false);
 				}
-				playerEntity.teleport(
-					UHCMod.SERVER.getOverworld(),
-					Config.LOBBY_SPAWN.getX(),
-					Config.LOBBY_SPAWN.getY(),
-					Config.LOBBY_SPAWN.getZ(),
-					0, 0
-				);
+				Vec3d spawn = Config.CURRENT_EVENT.getLobbySpawnPos();
+				playerEntity.teleport(UHCMod.SERVER.getOverworld(), spawn.getX(), spawn.getY(), spawn.getZ(), 0, 0);
 			});
 		} catch (Exception e) {
 			UHCMod.LOGGER.error("Failed to generate lobby", e);
 		}
 	}
 
-	public static void setBeforeGamerules() {
-		MinecraftServer server = UHCMod.SERVER;
-		GameRules gameRules = server.getGameRules();
-		gameRules.get(GameRules.NATURAL_REGENERATION).set(true, server);
-		gameRules.get(GameRules.DO_INSOMNIA).set(false, server);
-		gameRules.get(GameRules.DO_FIRE_TICK).set(false, server);
-		gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(false, server);
-		gameRules.get(GameRules.ANNOUNCE_ADVANCEMENTS).set(true, server);
-		gameRules.get(GameRules.FALL_DAMAGE).set(false, server);
-		gameRules.get(GameRules.DROWNING_DAMAGE).set(false, server);
-		gameRules.get(GameRules.DO_ENTITY_DROPS).set(false, server);
-		gameRules.get(GameRules.DO_WEATHER_CYCLE).set(false, server);
-		gameRules.get(GameRules.SNOW_ACCUMULATION_HEIGHT).set(0, server);
-		gameRules.get(GameRules.RANDOM_TICK_SPEED).set(0, server);
-		server.setDifficulty(Difficulty.PEACEFUL, true);
-		server.getOverworld().setTimeOfDay(6000); // 6000 = noon
-		server.getOverworld().setWeather(999999, 0, false, false);
-		server.getOverworld().setSpawnPos(new BlockPos(0, 250, 0), 0);
-		server.getOverworld().getWorldBorder().setCenter(0, 0);
-		server.getWorlds().forEach(serverWorld -> {
-			serverWorld.getWorldBorder().setCenter(0, 0);
-			serverWorld.getWorldBorder().setSize(6128);
-		});
-		GameSettings.PVP.setValue(false);
-		if (UHCMod.HAS_CARPET) {
-			CommandManager commandManager = server.getCommandManager();
-			ServerCommandSource source = server.getCommandSource();
-			commandManager.executeWithPrefix(source, "carpet commandLog ops");
-			commandManager.executeWithPrefix(source, "carpet commandDistance ops");
-			commandManager.executeWithPrefix(source, "carpet commandInfo ops");
-			commandManager.executeWithPrefix(source, "carpet commandPerimeterInfo ops");
-			commandManager.executeWithPrefix(source, "carpet commandProfile ops");
-			commandManager.executeWithPrefix(source, "carpet commandScript ops");
-			commandManager.executeWithPrefix(source, "carpet lightEngineMaxBatchSize 500");
-			commandManager.executeWithPrefix(source, "carpet structureBlockLimit 256");
-			commandManager.executeWithPrefix(source, "carpet fillLimit 1000000");
-			commandManager.executeWithPrefix(source, "carpet fillUpdates false");
-			commandManager.executeWithPrefix(source, "carpet setDefault commandLog ops");
-			commandManager.executeWithPrefix(source, "carpet setDefault commandDistance ops");
-			commandManager.executeWithPrefix(source, "carpet setDefault commandInfo ops");
-			commandManager.executeWithPrefix(source, "carpet setDefault commandPerimeterInfo ops");
-			commandManager.executeWithPrefix(source, "carpet setDefault commandProfile ops");
-			commandManager.executeWithPrefix(source, "carpet setDefault commandScript ops");
-			commandManager.executeWithPrefix(source, "carpet setDefault lightEngineMaxBatchSize 500");
-			commandManager.executeWithPrefix(source, "carpet setDefault structureBlockLimit 256");
-		}
-	}
-
-	public static void setDescriptor(MinecraftServer server) {
-		MutableText description = Text.literal("            %s፠ %sWelcome to Casual UHC! %s፠\n".formatted(ChatColour.GOLD, ChatColour.AQUA, ChatColour.GOLD))
-			.append(Text.literal("     Yes, it's back! Is your team prepared?").formatted(Formatting.DARK_AQUA));
-		server.getServerMetadata().setDescription(description);
-	}
-
-	public static void setUHCGamerules() {
-		MinecraftServer server = UHCMod.SERVER;
-		GameRules gameRules = server.getGameRules();
-		gameRules.get(GameRules.NATURAL_REGENERATION).set(false, server);
-		gameRules.get(GameRules.DO_FIRE_TICK).set(true, server);
-		gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
-		gameRules.get(GameRules.FALL_DAMAGE).set(true, server);
-		gameRules.get(GameRules.DROWNING_DAMAGE).set(true, server);
-		gameRules.get(GameRules.DO_ENTITY_DROPS).set(true, server);
-		gameRules.get(GameRules.DO_WEATHER_CYCLE).set(true, server);
-		gameRules.get(GameRules.SNOW_ACCUMULATION_HEIGHT).set(1, server);
-		gameRules.get(GameRules.RANDOM_TICK_SPEED).set(3, server);
-		server.setDifficulty(Difficulty.HARD, true);
-		server.getOverworld().setTimeOfDay(0);
-		if (UHCMod.HAS_CARPET) {
-			CommandManager commandManager = server.getCommandManager();
-			ServerCommandSource source = server.getCommandSource();
-			commandManager.executeWithPrefix(source, "spawn mobcaps set 7");
-		}
-	}
-
 	public static StructureTemplate getLobby() {
 		if (lobby == null) {
 			try {
-				InputStream inputStream = Files.newInputStream(Config.getConfig("lobby.nbt"));
+				InputStream inputStream = Files.newInputStream(Config.getConfig("lobbies").resolve(Config.CURRENT_EVENT.getLobbyName() + ".nbt"));
 				NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
 				lobby = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
 			} catch (Exception e) {
-				throw new IllegalStateException("Failed to load lobby.nbt");
+				throw new IllegalStateException("Failed to load lobby structure");
 			}
 		}
 		return lobby;
 	}
 
-	public static void schedulePhaseTask(int ticks, Runnable runnable) {
-		currentTasks.add(schedule(ticks, runnable));
-	}
-
-	public static void scheduleInLoopPhaseTask(int delay, int interval, int until, Runnable runnable) {
-		currentTasks.add(scheduleInLoop(delay, interval, until, runnable));
+	public static List<BlockPos> getMusicPositions() {
+		if (musicPositions == null) {
+			musicPositions = new ArrayList<>();
+			Vec3i dimensions = getLobby().getSize();
+			int x = -dimensions.getX() / 2;
+			int y = UHCMod.SERVER.getOverworld().getTopY() - dimensions.getY() / 2;
+			int z = -dimensions.getZ() / 2;
+			for (int nx = x; nx < -x; nx += 10) {
+				for (int nz = z; nz < -z; nz += 10) {
+					musicPositions.add(new BlockPos(nx, y, nz));
+				}
+			}
+		}
+		return musicPositions;
 	}
 
 	private static void deleteLobby() {

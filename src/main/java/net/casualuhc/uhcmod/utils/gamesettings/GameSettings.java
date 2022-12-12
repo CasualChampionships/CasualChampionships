@@ -3,11 +3,11 @@ package net.casualuhc.uhcmod.utils.gamesettings;
 import com.google.common.collect.ImmutableMap;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager.Stage;
-import net.casualuhc.uhcmod.utils.ItemUtil;
-import net.casualuhc.uhcmod.utils.Phase;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.utils.uhc.ItemUtils;
+import net.casualuhc.uhcmod.utils.uhc.Phase;
 import net.casualuhc.uhcmod.utils.screen.CustomScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -20,9 +20,7 @@ import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GameSettings {
 	public static final Map<ItemStack, GameSetting<?>> RULES = new LinkedHashMap<>();
@@ -48,116 +46,116 @@ public class GameSettings {
 
 	static {
 		WORLD_BORDER_SPEED = new GameSetting.DoubleGameSetting(
-			ItemUtil.named(Items.DIAMOND_BOOTS, "Border Speed"),
+			ItemUtils.named(Items.DIAMOND_BOOTS, "Border Speed"),
 			ImmutableMap.of(
 				// Why did I pick cake, I have no idea?
-				ItemUtil.named(Items.CAKE, "Insane"), 1 / 40D,
-				ItemUtil.named(Items.GREEN_STAINED_GLASS_PANE, "Fast"), 0.9D,
-				ItemUtil.named(Items.YELLOW_STAINED_GLASS_PANE, "Normal"), 1.0D,
-				ItemUtil.named(Items.RED_STAINED_GLASS_PANE, "Slow"), 1.1D
+				ItemUtils.named(Items.CAKE, "Insane"), 1 / 40D,
+				ItemUtils.named(Items.GREEN_STAINED_GLASS_PANE, "Fast"), 0.9D,
+				ItemUtils.named(Items.YELLOW_STAINED_GLASS_PANE, "Normal"), 1.0D,
+				ItemUtils.named(Items.RED_STAINED_GLASS_PANE, "Slow"), 1.1D
 			),
 			1.0D
 		);
 
 		HEALTH = new GameSetting.DoubleGameSetting(
-			PotionUtil.setPotion(ItemUtil.named(Items.POTION, "Health"), Potions.HEALING),
+			PotionUtil.setPotion(ItemUtils.named(Items.POTION, "Health"), Potions.HEALING),
 			ImmutableMap.of(
-				ItemUtil.named(Items.GREEN_STAINED_GLASS_PANE, "Triple"), 2.0D,
-				ItemUtil.named(Items.YELLOW_STAINED_GLASS_PANE, "double"), 1.0D,
-				ItemUtil.named(Items.RED_STAINED_GLASS_PANE, "Normal"), 0.0D
+				ItemUtils.named(Items.GREEN_STAINED_GLASS_PANE, "Triple"), 2.0D,
+				ItemUtils.named(Items.YELLOW_STAINED_GLASS_PANE, "Double"), 1.0D,
+				ItemUtils.named(Items.RED_STAINED_GLASS_PANE, "Normal"), 0.0D
 			),
 			1.0D
 		);
 
 		BOW_COOLDOWN = new GameSetting.DoubleGameSetting(
-			ItemUtil.named(Items.BOW, "Bow Cooldown"),
+			ItemUtils.named(Items.BOW, "Bow Cooldown"),
 			ImmutableMap.of(
-				ItemUtil.named(Items.CLOCK, "None"), 0.0D,
-				ItemUtil.named(Items.CLOCK, "0.5 Seconds"), 0.5D,
-				ItemUtil.named(Items.CLOCK, "1 Second"), 1.0D,
-				ItemUtil.named(Items.CLOCK, "2 Seconds"), 2.0D,
-				ItemUtil.named(Items.CLOCK, "3 Seconds"), 3.0D,
-				ItemUtil.named(Items.CLOCK, "5 Seconds"), 5.0D
+				ItemUtils.named(Items.CLOCK, "None"), 0.0D,
+				ItemUtils.named(Items.CLOCK, "0.5 Seconds"), 0.5D,
+				ItemUtils.named(Items.CLOCK, "1 Second"), 1.0D,
+				ItemUtils.named(Items.CLOCK, "2 Seconds"), 2.0D,
+				ItemUtils.named(Items.CLOCK, "3 Seconds"), 3.0D,
+				ItemUtils.named(Items.CLOCK, "5 Seconds"), 5.0D
 			),
 			1.0D
 		);
 
 		END_GAME_GLOW = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.SPECTRAL_ARROW, "End Game Glow"),
+			ItemUtils.named(Items.SPECTRAL_ARROW, "End Game Glow"),
 			getBooleanRuleOptions(),
 			true
 		);
 
 		FRIENDLY_PLAYER_GLOW = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.GOLDEN_CARROT, "Friendly Player Glow"),
+			ItemUtils.named(Items.GOLDEN_CARROT, "Friendly Player Glow"),
 			getBooleanRuleOptions(),
 			true
 		);
 
 		PLAYER_DROPS_GAPPLE_ON_DEATH = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.GOLDEN_APPLE, "Player Drops Gapple"),
+			ItemUtils.named(Items.GOLDEN_APPLE, "Player Drops Gapple"),
 			getBooleanRuleOptions(),
 			false
 		);
 
 		FLOODGATE = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.COBBLESTONE_WALL, "Floodgates"),
+			ItemUtils.named(Items.COBBLESTONE_WALL, "Floodgates"),
 			getBooleanRuleOptions(),
 			false
 		);
 
 		DISPLAY_TAB = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.WHITE_STAINED_GLASS_PANE, "Display Tab Info"),
+			ItemUtils.named(Items.WHITE_STAINED_GLASS_PANE, "Display Tab Info"),
 			getBooleanRuleOptions(),
 			true,
-			booleanSetting -> PlayerUtils.displayTab = booleanSetting.getValue()
+			booleanSetting -> PlayerManager.displayTab = booleanSetting.getValue()
 		);
 
 		PVP = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.DIAMOND_SWORD, "Pvp"),
+			ItemUtils.named(Items.DIAMOND_SWORD, "Pvp"),
 			getBooleanRuleOptions(),
 			false,
 			booleanSetting -> UHCMod.SERVER.setPvpEnabled(booleanSetting.getValue())
 		);
 
 		OP_POTIONS = new GameSetting.BooleanGameSetting(
-			PotionUtil.setPotion(ItemUtil.named(Items.SPLASH_POTION, "Op Potions"), Potions.STRONG_HEALING),
+			PotionUtil.setPotion(ItemUtils.named(Items.SPLASH_POTION, "Op Potions"), Potions.STRONG_HEALING),
 			getBooleanRuleOptions(),
 			false
 		);
 
 		PLAYER_DROPS_HEAD_ON_DEATH = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.PLAYER_HEAD, "Player Head Drops"),
+			ItemUtils.named(Items.PLAYER_HEAD, "Player Head Drops"),
 			getBooleanRuleOptions(),
 			true
 		);
 
 		GENERATE_PORTAL = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.CRYING_OBSIDIAN, "Generate Nether Portals"),
+			ItemUtils.named(Items.CRYING_OBSIDIAN, "Generate Nether Portals"),
 			getBooleanRuleOptions(),
 			true
 		);
 
 		TESTING = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.REDSTONE_BLOCK, "Testing"),
+			ItemUtils.named(Items.REDSTONE_BLOCK, "Testing"),
 			getBooleanRuleOptions(),
 			false
 		);
 
 		MINESWEEPER_ANNOUNCEMENT = new GameSetting.BooleanGameSetting(
-			ItemUtil.named(Items.JUKEBOX, "Minesweeper Announcement"),
+			ItemUtils.named(Items.JUKEBOX, "Minesweeper Announcement"),
 			getBooleanRuleOptions(),
 			true
 		);
 
 		HEADS_CONSUMABLE = new GameSetting.BooleanGameSetting(
-			PlayerUtils.generateGoldenHead().setCustomName(Text.of("Consumable Heads")),
+			PlayerManager.generateGoldenHead().setCustomName(Text.of("Consumable Heads")),
 			getBooleanRuleOptions(),
 			true
 		);
 
 		WORLD_BORDER_STAGE = new GameSetting.EnumGameSetting<>(
-			ItemUtil.named(Items.BARRIER, "World Border Stage"),
+			ItemUtils.named(Items.BARRIER, "World Border Stage"),
 			getEnumOptions(Stage.class),
 			Stage.FIRST,
 			stageSetting -> {
@@ -166,7 +164,7 @@ public class GameSettings {
 					WorldBorderManager.startWorldBorders();
 					return;
 				}
-				UHCMod.LOGGER.error("Could not set World border since game is not active");
+				UHCMod.LOGGER.error("Could not set world border since game is not active");
 			}
 		);
 	}
@@ -182,8 +180,8 @@ public class GameSettings {
 
 	private static Map<ItemStack, Boolean> getBooleanRuleOptions() {
 		return ImmutableMap.of(
-			ItemUtil.named(Items.GREEN_STAINED_GLASS_PANE, "On"), true,
-			ItemUtil.named(Items.RED_STAINED_GLASS_PANE, "Off"), false
+			ItemUtils.named(Items.GREEN_STAINED_GLASS_PANE, "On"), true,
+			ItemUtils.named(Items.RED_STAINED_GLASS_PANE, "Off"), false
 		);
 	}
 
@@ -193,9 +191,11 @@ public class GameSettings {
 		Map<ItemStack, T> map = new LinkedHashMap<>();
 		boolean isPurple = true;
 		for (T constant : enumClass.getEnumConstants()) {
-			String cleanedName = constant.name().toLowerCase().replaceAll("_", " ");
+			String cleanedName = Arrays.stream(constant.name().toLowerCase().split("_")).reduce("", (a, b) -> {
+				return a + b.substring(0, 1).toUpperCase(Locale.ROOT) + b.substring(1);
+			});
 			Item colour = isPurple ? Items.PURPLE_STAINED_GLASS_PANE : Items.WHITE_STAINED_GLASS_PANE;
-			map.put(ItemUtil.named(colour, cleanedName), constant);
+			map.put(ItemUtils.named(colour, cleanedName), constant);
 			isPurple = !isPurple;
 		}
 		return map;
@@ -231,8 +231,8 @@ public class GameSettings {
 					inventory.setStack(i, Items.GRAY_STAINED_GLASS.getDefaultStack().setCustomName(Text.literal("")));
 				}
 
-				inventory.setStack(0, ItemUtil.named(Items.RED_STAINED_GLASS, "Previous"));
-				inventory.setStack(8, ItemUtil.named(Items.GREEN_STAINED_GLASS, "Next"));
+				inventory.setStack(0, ItemUtils.named(Items.RED_STAINED_GLASS, "Previous"));
+				inventory.setStack(8, ItemUtils.named(Items.GREEN_STAINED_GLASS, "Next"));
 			});
 		}
 

@@ -3,7 +3,7 @@ package net.casualuhc.uhcmod.mixin;
 import com.mojang.authlib.GameProfile;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
 import net.minecraft.entity.damage.DamageSource;
@@ -38,20 +38,15 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
         ServerPlayerEntity thisPlayer = (ServerPlayerEntity) (Object) this;
-        if (PlayerUtils.isPlayerPlayingInSurvival(thisPlayer) && this.getHealth() <= 1.0F) {
+        if (PlayerManager.isPlayerPlayingInSurvival(thisPlayer) && this.getHealth() <= 1.0F) {
             this.halfHealthTicks++;
             if (this.halfHealthTicks == 1200) {
-                PlayerUtils.grantAdvancement(thisPlayer, UHCAdvancements.ON_THE_EDGE);
+                PlayerManager.grantAdvancement(thisPlayer, UHCAdvancements.ON_THE_EDGE);
             }
         } else {
             this.halfHealthTicks = 0;
         }
         EventHandler.onPlayerTick(thisPlayer);
-    }
-
-    @Inject(method = "onDeath", at = @At("HEAD"))
-    private void onDeathPre(DamageSource source, CallbackInfo ci) {
-        // UHCMod.UHCSocketClient.send(this.getDamageTracker().getDeathMessage().getString());
     }
 
     @Inject(method = "onDeath", at = @At("TAIL"))
@@ -61,7 +56,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
 
     @Inject(method = "onDisconnect", at = @At("TAIL"))
     private void onDisconnect(CallbackInfo ci) {
-        UHCDataBase.updateStats((ServerPlayerEntity) (Object) this);
+        EventHandler.onPlayerLeave((ServerPlayerEntity) (Object) this);
     }
 
     @Override
@@ -74,8 +69,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     @Override
     public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource) {
         if (super.handleFallDamage(fallDistance, damageMultiplier, damageSource)) {
-            if (GameManager.ticksSinceStart() < 1200) {
-                PlayerUtils.grantAdvancement((ServerPlayerEntity) (Object) this, UHCAdvancements.BROKEN_ANKLES);
+            if (GameManager.gameUptime() < 1200) {
+                PlayerManager.grantAdvancement((ServerPlayerEntity) (Object) this, UHCAdvancements.BROKEN_ANKLES);
             }
             return true;
         }

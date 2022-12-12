@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.minecraft.block.TntBlock;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -17,7 +17,7 @@ public class TntBlockMixin {
 	@Inject(method = "primeTnt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/LivingEntity;)V", at = @At("TAIL"))
 	private static void onPrimeTnt(World world, BlockPos pos, LivingEntity igniter, CallbackInfo ci) {
 		if (igniter instanceof ServerPlayerEntity player) {
-			PlayerUtils.grantAdvancement(player, UHCAdvancements.DEMOLITION_EXPERT);
+			PlayerManager.grantAdvancement(player, UHCAdvancements.DEMOLITION_EXPERT);
 		}
 	}
 }

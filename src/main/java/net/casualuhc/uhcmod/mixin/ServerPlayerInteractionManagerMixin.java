@@ -1,7 +1,8 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
+import net.casualuhc.uhcmod.utils.uhc.UHCUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
@@ -24,10 +25,11 @@ public class ServerPlayerInteractionManagerMixin {
     @Inject(method = "interactBlock",
         slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;useOnBlock(Lnet/minecraft/item/ItemUsageContext;)Lnet/minecraft/util/ActionResult;", ordinal = 0)),
         at = @At(value = "FIELD", target = "Lnet/minecraft/advancement/criterion/Criteria;ITEM_USED_ON_BLOCK:Lnet/minecraft/advancement/criterion/ItemCriterion;", ordinal = 0),
-        locals = LocalCapture.CAPTURE_FAILHARD)
+        locals = LocalCapture.CAPTURE_FAILHARD
+    )
     private void onBlockPlaced(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir, BlockPos pos, BlockState oldState, boolean bl, boolean bl2, ItemStack stack1, ItemUsageContext context) {
-        if (PlayerUtils.detectFlexibleBlockPlacement(world, hitResult.getBlockPos(), hitResult.getSide(), oldState, context)) {
-            PlayerUtils.grantAdvancement(player, UHCAdvancements.BUSTED);
+        if (UHCUtils.detectFlexibleBlockPlacement(world, hitResult.getBlockPos(), hitResult.getSide(), oldState, context)) {
+            PlayerManager.grantAdvancement(player, UHCAdvancements.BUSTED);
         }
     }
 }

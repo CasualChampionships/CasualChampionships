@@ -1,4 +1,4 @@
-package net.casualuhc.uhcmod.utils;
+package net.casualuhc.uhcmod.utils.scheduling;
 
 public class Task {
 	private final Runnable runnable;

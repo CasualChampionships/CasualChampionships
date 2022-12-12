@@ -5,14 +5,15 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
+import net.casualuhc.uhcmod.utils.uhc.UHCUtils;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSetting;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
-import net.casualuhc.uhcmod.utils.Phase;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
-import net.casualuhc.uhcmod.utils.TeamUtils;
+import net.casualuhc.uhcmod.utils.uhc.Phase;
+import net.casualuhc.uhcmod.managers.TeamManager;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.TeamArgumentType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -33,14 +34,14 @@ public class UHCCommand {
 			.then(literal("team")
 				.then(literal("reload")
 					.executes(context -> {
-						TeamUtils.createTeams();
+						TeamManager.createTeams();
 						return 1;
 					})
 				)
 				.then(literal("forceadd")
 					.then(argument("player", EntityArgumentType.entity())
 						.then(argument("team", TeamArgumentType.team())
-							.executes(TeamUtils::forceAddPlayer)
+							.executes(TeamManager::forceAddPlayer)
 						)
 					)
 				)
@@ -94,7 +95,7 @@ public class UHCCommand {
 					.executes(context -> {
 						GameManager.setPhase(Phase.ACTIVE);
 						EventHandler.onGracePeriodEnd();
-						GameManager.setUHCGamerules();
+						UHCUtils.setUHCGamerules();
 						return 1;
 					})
 				)
@@ -156,7 +157,7 @@ public class UHCCommand {
 				)
 				.then(literal("removeglow")
 					.executes(context -> {
-						PlayerUtils.forEveryPlayer(player -> player.setGlowing(false));
+						PlayerManager.forEveryPlayer(player -> player.setGlowing(false));
 						return 1;
 					})
 				)
@@ -167,8 +168,8 @@ public class UHCCommand {
 							player.getHungerManager().setSaturationLevel(20F);
 							EntityAttributeInstance instance = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 							if (instance != null) {
-								instance.removeModifier(PlayerUtils.HEALTH_BOOST);
-								instance.addPersistentModifier(new EntityAttributeModifier(PlayerUtils.HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
+								instance.removeModifier(PlayerManager.HEALTH_BOOST);
+								instance.addPersistentModifier(new EntityAttributeModifier(PlayerManager.HEALTH_BOOST, "Health Boost", GameSettings.HEALTH.getValue(), EntityAttributeModifier.Operation.MULTIPLY_BASE));
 							}
 							player.setHealth(player.getMaxHealth());
 							return 1;

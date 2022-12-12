@@ -1,7 +1,7 @@
 package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
@@ -29,7 +29,7 @@ public abstract class LootableContainerBlockEntityMixin extends LockableContaine
 	@Inject(method = "checkLootInteraction", at = @At(value = "INVOKE", target = "Lnet/minecraft/loot/LootTable;supplyInventory(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/loot/context/LootContext;)V", shift = At.Shift.AFTER))
 	private void afterLookGenerated(PlayerEntity player, CallbackInfo ci) {
 		if (player instanceof ServerPlayerEntity serverPlayer && this.getInvStackList().stream().anyMatch(s -> s.getItem() == Items.ENCHANTED_GOLDEN_APPLE)) {
-			PlayerUtils.grantAdvancement(serverPlayer, UHCAdvancements.DREAM_LUCK);
+			PlayerManager.grantAdvancement(serverPlayer, UHCAdvancements.DREAM_LUCK);
 		}
 	}
 }

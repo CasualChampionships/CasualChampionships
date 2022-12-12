@@ -3,7 +3,7 @@ package net.casualuhc.uhcmod.utils.screen;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.PlayerUtils;
+import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
@@ -20,7 +20,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.Random;
 
-import static net.casualuhc.uhcmod.utils.ItemUtil.named;
+import static net.casualuhc.uhcmod.utils.uhc.ItemUtils.named;
 
 public class MinesweeperScreen extends CustomScreen {
 	private static double record = 127;
@@ -141,12 +141,12 @@ public class MinesweeperScreen extends CustomScreen {
 		this.complete = true;
 		double seconds = (System.nanoTime() - this.grid.startTime) / 1_000_000_000D;
 		if (seconds <= 40) {
-			PlayerUtils.grantAdvancement((ServerPlayerEntity) player, UHCAdvancements.OFFICIALLY_BORED);
+			PlayerManager.grantAdvancement((ServerPlayerEntity) player, UHCAdvancements.OFFICIALLY_BORED);
 		}
 		player.sendMessage(Text.literal("You won in %.2fs!".formatted(seconds)));
 		if (seconds < record && GameSettings.MINESWEEPER_ANNOUNCEMENT.getValue()) {
 			record = seconds;
-			PlayerUtils.messageEveryPlayer(
+			PlayerManager.messageEveryPlayer(
 				Text.literal("%s now holds the record beating Minesweeper in %.2fs.".formatted(player.getEntityName(), seconds))
 			);
 		}
