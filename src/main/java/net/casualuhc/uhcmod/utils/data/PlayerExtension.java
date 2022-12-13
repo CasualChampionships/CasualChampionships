@@ -20,7 +20,6 @@ public class PlayerExtension {
 
 	public final WorldBorder worldBorder = new WorldBorder();
 
-	public BlockPos lobbyMusicPos = null;
 	public AbstractTeam trueTeam = null;
 	public boolean wasInWorldBorder = false;
 	public int damageDealt = 0;

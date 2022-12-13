@@ -264,7 +264,7 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/officially_bored"));
 
-    DISTRACTED = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
+    	DISTRACTED = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
 			Items.CHAIN_COMMAND_BLOCK,
 			Text.literal("Distracted"),
 			Text.literal("Die while playing minesweeper"),

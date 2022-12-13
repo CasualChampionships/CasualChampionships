@@ -236,12 +236,12 @@ public class GameManager {
 			@Override
 			public void onReady() {
 				setPhase(Phase.READY);
-				hideBossBar();
 			}
 
 			@Override
 			public void onStart() {
 				setPhase(Phase.START);
+				hideBossBar();
 				startCountDown();
 			}
 

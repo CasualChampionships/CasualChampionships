@@ -72,6 +72,7 @@ public class UHCUtils {
 		gameRules.get(GameRules.DO_ENTITY_DROPS).set(false, server);
 		gameRules.get(GameRules.DO_WEATHER_CYCLE).set(false, server);
 		gameRules.get(GameRules.DO_TRADER_SPAWNING).set(false, server);
+		gameRules.get(GameRules.DO_TILE_DROPS).set(false, server);
 		gameRules.get(GameRules.SNOW_ACCUMULATION_HEIGHT).set(0, server);
 		gameRules.get(GameRules.RANDOM_TICK_SPEED).set(0, server);
 		server.setDifficulty(Difficulty.PEACEFUL, true);
@@ -116,6 +117,7 @@ public class UHCUtils {
 		gameRules.get(GameRules.DO_ENTITY_DROPS).set(true, server);
 		gameRules.get(GameRules.DO_WEATHER_CYCLE).set(true, server);
 		gameRules.get(GameRules.DO_TRADER_SPAWNING).set(true, server);
+		gameRules.get(GameRules.DO_TILE_DROPS).set(true, server);
 		gameRules.get(GameRules.SNOW_ACCUMULATION_HEIGHT).set(1, server);
 		gameRules.get(GameRules.RANDOM_TICK_SPEED).set(3, server);
 		server.setDifficulty(Difficulty.HARD, true);

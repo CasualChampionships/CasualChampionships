@@ -1,9 +1,11 @@
 package net.casualuhc.uhcmod.events;
 
+import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
+import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.uhc.Event;
 import net.casualuhc.uhcmod.utils.uhc.ItemUtils;
@@ -77,6 +79,17 @@ public class ChristmasUHC implements Event {
 						inventory.armor.set(3, ItemUtils.named(Items.CARVED_PUMPKIN, "Santa's Hat"));
 					}
 				}
+			}
+		});
+		EventHandler.register(new UHCEvents() {
+			@Override
+			public void onLobby() {
+				UHCMod.SERVER.getOverworld().setWeather(0, 6000, true, false);
+			}
+
+			@Override
+			public void onStart() {
+				UHCMod.SERVER.getOverworld().setWeather(6000, 0, false, false);
 			}
 		});
 	}

@@ -247,15 +247,7 @@ public class PlayerManager {
 	 */
 	public static void playLobbyMusic(ServerPlayerEntity player, int tickInterval) {
 		if (!GameManager.isGameActive()) {
-			// This is the only way we are able to stop the music later.
-			// The client stores the position that we play a disc at.
-			player.getWorld().syncWorldEvent(
-				WorldEvents.MUSIC_DISC_PLAYED,
-				PlayerExtension.get(player).lobbyMusicPos = player.getBlockPos(),
-				Item.getRawId(Items.MUSIC_DISC_5)
-			);
-			// Remove the disc overlay
-			player.sendMessage(Text.empty(), true);
+			player.playSound(SoundEvents.MUSIC_DISC_5, SoundCategory.RECORDS, 1.0f, 1.0f);
 			Scheduler.schedule(tickInterval, () -> {
 				playLobbyMusic(player, tickInterval);
 			});
@@ -266,12 +258,7 @@ public class PlayerManager {
 	 * Stop the lobby music for all players.
 	 */
 	public static void stopLobbyMusic() {
-		forEveryPlayer(player -> {
-			BlockPos pos = PlayerExtension.get(player).lobbyMusicPos;
-			if (pos != null) {
-				player.getWorld().syncWorldEvent(WorldEvents.MUSIC_DISC_PLAYED, pos, 0);
-			}
-		});
+		resendResourcePack();
 	}
 
 	/**
@@ -461,13 +448,6 @@ public class PlayerManager {
 			@Override
 			public void onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 				handlePlayerDeath(player, source);
-			}
-
-			@Override
-			public void onPlayerLeave(ServerPlayerEntity player) {
-				PlayerExtension.apply(player, e -> {
-					e.lobbyMusicPos = null;
-				});
 			}
 		});
 
