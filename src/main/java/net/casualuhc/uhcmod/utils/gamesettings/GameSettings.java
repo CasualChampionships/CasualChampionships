@@ -149,7 +149,7 @@ public class GameSettings {
 		);
 
 		HEADS_CONSUMABLE = new GameSetting.BooleanGameSetting(
-			PlayerManager.generateGoldenHead().setCustomName(Text.of("Consumable Heads")),
+			ItemUtils.generateGoldenHead().setCustomName(Text.of("Consumable Heads")),
 			getBooleanRuleOptions(),
 			true
 		);

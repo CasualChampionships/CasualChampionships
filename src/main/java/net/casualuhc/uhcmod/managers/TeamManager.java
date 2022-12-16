@@ -12,6 +12,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.TeamArgumentType;
 import net.minecraft.scoreboard.AbstractTeam;
+import net.minecraft.scoreboard.AbstractTeam.CollisionRule;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.Team;
@@ -38,6 +39,8 @@ import java.util.Set;
 public class TeamManager {
 	private static final Set<AbstractTeam> IGNORED_TEAMS = new HashSet<>();
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+	private static CollisionRule collisions = CollisionRule.ALWAYS;
 
 	/**
 	 * Checks whether a team is eliminated from the UHC.
@@ -211,13 +214,14 @@ public class TeamManager {
 		for (String operator : Config.OPERATORS) {
 			scoreboard.addPlayerToTeam(operator, operatorTeam);
 		}
+		operatorTeam.setCollisionRule(CollisionRule.NEVER);
 		operatorTeam.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
 		IGNORED_TEAMS.add(operatorTeam);
 
 		Team spectatorTeam = scoreboard.addTeam("Spectator");
 		spectatorTeam.setColor(Formatting.DARK_GRAY);
-		spectatorTeam.setCollisionRule(AbstractTeam.CollisionRule.NEVER);
 		setEliminated(spectatorTeam, true);
+		spectatorTeam.setCollisionRule(CollisionRule.NEVER);
 		spectatorTeam.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
 		IGNORED_TEAMS.add(spectatorTeam);
 
@@ -226,6 +230,18 @@ public class TeamManager {
 				scoreboard.addPlayerToTeam(player.getEntityName(), spectatorTeam);
 			}
 		});
+	}
+
+	/**
+	 * Sets whether all teams should have collisions enabled or not.
+	 *
+	 * @param shouldCollide whether players should collide.
+	 */
+	public static void setCollisions(boolean shouldCollide) {
+		collisions = shouldCollide ? CollisionRule.ALWAYS : CollisionRule.NEVER;
+		for (Team team : UHCMod.SERVER.getScoreboard().getTeams()) {
+			team.setCollisionRule(collisions);
+		}
 	}
 
 	/**
@@ -250,6 +266,16 @@ public class TeamManager {
 			public void onReady() {
 				unReadyAllTeams();
 				sendReadyMessage();
+			}
+
+			@Override
+			public void onLobby() {
+				setCollisions(false);
+			}
+
+			@Override
+			public void onActive() {
+				setCollisions(true);
 			}
 		});
 	}
@@ -325,7 +351,7 @@ public class TeamManager {
 				scoreboard.addPlayerToTeam(member.getAsString(), team);
 			}
 			team.setFriendlyFireAllowed(false);
-			team.setCollisionRule(AbstractTeam.CollisionRule.NEVER);
+			team.setCollisionRule(collisions);
 		}
 	}
 }

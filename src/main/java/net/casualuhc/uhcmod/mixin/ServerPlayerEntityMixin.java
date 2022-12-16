@@ -69,7 +69,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     @Override
     public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource) {
         if (super.handleFallDamage(fallDistance, damageMultiplier, damageSource)) {
-            if (GameManager.gameUptime() < 1200) {
+            if (GameManager.gameUptime() < 1200 && this.computeFallDamage(fallDistance, damageMultiplier) > 0) {
                 PlayerManager.grantAdvancement((ServerPlayerEntity) (Object) this, UHCAdvancements.BROKEN_ANKLES);
             }
             return true;

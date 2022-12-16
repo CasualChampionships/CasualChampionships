@@ -25,6 +25,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.scoreboard.AbstractTeam;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -184,6 +185,24 @@ public class GameManager {
 	 */
 	public static Iterable<Recipe<?>> getCustomRecipes() {
 		return List.of(new GoldenHeadRecipe());
+	}
+
+	/**
+	 * Gets the lobby structure template, loads it if it has not yet been loaded.
+	 *
+	 * @return the lobby structure.
+	 */
+	public static StructureTemplate getLobby() {
+		if (lobby == null) {
+			try {
+				InputStream inputStream = Files.newInputStream(Config.getConfig("lobbies").resolve(Config.CURRENT_EVENT.getLobbyName() + ".nbt"));
+				NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
+				lobby = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
+			} catch (Exception e) {
+				throw new IllegalStateException("Failed to load lobby structure");
+			}
+		}
+		return lobby;
 	}
 
 	public static void noop() { }
@@ -388,6 +407,7 @@ public class GameManager {
 		});
 
 		schedulePhaseTask(minutesToTicks(1), () -> {
+			PlayerManager.forEveryPlayer(PlayerManager::clearPlayerInventory);
 			EventHandler.onSetup();
 			EventHandler.onLobby();
 		});
@@ -424,19 +444,6 @@ public class GameManager {
 			bar.clearPlayers();
 			manager.remove(bar);
 		}
-	}
-
-	private static StructureTemplate getLobby() {
-		if (lobby == null) {
-			try {
-				InputStream inputStream = Files.newInputStream(Config.getConfig("lobbies").resolve(Config.CURRENT_EVENT.getLobbyName() + ".nbt"));
-				NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
-				lobby = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
-			} catch (Exception e) {
-				throw new IllegalStateException("Failed to load lobby structure");
-			}
-		}
-		return lobby;
 	}
 
 	private static void generateLobby() {

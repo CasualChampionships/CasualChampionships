@@ -10,10 +10,7 @@ import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
-import net.casualuhc.uhcmod.utils.uhc.Config;
-import net.casualuhc.uhcmod.utils.uhc.OneTimeAchievement;
-import net.casualuhc.uhcmod.utils.uhc.Phase;
-import net.casualuhc.uhcmod.utils.uhc.UHCUtils;
+import net.casualuhc.uhcmod.utils.uhc.*;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.block.Blocks;
@@ -25,12 +22,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.SkullItem;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
@@ -45,13 +38,11 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldEvents;
 import net.minecraft.world.border.WorldBorder;
 
 import java.text.DecimalFormat;
@@ -68,10 +59,6 @@ public class PlayerManager {
 	private static final MutableText HEADER = literal("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
 	private static final MutableText FOOTER = literal("\nServer Hosted By KiwiTech").formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.0");
-
-	private static final ItemStack GOLDEN_HEAD = Util.make(generatePlayerHead("PhantomTupac", Config.CURRENT_EVENT.getGoldenHeadTexture()), i -> {
-		i.setCustomName(literal("Golden Head").formatted(Formatting.GOLD).styled(s -> s.withItalic(false)));
-	});
 
 	public static final UUID HEALTH_BOOST = UUID.fromString("a61b8a4f-a4f5-4b7f-b787-d10ba4ad3d57");
 	public static boolean displayTab = true;
@@ -146,7 +133,7 @@ public class PlayerManager {
 	 * @param entity the possible player to give the head item to.
 	 */
 	public static void dropPlayerHead(ServerPlayerEntity player, Entity entity) {
-		ItemStack playerHead = generatePlayerHead(player.getEntityName());
+		ItemStack playerHead = ItemUtils.generatePlayerHead(player.getEntityName());
 		if (entity instanceof ServerPlayerEntity attacker) {
 			if (!attacker.getInventory().insertStack(playerHead)) {
 				player.dropItem(playerHead, true, false);
@@ -154,59 +141,6 @@ public class PlayerManager {
 			return;
 		}
 		player.dropItem(playerHead, true, false);
-	}
-
-	/**
-	 * Generates a player's head as an item stack with count 1.
-	 *
-	 * @param playerName the name of the player.
-	 * @return the head of the player.
-	 */
-	public static ItemStack generatePlayerHead(String playerName) {
-		return generatePlayerHead(playerName, null);
-	}
-
-	/**
-	 * Generates a player's head with a given texture with count 1.
-	 *
-	 * @param playerName the name of the player.
-	 * @param texture the texture of the head.
-	 * @return the head of the player.
-	 * @see #generatePlayerHead(String)
-	 */
-	public static ItemStack generatePlayerHead(String playerName, String texture) {
-		NbtCompound compound = new NbtCompound();
-		compound.putString("id", "player_head");
-		compound.putByte("Count", (byte) 1);
-
-
-		NbtCompound skullData = new NbtCompound();
-		skullData.putString("Name", playerName);
-		if (texture != null) {
-			NbtCompound textureCompound = new NbtCompound();
-			textureCompound.putString("Value", texture);
-			NbtList textures = new NbtList();
-			textures.add(textureCompound);
-			NbtCompound properties = new NbtCompound();
-			properties.put("textures", textures);
-			skullData.put("Properties", properties);
-		}
-
-		NbtCompound playerData = new NbtCompound();
-		playerData.put(SkullItem.SKULL_OWNER_KEY, skullData);
-
-		compound.put("tag", playerData);
-
-		return ItemStack.fromNbt(compound);
-	}
-
-	/**
-	 * Generates a new Golden Head item stack.
-	 *
-	 * @return the Golden Head item stack.
-	 */
-	public static ItemStack generateGoldenHead() {
-		return GOLDEN_HEAD.copy();
 	}
 
 	/**
@@ -464,12 +398,8 @@ public class PlayerManager {
 			}
 
 			@Override
-			public void onStart() {
-				stopLobbyMusic();
-			}
-
-			@Override
 			public void onActive() {
+				stopLobbyMusic();
 				forceUpdateGlowing();
 				forceUpdateFullBright();
 			}

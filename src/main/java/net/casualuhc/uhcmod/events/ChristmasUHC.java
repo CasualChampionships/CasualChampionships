@@ -12,13 +12,28 @@ import net.casualuhc.uhcmod.utils.uhc.ItemUtils;
 import net.minecraft.entity.boss.BossBar;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer.ServerResourcePackProperties;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockBox;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeKeys;
+import net.minecraft.world.biome.source.BiomeCoords;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChristmasUHC implements Event {
 	private static final Vec3d LOBBY_SPAWN = new Vec3d(2, 272, 9);
@@ -84,13 +99,55 @@ public class ChristmasUHC implements Event {
 		EventHandler.register(new UHCEvents() {
 			@Override
 			public void onLobby() {
+				makeLobbySnowy();
 				UHCMod.SERVER.getOverworld().setWeather(0, 6000, true, false);
 			}
 
 			@Override
 			public void onStart() {
-				UHCMod.SERVER.getOverworld().setWeather(6000, 0, false, false);
+				UHCMod.SERVER.getOverworld().setWeather(24000, 0, false, false);
 			}
 		});
+	}
+
+	private static void makeLobbySnowy() {
+		Vec3i dimensions = GameManager.getLobby().getSize();
+		int topY = UHCMod.SERVER.getOverworld().getTopY();
+		int minX = -dimensions.getX() / 2;
+		int minY = UHCMod.SERVER.getOverworld().getTopY() - dimensions.getY() - 10;
+		int minZ = -dimensions.getZ() / 2;
+
+		BlockBox blockBox = BlockBox.create(new Vec3i(minX, minY, minZ), new Vec3i(-minX, topY, -minZ));
+
+		ServerWorld serverWorld = UHCMod.SERVER.getOverworld();
+		List<Chunk> list = new ArrayList<>();
+
+		for (int j = ChunkSectionPos.getSectionCoord(blockBox.getMinZ()); j <= ChunkSectionPos.getSectionCoord(blockBox.getMaxZ()); ++j) {
+			for (int k = ChunkSectionPos.getSectionCoord(blockBox.getMinX()); k <= ChunkSectionPos.getSectionCoord(blockBox.getMaxX()); ++k) {
+				Chunk chunk = serverWorld.getChunk(k, j, ChunkStatus.FULL, true);
+				list.add(chunk);
+			}
+		}
+
+		Registry<Biome> biomeRegistry = UHCMod.SERVER.getRegistryManager().get(RegistryKeys.BIOME);
+		Biome biome = biomeRegistry.get(BiomeKeys.SNOWY_TAIGA);
+		RegistryEntry<Biome> biomeEntry = biomeRegistry.getEntry(biome);
+
+		for (Chunk chunk : list) {
+			chunk.populateBiomes(
+				(x, y, z, noise) -> {
+					int i = BiomeCoords.toBlock(x);
+					int j = BiomeCoords.toBlock(y);
+					int k = BiomeCoords.toBlock(z);
+					if (blockBox.contains(i, j, k)) {
+						return biomeEntry;
+					}
+					return chunk.getBiomeForNoiseGen(x, y, z);
+				},
+				serverWorld.getChunkManager().getNoiseConfig().getMultiNoiseSampler()
+			);
+			chunk.setNeedsSaving(true);
+			serverWorld.getChunkManager().threadedAnvilChunkStorage.sendChunkPacketToWatchingPlayers(chunk);
+		}
 	}
 }
