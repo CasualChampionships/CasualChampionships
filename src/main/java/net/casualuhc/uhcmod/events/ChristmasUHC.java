@@ -39,20 +39,18 @@ public class ChristmasUHC implements Event {
 	private static final Vec3d LOBBY_SPAWN = new Vec3d(2, 272, 9);
 
 	private static final ServerResourcePackProperties PROPERTIES = new ServerResourcePackProperties(
-		"https://download.mc-packs.net/pack/09b7b5f2cd8e5ff163174d38a08d1919ea51b346.zip",
-		"09b7b5f2cd8e5ff163174d38a08d1919ea51b346",
+		"https://download.mc-packs.net/pack/3eaede972adb0e38d8ec490ccfe6d0cec693df76.zip",
+		"3eaede972adb0e38d8ec490ccfe6d0cec693df76",
 		false, Text.literal("This texture pack provides some festive features!")
 	);
 
 	@Override
 	public MutableText getBossBarMessage() {
-		return Text.literal("Welcome").formatted(Formatting.RED, Formatting.BOLD)
+		return Text.translatable("uhc.lobby.welcome").formatted(Formatting.RED, Formatting.BOLD)
 			.append(" ")
-			.append(Text.literal("to").formatted(Formatting.WHITE, Formatting.BOLD))
+			.append(Text.literal("Casual").formatted(Formatting.WHITE, Formatting.BOLD))
 			.append(" ")
-			.append(Text.literal("Casual").formatted(Formatting.RED, Formatting.BOLD))
-			.append(" ")
-			.append(Text.literal("UHC").formatted(Formatting.WHITE, Formatting.BOLD));
+			.append(Text.literal("UHC").formatted(Formatting.RED, Formatting.BOLD));
 	}
 
 	@Override
@@ -91,7 +89,7 @@ public class ChristmasUHC implements Event {
 
 					PlayerInventory inventory = player.getInventory();
 					if (inventory.isEmpty()) {
-						inventory.armor.set(3, ItemUtils.named(Items.CARVED_PUMPKIN, "Santa's Hat"));
+						inventory.armor.set(3, ItemUtils.translatableNamed(Items.CARVED_PUMPKIN, "uhc.christmas.santaHat"));
 					}
 				}
 			}

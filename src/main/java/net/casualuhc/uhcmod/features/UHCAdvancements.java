@@ -59,8 +59,8 @@ public class UHCAdvancements {
 	static {
 		ROOT = Advancement.Builder.create().display(
 			Items.GOLDEN_APPLE,
-			Text.literal("UHC Advancements"),
-			Text.literal("Advancements to achieve during UHC!"),
+			Text.translatable("uhc.advancements.root"),
+			Text.translatable("uhc.advancements.root.desc"),
 			new Identifier("textures/gui/advancements/backgrounds/adventure.png"),
 			AdvancementFrame.TASK,
 			false, false, false
@@ -68,8 +68,8 @@ public class UHCAdvancements {
 
 		FIRST_BLOOD = Advancement.Builder.create().parent(ROOT).display(
 			Items.IRON_SWORD,
-			Text.literal("First Blood"),
-			Text.literal("Kill the first person of the game"),
+			Text.translatable("uhc.advancements.firstBlood"),
+			Text.translatable("uhc.advancements.firstBlood.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -77,8 +77,8 @@ public class UHCAdvancements {
 
 		EARLY_EXIT = Advancement.Builder.create().parent(ROOT).display(
 			Items.POISONOUS_POTATO,
-			Text.literal("Early Exit"),
-			Text.literal("Someone had to go out first ¯\\_(ツ)_/¯"),
+			Text.translatable("uhc.advancements.earlyExit"),
+			Text.translatable("uhc.advancements.earlyExit.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -86,8 +86,8 @@ public class UHCAdvancements {
 
 		MOSTLY_HARMLESS = Advancement.Builder.create().parent(EARLY_EXIT).display(
 			Items.FEATHER,
-			Text.literal("Mostly Harmless"),
-			Text.literal("Least damage dealt to other players"),
+			Text.translatable("uhc.advancements.mostlyHarmless"),
+			Text.translatable("uhc.advancements.mostlyHarmless.desc"),
 			null,
 			AdvancementFrame.CHALLENGE,
 			true, true, false
@@ -95,8 +95,8 @@ public class UHCAdvancements {
 
 		HEAVY_HITTER = Advancement.Builder.create().parent(FIRST_BLOOD).display(
 			Items.ANVIL,
-			Text.literal("Heavy Hitter"),
-			Text.literal("Most damage dealt to other players"),
+			Text.translatable("uhc.advancements.heavyHitter"),
+			Text.translatable("uhc.advancements.heavyHitter.desc"),
 			null,
 			AdvancementFrame.CHALLENGE,
 			true, true, false
@@ -104,8 +104,8 @@ public class UHCAdvancements {
 
 		WINNER = Advancement.Builder.create().parent(FIRST_BLOOD).display(
 			Items.TOTEM_OF_UNDYING,
-			Text.literal("WINNER!"),
-			Text.literal("Congratulations on winning the UHC!"),
+			Text.translatable("uhc.advancements.winner"),
+			Text.translatable("uhc.advancements.winner.desc"),
 			null,
 			AdvancementFrame.CHALLENGE,
 			true, true, false
@@ -113,8 +113,8 @@ public class UHCAdvancements {
 
 		COMBAT_LOGGER = Advancement.Builder.create().parent(ROOT).display(
 			Items.WOODEN_SWORD,
-			Text.literal("Combat Logger"),
-			Text.literal("We all believe it was your internet..."),
+			Text.translatable("uhc.advancements.combatLogger"),
+			Text.translatable("uhc.advancements.combatLogger.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -122,8 +122,8 @@ public class UHCAdvancements {
 
 		THATS_NOT_DUSTLESS = Advancement.Builder.create().parent(ROOT).display(
 			Items.REDSTONE,
-			Text.literal("That's Not Dustless!"),
-			Text.literal("Use redstone dust"),
+			Text.translatable("uhc.advancements.notDustless"),
+			Text.translatable("uhc.advancements.notDustless.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -131,8 +131,8 @@ public class UHCAdvancements {
 
 		PARKOUR_MASTER = Advancement.Builder.create().parent(ROOT).display(
 			Items.NETHERITE_BOOTS,
-			Text.literal("Parkour Master"),
-			Text.literal("Complete the parkour in the lobby"),
+			Text.translatable("uhc.advancements.parkourMaster"),
+			Text.translatable("uhc.advancements.parkourMaster.desc"),
 			null,
 			AdvancementFrame.CHALLENGE,
 			true, true, false
@@ -140,8 +140,8 @@ public class UHCAdvancements {
 
 		WORLD_RECORD_PACE = Advancement.Builder.create().parent(ROOT).display(
 			PotionUtil.setPotion(Items.SPLASH_POTION.getDefaultStack(), Potions.SWIFTNESS),
-			Text.literal("World Record Pace!"),
-			Text.literal("Be the first to craft a crafting table"),
+			Text.translatable("uhc.advancements.worldRecordPace"),
+			Text.translatable("uhc.advancements.worldRecordPace.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -149,8 +149,8 @@ public class UHCAdvancements {
 
 		THATS_EMBARRASSING = Advancement.Builder.create().parent(ROOT).display(
 			Items.SWEET_BERRIES,
-			Text.literal("That's Embarrassing"),
-			Text.literal("Take damage from a sweet berry bush"),
+			Text.translatable("uhc.advancements.thatsEmbarrassing"),
+			Text.translatable("uhc.advancements.thatsEmbarrassing.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -158,8 +158,8 @@ public class UHCAdvancements {
 
 		BUSTED = Advancement.Builder.create().parent(ROOT).display(
 			Items.BARRIER,
-			Text.literal("Busted"),
-			Text.literal("Break the rules by using flexible block placement"),
+			Text.translatable("uhc.advancements.busted"),
+			Text.translatable("uhc.advancements.busted.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -167,8 +167,8 @@ public class UHCAdvancements {
 
 		DEMOLITION_EXPERT = Advancement.Builder.create().parent(EARLY_EXIT).display(
 			Items.TNT,
-			Text.literal("Demolitions Expert"),
-			Text.literal("Are you sure you know what you're doing with TNT?"),
+			Text.translatable("uhc.advancements.demolitionExpert"),
+			Text.translatable("uhc.advancements.demolitionExpert.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -176,8 +176,8 @@ public class UHCAdvancements {
 
 		OK_WE_BELIEVE_YOU_NOW = Advancement.Builder.create().parent(COMBAT_LOGGER).display(
 			Items.WOODEN_HOE,
-			Text.literal("Ok We Believe You Now"),
-			Text.literal("Should've used KCP"),
+			Text.translatable("uhc.advancements.okWeBelieveYouNow"),
+			Text.translatable("uhc.advancements.okWeBelieveYouNow.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -185,8 +185,8 @@ public class UHCAdvancements {
 
 		FALLING_BLOCK = Advancement.Builder.create().parent(THATS_NOT_DUSTLESS).display(
 			Items.SAND,
-			Text.literal("Falling Block"),
-			Text.literal("Place a falling block"),
+			Text.translatable("uhc.advancements.fallingBlock"),
+			Text.translatable("uhc.advancements.fallingBlock.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -194,8 +194,8 @@ public class UHCAdvancements {
 
 		DREAM_LUCK = Advancement.Builder.create().parent(BUSTED).display(
 			Items.ENCHANTED_GOLDEN_APPLE,
-			Text.literal("Dream Luck"),
-			Text.literal("Find an enchanted golden apple"),
+			Text.translatable("uhc.advancements.dreamLuck"),
+			Text.translatable("uhc.advancements.dreamLuck.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -203,8 +203,8 @@ public class UHCAdvancements {
 
 		BROKEN_ANKLES = Advancement.Builder.create().parent(THATS_EMBARRASSING).display(
 			Items.LEATHER_BOOTS,
-			Text.literal("Broken Ankles"),
-			Text.literal("Take fall damage within a minute of UHC starting"),
+			Text.translatable("uhc.advancements.brokenAnkles"),
+			Text.translatable("uhc.advancements.brokenAnkles.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -212,8 +212,8 @@ public class UHCAdvancements {
 
 		ON_THE_EDGE = Advancement.Builder.create().parent(BROKEN_ANKLES).display(
 			PotionUtil.setPotion(Items.SPLASH_POTION.getDefaultStack(), Potions.STRONG_HARMING),
-			Text.literal("Living Life On The Edge"),
-			Text.literal("Surviving 60 seconds on half a heart"),
+			Text.translatable("uhc.advancements.onTheEdge"),
+			Text.translatable("uhc.advancements.onTheEdge.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -221,8 +221,8 @@ public class UHCAdvancements {
 
 		SKILL_ISSUE = Advancement.Builder.create().parent(EARLY_EXIT).display(
 			Items.BONE,
-			Text.literal("Skill Issue"),
-			Text.literal("Die to the world border"),
+			Text.translatable("uhc.advancements.skillIssue"),
+			Text.translatable("uhc.advancements.skillIssue.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -230,8 +230,8 @@ public class UHCAdvancements {
 
 		SOLOIST = Advancement.Builder.create().parent(ROOT).display(
 			Items.PLAYER_HEAD,
-			Text.literal("Soloist"),
-			Text.literal("Teammates are overrated"),
+			Text.translatable("uhc.advancements.soloist"),
+			Text.translatable("uhc.advancements.soloist.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -239,8 +239,8 @@ public class UHCAdvancements {
 
 		NOT_NOW = Advancement.Builder.create().parent(ROOT).display(
 			Items.NETHERITE_SWORD,
-			Text.literal("Not Now"),
-			Text.literal("Sensei's words echoed... There's a time and a place for everything, but not now."),
+			Text.translatable("uhc.advancements.notNow"),
+			Text.translatable("uhc.advancements.notNow.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -248,8 +248,8 @@ public class UHCAdvancements {
 
 		LDAP = Advancement.Builder.create().parent(NOT_NOW).display(
 			Items.EMERALD_BLOCK,
-			Text.literal("Ldap"),
-			Text.literal("Hi Katie <3"),
+			Text.translatable("uhc.advancements.ldap"),
+			Text.translatable("uhc.advancements.ldap.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -257,8 +257,8 @@ public class UHCAdvancements {
 
 		OFFICIALLY_BORED = Advancement.Builder.create().parent(WORLD_RECORD_PACE).display(
 			Items.COMMAND_BLOCK,
-			Text.literal("Officially Bored"),
-			Text.literal("Beat minesweeper in less than 40 seconds"),
+			Text.translatable("uhc.advancements.officiallyBored"),
+			Text.translatable("uhc.advancements.officiallyBored.desc"),
 			null,
 			AdvancementFrame.CHALLENGE,
 			true, true, false
@@ -266,8 +266,8 @@ public class UHCAdvancements {
 
     	DISTRACTED = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
 			Items.CHAIN_COMMAND_BLOCK,
-			Text.literal("Distracted"),
-			Text.literal("Die while playing minesweeper"),
+			Text.translatable("uhc.advancements.distracted"),
+			Text.translatable("uhc.advancements.distracted.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false
@@ -275,8 +275,8 @@ public class UHCAdvancements {
 
 		FIND_THE_BUTTON = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
 			Items.STONE_BUTTON,
-			Text.literal("Find The Button"),
-			Text.literal("Follow the clues to find the button"),
+			Text.translatable("uhc.advancements.findTheButton"),
+			Text.translatable("uhc.advancements.findTheButton.desc"),
 			null,
 			AdvancementFrame.TASK,
 			true, true, false

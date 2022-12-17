@@ -75,7 +75,7 @@ public class TickSyncedBorderExtent implements WorldBorder.Area {
 
 	@Override
 	public double getShrinkingSpeed() {
-		return Math.abs(this.from - this.to) / this.tickDuration;
+		return Math.abs(this.from - this.to) / this.realDuration;
 	}
 
 	@Override

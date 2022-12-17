@@ -54,10 +54,11 @@ import java.util.function.Consumer;
 
 import static net.casualuhc.uhcmod.utils.scheduling.Scheduler.secondsToTicks;
 import static net.minecraft.text.Text.literal;
+import static net.minecraft.text.Text.translatable;
 
 public class PlayerManager {
 	private static final MutableText HEADER = literal("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
-	private static final MutableText FOOTER = literal("\nServer Hosted By KiwiTech").formatted(Formatting.AQUA, Formatting.BOLD);
+	private static final MutableText FOOTER = literal("\n").append(translatable("uhc.tab.hosted")).formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.0");
 
 	public static final UUID HEALTH_BOOST = UUID.fromString("a61b8a4f-a4f5-4b7f-b787-d10ba4ad3d57");
@@ -201,7 +202,7 @@ public class PlayerManager {
 	 * @param player the player to get ready.
 	 */
 	public static void setPlayerForUHC(ServerPlayerEntity player) {
-		player.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("Good Luck!").formatted(Formatting.GOLD, Formatting.BOLD)));
+		player.networkHandler.sendPacket(new TitleS2CPacket(Text.translatable("uhc.lobby.goodLuck").formatted(Formatting.GOLD, Formatting.BOLD)));
 		player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(), SoundCategory.MASTER, 1.0F, 1.0F);
 
 		player.dismountVehicle();
@@ -221,7 +222,6 @@ public class PlayerManager {
 			}
 
 			PlayerExtension.get(player).displayCoords = true;
-			player.sendMessage(Text.literal("You can enable/disable the coordinates above your hot bar by using /coords"), false);
 
 			clearPlayerInventory(player);
 			setPlayerPlaying(player, true);
@@ -285,8 +285,8 @@ public class PlayerManager {
 			player.removeStatusEffect(StatusEffects.NIGHT_VISION);
 		}
 		if (!force) {
-			Text message = literal("Fullbright has been ").append(
-				extension.fullbright ? literal("Enabled").formatted(Formatting.DARK_GREEN) : literal("Disabled").formatted(Formatting.DARK_RED)
+			Text message = translatable("uhc.tips.fullbright").append(" ").append(
+				extension.fullbright ? translatable("uhc.tips.enabled").formatted(Formatting.DARK_GREEN) : translatable("uhc.tips.disabled").formatted(Formatting.DARK_RED)
 			);
 			player.sendMessage(message);
 		}
@@ -399,7 +399,6 @@ public class PlayerManager {
 
 			@Override
 			public void onActive() {
-				stopLobbyMusic();
 				forceUpdateGlowing();
 				forceUpdateFullBright();
 			}
@@ -437,7 +436,7 @@ public class PlayerManager {
 					}
 				}
 			}
-			player.sendMessage(Text.literal("Welcome to Casual UHC!").formatted(Formatting.GOLD), false);
+			player.sendMessage(Text.translatable("uhc.lobby.welcome").append(" Casual UHC").formatted(Formatting.GOLD), false);
 		} else if (player.getScoreboardTeam() == null || !PlayerManager.isPlayerPlaying(player)){
 			player.changeGameMode(GameMode.SPECTATOR);
 		}
@@ -469,13 +468,13 @@ public class PlayerManager {
 		// Update location on action bar
 		if (extension.displayCoords) {
 			MutableText coords = literal("(" + playerEntity.getBlockX() + ", " + playerEntity.getBlockY() + ", " + playerEntity.getBlockZ() + ")");
-			String direction = "Direction: " + playerEntity.getHorizontalFacing().asString().toUpperCase(Locale.ROOT);
+			Text direction = translatable("uhc.game.direction").append(": " + playerEntity.getHorizontalFacing().asString().toUpperCase(Locale.ROOT));
 			int borderRadius = ((int) border.getSize() / 2);
-			String radius = "WB Radius: " + borderRadius;
+			Text radius = translatable("uhc.game.radius").append(": " + borderRadius);
 			int distanceToBorder = ((int) border.getDistanceInsideBorder(playerEntity));
 			double distancePercent = distanceToBorder / (double) borderRadius;
 			Formatting formatting = distancePercent > 0.4 ? Formatting.DARK_GREEN : distancePercent > 0.2 ? Formatting.YELLOW : distancePercent > 0.1 ? Formatting.RED : Formatting.DARK_RED;
-			Text distanceToWb = literal("Distance to WB: ").append(literal(String.valueOf(distanceToBorder)).formatted(formatting));
+			Text distanceToWb = translatable("uhc.game.distance").append(": ").append(literal(String.valueOf(distanceToBorder)).formatted(formatting));
 
 			playerEntity.sendMessage(coords.append(" | ").append(direction).append(" | ").append(distanceToWb).append(" | ").append(radius), true);
 		}
@@ -520,7 +519,7 @@ public class PlayerManager {
 				PlayerManager.forEveryPlayer(playerEntity -> {
 					playerEntity.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 0.5f, 1);
 					playerEntity.sendMessage(
-						literal("%s has been ELIMINATED!".formatted(team.getName())).formatted(team.getColor(), Formatting.BOLD), false
+						translatable("uhc.game.eliminated", team.getName()).formatted(team.getColor(), Formatting.BOLD), false
 					);
 				});
 			}
@@ -607,8 +606,8 @@ public class PlayerManager {
 
 			// The big title and subtitle msg packets -- sent every 100 game ticks
 			if (UHCMod.SERVER.getTicks() % 100 == 0) {
-				MutableText title = literal("You're outside the border!").formatted(Formatting.RED);
-				MutableText subTitle = literal("§cTravel §a" + direction + " §cto get to safety!");
+				MutableText title = translatable("uhc.game.outsideBorder").formatted(Formatting.RED);
+				MutableText subTitle = translatable("uhc.game.outsideBorder.sub", direction.name());
 				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(title));
 				playerEntity.networkHandler.sendPacket(new SubtitleS2CPacket(subTitle));
 			}

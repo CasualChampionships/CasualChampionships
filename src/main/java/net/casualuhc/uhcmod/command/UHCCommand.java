@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
+import net.casualuhc.uhcmod.utils.screen.RuleScreen;
 import net.casualuhc.uhcmod.utils.uhc.UHCUtils;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSetting;
@@ -26,12 +27,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.sql.Time;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
-import java.util.TimeZone;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -129,7 +127,7 @@ public class UHCCommand {
 			)
 			.then(literal("config")
 				.executes(context -> {
-					context.getSource().getPlayerOrThrow().openHandledScreen(GameSettings.createScreenFactory(0));
+					context.getSource().getPlayerOrThrow().openHandledScreen(RuleScreen.createScreenFactory(0));
 					return 1;
 				})
 				.then(literal("worldborder")

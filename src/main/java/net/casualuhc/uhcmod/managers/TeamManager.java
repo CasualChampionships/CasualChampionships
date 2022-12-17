@@ -9,6 +9,7 @@ import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.TeamArgumentType;
 import net.minecraft.scoreboard.AbstractTeam;
@@ -37,7 +38,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TeamManager {
-	private static final Set<AbstractTeam> IGNORED_TEAMS = new HashSet<>();
+	private static final Set<Team> IGNORED_TEAMS = new HashSet<>();
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	private static CollisionRule collisions = CollisionRule.ALWAYS;
@@ -181,7 +182,7 @@ public class TeamManager {
 		Team team = TeamArgumentType.getTeam(context, "team");
 
 		UHCMod.SERVER.getScoreboard().addPlayerToTeam(player.getEntityName(), team);
-		player.sendMessage(Text.literal("You have been added to team ").append(team.getFormattedName()), false);
+		player.sendMessage(Text.translatable("uhc.game.addedToTeam", team.getFormattedName()), false);
 		context.getSource().sendFeedback(Text.literal("Successfully added to team"), false);
 
 		PlayerManager.setPlayerForUHC(player);
@@ -215,14 +216,12 @@ public class TeamManager {
 			scoreboard.addPlayerToTeam(operator, operatorTeam);
 		}
 		operatorTeam.setCollisionRule(CollisionRule.NEVER);
-		operatorTeam.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
 		IGNORED_TEAMS.add(operatorTeam);
 
 		Team spectatorTeam = scoreboard.addTeam("Spectator");
 		spectatorTeam.setColor(Formatting.DARK_GRAY);
 		setEliminated(spectatorTeam, true);
 		spectatorTeam.setCollisionRule(CollisionRule.NEVER);
-		spectatorTeam.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
 		IGNORED_TEAMS.add(spectatorTeam);
 
 		PlayerManager.forEveryPlayer(player -> {
@@ -271,11 +270,17 @@ public class TeamManager {
 			@Override
 			public void onLobby() {
 				setCollisions(false);
+				for (Team team : IGNORED_TEAMS) {
+					team.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.ALWAYS);
+				}
 			}
 
 			@Override
 			public void onActive() {
 				setCollisions(true);
+				for (Team team : IGNORED_TEAMS) {
+					team.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
+				}
 			}
 		});
 	}
@@ -287,16 +292,16 @@ public class TeamManager {
 	}
 
 	private static void sendReadyMessage() {
-		Text yesMessage = Text.literal("[YES]").formatted(Formatting.BOLD, Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes")));
-		Text noMessage = Text.literal("[NO]").formatted(Formatting.BOLD, Formatting.RED).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no")));
+		Text yesMessage = Text.literal("[").append(Text.translatable("uhc.lobby.ready.yes")).append("]").formatted(Formatting.BOLD, Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes")));
+		Text noMessage = Text.literal("[").append(Text.translatable("uhc.lobby.ready.no")).append("]").formatted(Formatting.BOLD, Formatting.RED).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no")));
 		Text readyMessage = Text.literal(
 			"""
 			§6══════════════════§r
 			
-			      Is your team ready?
+			      %s
 			
 			
-			"""
+			""".formatted(I18n.translate("uhc.lobby.ready.question"))
 		).append("       ").append(yesMessage).append("        ").append(noMessage).append(
 			"""
    

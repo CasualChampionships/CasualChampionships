@@ -25,6 +25,7 @@
     "PortalForcerMixin",
     "RecipeManagerMixin",
     "RedstoneWireBlockMixin",
+    "ScoreboardMixin",
     "ServerEntityManagerMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayerInteractionManagerMixin",
@@ -34,6 +35,7 @@
     "SpreadPlayersCommandMixin",
     "SweetBerryBushBlockMixin",
     "SynchronizeRecipeS2CPacketMixin",
+    "TeamMixin",
     "TntBlockMixin",
     "WorldBorderMixin"
   ],

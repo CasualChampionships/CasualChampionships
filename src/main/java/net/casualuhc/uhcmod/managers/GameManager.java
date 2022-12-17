@@ -25,7 +25,6 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.scoreboard.AbstractTeam;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -231,7 +230,8 @@ public class GameManager {
 					float percentLeft = millisLeft / (float) (30 * 60 * 1000);
 					bossBar.setPercent(MathHelper.clamp(1 - percentLeft, 0, 1));
 					long minutesLeft = millisLeft / (60 * 1000);
-					MutableText startTime = minutesLeft <= 0 ? Text.literal("Starting Soon!") : Text.literal("Starting in %d minute%s!".formatted(minutesLeft, minutesLeft == 1 ? "" : "s"));
+					MutableText startTime = minutesLeft <= 0 ? Text.translatable("uhc.lobby.starting.soon") :
+						minutesLeft == 1 ? Text.translatable("uhc.lobby.starting.one") : Text.translatable("uhc.lobby.starting.generic", minutesLeft);
 					bossBar.setName(Config.CURRENT_EVENT.getBossBarMessage().append(". ").append(startTime.formatted(Formatting.GREEN, Formatting.BOLD)));
 				}
 			}
@@ -302,6 +302,8 @@ public class GameManager {
 
 		schedulePhaseTask(secondsToTicks(10), () -> {
 			PlayerManager.forEveryPlayer(PlayerManager::setPlayerForUHC);
+			PlayerManager.stopLobbyMusic();
+
 			deleteLobby();
 
 			MinecraftServer server = UHCMod.SERVER;
@@ -313,8 +315,7 @@ public class GameManager {
 	private static void startGracePeriod() {
 		PlayerManager.forEveryPlayer(playerEntity -> {
 			playerEntity.sendMessage(
-				Text.literal("Grace Period will end in 10 minutes, once grace period is over PVP will be enabled and world border will start moving")
-					.formatted(Formatting.GOLD),
+				Text.translatable("uhc.game.grace.first").formatted(Formatting.GOLD),
 				false
 			);
 			playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 1.0F);
@@ -325,8 +326,7 @@ public class GameManager {
 			int i = integer.addAndGet(-2);
 			PlayerManager.forEveryPlayer(playerEntity -> {
 				playerEntity.sendMessage(
-					Text.literal("Grace Period will end in %s minutes".formatted(i))
-						.formatted(Formatting.GOLD),
+					Text.translatable("The grace period will end in %s minutes", i).formatted(Formatting.GOLD),
 					false
 				);
 				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 1.0F);
@@ -336,8 +336,7 @@ public class GameManager {
 		schedulePhaseTask(minutesToTicks(10), () -> {
 			PlayerManager.forEveryPlayer(playerEntity -> {
 				playerEntity.sendMessage(
-					Text.literal("Grace Period is now over, PVP is enabled and world border has started! Good Luck!")
-						.formatted(Formatting.RED, Formatting.BOLD),
+					Text.translatable("uhc.game.grace.over").formatted(Formatting.RED, Formatting.BOLD),
 					false
 				);
 				playerEntity.playSound(SoundEvents.ENTITY_ENDER_DRAGON_AMBIENT, SoundCategory.MASTER, 1.0F, 1.0F);
@@ -384,7 +383,7 @@ public class GameManager {
 
 		PlayerManager.forEveryPlayer(playerEntity -> {
 			playerEntity.setGlowing(false);
-			playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("%s has won!".formatted(team.getName())).formatted(team.getColor())));
+			playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.translatable("uhc.game.won", team.getName()).formatted(team.getColor())));
 			UHCDataBase.updateStats(playerEntity);
 		});
 

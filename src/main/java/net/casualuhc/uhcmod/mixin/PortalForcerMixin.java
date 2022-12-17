@@ -17,7 +17,8 @@ public class PortalForcerMixin {
 
     @Redirect(method = "method_39663(Lnet/minecraft/world/border/WorldBorder;Lnet/minecraft/world/poi/PointOfInterest;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;contains(Lnet/minecraft/util/math/BlockPos;)Z"))
     private static boolean isWithinDistanceOfWorldBorder(WorldBorder border, BlockPos pos) {
-        double shrinkingSpeed = border.getShrinkingSpeed(); // Blocks per millisecond
+        // Blocks per millisecond
+        double shrinkingSpeed = border.getShrinkingSpeed();
         if (shrinkingSpeed <= 0) {
             // Border is static or expanding
             return border.contains(pos);

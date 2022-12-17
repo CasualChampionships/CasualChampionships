@@ -18,7 +18,7 @@ public interface Event {
 	 * @return the message to display.
 	 */
 	default MutableText getBossBarMessage() {
-		return Text.literal("Welcome to Casual UHC!").formatted(Formatting.BOLD);
+		return Text.translatable("uhc.lobby.welcome").append("Casual UHC").formatted(Formatting.BOLD);
 	}
 
 	/**

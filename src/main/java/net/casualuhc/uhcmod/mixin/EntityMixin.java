@@ -13,7 +13,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class EntityMixin {
     @Redirect(method = "getTeleportTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;clamp(DDD)Lnet/minecraft/util/math/BlockPos;"))
     private BlockPos clampWithinDistanceOfWorldBorder(WorldBorder border, double x, double y, double z) {
-        double shrinkingSpeed = border.getShrinkingSpeed(); // Blocks per millisecond
+        // Blocks per millisecond
+        double shrinkingSpeed = border.getShrinkingSpeed();
         if (shrinkingSpeed <= 0) {
             // Border is static or expanding
             return border.clamp(x, y, z);

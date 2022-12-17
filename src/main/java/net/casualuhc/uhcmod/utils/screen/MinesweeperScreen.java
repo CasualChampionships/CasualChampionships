@@ -20,7 +20,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.Random;
 
-import static net.casualuhc.uhcmod.utils.uhc.ItemUtils.named;
+import static net.casualuhc.uhcmod.utils.uhc.ItemUtils.literalNamed;
+import static net.casualuhc.uhcmod.utils.uhc.ItemUtils.translatableNamed;
 
 public class MinesweeperScreen extends CustomScreen {
 	private static double record = 127;
@@ -29,8 +30,8 @@ public class MinesweeperScreen extends CustomScreen {
 	private final IntSet flags = new IntArraySet();
 	private final Grid grid = new Grid(9, 9);
 
-	private final ItemStack flagItem = named(Items.MANGROVE_SIGN, "Flags");
-	private final ItemStack clockItem = named(Items.CLOCK, "Timer (seconds)");
+	private final ItemStack flagItem = translatableNamed(Items.MANGROVE_SIGN, "uhc.minesweeper.flags");
+	private final ItemStack clockItem = translatableNamed(Items.CLOCK, "uhc.minesweeper.timer");
 
 	private boolean complete = false;
 
@@ -38,15 +39,15 @@ public class MinesweeperScreen extends CustomScreen {
 		super(player, syncId, 6);
 		this.flagItem.setCount(12);
 
-		this.slots.get(81).setStack(named(Items.RED_STAINED_GLASS, "Exit"));
-		this.slots.get(82).setStack(named(Items.OAK_SIGN, "Welcome to 9x9 Minesweeper!"));
-		this.slots.get(83).setStack(named(Items.OAK_SIGN, "Left click to reveal a tile"));
-		this.slots.get(84).setStack(named(Items.OAK_SIGN, "Right click to leave a flag"));
-		this.slots.get(85).setStack(named(Items.OAK_SIGN, "There are a total of 12 mines"));
+		this.slots.get(81).setStack(translatableNamed(Items.RED_STAINED_GLASS, "uhc.minesweeper.exit"));
+		this.slots.get(82).setStack(translatableNamed(Items.OAK_SIGN, "uhc.minesweeper.desc.1"));
+		this.slots.get(83).setStack(translatableNamed(Items.OAK_SIGN, "uhc.minesweeper.desc.2"));
+		this.slots.get(84).setStack(translatableNamed(Items.OAK_SIGN, "uhc.minesweeper.desc.3"));
+		this.slots.get(85).setStack(translatableNamed(Items.OAK_SIGN, "uhc.minesweeper.desc.4"));
 		this.slots.get(86).setStack(this.flagItem);
 		this.slots.get(87).setStack(this.clockItem);
-		this.slots.get(88).setStack(named(Items.GRAY_STAINED_GLASS, ""));
-		this.slots.get(89).setStack(named(Items.GREEN_STAINED_GLASS, "Play Again"));
+		this.slots.get(88).setStack(literalNamed(Items.GRAY_STAINED_GLASS, ""));
+		this.slots.get(89).setStack(translatableNamed(Items.GREEN_STAINED_GLASS, "uhc.minesweeper.playAgain"));
 
 		EventHandler.register(new MinecraftEvents() {
 			@Override
@@ -124,7 +125,7 @@ public class MinesweeperScreen extends CustomScreen {
 			stack = ItemStack.EMPTY;
 		} else {
 			this.flags.add(index);
-			stack = named(Items.MANGROVE_SIGN, "Flag");
+			stack = translatableNamed(Items.MANGROVE_SIGN, "uhc.minesweeper.flag");
 		}
 		this.flagItem.setCount(Math.max(12 - this.flags.size(), 1));
 		this.slots.get(index).setStack(stack);
@@ -143,11 +144,12 @@ public class MinesweeperScreen extends CustomScreen {
 		if (seconds <= 40) {
 			PlayerManager.grantAdvancement((ServerPlayerEntity) player, UHCAdvancements.OFFICIALLY_BORED);
 		}
-		player.sendMessage(Text.literal("You won in %.2fs!".formatted(seconds)));
+
+		player.sendMessage(Text.translatable("uhc.minesweeper.won", String.format("%.2f", seconds)));
 		if (seconds < record && GameSettings.MINESWEEPER_ANNOUNCEMENT.getValue()) {
 			record = seconds;
 			PlayerManager.messageEveryPlayer(
-				Text.literal("%s now holds the record beating Minesweeper in %.2fs.".formatted(player.getEntityName(), seconds))
+				Text.translatable("uhc.minesweeper.record", player.getEntityName(), String.format("%.2f", seconds))
 			);
 		}
 	}
@@ -157,21 +159,21 @@ public class MinesweeperScreen extends CustomScreen {
 		for (int i = 0; i < this.grid.capacity; i++) {
 			this.slots.get(i).setStack(this.getTileStack(this.grid.getTile(i)));
 		}
-		player.sendMessage(Text.literal("You lost :("));
+		player.sendMessage(Text.translatable("uhc.minesweeper.lost"));
 	}
 
 	private ItemStack getTileStack(int tile) {
 		return switch (tile) {
-			case -1 -> named(Items.BLACK_STAINED_GLASS_PANE, "Mine");
-			case 0 -> named(Items.GRAY_STAINED_GLASS_PANE, "");
-			case 1 -> named(Items.BLUE_STAINED_GLASS_PANE, "1");
-			case 2 -> named(Items.LIME_STAINED_GLASS_PANE, "2");
-			case 3 -> named(Items.RED_STAINED_GLASS_PANE, "3");
-			case 4 -> named(Items.PURPLE_STAINED_GLASS_PANE, "4");
-			case 5 -> named(Items.ORANGE_STAINED_GLASS_PANE, "5");
-			case 6 -> named(Items.CYAN_STAINED_GLASS_PANE, "6");
-			case 7 -> named(Items.LIGHT_GRAY_STAINED_GLASS_PANE, "7");
-			case 8 -> named(Items.MAGENTA_STAINED_GLASS, "8");
+			case -1 -> translatableNamed(Items.BLACK_STAINED_GLASS_PANE, "uhc.minesweeper.mine");
+			case 0 -> literalNamed(Items.GRAY_STAINED_GLASS_PANE, "");
+			case 1 -> literalNamed(Items.BLUE_STAINED_GLASS_PANE, "1");
+			case 2 -> literalNamed(Items.LIME_STAINED_GLASS_PANE, "2");
+			case 3 -> literalNamed(Items.RED_STAINED_GLASS_PANE, "3");
+			case 4 -> literalNamed(Items.PURPLE_STAINED_GLASS_PANE, "4");
+			case 5 -> literalNamed(Items.ORANGE_STAINED_GLASS_PANE, "5");
+			case 6 -> literalNamed(Items.CYAN_STAINED_GLASS_PANE, "6");
+			case 7 -> literalNamed(Items.LIGHT_GRAY_STAINED_GLASS_PANE, "7");
+			case 8 -> literalNamed(Items.MAGENTA_STAINED_GLASS, "8");
 			default -> throw new IllegalStateException("Invalid tile: %s".formatted(tile));
 		};
 	}

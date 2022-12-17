@@ -30,7 +30,7 @@ public class PosCommand {
         if (abstractTeam != null) {
             manager.executeWithPrefix(source, String.format("tm I'm at %.0f, %.0f, %.0f", pos.x, pos.y, pos.z));
         } else {
-            throw new SimpleCommandExceptionType(Text.literal("§c[ERROR] You can only run this command if you are alive and in a team!")).create();
+            throw new SimpleCommandExceptionType(Text.translatable("uhc.commands.error.noteam")).create();
         }
         return 0;
     }

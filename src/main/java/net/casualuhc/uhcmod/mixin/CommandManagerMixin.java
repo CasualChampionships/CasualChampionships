@@ -20,10 +20,9 @@ public class CommandManagerMixin {
     private CommandDispatcher<ServerCommandSource> dispatcher;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void register(RegistrationEnvironment environment, CommandRegistryAccess commandRegistryAccess, CallbackInfo ci){
-        CameramanCommand.register(this.dispatcher);
+    private void register(RegistrationEnvironment environment, CommandRegistryAccess commandRegistryAccess, CallbackInfo ci) {
         PosCommand.register(this.dispatcher);
-        SpectCommand.register(this.dispatcher);
+        SpectatorCommand.register(this.dispatcher);
         CoordsCommand.register(this.dispatcher);
         UHCCommand.register(this.dispatcher);
         ReadyCommand.register(this.dispatcher);
