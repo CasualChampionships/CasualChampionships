@@ -2,7 +2,6 @@ package net.casualuhc.uhcmod.utils.data;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.scoreboard.AbstractTeam;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.border.WorldBorder;
 
 import java.util.HashMap;

@@ -9,6 +9,7 @@ import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
+import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.scheduling.Task;
 import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.casualuhc.uhcmod.utils.uhc.OneTimeAchievement;
@@ -44,10 +45,7 @@ import net.minecraft.world.World;
 
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.casualuhc.uhcmod.utils.scheduling.Scheduler.*;
@@ -306,9 +304,12 @@ public class GameManager {
 
 			deleteLobby();
 
-			MinecraftServer server = UHCMod.SERVER;
-			server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
-			EventHandler.onActive();
+			// We need to schedule this because otherwise lobby entities won't get killed before it gets unloaded
+			Scheduler.schedule(2, () -> {
+				EventHandler.onActive();
+				MinecraftServer server = UHCMod.SERVER;
+				server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
+			});
 		});
 	}
 

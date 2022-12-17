@@ -46,10 +46,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static net.casualuhc.uhcmod.utils.scheduling.Scheduler.secondsToTicks;
@@ -60,6 +57,7 @@ public class PlayerManager {
 	private static final MutableText HEADER = literal("Casual UHC\n").formatted(Formatting.GOLD, Formatting.BOLD);
 	private static final MutableText FOOTER = literal("\n").append(translatable("uhc.tab.hosted")).formatted(Formatting.AQUA, Formatting.BOLD);
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.0");
+	private static final Map<ServerPlayerEntity, List<Runnable>> RESOURCE_RELOADS = new HashMap<>();
 
 	public static final UUID HEALTH_BOOST = UUID.fromString("a61b8a4f-a4f5-4b7f-b787-d10ba4ad3d57");
 	public static boolean displayTab = true;
@@ -76,6 +74,16 @@ public class PlayerManager {
 				consumer.accept(playerEntity);
 			}
 		});
+	}
+
+	/**
+	 * Stores a runnable to be run when the player next reloads their resource pack.
+	 *
+	 * @param player the player to wait for the next reload.
+	 * @param runnable the runnable to run.
+	 */
+	public static void waitForResourcePack(ServerPlayerEntity player, Runnable runnable) {
+		RESOURCE_RELOADS.computeIfAbsent(player, p -> new LinkedList<>()).add(runnable);
 	}
 
 	/**
@@ -386,7 +394,17 @@ public class PlayerManager {
 
 			@Override
 			public void onResourcePackLoaded(ServerPlayerEntity player) {
-				player.sendMessage(Text.translatable("uhc.lobby.welcome").append(" Casual UHC").formatted(Formatting.GOLD), false);
+				List<Runnable> tasks = RESOURCE_RELOADS.get(player);
+				if (tasks != null) {
+					for (Runnable task : tasks) {
+						task.run();
+					}
+				}
+			}
+
+			@Override
+			public void onPlayerLeave(ServerPlayerEntity player) {
+				RESOURCE_RELOADS.remove(player);
 			}
 		});
 
@@ -425,6 +443,10 @@ public class PlayerManager {
 			return;
 		}
 
+		waitForResourcePack(player, () -> {
+			player.sendMessage(Text.translatable("uhc.lobby.welcome").append(" Casual UHC").formatted(Formatting.GOLD), false);
+		});
+
 		Scoreboard scoreboard = UHCMod.SERVER.getScoreboard();
 		if (!GameManager.isGameActive()) {
 			if (!player.hasPermissionLevel(2)) {
@@ -432,6 +454,9 @@ public class PlayerManager {
 				Vec3d spawn = Config.CURRENT_EVENT.getLobbySpawnPos();
 				player.teleport(UHCMod.SERVER.getOverworld(), spawn.getX(), spawn.getY(), spawn.getZ(), 0, 0);
 			} else {
+				if (Config.IS_DEV) {
+					player.sendMessage(Text.literal("[INFO] UHC is in dev mode!").formatted(Formatting.RED));
+				}
 				player.changeGameMode(GameMode.CREATIVE);
 				AbstractTeam team = player.getScoreboardTeam();
 				if (team == null) {
