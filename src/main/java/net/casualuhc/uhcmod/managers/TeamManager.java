@@ -292,23 +292,11 @@ public class TeamManager {
 	}
 
 	private static void sendReadyMessage() {
+		Text bar = Text.literal( "══════════════════").formatted(Formatting.GOLD);
 		Text yesMessage = Text.literal("[").append(Text.translatable("uhc.lobby.ready.yes")).append("]").formatted(Formatting.BOLD, Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes")));
 		Text noMessage = Text.literal("[").append(Text.translatable("uhc.lobby.ready.no")).append("]").formatted(Formatting.BOLD, Formatting.RED).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no")));
-		Text readyMessage = Text.literal(
-			"""
-			§6══════════════════§r
-			
-			      %s
-			
-			
-			""".formatted(I18n.translate("uhc.lobby.ready.question"))
-		).append("       ").append(yesMessage).append("        ").append(noMessage).append(
-			"""
-   
-   
-			§6══════════════════§r
-			"""
-		);
+		Text readyMessage = bar.copy().append("\n      ").append(Text.translatable("uhc.lobby.ready.question"))
+			.append("\n\n\n       ").append(yesMessage).append("        ").append(noMessage).append("\n\n\n").append(bar);
 		PlayerManager.forEveryPlayer(playerEntity -> {
 			AbstractTeam team = playerEntity.getScoreboardTeam();
 			if (shouldIgnoreTeam(team)) {

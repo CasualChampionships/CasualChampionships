@@ -32,7 +32,10 @@ public class Config {
 			if (Files.exists(CONFIG_PATH)) {
 				String string = Files.readString(CONFIG_PATH);
 				JsonObject config = GSON.fromJson(string, JsonObject.class);
-				uri = config.get("mongo").getAsString();
+				JsonElement mongo = config.get("mongo");
+				if (mongo != null) {
+					uri = mongo.getAsString();
+				}
 				dev = config.get("dev").getAsBoolean();
 				config.get("operators").getAsJsonArray().forEach(e -> operators.add(e.getAsString()));
 				JsonElement element = config.get("event");

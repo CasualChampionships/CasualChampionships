@@ -311,7 +311,7 @@ public class PlayerManager {
 	 * @param properties the properties of the pack.
 	 */
 	public static void sendResourcePack(ServerPlayerEntity player, MinecraftServer.ServerResourcePackProperties properties) {
-		player.sendResourcePackUrl(properties.url(), properties.hash(), properties.isRequired(), properties.prompt());
+		player.sendResourcePackUrl(properties.url(), properties.hash(), true, properties.prompt());
 	}
 
 	public static EntityTrackerUpdateS2CPacket handleTrackerUpdatePacketForTeamGlowing(ServerPlayerEntity glowingPlayer, ServerPlayerEntity observingPlayer, EntityTrackerUpdateS2CPacket packet) {
@@ -383,6 +383,11 @@ public class PlayerManager {
 			public void onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 				handlePlayerDeath(player, source);
 			}
+
+			@Override
+			public void onResourcePackLoaded(ServerPlayerEntity player) {
+				player.sendMessage(Text.translatable("uhc.lobby.welcome").append(" Casual UHC").formatted(Formatting.GOLD), false);
+			}
 		});
 
 		EventHandler.register(new UHCEvents() {
@@ -436,7 +441,6 @@ public class PlayerManager {
 					}
 				}
 			}
-			player.sendMessage(Text.translatable("uhc.lobby.welcome").append(" Casual UHC").formatted(Formatting.GOLD), false);
 		} else if (player.getScoreboardTeam() == null || !PlayerManager.isPlayerPlaying(player)){
 			player.changeGameMode(GameMode.SPECTATOR);
 		}
