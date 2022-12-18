@@ -258,6 +258,7 @@ public class GameManager {
 			@Override
 			public void onStart() {
 				setPhase(Phase.START);
+				setStartTime(Long.MAX_VALUE);
 				hideBossBar();
 				startCountDown();
 			}

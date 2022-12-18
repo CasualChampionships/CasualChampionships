@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod.managers;
 
+import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.*;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,7 +10,6 @@ import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.TeamArgumentType;
 import net.minecraft.scoreboard.AbstractTeam;
@@ -26,6 +26,9 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.JsonHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
@@ -33,9 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class TeamManager {
 	private static final Set<Team> IGNORED_TEAMS = new HashSet<>();
@@ -152,6 +153,25 @@ public class TeamManager {
 	 * Checks whether all playing teams are ready.
 	 */
 	public static void checkAllTeamsReady() {
+		if (getUnreadyTeams().isEmpty()) {
+			PlayerManager.forEveryPlayer(p -> {
+				p.sendMessage(Text.translatable("uhc.lobby.allReady").formatted(Formatting.GOLD));
+				if (p.hasPermissionLevel(4)) {
+					p.sendMessage(Text.literal("[Click here to start]").formatted(Formatting.GREEN).styled(s -> {
+						return s.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/uhc start force"));
+					}));
+				}
+			});
+		}
+	}
+
+	/**
+	 * Gets a list of all teams that are yet to ready up.
+	 *
+	 * @return list of unready teams.
+	 */
+	public static List<Team> getUnreadyTeams() {
+		List<Team> teams = new LinkedList<>();
 		MinecraftServer server = UHCMod.SERVER;
 		ServerScoreboard scoreboard = server.getScoreboard();
 		for (Team team : scoreboard.getTeams()) {
@@ -164,10 +184,10 @@ public class TeamManager {
 				}
 			}
 			if (teamHasMember && !isReady(team) && !shouldIgnoreTeam(team)) {
-				return;
+				teams.add(team);
 			}
 		}
-		EventHandler.onStart();
+		return teams;
 	}
 
 	/**
@@ -195,6 +215,23 @@ public class TeamManager {
 		}
 
 		return 1;
+	}
+
+	public static void spawnAllPlayers() {
+		if (GameManager.isGameActive()) {
+			return;
+		}
+		MinecraftServer server = UHCMod.SERVER;
+		net.minecraft.server.PlayerManager playerManager = server.getPlayerManager();
+		Vec3d spawnPos = Config.CURRENT_EVENT.getLobbySpawnPos();
+		for (Team team : server.getScoreboard().getTeams()) {
+			for (String name : team.getPlayerList()) {
+				if (playerManager.getPlayer(name) == null) {
+					EntityPlayerMPFake.createFake(name, server, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, World.OVERWORLD, GameMode.ADVENTURE, false);
+				}
+			}
+		}
+		server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 1 10 false @e[type=player]");
 	}
 
 	/**

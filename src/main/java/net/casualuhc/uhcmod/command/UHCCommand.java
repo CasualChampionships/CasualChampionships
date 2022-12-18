@@ -70,6 +70,12 @@ public class UHCCommand {
 						return 1;
 					})
 				)
+				.then(literal("spawnall")
+					.executes(context -> {
+						TeamManager.spawnAllPlayers();
+						return 1;
+					})
+				)
 			)
 			.then(literal("phase")
 				.then(literal("cancel")
