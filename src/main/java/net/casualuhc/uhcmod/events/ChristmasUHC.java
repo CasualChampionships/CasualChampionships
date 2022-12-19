@@ -39,8 +39,8 @@ public class ChristmasUHC implements Event {
 	private static final Vec3d LOBBY_SPAWN = new Vec3d(2, 272, 9);
 
 	private static final ServerResourcePackProperties PROPERTIES = new ServerResourcePackProperties(
-		"https://download.mc-packs.net/pack/d2292e0f7fa0177709f41df944bbcc8ec626056c.zip",
-		"d2292e0f7fa0177709f41df944bbcc8ec626056c",
+		"https://download.mc-packs.net/pack/19be7fedc4f16f68e406b6c76dd6c9cb652e168c.zip",
+		"19be7fedc4f16f68e406b6c76dd6c9cb652e168c",
 		false, Text.literal("This texture pack provides some festive features!")
 	);
 

@@ -260,7 +260,7 @@ public class UHCAdvancements {
 			Text.translatable("uhc.advancements.officiallyBored"),
 			Text.translatable("uhc.advancements.officiallyBored.desc"),
 			null,
-			AdvancementFrame.CHALLENGE,
+			AdvancementFrame.TASK,
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/officially_bored"));
 
@@ -278,7 +278,7 @@ public class UHCAdvancements {
 			Text.translatable("uhc.advancements.findTheButton"),
 			Text.translatable("uhc.advancements.findTheButton.desc"),
 			null,
-			AdvancementFrame.TASK,
+			AdvancementFrame.CHALLENGE,
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/find_the_button"));
 

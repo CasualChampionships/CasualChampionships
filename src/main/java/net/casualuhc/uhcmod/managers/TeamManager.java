@@ -217,6 +217,9 @@ public class TeamManager {
 		return 1;
 	}
 
+	/**
+	 * Spawn all fake players.
+	 */
 	public static void spawnAllPlayers() {
 		if (GameManager.isGameActive()) {
 			return;
@@ -231,7 +234,19 @@ public class TeamManager {
 				}
 			}
 		}
-		server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 1 10 false @e[type=player]");
+	}
+
+	/**
+	 * Kill all fake players.
+	 */
+	public static void killAllPlayers() {
+		if (!GameManager.isGameActive()) {
+			PlayerManager.forEveryPlayer(p -> {
+				if (p instanceof EntityPlayerMPFake) {
+					p.kill();
+				}
+			});
+		}
 	}
 
 	/**

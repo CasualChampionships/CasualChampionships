@@ -76,6 +76,12 @@ public class UHCCommand {
 						return 1;
 					})
 				)
+				.then(literal("killall")
+					.executes(context -> {
+						TeamManager.killAllPlayers();
+						return 1;
+					})
+				)
 			)
 			.then(literal("phase")
 				.then(literal("cancel")
