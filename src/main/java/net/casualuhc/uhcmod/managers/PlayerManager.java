@@ -4,12 +4,14 @@ import io.netty.buffer.Unpooled;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
+import net.casualuhc.uhcmod.utils.data.PlayerFlag;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
+import net.casualuhc.uhcmod.utils.stat.UHCStat;
 import net.casualuhc.uhcmod.utils.uhc.*;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementProgress;
@@ -102,7 +104,7 @@ public class PlayerManager {
 	 * @param isPlaying whether the player is playing.
 	 */
 	public static void setPlayerPlaying(ServerPlayerEntity player, boolean isPlaying) {
-		PlayerExtension.get(player).isPlaying = isPlaying;
+		PlayerExtension.get(player).setFlag(PlayerFlag.IS_PLAYING, isPlaying);
 	}
 
 	/**
@@ -112,7 +114,7 @@ public class PlayerManager {
 	 * @return whether the player is playing.
 	 */
 	public static boolean isPlayerPlaying(ServerPlayerEntity player) {
-		return PlayerExtension.get(player).isPlaying;
+		return PlayerExtension.get(player).getFlag(PlayerFlag.IS_PLAYING);
 	}
 
 	/**
@@ -159,6 +161,7 @@ public class PlayerManager {
 	 * @param advancement the advancement to grant.
 	 */
 	public static void grantAdvancement(ServerPlayerEntity player, Advancement advancement) {
+		PlayerExtension.get(player).getStats().addAdvancement(advancement);
 		AdvancementProgress advancementProgress = player.getAdvancementTracker().getProgress(advancement);
 		if (!advancementProgress.isDone()) {
 			for (String string : advancementProgress.getUnobtainedCriteria()) {
@@ -229,7 +232,14 @@ public class PlayerManager {
 				PlayerManager.grantAdvancement(player, UHCAdvancements.SOLOIST);
 			}
 
-			PlayerExtension.get(player).displayCoords = true;
+			PlayerExtension.apply(player, e -> {
+				e.setFlag(PlayerFlag.HUD_ENABLED, true);
+				e.setFlag(PlayerFlag.GLOW_ENABLED, true);
+				e.setFlag(PlayerFlag.FULL_BRIGHT_ENABLED, true);
+				e.getStats().increment(UHCStat.PLAYS, 1);
+			});
+			forceUpdateGlowingFlag(player);
+			updateFullBright(player, true);
 
 			clearPlayerInventory(player);
 			setPlayerPlaying(player, true);
@@ -287,14 +297,14 @@ public class PlayerManager {
 	 */
 	public static void updateFullBright(ServerPlayerEntity player, boolean force) {
 		PlayerExtension extension = PlayerExtension.get(player);
-		if (extension.fullbright) {
+		if (extension.getFlag(PlayerFlag.FULL_BRIGHT_ENABLED)) {
 			player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
 		} else {
 			player.removeStatusEffect(StatusEffects.NIGHT_VISION);
 		}
 		if (!force) {
 			Text message = translatable("uhc.tips.fullbright").append(" ").append(
-				extension.fullbright ? translatable("uhc.tips.enabled").formatted(Formatting.DARK_GREEN) : translatable("uhc.tips.disabled").formatted(Formatting.DARK_RED)
+				extension.getFlag(PlayerFlag.FULL_BRIGHT_ENABLED) ? translatable("uhc.tips.enabled").formatted(Formatting.DARK_GREEN) : translatable("uhc.tips.disabled").formatted(Formatting.DARK_RED)
 			);
 			player.sendMessage(message);
 		}
@@ -332,7 +342,7 @@ public class PlayerManager {
 		if (!PlayerManager.isPlayerSurvival(glowingPlayer)) {
 			return packet;
 		}
-		if (!PlayerExtension.get(observingPlayer).shouldGlow) {
+		if (!PlayerExtension.get(observingPlayer).getFlag(PlayerFlag.GLOW_ENABLED)) {
 			return packet;
 		}
 
@@ -411,12 +421,8 @@ public class PlayerManager {
 
 		EventHandler.register(new UHCEvents() {
 			@Override
-			public void onLobby() {
-				PlayerExtension.reset();
-			}
-
-			@Override
 			public void onSetup() {
+				PlayerExtension.reset();
 				UHCMod.SERVER.getAdvancementLoader().getAdvancements().forEach(a -> forEveryPlayer(p -> revokeAdvancement(p, a)));
 				forEveryPlayer(p -> grantAdvancement(p, UHCAdvancements.ROOT));
 			}
@@ -496,7 +502,7 @@ public class PlayerManager {
 		WorldBorder border = entityWorld.getWorldBorder();
 
 		// Update location on action bar
-		if (extension.displayCoords) {
+		if (extension.getFlag(PlayerFlag.HUD_ENABLED)) {
 			MutableText coords = literal("(" + playerEntity.getBlockX() + ", " + playerEntity.getBlockY() + ", " + playerEntity.getBlockZ() + ")");
 			Text direction = translatable("uhc.game.direction").append(": " + playerEntity.getHorizontalFacing().asString().toUpperCase(Locale.ROOT));
 			int borderRadius = ((int) border.getSize() / 2);
@@ -521,12 +527,19 @@ public class PlayerManager {
 			player.setSpawnPoint(player.world.getRegistryKey(), player.getBlockPos(), player.getSpawnAngle(), true, false);
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
 
-			UHCDataBase.updateStats(player);
 			forceUpdateGlowingFlag(player);
 
 			if (GameManager.isUnclaimed(OneTimeAchievement.DEATH)) {
 				grantAdvancement(player, UHCAdvancements.EARLY_EXIT);
 			}
+
+			if (source.getAttacker() instanceof ServerPlayerEntity attacker) {
+				PlayerExtension.get(attacker).getStats().increment(UHCStat.KILLS, 1);
+				if (GameManager.isUnclaimed(OneTimeAchievement.KILL)) {
+					grantAdvancement(attacker, UHCAdvancements.FIRST_BLOOD);
+				}
+			}
+
 
 			if (GameSettings.PLAYER_DROPS_GAPPLE_ON_DEATH.getValue()) {
 				player.dropItem(Items.GOLDEN_APPLE.getDefaultStack(), true, false);
@@ -536,14 +549,14 @@ public class PlayerManager {
 				dropPlayerHead(player, source.getAttacker());
 			}
 
-			if (source.getAttacker() instanceof ServerPlayerEntity attacker && GameManager.isUnclaimed(OneTimeAchievement.KILL)) {
-				grantAdvancement(attacker, UHCAdvancements.FIRST_BLOOD);
-			}
+			PlayerExtension extension = PlayerExtension.get(player);
+			extension.getStats().increment(UHCStat.DEATHS, 1);
 
 			AbstractTeam team = player.getScoreboardTeam();
-			PlayerExtension.get(player).trueTeam = team;
+			extension.setRealTeam(team);
 			ServerScoreboard scoreboard = player.getWorld().getServer().getScoreboard();
 			scoreboard.addPlayerToTeam(player.getEntityName(), scoreboard.getTeam("Spectator"));
+
 			if (team != null && !TeamManager.teamHasAlive(team) && !TeamManager.isEliminated(team)) {
 				TeamManager.setEliminated(team, true);
 				PlayerManager.forEveryPlayer(playerEntity -> {
@@ -553,6 +566,7 @@ public class PlayerManager {
 					);
 				});
 			}
+
 			if (TeamManager.isLastTeam()) {
 				EventHandler.onEnd();
 			}
@@ -590,7 +604,7 @@ public class PlayerManager {
 			if (playerX * playerX >= playerZ * playerZ) {
 				// Checking to see if the player is closer to the west world border -- handing particle stuff (arrow)
 				if (playerX - border.getBoundWest() > border.getBoundEast() - playerX) {
-					playerExtension.worldBorder.setCenter(border.getSize(), border.getCenterZ());
+					playerExtension.getFakeBorder().setCenter(border.getSize(), border.getCenterZ());
 					direction = Direction.WEST;
 
 					for (int x = 0; x < 15; x++) {
@@ -600,7 +614,7 @@ public class PlayerManager {
 					}
 					// Checking to see if the player is closer to the east world border -- handing particle stuff (arrow)
 				} else {
-					playerExtension.worldBorder.setCenter(-1 * border.getSize(), border.getCenterZ());
+					playerExtension.getFakeBorder().setCenter(-1 * border.getSize(), border.getCenterZ());
 					direction = Direction.EAST;
 					for (int x = 0; x < 15; x++) {
 						sendParticles(playerEntity, playerBlockX + 0.8 - (float) x / 45, bottomBlockY, playerBlockZ + 0.5 + (float) x / 30);
@@ -611,7 +625,7 @@ public class PlayerManager {
 			} else {
 				// Checking to see if the player is closer to the north world border -- handing particle stuff (arrow)
 				if (playerZ - border.getBoundNorth() > border.getBoundSouth() - playerZ) {
-					playerExtension.worldBorder.setCenter(border.getCenterX(), border.getSize());
+					playerExtension.getFakeBorder().setCenter(border.getCenterX(), border.getSize());
 					direction = Direction.NORTH;
 
 					for (int x = 0; x < 15; x++) {
@@ -621,7 +635,7 @@ public class PlayerManager {
 					}
 					// Checking to see if the player is closer to the south world border -- handing particle stuff (arrow)
 				} else {
-					playerExtension.worldBorder.setCenter(border.getCenterX(), -1 * border.getSize());
+					playerExtension.getFakeBorder().setCenter(border.getCenterX(), -1 * border.getSize());
 					direction = Direction.SOUTH;
 					for (int x = 0; x < 15; x++) {
 						sendParticles(playerEntity, playerBlockX + 0.5 + (float) x / 30, bottomBlockY, playerBlockZ + 0.8 - (float) x / 45);
@@ -631,8 +645,8 @@ public class PlayerManager {
 				}
 			}
 			// Sending fake world border packets to the player
-			playerExtension.worldBorder.setSize(border.getSize() + 1);
-			sendWorldBorderPackets(playerEntity, playerExtension.worldBorder);
+			playerExtension.getFakeBorder().setSize(border.getSize() + 1);
+			sendWorldBorderPackets(playerEntity, playerExtension.getFakeBorder());
 
 			// The big title and subtitle msg packets -- sent every 100 game ticks
 			if (UHCMod.SERVER.getTicks() % 100 == 0) {
@@ -642,9 +656,9 @@ public class PlayerManager {
 				playerEntity.networkHandler.sendPacket(new SubtitleS2CPacket(subTitle));
 			}
 
-			playerExtension.wasInWorldBorder = true;
-		} else if (playerExtension.wasInWorldBorder) {
-			playerExtension.wasInWorldBorder = false;
+			playerExtension.setFlag(PlayerFlag.WAS_IN_BORDER, true);
+		} else if (playerExtension.getFlag(PlayerFlag.WAS_IN_BORDER)) {
+			playerExtension.setFlag(PlayerFlag.WAS_IN_BORDER, false);
 			sendWorldBorderPackets(playerEntity, border);
 		}
 	}

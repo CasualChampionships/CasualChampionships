@@ -63,7 +63,7 @@ public class ReadyCommand {
 		if (TeamManager.isReady(team)) {
 			throw ALREADY_READY.create();
 		}
-		TeamManager.setReady(team, true);
+		TeamManager.setReady(team, isReady);
 		MutableText readyText = isReady ? Text.translatable("uhc.lobby.ready.isReady", team.getName()) : Text.translatable("uhc.lobby.ready.notReady", team.getName());
 		PlayerManager.messageEveryPlayer(readyText.formatted(team.getColor(), Formatting.BOLD));
 		TeamManager.checkAllTeamsReady();

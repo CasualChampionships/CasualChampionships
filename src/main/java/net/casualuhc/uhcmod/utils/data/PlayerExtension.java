@@ -1,13 +1,15 @@
 package net.casualuhc.uhcmod.utils.data;
 
+import net.casualuhc.uhcmod.utils.stat.PlayerStats;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.scoreboard.AbstractTeam;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.world.border.WorldBorder;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
+
+import static net.casualuhc.uhcmod.utils.data.PlayerFlag.*;
 
 /**
  * This class serves to store extra data about a {@link net.minecraft.server.network.ServerPlayerEntity}.
@@ -17,22 +19,73 @@ import java.util.function.Consumer;
 public class PlayerExtension {
 	private static final Map<UUID, PlayerExtension> PLAYERS = new HashMap<>();
 
-	public final WorldBorder worldBorder = new WorldBorder();
+	private final String name;
+	private final PlayerStats stats = new PlayerStats();
+	private final WorldBorder fakeBorder = new WorldBorder();
+	private final Set<PlayerFlag> flags = EnumSet.noneOf(PlayerFlag.class);
 
-	public AbstractTeam trueTeam = null;
-	public boolean wasInWorldBorder = false;
-	public int damageDealt = 0;
-	public int relogs = 0;
+	private Team realTeam = null;
 
-	public boolean isPlaying = false;
-	public boolean displayCoords = false;
-	public boolean shouldGlow = true;
-	public boolean fullbright = true;
+	private PlayerExtension(String name) {
+		this.name = name;
+		this.resetFlags();
+	}
 
-	private PlayerExtension() { }
+	public String getName() {
+		return this.name;
+	}
+
+	public WorldBorder getFakeBorder() {
+		return this.fakeBorder;
+	}
+
+	public boolean belongsToTeam(AbstractTeam team) {
+		return this.realTeam == team;
+	}
+
+	public void setRealTeam(AbstractTeam realTeam) {
+		this.realTeam = (Team) realTeam;
+	}
+
+	public PlayerStats getStats() {
+		return this.stats;
+	}
+
+	public boolean getFlag(PlayerFlag flag) {
+		return this.flags.contains(flag);
+	}
+
+	/**
+	 * Sets a specific flag for the player.
+	 *
+	 * @param flag the flag to set.
+	 * @param bool whether it should be removed or added.
+	 * @return true if the flag changed, false otherwise.
+	 */
+	@SuppressWarnings("UnusedReturnValue")
+	public boolean setFlag(PlayerFlag flag, boolean bool) {
+		return bool ? this.flags.add(flag) : this.flags.remove(flag);
+	}
+
+	public void toggleFlag(PlayerFlag flag) {
+		if (!this.flags.add(flag)) {
+			this.flags.remove(flag);
+		}
+	}
+
+	public void resetFlags() {
+		this.flags.clear();
+		this.setFlag(GLOW_ENABLED, true);
+		this.setFlag(HUD_ENABLED, true);
+		this.setFlag(FULL_BRIGHT_ENABLED, true);
+	}
 
 	public static PlayerExtension get(PlayerEntity player) {
-		return PLAYERS.computeIfAbsent(player.getUuid(), u -> new PlayerExtension());
+		return PLAYERS.computeIfAbsent(player.getUuid(), u -> new PlayerExtension(player.getEntityName()));
+	}
+
+	public static void forEach(Consumer<PlayerExtension> consumer) {
+		PLAYERS.values().forEach(consumer);
 	}
 
 	public static void apply(PlayerEntity player, Consumer<PlayerExtension> consumer) {
@@ -40,12 +93,10 @@ public class PlayerExtension {
 	}
 
 	public static void reset() {
-		PLAYERS.values().forEach(p -> {
-			p.trueTeam = null;
-			p.isPlaying = false;
-			p.wasInWorldBorder = false;
-			p.damageDealt = 0;
-			p.relogs = 0;
+		forEach(p -> {
+			p.setRealTeam(null);
+			p.resetFlags();
+			p.stats.reset();
 		});
 	}
 }

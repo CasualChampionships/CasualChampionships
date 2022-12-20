@@ -8,6 +8,8 @@ import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.screen.MinesweeperScreen;
+import net.casualuhc.uhcmod.utils.stat.PlayerStats;
+import net.casualuhc.uhcmod.utils.stat.UHCStat;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.advancement.criterion.ImpossibleCriterion;
@@ -317,7 +319,7 @@ public class UHCAdvancements {
 				AtomicReference<PlayerAttacker> highest = new AtomicReference<>();
 				PlayerManager.forEveryPlayer(p -> {
 					if (PlayerManager.isPlayerPlaying(p)) {
-						int current = PlayerExtension.get(p).damageDealt;
+						double current = PlayerExtension.get(p).getStats().get(UHCStat.DAMAGE_DEALT);
 						if (lowest.get() == null) {
 							PlayerAttacker first = new PlayerAttacker(p, current);
 							lowest.set(first);
@@ -342,12 +344,14 @@ public class UHCAdvancements {
 			@Override
 			public void onPlayerJoin(ServerPlayerEntity player) {
 				if (PlayerManager.isPlayerPlayingInSurvival(player)) {
-					PlayerExtension.get(player).relogs++;
+					PlayerExtension extension = PlayerExtension.get(player);
+					PlayerStats stats = extension.getStats();
+					stats.increment(UHCStat.RELOGS, 1);
 
 					// Wait for player to load in
 					Scheduler.schedule(Scheduler.secondsToTicks(5), () -> {
 						PlayerManager.grantAdvancement(player, UHCAdvancements.COMBAT_LOGGER);
-						if (PlayerExtension.get(player).relogs == 10) {
+						if (stats.get(UHCStat.RELOGS) == 10) {
 							PlayerManager.grantAdvancement(player, UHCAdvancements.OK_WE_BELIEVE_YOU_NOW);
 						}
 					});
@@ -373,5 +377,5 @@ public class UHCAdvancements {
 		UHC_ADVANCEMENTS.forEach(consumer);
 	}
 
-	private record PlayerAttacker(ServerPlayerEntity player, int damageDealt) { }
+	private record PlayerAttacker(ServerPlayerEntity player, double damageDealt) { }
 }

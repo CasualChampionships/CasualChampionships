@@ -4,9 +4,12 @@ import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.PlayerManager;
+import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
+import net.casualuhc.uhcmod.utils.stat.PlayerStats;
+import net.casualuhc.uhcmod.utils.stat.UHCStat;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -151,6 +154,11 @@ public class MinesweeperScreen extends CustomScreen {
 			PlayerManager.messageEveryPlayer(
 				Text.translatable("uhc.minesweeper.record", player.getEntityName(), String.format("%.2f", seconds))
 			);
+		}
+		PlayerStats stats = PlayerExtension.get(player).getStats();
+		double current = stats.get(UHCStat.MINESWEEPER_RECORD);
+		if (Double.isNaN(current) || current > seconds) {
+			stats.set(UHCStat.MINESWEEPER_RECORD, seconds);
 		}
 	}
 

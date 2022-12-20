@@ -1,39 +1,30 @@
 package net.casualuhc.uhcmod.mixin;
 
-import net.casualuhc.uhcmod.managers.PlayerManager;
+import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
+import net.casualuhc.uhcmod.utils.stat.UHCStat;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerEntity.class)
 public class PlayerEntityMixin {
-	/**
-	 * We only count attacking damage to other players...
-	 */
-	@Unique
-	private boolean wasPlayer = false;
-
-	@Inject(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;increaseStat(Lnet/minecraft/util/Identifier;I)V", shift = At.Shift.BEFORE))
-	private void onAttack(Entity target, CallbackInfo ci) {
-		if (target instanceof ServerPlayerEntity) {
-			this.wasPlayer = true;
+	@Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;increaseStat(Lnet/minecraft/util/Identifier;I)V"))
+	private void onAttack(PlayerEntity player, Identifier stat, int amount, Entity target) {
+		player.increaseStat(stat, amount);
+		if (GameManager.isGameActive() && target instanceof PlayerEntity) {
+			PlayerExtension.get(player).getStats().increment(UHCStat.DAMAGE_DEALT, amount / 10.0);
 		}
 	}
 
-	@Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;increaseStat(Lnet/minecraft/util/Identifier;I)V"))
-	private void onAttack(PlayerEntity thisPlayer, Identifier stat, int amount) {
-		if (this.wasPlayer && thisPlayer instanceof ServerPlayerEntity player && PlayerManager.isPlayerPlayingInSurvival(player)) {
-			PlayerExtension.get(thisPlayer).damageDealt += amount;
-			thisPlayer.increaseStat(stat, amount);
-			this.wasPlayer = false;
+	@Redirect(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;increaseStat(Lnet/minecraft/util/Identifier;I)V", ordinal = 1))
+	private void onDamage(PlayerEntity player, Identifier stat, int amount) {
+		player.increaseStat(stat, amount);
+		if (GameManager.isGameActive()) {
+			PlayerExtension.get(player).getStats().increment(UHCStat.DAMAGE_TAKEN, amount / 10.0);
 		}
 	}
 }

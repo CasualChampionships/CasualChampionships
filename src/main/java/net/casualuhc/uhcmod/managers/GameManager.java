@@ -216,11 +216,6 @@ public class GameManager {
 			}
 
 			@Override
-			public void onPlayerLeave(ServerPlayerEntity player) {
-				UHCDataBase.updateStats(player);
-			}
-
-			@Override
 			public void onServerTick(MinecraftServer server) {
 				ticks++;
 				if (isPhase(Phase.LOBBY) && bossBar != null && ticks % 100 == 0 && startTime - 30 * 60 * 1000 < System.currentTimeMillis()) {
@@ -260,6 +255,7 @@ public class GameManager {
 				setPhase(Phase.START);
 				setStartTime(Long.MAX_VALUE);
 				hideBossBar();
+				deleteAllBossBars();
 				startCountDown();
 			}
 
@@ -378,31 +374,27 @@ public class GameManager {
 		}
 
 		PlayerManager.forEveryPlayer(player -> {
-			if (player.getScoreboardTeam() == team || PlayerExtension.get(player).trueTeam == team) {
+			if (player.getScoreboardTeam() == team || PlayerExtension.get(player).belongsToTeam(team)) {
 				PlayerManager.grantAdvancement(player, UHCAdvancements.WINNER);
 			}
-		});
-
-		PlayerManager.forEveryPlayer(playerEntity -> {
-			playerEntity.setGlowing(false);
-			playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.translatable("uhc.game.won", team.getName()).formatted(team.getColor())));
-			UHCDataBase.updateStats(playerEntity);
+			player.setGlowing(false);
+			player.networkHandler.sendPacket(new TitleS2CPacket(Text.translatable("uhc.game.won", team.getName()).formatted(team.getColor())));
 		});
 
 		UHCDataBase.incrementWinDataBase(team.getName());
-		UHCDataBase.updateTotalDataBase();
+		UHCDataBase.updateStats();
 
 		scheduleInLoopPhaseTask(0, 4, secondsToTicks(5), () -> {
-			PlayerManager.forEveryPlayer(playerEntity -> {
-				playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST, SoundCategory.MASTER, 0.5f, 1f);
-				playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
-				playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
+			PlayerManager.forEveryPlayer(player -> {
+				player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST, SoundCategory.MASTER, 0.5f, 1f);
+				player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
+				player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
 			});
 			schedulePhaseTask(6, () -> {
-				PlayerManager.forEveryPlayer(playerEntity -> {
-					playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_SHOOT, SoundCategory.MASTER, 0.5f, 1f);
-					playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
-					playerEntity.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
+				PlayerManager.forEveryPlayer(player -> {
+					player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_SHOOT, SoundCategory.MASTER, 0.5f, 1f);
+					player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
+					player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
 				});
 			});
 		});
