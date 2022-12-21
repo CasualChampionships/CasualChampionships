@@ -9,7 +9,6 @@ import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
-import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
 import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.stat.UHCStat;
 import net.casualuhc.uhcmod.utils.uhc.*;
@@ -244,7 +243,7 @@ public class PlayerManager {
 			clearPlayerInventory(player);
 			setPlayerPlaying(player, true);
 
-			player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, secondsToTicks(5), 4, true, false));
+			player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, secondsToTicks(10), 4, true, false));
 			player.changeGameMode(GameMode.SURVIVAL);
 			return;
 		}
@@ -330,6 +329,28 @@ public class PlayerManager {
 	 */
 	public static void sendResourcePack(ServerPlayerEntity player, MinecraftServer.ServerResourcePackProperties properties) {
 		player.sendResourcePackUrl(properties.url(), properties.hash(), true, properties.prompt());
+	}
+
+	/**
+	 * We change the player's team to Spectator after death
+	 * to hide name tags but the player should still be part of their original team.
+	 *
+	 * @param player the player to check the team of.
+	 * @return the real team the player belongs to.
+	 */
+	public static Team getTrueTeam(ServerPlayerEntity player) {
+		return PlayerExtension.get(player).getRealTeam();
+	}
+
+	/**
+	 * Checks whether a player belongs a specific team.
+	 *
+	 * @param player the player to check.
+	 * @param team the team to check.
+	 * @return whether the player belongs to that team.
+	 */
+	public static boolean belongsToTeam(ServerPlayerEntity player, AbstractTeam team) {
+		return player.getScoreboardTeam() == team || getTrueTeam(player) == team;
 	}
 
 	public static EntityTrackerUpdateS2CPacket handleTrackerUpdatePacketForTeamGlowing(ServerPlayerEntity glowingPlayer, ServerPlayerEntity observingPlayer, EntityTrackerUpdateS2CPacket packet) {
@@ -553,7 +574,6 @@ public class PlayerManager {
 			extension.getStats().increment(UHCStat.DEATHS, 1);
 
 			AbstractTeam team = player.getScoreboardTeam();
-			extension.setRealTeam(team);
 			ServerScoreboard scoreboard = player.getWorld().getServer().getScoreboard();
 			scoreboard.addPlayerToTeam(player.getEntityName(), scoreboard.getTeam("Spectator"));
 

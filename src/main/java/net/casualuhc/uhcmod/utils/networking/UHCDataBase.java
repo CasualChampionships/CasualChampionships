@@ -67,10 +67,15 @@ public class UHCDataBase {
 					PlayerStats stats = extension.getStats();
 					String playerName = extension.getName();
 					Document original = new Document("_id", playerName);
-					for (UHCStat stat : UHCStat.values()) {
-						original.put(stat.id(), stats.get(stat));
-					}
 					Document latest = new Document(original);
+					for (UHCStat stat : UHCStat.values()) {
+						String id = stat.id();
+						double value = stats.get(stat);
+						original.put(id, value);
+						if (stat.latest) {
+							latest.put(id, value);
+						}
+					}
 
 					BasicDBList advancements = stats.getAdvancements().map(a -> {
 						BasicBSONObject object = new BasicDBObject();

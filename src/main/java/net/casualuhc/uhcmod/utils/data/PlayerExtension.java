@@ -39,12 +39,12 @@ public class PlayerExtension {
 		return this.fakeBorder;
 	}
 
-	public boolean belongsToTeam(AbstractTeam team) {
-		return this.realTeam == team;
-	}
-
 	public void setRealTeam(AbstractTeam realTeam) {
 		this.realTeam = (Team) realTeam;
+	}
+
+	public Team getRealTeam() {
+		return this.realTeam;
 	}
 
 	public PlayerStats getStats() {

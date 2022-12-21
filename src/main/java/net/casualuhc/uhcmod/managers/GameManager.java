@@ -374,7 +374,7 @@ public class GameManager {
 		}
 
 		PlayerManager.forEveryPlayer(player -> {
-			if (player.getScoreboardTeam() == team || PlayerExtension.get(player).belongsToTeam(team)) {
+			if (PlayerManager.belongsToTeam(player, team)) {
 				PlayerManager.grantAdvancement(player, UHCAdvancements.WINNER);
 			}
 			player.setGlowing(false);
