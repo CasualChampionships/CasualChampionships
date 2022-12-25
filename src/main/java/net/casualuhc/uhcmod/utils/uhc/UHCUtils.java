@@ -16,6 +16,7 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.PlaceableOnWaterItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -165,5 +166,19 @@ public class UHCUtils {
 		@SuppressWarnings("DataFlowIssue")
 		double ratio = (double) 7 / ((SpawnGroupInterface) (Object) SpawnGroup.MONSTER).getInitialSpawnCap();
 		SpawnReporter.mobcap_exponent = 4.0 * Math.log(ratio) / Math.log(2.0);
+	}
+
+	public static void sendToOps(Text message) {
+		Text text = Text.translatable("chat.type.admin", Text.literal("UHC-Admin"), message);
+
+		// send to opped players
+		for (ServerPlayerEntity player : UHCMod.SERVER.getPlayerManager().getPlayerList()) {
+			if (UHCMod.SERVER.getPlayerManager().isOperator(player.getGameProfile())) {
+				player.sendMessage(text);
+			}
+		}
+
+		// log to server console
+		UHCMod.SERVER.sendMessage(text);
 	}
 }
