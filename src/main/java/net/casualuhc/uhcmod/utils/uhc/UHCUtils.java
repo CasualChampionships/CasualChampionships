@@ -6,6 +6,7 @@ import carpet.api.settings.SettingsManager;
 import carpet.fakes.SpawnGroupInterface;
 import carpet.utils.SpawnReporter;
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.utils.data.WorldExtension;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
@@ -15,6 +16,7 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.PlaceableOnWaterItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -23,7 +25,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UHCUtils {
 	private UHCUtils() { }
@@ -32,25 +36,60 @@ public class UHCUtils {
 		return (float) (MathHelper.average(UHCMod.SERVER.lastTickLengths) * 1.0E-6F);
 	}
 
-	public static boolean detectFlexibleBlockPlacement(World world, BlockPos pos, Direction side, BlockState oldState, ItemUsageContext context) {
+	public static boolean detectFlexibleBlockPlacement(ServerWorld world, BlockPos pos, Direction side, BlockState oldState, ItemUsageContext context) {
+		WorldExtension worldExt = WorldExtension.forWorld(world);
 		ItemPlacementContext placementContext = new ItemPlacementContext(context);
-		boolean fluidsSolid = context.getStack().getItem() instanceof PlaceableOnWaterItem;
 
-		if (!oldState.canReplace(placementContext) || (fluidsSolid && oldState.getFluidState().isStill())) {
-			pos = pos.offset(side);
-		} else {
+		boolean couldBePlacedOffset = isSolidForPlacement(placementContext, oldState);
+		boolean couldBePlacedHere = !couldBePlacedOffset;
+		for (BlockState olderState : worldExt.getOldBlockStatesInLastNTicks(pos, 20)) {
+			boolean isSolid = isSolidForPlacement(placementContext, olderState);
+			couldBePlacedOffset |= isSolid;
+			couldBePlacedHere |= !isSolid;
+		}
+
+		List<BlockPos> possiblePlacementPositions = new ArrayList<>(2);
+		if (couldBePlacedHere) {
+			possiblePlacementPositions.add(pos);
+			// check for placement inside of a block
 			ShapeContext shapeContext = context.getPlayer() == null ? ShapeContext.absent() : ShapeContext.of(context.getPlayer());
 			if (!oldState.getOutlineShape(world, pos, shapeContext).isEmpty()) {
 				return false;
 			}
-		}
-		for (Direction dir : Direction.values()) {
-			BlockState neighbor = world.getBlockState(pos.offset(dir));
-			if (!neighbor.canReplace(placementContext) || (fluidsSolid && neighbor.getFluidState().isStill())) {
-				return false;
+			for (BlockState olderState : worldExt.getOldBlockStatesInLastNTicks(pos, 20)) {
+				if (!olderState.getOutlineShape(world, pos, shapeContext).isEmpty()) {
+					return false;
+				}
 			}
 		}
+
+		if (couldBePlacedOffset) {
+			possiblePlacementPositions.add(pos.offset(side));
+		}
+
+		for (BlockPos placedPos : possiblePlacementPositions) {
+			for (Direction dir : Direction.values()) {
+				BlockState neighbor = world.getBlockState(placedPos.offset(dir));
+				if (isSolidForPlacement(placementContext, neighbor)) {
+					return false;
+				}
+				for (BlockState olderNeighbor : worldExt.getOldBlockStatesInLastNTicks(placedPos.offset(dir), 20)) {
+					if (isSolidForPlacement(placementContext, olderNeighbor)) {
+						return false;
+					}
+				}
+			}
+		}
+
 		return true;
+	}
+
+	private static boolean isSolidForPlacement(ItemPlacementContext context, BlockState state) {
+		if (!state.canReplace(context)) {
+			return true;
+		}
+		boolean fluidsSolid = context.getStack().getItem() instanceof PlaceableOnWaterItem;
+		return fluidsSolid && state.getFluidState().isStill();
 	}
 
 	public static void setDescriptor(MinecraftServer server) {

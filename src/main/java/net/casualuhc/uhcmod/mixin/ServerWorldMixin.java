@@ -1,6 +1,9 @@
 package net.casualuhc.uhcmod.mixin;
 
+import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.utils.data.WorldExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -12,7 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerWorld.class)
-public abstract class ServerWorldMixin {
+public abstract class ServerWorldMixin implements WorldExtension.Holder {
+    private final WorldExtension uhcmod_worldExtension = new WorldExtension();
+
     @Inject(at = @At("HEAD"), method = "canPlayerModifyAt", cancellable = true)
     public void canPlayerModifyAt(PlayerEntity player, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         // Ignore spawn protection
@@ -22,6 +27,23 @@ public abstract class ServerWorldMixin {
     @Inject(method = "onPlayerConnected", at = @At("HEAD"))
     private void onPlayerConnected(ServerPlayerEntity player, CallbackInfo ci) {
         EventHandler.onPlayerJoin(player);
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void onTick(CallbackInfo ci) {
+        uhcmod_worldExtension.tick();
+    }
+
+    @Inject(method = "onBlockChanged", at = @At("HEAD"))
+    private void onBlockChanged(BlockPos pos, BlockState oldBlock, BlockState newBlock, CallbackInfo ci) {
+        if (UHCMod.SERVER.isOnThread() && oldBlock != newBlock) {
+            uhcmod_worldExtension.storeBlockChange(pos, oldBlock);
+        }
+    }
+
+    @Override
+    public WorldExtension getWorldExtension() {
+        return uhcmod_worldExtension;
     }
 }
 

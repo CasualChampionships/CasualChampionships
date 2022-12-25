@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -28,7 +29,7 @@ public class ServerPlayerInteractionManagerMixin {
         locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void onBlockPlaced(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir, BlockPos pos, BlockState oldState, boolean bl, boolean bl2, ItemStack stack1, ItemUsageContext context) {
-        if (UHCUtils.detectFlexibleBlockPlacement(world, hitResult.getBlockPos(), hitResult.getSide(), oldState, context)) {
+        if (UHCUtils.detectFlexibleBlockPlacement((ServerWorld) world, hitResult.getBlockPos(), hitResult.getSide(), oldState, context)) {
             PlayerManager.grantAdvancement(player, UHCAdvancements.BUSTED);
         }
     }
