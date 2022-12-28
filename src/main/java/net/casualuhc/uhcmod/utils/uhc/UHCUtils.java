@@ -78,12 +78,7 @@ public class UHCUtils {
 		server.setDifficulty(Difficulty.PEACEFUL, true);
 		server.getOverworld().setTimeOfDay(6000); // 6000 = noon
 		server.getOverworld().setWeather(999999, 0, false, false);
-		server.getOverworld().setSpawnPos(new BlockPos(Config.CURRENT_EVENT.getLobbySpawnPos()), 0);
-		server.getOverworld().getWorldBorder().setCenter(0, 0);
-		server.getWorlds().forEach(serverWorld -> {
-			serverWorld.getWorldBorder().setCenter(0, 0);
-			serverWorld.getWorldBorder().setSize(6128);
-		});
+		server.getOverworld().setSpawnPos(new BlockPos(Config.CURRENT_EVENT.getLobbySpawnPos()), 90);
 		GameSettings.PVP.setValue(false);
 
 		try {
@@ -96,22 +91,20 @@ public class UHCUtils {
 			manager.getCarpetRule("commandProfile").set(source, "ops");
 			manager.getCarpetRule("commandScript").set(source, "ops");
 			manager.getCarpetRule("lightEngineMaxBatchSize").set(source, "500");
-			manager.getCarpetRule("structureBlockLimit").set(source, "256");
+			manager.getCarpetRule("structureBlockLimit").set(source, "2560");
 			manager.getCarpetRule("fillLimit").set(source, "1000000");
 			manager.getCarpetRule("fillUpdates").set(source, "false");
-			manager.getCarpetRule("commandInfo").set(source, "ops");
 			manager.getCarpetRule("commandInfo").set(source, "ops");
 		} catch (InvalidRuleValueException e) {
 			UHCMod.LOGGER.error("Failed to set carpet rule", e);
 		}
 	}
 
-	public static void setUHCGamerules() {
+	public static void setCTFGamerules() {
 		MinecraftServer server = UHCMod.SERVER;
 		GameRules gameRules = server.getGameRules();
-		gameRules.get(GameRules.NATURAL_REGENERATION).set(false, server);
+		gameRules.get(GameRules.NATURAL_REGENERATION).set(true, server);
 		gameRules.get(GameRules.DO_FIRE_TICK).set(true, server);
-		gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
 		gameRules.get(GameRules.FALL_DAMAGE).set(true, server);
 		gameRules.get(GameRules.DROWNING_DAMAGE).set(true, server);
 		gameRules.get(GameRules.DO_ENTITY_DROPS).set(true, server);

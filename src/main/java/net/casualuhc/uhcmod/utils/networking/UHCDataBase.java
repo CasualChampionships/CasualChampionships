@@ -42,7 +42,7 @@ public class UHCDataBase {
 			MongoDatabase database = CLIENT.getDatabase("UHC");
 			PLAYER_STATS = database.getCollection(Config.IS_DEV ? "test_player_stats" : "new_player_stats");
 			COMBINED_STATS = database.getCollection(Config.IS_DEV ? "test_total_player_stats" : "new_total_player_stats");
-			TEAM_CONFIG = database.getCollection("teams");
+			TEAM_CONFIG = database.getCollection("ctf_teams");
 			EXECUTOR = Executors.newSingleThreadExecutor();
 		} else {
 			CLIENT = null;

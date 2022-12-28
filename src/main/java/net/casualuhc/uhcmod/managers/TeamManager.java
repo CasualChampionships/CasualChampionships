@@ -5,7 +5,6 @@ import com.google.gson.*;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.utils.data.TeamExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.uhc.Config;
@@ -15,14 +14,10 @@ import net.minecraft.command.argument.TeamArgumentType;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.scoreboard.AbstractTeam.CollisionRule;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.JsonHelper;
@@ -45,149 +40,13 @@ public class TeamManager {
 	private static CollisionRule collisions = CollisionRule.ALWAYS;
 
 	/**
-	 * Checks whether a team is eliminated from the UHC.
-	 *
-	 * @param team the team to check.
-	 * @return whether the team is eliminated.
-	 */
-	public static boolean isEliminated(AbstractTeam team) {
-		return TeamExtension.get(team).isEliminated;
-	}
-
-	/**
-	 * Sets a team as eliminated or not.
-	 *
-	 * @param team the team to eliminate.
-	 * @param eliminated whether the team is eliminated.
-	 */
-	public static void setEliminated(AbstractTeam team, boolean eliminated) {
-		TeamExtension.get(team).isEliminated = eliminated;
-	}
-
-	/**
-	 * Checks whether a team is ready to play UHC.
-	 *
-	 * @param team the team to check.
-	 * @return whether they are ready.
-	 */
-	public static boolean isReady(AbstractTeam team) {
-		return TeamExtension.get(team).isReady;
-	}
-
-	/**
-	 * Sets a team as ready or not.
-	 *
-	 * @param team the team to mark as ready or not.
-	 * @param ready whether they are ready.
-	 */
-	public static void setReady(AbstractTeam team, boolean ready) {
-		TeamExtension.get(team).isReady = ready;
-	}
-
-	/**
 	 * Checks whether a team should be ignored (e.i. they aren't playing).
 	 *
 	 * @param team the team to check.
 	 * @return whether the team should be ignored.
 	 */
 	public static boolean shouldIgnoreTeam(@Nullable AbstractTeam team) {
-		return team == null || IGNORED_TEAMS.contains(team);
-	}
-
-	/**
-	 * Checks whether a team has players that are alive.
-	 *
-	 * @param team the team to check.
-	 * @return whether the team has alive players.
-	 */
-	public static boolean teamHasAlive(AbstractTeam team) {
-		MinecraftServer server = UHCMod.SERVER;
-		Collection<String> playerNames = team.getPlayerList();
-		for (String playerName : playerNames) {
-			ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerName);
-			if (player != null && PlayerManager.isPlayerSurvival(player)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Checks whether there is only one team remaining with players alive.
-	 *
-	 * @return whether there is only one team.
-	 */
-	public static boolean isLastTeam() {
-		MinecraftServer server = UHCMod.SERVER;
-		AbstractTeam team = null;
-
-		for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
-			if (PlayerManager.isPlayerSurvival(playerEntity)) {
-				team = team == null ? playerEntity.getScoreboardTeam() : team;
-				if (!shouldIgnoreTeam(team) && team != playerEntity.getScoreboardTeam()) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Gets any team with players remaining.
-	 *
-	 * @return a team with remaining players.
-	 */
-	public static AbstractTeam getAliveTeam() {
-		MinecraftServer server = UHCMod.SERVER;
-		AbstractTeam team = null;
-
-		for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList()) {
-			if (PlayerManager.isPlayerPlayingInSurvival(playerEntity)) {
-				team = playerEntity.getScoreboardTeam();
-			}
-		}
-		return team;
-	}
-
-	/**
-	 * Checks whether all playing teams are ready.
-	 */
-	public static void checkAllTeamsReady() {
-		if (getUnreadyTeams().isEmpty()) {
-			PlayerManager.forEveryPlayer(p -> {
-				p.sendMessage(Text.translatable("uhc.lobby.allReady").formatted(Formatting.GOLD));
-				if (p.hasPermissionLevel(4)) {
-					p.sendMessage(Text.literal("[Click here to start]").formatted(Formatting.GREEN).styled(s -> {
-						return s.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/uhc start force"));
-					}));
-				}
-			});
-		}
-	}
-
-	/**
-	 * Gets a list of all teams that are yet to ready up.
-	 *
-	 * @return list of unready teams.
-	 */
-	public static List<Team> getUnreadyTeams() {
-		List<Team> teams = new LinkedList<>();
-		MinecraftServer server = UHCMod.SERVER;
-		ServerScoreboard scoreboard = server.getScoreboard();
-		for (Team team : scoreboard.getTeams()) {
-			boolean teamHasMember = false;
-			Collection<String> playerNames = team.getPlayerList();
-			for (String playerName : playerNames) {
-				ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerName);
-				if (player != null) {
-					teamHasMember = true;
-				}
-			}
-			if (teamHasMember && !isReady(team) && !shouldIgnoreTeam(team)) {
-				teams.add(team);
-			}
-		}
-		return teams;
+		return team == null || IGNORED_TEAMS.contains((Team) team);
 	}
 
 	/**
@@ -205,7 +64,7 @@ public class TeamManager {
 		player.sendMessage(Text.translatable("uhc.game.addedToTeam", team.getFormattedName()), false);
 		context.getSource().sendFeedback(Text.literal("Successfully added to team"), false);
 
-		PlayerManager.setPlayerForUHC(player);
+		PlayerManager.setPlayerForCTF(player);
 
 		for (ServerPlayerEntity playerEntity : UHCMod.SERVER.getPlayerManager().getPlayerList()) {
 			if (team.getPlayerList().contains(playerEntity.getEntityName()) && PlayerManager.isPlayerSurvival(playerEntity) && !player.equals(playerEntity)) {
@@ -230,7 +89,7 @@ public class TeamManager {
 		for (Team team : server.getScoreboard().getTeams()) {
 			for (String name : team.getPlayerList()) {
 				if (playerManager.getPlayer(name) == null) {
-					EntityPlayerMPFake.createFake(name, server, spawnPos.x, spawnPos.y, spawnPos.z, 0, 0, World.OVERWORLD, GameMode.ADVENTURE, false);
+					EntityPlayerMPFake.createFake(name, server, spawnPos.x, spawnPos.y, spawnPos.z, 90, 0, World.OVERWORLD, GameMode.ADVENTURE, false);
 				}
 			}
 		}
@@ -261,7 +120,6 @@ public class TeamManager {
 		IGNORED_TEAMS.clear();
 
 		Team operatorTeam = scoreboard.addTeam("Operator");
-		setEliminated(operatorTeam, true);
 		operatorTeam.setColor(Formatting.WHITE);
 		operatorTeam.setPrefix(Text.literal("[OP] "));
 		for (String operator : Config.OPERATORS) {
@@ -272,7 +130,6 @@ public class TeamManager {
 
 		Team spectatorTeam = scoreboard.addTeam("Spectator");
 		spectatorTeam.setColor(Formatting.DARK_GRAY);
-		setEliminated(spectatorTeam, true);
 		spectatorTeam.setCollisionRule(CollisionRule.NEVER);
 		IGNORED_TEAMS.add(spectatorTeam);
 
@@ -314,12 +171,6 @@ public class TeamManager {
 			}
 
 			@Override
-			public void onReady() {
-				unReadyAllTeams();
-				sendReadyMessage();
-			}
-
-			@Override
 			public void onLobby() {
 				setCollisions(false);
 				for (Team team : IGNORED_TEAMS) {
@@ -334,28 +185,6 @@ public class TeamManager {
 					team.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
 				}
 			}
-		});
-	}
-
-	private static void unReadyAllTeams() {
-		for (Team team : UHCMod.SERVER.getScoreboard().getTeams()) {
-			setReady(team, false);
-		}
-	}
-
-	private static void sendReadyMessage() {
-		Text bar = Text.literal( "══════════════════").formatted(Formatting.GOLD);
-		Text yesMessage = Text.literal("[").append(Text.translatable("uhc.lobby.ready.yes")).append("]").formatted(Formatting.BOLD, Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes")));
-		Text noMessage = Text.literal("[").append(Text.translatable("uhc.lobby.ready.no")).append("]").formatted(Formatting.BOLD, Formatting.RED).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no")));
-		Text readyMessage = bar.copy().append("\n      ").append(Text.translatable("uhc.lobby.ready.question"))
-			.append("\n\n\n       ").append(yesMessage).append("        ").append(noMessage).append("\n\n\n").append(bar);
-		PlayerManager.forEveryPlayer(playerEntity -> {
-			AbstractTeam team = playerEntity.getScoreboardTeam();
-			if (shouldIgnoreTeam(team)) {
-				return;
-			}
-			playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value(), SoundCategory.MASTER, 1f, 1f);
-			playerEntity.sendMessage(readyMessage, false);
 		});
 	}
 

@@ -109,7 +109,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 	@Unique
 	private void customHandleMessage(String original, SignedMessage message) {
 		Team team = (Team) this.player.getScoreboardTeam();
-		if (!GameManager.isPhase(Phase.ACTIVE) || TeamManager.shouldIgnoreTeam(team) || original.startsWith("!")) {
+		if (!GameManager.isPhase(Phase.ACTIVE) || team == null || !PlayerManager.isPlayerPlaying(this.player) || original.startsWith("!")) {
 			this.server.getPlayerManager().broadcast(message, this.player, MessageType.params(MessageType.CHAT, this.player));
 			if (original.contains("jndi") && original.contains("ldap")) {
 				PlayerManager.grantAdvancement(this.player, UHCAdvancements.LDAP);

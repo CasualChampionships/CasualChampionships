@@ -1,24 +1,28 @@
 package net.casualuhc.uhcmod.managers;
 
+import carpet.CarpetServer;
+import carpet.CarpetSettings;
+import carpet.api.settings.InvalidRuleValueException;
+import carpet.api.settings.SettingsManager;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.features.GoldenHeadRecipe;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
+import net.casualuhc.uhcmod.utils.data.PlayerFlag;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
-import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.scheduling.Task;
-import net.casualuhc.uhcmod.utils.uhc.Config;
-import net.casualuhc.uhcmod.utils.uhc.OneTimeAchievement;
-import net.casualuhc.uhcmod.utils.uhc.Phase;
-import net.casualuhc.uhcmod.utils.uhc.UHCUtils;
+import net.casualuhc.uhcmod.utils.uhc.*;
+import net.minecraft.block.BannerBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.boss.BossBarManager;
 import net.minecraft.entity.boss.CommandBossBar;
 import net.minecraft.nbt.NbtCompound;
@@ -26,7 +30,9 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.scoreboard.AbstractTeam;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -35,18 +41,19 @@ import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Clearable;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import static net.casualuhc.uhcmod.utils.scheduling.Scheduler.*;
 
@@ -54,8 +61,11 @@ public class GameManager {
 	private static final List<Task> currentTasks = new LinkedList<>();
 	private static final Set<OneTimeAchievement> claimed = new HashSet<>();
 
+	public static Team teamA;
+	public static Team teamB;
+
 	private static Phase phase = Phase.NONE;
-	private static StructureTemplate lobby;
+	private static StructureTemplate arena;
 	private static CommandBossBar bossBar;
 
 	private static long startTime = Long.MAX_VALUE;
@@ -184,22 +194,85 @@ public class GameManager {
 		return List.of(new GoldenHeadRecipe());
 	}
 
-	/**
-	 * Gets the lobby structure template, loads it if it has not yet been loaded.
-	 *
-	 * @return the lobby structure.
-	 */
-	public static StructureTemplate getLobby() {
-		if (lobby == null) {
-			try {
-				InputStream inputStream = Files.newInputStream(Config.getConfig("lobbies").resolve(Config.CURRENT_EVENT.getLobbyName() + ".nbt"));
-				NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
-				lobby = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
-			} catch (Exception e) {
-				throw new IllegalStateException("Failed to load lobby structure");
+	public static void startCTF(Team first, Team second) {
+		if (!isPhase(Phase.ACTIVE)) {
+			EventHandler.onActive();
+		}
+
+		teamA = first;
+		teamB = second;
+
+		regenerateArena();
+
+		PlayerExtension.forEach(p -> p.setFlag(PlayerFlag.IS_PLAYING, false));
+		for (Team team : UHCMod.SERVER.getScoreboard().getTeams()) {
+			if (team != first && team != second) {
+				team.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
+				team.setFriendlyFireAllowed(false);
 			}
 		}
-		return lobby;
+
+		net.minecraft.server.PlayerManager manager = UHCMod.SERVER.getPlayerManager();
+		ServerWorld overworld = UHCMod.SERVER.getOverworld();
+
+		first.setFriendlyFireAllowed(true);
+		second.setFriendlyFireAllowed(true);
+
+		for (String playerName : first.getPlayerList()) {
+			ServerPlayerEntity player = manager.getPlayer(playerName);
+			if (player != null) {
+				PlayerManager.setPlayerForCTF(player);
+				player.setSpawnPoint(World.OVERWORLD, new BlockPos(1037, 53, -6584), 0, true, false);
+				player.teleport(overworld, 1098, 53, -6522, 90F, 0F);
+			}
+		}
+		for (String playerName : second.getPlayerList()) {
+			ServerPlayerEntity player = manager.getPlayer(playerName);
+			if (player != null) {
+				PlayerManager.setPlayerForCTF(player);
+				player.setSpawnPoint(World.OVERWORLD, new BlockPos(1037, 53, -6450), 180, true, false);
+				player.teleport(overworld, 1098, 53, -6512, 90F, 0F);
+			}
+		}
+	}
+
+	public static void resetCTF() {
+		PlayerManager.forEveryPlayer(player -> {
+			if (PlayerManager.isPlayerPlaying(player)) {
+				PlayerManager.clearPlayerInventory(player);
+				player.kill();
+			}
+		});
+
+		ServerWorld overworld = UHCMod.SERVER.getOverworld();
+
+		for (ItemEntity item : overworld.getEntitiesByType(EntityType.ITEM, i -> true)) {
+			item.kill();
+		}
+
+		// Destroy placed banners
+		BlockPos pos = new BlockPos(1037, 53, -6442);
+		if (overworld.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL)) {
+			overworld.getBlockState(pos.down()).scheduledTick(overworld, pos.down(), null);
+		}
+
+		pos = new BlockPos(1037, 53, -6594);
+		if (overworld.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL)) {
+			overworld.getBlockState(pos.down()).scheduledTick(overworld, pos.down(), null);
+		}
+
+		// Place back banners
+		BlockState blue = Blocks.BLUE_BANNER.getDefaultState().with(BannerBlock.ROTATION, 0);
+		pos = new BlockPos(1037, 65, -6578);
+		if (overworld.setBlockState(pos, blue, Block.NOTIFY_ALL)) {
+			overworld.getBlockState(pos.down()).scheduledTick(overworld, pos.down(), null);
+		}
+
+		BlockState red = Blocks.RED_BANNER.getDefaultState().with(BannerBlock.ROTATION, 8);
+		pos = new BlockPos(1037, 65, -6458);
+		if (overworld.setBlockState(pos, red, Block.NOTIFY_ALL)) {
+			overworld.getBlockState(pos.down()).scheduledTick(overworld, pos.down(), null);
+		}
 	}
 
 	public static void noop() { }
@@ -241,168 +314,24 @@ public class GameManager {
 			@Override
 			public void onLobby() {
 				setPhase(Phase.LOBBY);
-				generateLobby();
 				generateBossBar();
-			}
-
-			@Override
-			public void onReady() {
-				setPhase(Phase.READY);
-			}
-
-			@Override
-			public void onStart() {
-				setPhase(Phase.START);
-				setStartTime(Long.MAX_VALUE);
-				hideBossBar();
-				deleteAllBossBars();
-				startCountDown();
+				regenerateArena();
 			}
 
 			@Override
 			public void onActive() {
 				setPhase(Phase.ACTIVE);
+				setStartTime(Long.MAX_VALUE);
+				hideBossBar();
+				deleteAllBossBars();
 				resetTrackers();
-				startGracePeriod();
-				UHCUtils.setUHCGamerules();
+				UHCUtils.setCTFGamerules();
 			}
 
 			@Override
 			public void onEnd() {
 				setPhase(Phase.END);
-				endUHC();
 			}
-
-			@Override
-			public void onGracePeriodEnd() {
-				GameSettings.PVP.setValue(true);
-			}
-
-			@Override
-			public void onWorldBorderComplete() {
-				worldBorderComplete();
-			}
-		});
-	}
-
-	private static void startCountDown() {
-		AtomicInteger integer = new AtomicInteger(10);
-		scheduleInLoopPhaseTask(0, secondsToTicks(1), secondsToTicks(10), () -> {
-			int i = integer.getAndDecrement();
-			PlayerManager.forEveryPlayer(playerEntity -> {
-				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal(String.valueOf(i)).formatted(Formatting.GREEN)));
-				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 3.0F);
-			});
-		});
-
-		schedulePhaseTask(secondsToTicks(10), () -> {
-			PlayerManager.forEveryPlayer(PlayerManager::setPlayerForUHC);
-			PlayerManager.stopLobbyMusic();
-
-			deleteLobby();
-
-			// We need to schedule this because otherwise lobby entities won't get killed before it gets unloaded
-			Scheduler.schedule(2, () -> {
-				EventHandler.onActive();
-				MinecraftServer server = UHCMod.SERVER;
-				server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
-			});
-		});
-	}
-
-	private static void startGracePeriod() {
-		PlayerManager.forEveryPlayer(playerEntity -> {
-			playerEntity.sendMessage(
-				Text.translatable("uhc.game.grace.first").formatted(Formatting.GOLD),
-				false
-			);
-			playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 1.0F);
-		});
-
-		AtomicInteger integer = new AtomicInteger(10);
-		scheduleInLoopPhaseTask(minutesToTicks(2), minutesToTicks(2), minutesToTicks(8), () -> {
-			int i = integer.addAndGet(-2);
-			PlayerManager.forEveryPlayer(playerEntity -> {
-				playerEntity.sendMessage(
-					Text.translatable("The grace period will end in %s minutes", i).formatted(Formatting.GOLD),
-					false
-				);
-				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 1.0F);
-			});
-		});
-
-		schedulePhaseTask(minutesToTicks(10), () -> {
-			PlayerManager.forEveryPlayer(playerEntity -> {
-				playerEntity.sendMessage(
-					Text.translatable("uhc.game.grace.over").formatted(Formatting.RED, Formatting.BOLD),
-					false
-				);
-				playerEntity.playSound(SoundEvents.ENTITY_ENDER_DRAGON_AMBIENT, SoundCategory.MASTER, 1.0F, 1.0F);
-			});
-
-			EventHandler.onGracePeriodEnd();
-		});
-	}
-
-	private static void worldBorderComplete() {
-		UHCMod.LOGGER.info("World Border Completed");
-		schedulePhaseTask(minutesToTicks(5), () -> {
-			if (GameSettings.END_GAME_GLOW.getValue()) {
-				UHCMod.LOGGER.info("Players are now glowing");
-				PlayerManager.forEveryPlayer(playerEntity -> {
-					if (PlayerManager.isPlayerSurvival(playerEntity)) {
-						playerEntity.setGlowing(true);
-					}
-				});
-			}
-			if (GameSettings.GENERATE_PORTAL.getValue()) {
-				ServerWorld overworld = UHCMod.SERVER.getOverworld();
-				overworld.getPortalForcer().createPortal(BlockPos.ORIGIN, Direction.Axis.X);
-				ServerWorld nether = UHCMod.SERVER.getWorld(World.NETHER);
-				if (nether != null) {
-					nether.getPortalForcer().createPortal(BlockPos.ORIGIN, Direction.Axis.X);
-				}
-			}
-		});
-	}
-
-	private static void endUHC() {
-		AbstractTeam team = TeamManager.getAliveTeam();
-		if (team == null) {
-			UHCMod.LOGGER.error("Last team was null!");
-			return;
-		}
-
-		PlayerManager.forEveryPlayer(player -> {
-			if (PlayerManager.belongsToTeam(player, team)) {
-				PlayerManager.grantAdvancement(player, UHCAdvancements.WINNER);
-			}
-			player.setGlowing(false);
-			player.networkHandler.sendPacket(new TitleS2CPacket(Text.translatable("uhc.game.won", team.getName()).formatted(team.getColor())));
-		});
-
-		UHCDataBase.incrementWinDataBase(team.getName());
-		UHCDataBase.updateStats();
-
-		scheduleInLoopPhaseTask(0, 4, secondsToTicks(5), () -> {
-			PlayerManager.forEveryPlayer(player -> {
-				player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST, SoundCategory.MASTER, 0.5f, 1f);
-				player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
-				player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
-			});
-			schedulePhaseTask(6, () -> {
-				PlayerManager.forEveryPlayer(player -> {
-					player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_SHOOT, SoundCategory.MASTER, 0.5f, 1f);
-					player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
-					player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
-				});
-			});
-		});
-
-		schedulePhaseTask(minutesToTicks(1), () -> {
-			PlayerManager.forEveryPlayer(PlayerManager::clearPlayerInventory);
-			EventHandler.onSetup();
-			EventHandler.onLobby();
 		});
 	}
 
@@ -439,46 +368,33 @@ public class GameManager {
 		}
 	}
 
-	private static void generateLobby() {
+	private static void regenerateArena() {
 		try {
-			deleteLobby();
-			Vec3i dimensions = getLobby().getSize();
-			int x = -dimensions.getX() / 2;
-			int y = UHCMod.SERVER.getOverworld().getTopY() - dimensions.getY() - 10;
-			int z = -dimensions.getZ() / 2;
-			BlockPos pos = new BlockPos(x, y ,z);
-			getLobby().place(UHCMod.SERVER.getOverworld(), pos, pos, new StructurePlacementData(), Random.create(), 3);
-			PlayerManager.forEveryPlayer(playerEntity -> {
-				if (!playerEntity.hasPermissionLevel(2)) {
-					playerEntity.interactionManager.changeGameMode(GameMode.ADVENTURE);
-				} else {
-					playerEntity.sendMessage(Text.literal("Successfully generated lobby!").formatted(Formatting.GREEN), false);
+			ServerWorld world = UHCMod.SERVER.getOverworld();
+			for (Entity entity : world.iterateEntities()) {
+				if (entity != null && entity.getScoreboardTags().contains("uhc")) {
+					entity.kill();
 				}
-				Vec3d spawn = Config.CURRENT_EVENT.getLobbySpawnPos();
-				playerEntity.teleport(UHCMod.SERVER.getOverworld(), spawn.getX(), spawn.getY(), spawn.getZ(), 0, 0);
-			});
+			}
+			BlockPos pos = new BlockPos(942, 36, -6672);
+
+			getArena().place(world, pos, pos, new StructurePlacementData().setUpdateNeighbors(false), Random.create(), Block.NOTIFY_LISTENERS);
 		} catch (Exception e) {
-			UHCMod.LOGGER.error("Failed to generate lobby", e);
+			UHCMod.LOGGER.error("Failed to generate lobby");
 		}
 	}
 
-	private static void deleteLobby() {
-		ServerWorld world = UHCMod.SERVER.getOverworld();
-		Vec3i dimensions = getLobby().getSize();
-		int startY = world.getTopY() - dimensions.getY() - 11;
-		int endY = world.getTopY();
-		int startX = -(dimensions.getX() / 2 + 1);
-		int startZ = -(dimensions.getZ() / 2 + 1);
-		for (BlockPos pos : BlockPos.iterate(startX, startY, startZ, -startX, endY, -startZ)) {
-			BlockEntity blockEntity = world.getBlockEntity(pos);
-			Clearable.clear(blockEntity);
-			world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS, 0);
-		}
-		for (Entity entity : world.iterateEntities()) {
-			if (entity != null && entity.getScoreboardTags().contains("uhc")) {
-				entity.kill();
+	private static StructureTemplate getArena() {
+		if (arena == null) {
+			try {
+				InputStream inputStream = Files.newInputStream(Config.getConfig("lobbies").resolve("capture_the_flag.nbt"));
+				NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
+				arena = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
+			} catch (Exception e) {
+				throw new IllegalStateException("Failed to load lobby structure");
 			}
 		}
+		return arena;
 	}
 }
 

@@ -3,40 +3,46 @@ package net.casualuhc.uhcmod.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.PlayerManager;
-import net.casualuhc.uhcmod.managers.WorldBorderManager;
-import net.casualuhc.uhcmod.utils.screen.RuleScreen;
-import net.casualuhc.uhcmod.utils.uhc.UHCUtils;
+import net.casualuhc.uhcmod.managers.TeamManager;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSetting;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
+import net.casualuhc.uhcmod.utils.screen.RuleScreen;
+import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.casualuhc.uhcmod.utils.uhc.Phase;
-import net.casualuhc.uhcmod.managers.TeamManager;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.TeamArgumentType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.Vec3d;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 
+import static net.casualuhc.uhcmod.managers.GameManager.*;
+import static net.casualuhc.uhcmod.utils.scheduling.Scheduler.secondsToTicks;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class UHCCommand {
+public class CTFCommand {
 	public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-		dispatcher.register(literal("uhc").requires(source -> source.hasPermissionLevel(4))
+		dispatcher.register(literal("ctf").requires(source -> source.hasPermissionLevel(2))
 			.then(literal("setstart")
 				.then(argument("time", StringArgumentType.greedyString())
 					.executes(context -> {
@@ -112,50 +118,82 @@ public class UHCCommand {
 				})
 			)
 			.then(literal("start")
-				.executes(context -> {
-					EventHandler.onReady();
-					return 1;
-				})
-				.then(literal("force")
-					.executes(context -> {
-						EventHandler.onStart();
-						return 1;
-					})
-				)
-				.then(literal("quiet")
-					.executes(context -> {
-						GameManager.setPhase(Phase.ACTIVE);
-						EventHandler.onGracePeriodEnd();
-						UHCUtils.setUHCGamerules();
-						return 1;
-					})
+				.then(argument("first", TeamArgumentType.team())
+					.then(literal("against")
+						.then(argument("second", TeamArgumentType.team())
+							.executes(context -> {
+								Team first = TeamArgumentType.getTeam(context, "first");
+								Team second = TeamArgumentType.getTeam(context, "second");
+								GameManager.startCTF(first, second);
+								return 1;
+							})
+						)
+					)
 				)
 			)
-			.then(literal("endgame")
+			.then(literal("nextround")
 				.executes(context -> {
-					EventHandler.onEnd();
+					GameManager.resetCTF();
 					return 1;
 				})
+			)
+			// I got really lazy
+			.then(literal("end")
+				.then(argument("winner", TeamArgumentType.team())
+					.executes(context -> {
+						Team team = TeamArgumentType.getTeam(context, "winner");
+						PlayerManager.forEveryPlayer(player -> {
+							player.setGlowing(false);
+							player.networkHandler.sendPacket(new TitleS2CPacket(Text.translatable("uhc.game.wonRound", team.getName()).formatted(team.getColor())));
+							if (
+								(teamA != null && player.getScoreboardTeam() == teamA) ||
+								(teamB != null && player.getScoreboardTeam() == teamB)
+							) {
+								Vec3d spawn = Config.CURRENT_EVENT.getLobbySpawnPos();
+								player.teleport(UHCMod.SERVER.getOverworld(), spawn.getX(), spawn.getY(), spawn.getZ(), 90, 0);
+							}
+						});
+						teamA = null;
+						teamB = null;
+						return 1;
+					})
+					.then(literal("finale")
+						.executes(context -> {
+							Team team = TeamArgumentType.getTeam(context, "winner");
+							EventHandler.onEnd();
+							PlayerManager.forEveryPlayer(player -> {
+								if (player.getScoreboardTeam() == team) {
+									PlayerManager.grantAdvancement(player, UHCAdvancements.WINNER);
+								}
+								player.setGlowing(false);
+								player.networkHandler.sendPacket(new TitleS2CPacket(Text.translatable("uhc.game.won", team.getName()).formatted(team.getColor())));
+							});
+							scheduleInLoopPhaseTask(0, 4, secondsToTicks(5), () -> {
+								PlayerManager.forEveryPlayer(player -> {
+									player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST, SoundCategory.MASTER, 0.5f, 1f);
+									player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
+									player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
+								});
+								schedulePhaseTask(6, () -> {
+									PlayerManager.forEveryPlayer(player -> {
+										player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_SHOOT, SoundCategory.MASTER, 0.5f, 1f);
+										player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
+										player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
+									});
+								});
+							});
+							teamA = null;
+							teamB = null;
+							return 1;
+						})
+					)
+				)
 			)
 			.then(literal("config")
 				.executes(context -> {
 					context.getSource().getPlayerOrThrow().openHandledScreen(RuleScreen.createScreenFactory(0));
 					return 1;
 				})
-				.then(literal("worldborder")
-					.then(getWorldBorderStagesStart())
-					.then(getWorldBorderStagesEnd())
-					.then(literal("stop")
-						.executes(context -> {
-							if (!GameManager.isPhase(Phase.ACTIVE)) {
-								throw CANNOT_MODIFY_WB;
-							}
-							context.getSource().getServer().getWorlds().forEach(serverWorld -> serverWorld.getWorldBorder().setSize(serverWorld.getWorldBorder().getSize()));
-							context.getSource().sendFeedback(Text.literal("Border Stopped"), false);
-							return 1;
-						})
-					)
-				)
 				.then(literal("pvp")
 					.then(literal("true").executes(context -> {
 						GameSettings.PVP.setValue(true);
@@ -212,45 +250,8 @@ public class UHCCommand {
 		);
 	}
 
-	private static final CommandSyntaxException CANNOT_MODIFY_WB = new SimpleCommandExceptionType(Text.literal("Cannot change world border now")).create();
-
-	private static LiteralArgumentBuilder<ServerCommandSource> getWorldBorderStagesStart() {
-		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("forcestart");
-		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
-			commandBuilder.then(literal(stage.name())
-				.executes(context -> {
-					if (GameManager.isPhase(Phase.ACTIVE)) {
-						WorldBorderManager.moveWorldBorders(stage.getStartSize(), 0);
-						WorldBorderManager.startWorldBorders();
-						return 1;
-					}
-					throw CANNOT_MODIFY_WB;
-				})
-			);
-		}
-		return commandBuilder;
-	}
-
-	private static LiteralArgumentBuilder<ServerCommandSource> getWorldBorderStagesEnd() {
-		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("forceend");
-		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
-			commandBuilder.then(literal(stage.name())
-				.executes(context -> {
-					if (GameManager.isPhase(Phase.ACTIVE)) {
-						WorldBorderManager.moveWorldBorders(stage.getEndSize(), 0);
-						WorldBorderManager.startWorldBorders();
-						return 1;
-					}
-					throw CANNOT_MODIFY_WB;
-				})
-			);
-		}
-		return commandBuilder;
-	}
-
 	private static LiteralArgumentBuilder<ServerCommandSource> getGameRuleCommand() {
 		LiteralArgumentBuilder<ServerCommandSource> commandBuilder = literal("gamerule");
-
 		for (GameSetting<?> setting : GameSettings.RULES.values()) {
 			String settingName = setting.getName().replaceAll(" ", "_").toLowerCase();
 			LiteralArgumentBuilder<ServerCommandSource> commandArgument = literal(settingName);

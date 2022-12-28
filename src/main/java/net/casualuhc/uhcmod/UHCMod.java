@@ -1,16 +1,14 @@
 package net.casualuhc.uhcmod;
 
-import net.casualuhc.uhcmod.events.ChristmasUHC;
+import net.casualuhc.uhcmod.events.CaptureTheFlag;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.TeamManager;
-import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.uhc.Event;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -31,7 +29,6 @@ public class UHCMod implements ModInitializer {
         Config.noop();
         GameManager.noop();
         UHCAdvancements.noop();
-        WorldBorderManager.noop();
         PlayerManager.noop();
         TeamManager.noop();
         Scheduler.noop();
@@ -50,6 +47,6 @@ public class UHCMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        addEvent("christmas", new ChristmasUHC());
+        addEvent("ctf", new CaptureTheFlag());
     }
 }

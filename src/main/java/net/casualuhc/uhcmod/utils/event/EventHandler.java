@@ -63,14 +63,6 @@ public class EventHandler {
 		UHC_EVENTS.forEach(UHCEvents::onLobby);
 	}
 
-	public static void onReady() {
-		UHC_EVENTS.forEach(UHCEvents::onReady);
-	}
-
-	public static void onStart() {
-		UHC_EVENTS.forEach(UHCEvents::onStart);
-	}
-
 	public static void onActive() {
 		UHC_EVENTS.forEach(UHCEvents::onActive);
 	}

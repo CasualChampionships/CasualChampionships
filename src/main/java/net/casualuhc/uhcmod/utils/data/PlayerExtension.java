@@ -21,10 +21,7 @@ public class PlayerExtension {
 
 	private final String name;
 	private final PlayerStats stats = new PlayerStats();
-	private final WorldBorder fakeBorder = new WorldBorder();
 	private final Set<PlayerFlag> flags = EnumSet.noneOf(PlayerFlag.class);
-
-	private Team realTeam = null;
 
 	private PlayerExtension(String name) {
 		this.name = name;
@@ -33,18 +30,6 @@ public class PlayerExtension {
 
 	public String getName() {
 		return this.name;
-	}
-
-	public WorldBorder getFakeBorder() {
-		return this.fakeBorder;
-	}
-
-	public void setRealTeam(AbstractTeam realTeam) {
-		this.realTeam = (Team) realTeam;
-	}
-
-	public Team getRealTeam() {
-		return this.realTeam;
 	}
 
 	public PlayerStats getStats() {
@@ -76,7 +61,6 @@ public class PlayerExtension {
 	public void resetFlags() {
 		this.flags.clear();
 		this.setFlag(GLOW_ENABLED, true);
-		this.setFlag(HUD_ENABLED, true);
 		this.setFlag(FULL_BRIGHT_ENABLED, true);
 	}
 
@@ -94,7 +78,6 @@ public class PlayerExtension {
 
 	public static void reset() {
 		forEach(p -> {
-			p.setRealTeam(null);
 			p.resetFlags();
 			p.stats.reset();
 		});

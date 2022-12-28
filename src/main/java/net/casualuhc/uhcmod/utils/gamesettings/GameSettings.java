@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.PlayerManager;
-import net.casualuhc.uhcmod.managers.WorldBorderManager;
-import net.casualuhc.uhcmod.managers.WorldBorderManager.Stage;
 import net.casualuhc.uhcmod.utils.uhc.ItemUtils;
 import net.casualuhc.uhcmod.utils.uhc.Phase;
 import net.minecraft.item.Item;
@@ -33,11 +31,8 @@ public class GameSettings {
 	public static final GameSetting.BooleanGameSetting OP_POTIONS;
 	public static final GameSetting.BooleanGameSetting PLAYER_DROPS_HEAD_ON_DEATH;
 	public static final GameSetting.BooleanGameSetting GENERATE_PORTAL;
-	public static final GameSetting.BooleanGameSetting TESTING;
 	public static final GameSetting.BooleanGameSetting MINESWEEPER_ANNOUNCEMENT;
 	public static final GameSetting.BooleanGameSetting HEADS_CONSUMABLE;
-
-	public static final GameSetting.EnumGameSetting<Stage> WORLD_BORDER_STAGE;
 
 	static {
 		WORLD_BORDER_SPEED = new GameSetting.DoubleGameSetting(
@@ -59,7 +54,7 @@ public class GameSettings {
 				ItemUtils.literalNamed(Items.YELLOW_STAINED_GLASS_PANE, "Double"), 1.0D,
 				ItemUtils.literalNamed(Items.RED_STAINED_GLASS_PANE, "Normal"), 0.0D
 			),
-			1.0D
+			0.0D
 		);
 
 		BOW_COOLDOWN = new GameSetting.DoubleGameSetting(
@@ -72,7 +67,7 @@ public class GameSettings {
 				ItemUtils.literalNamed(Items.CLOCK, "3 Seconds"), 3.0D,
 				ItemUtils.literalNamed(Items.CLOCK, "5 Seconds"), 5.0D
 			),
-			1.0D
+			0.0D
 		);
 
 		END_GAME_GLOW = new GameSetting.BooleanGameSetting(
@@ -109,7 +104,7 @@ public class GameSettings {
 		PVP = new GameSetting.BooleanGameSetting(
 			ItemUtils.literalNamed(Items.DIAMOND_SWORD, "Pvp"),
 			getBooleanRuleOptions(),
-			false,
+			true,
 			booleanSetting -> UHCMod.SERVER.setPvpEnabled(booleanSetting.getValue())
 		);
 
@@ -122,19 +117,13 @@ public class GameSettings {
 		PLAYER_DROPS_HEAD_ON_DEATH = new GameSetting.BooleanGameSetting(
 			ItemUtils.literalNamed(Items.PLAYER_HEAD, "Player Head Drops"),
 			getBooleanRuleOptions(),
-			true
+			false
 		);
 
 		GENERATE_PORTAL = new GameSetting.BooleanGameSetting(
 			ItemUtils.literalNamed(Items.CRYING_OBSIDIAN, "Generate Nether Portals"),
 			getBooleanRuleOptions(),
 			true
-		);
-
-		TESTING = new GameSetting.BooleanGameSetting(
-			ItemUtils.literalNamed(Items.REDSTONE_BLOCK, "Testing"),
-			getBooleanRuleOptions(),
-			false
 		);
 
 		MINESWEEPER_ANNOUNCEMENT = new GameSetting.BooleanGameSetting(
@@ -146,21 +135,7 @@ public class GameSettings {
 		HEADS_CONSUMABLE = new GameSetting.BooleanGameSetting(
 			ItemUtils.generateGoldenHead().setCustomName(Text.of("Consumable Heads")),
 			getBooleanRuleOptions(),
-			true
-		);
-
-		WORLD_BORDER_STAGE = new GameSetting.EnumGameSetting<>(
-			ItemUtils.literalNamed(Items.BARRIER, "World Border Stage"),
-			getEnumOptions(Stage.class),
-			Stage.FIRST,
-			stageSetting -> {
-				if (GameManager.isPhase(Phase.ACTIVE)) {
-					WorldBorderManager.moveWorldBorders(stageSetting.getValue().getStartSize(), 0);
-					WorldBorderManager.startWorldBorders();
-					return;
-				}
-				UHCMod.LOGGER.error("Could not set world border since game is not active");
-			}
+			false
 		);
 	}
 
@@ -170,21 +145,4 @@ public class GameSettings {
 			ItemUtils.literalNamed(Items.RED_STAINED_GLASS_PANE, "Off"), false
 		);
 	}
-
-	@SuppressWarnings("SameParameterValue")
-	private static <T extends Enum<T>> Map<ItemStack, T> getEnumOptions(Class<T> enumClass) {
-		// This needs to be ordered
-		Map<ItemStack, T> map = new LinkedHashMap<>();
-		boolean isPurple = true;
-		for (T constant : enumClass.getEnumConstants()) {
-			String cleanedName = Arrays.stream(constant.name().toLowerCase().split("_")).reduce("", (a, b) -> {
-				return a + b.substring(0, 1).toUpperCase(Locale.ROOT) + b.substring(1);
-			});
-			Item colour = isPurple ? Items.PURPLE_STAINED_GLASS_PANE : Items.WHITE_STAINED_GLASS_PANE;
-			map.put(ItemUtils.literalNamed(colour, cleanedName), constant);
-			isPurple = !isPurple;
-		}
-		return map;
-	}
-
 }

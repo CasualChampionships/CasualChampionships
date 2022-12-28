@@ -12,16 +12,6 @@ public interface UHCEvents {
 	default void onLobby() { }
 
 	/**
-	 * This event is fired when players are asked if they are ready.
-	 */
-	default void onReady() { }
-
-	/**
-	 * This event is fired when the UHC starts (countdown and spread players).
-	 */
-	default void onStart() { }
-
-	/**
 	 * This event is fired when the UHC has finished starting (after players have been teleported).
 	 */
 	default void onActive() { }

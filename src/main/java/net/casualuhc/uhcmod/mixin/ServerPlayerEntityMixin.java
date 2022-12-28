@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends PlayerEntity {
@@ -63,21 +64,17 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
         EventHandler.onPlayerLeave((ServerPlayerEntity) (Object) this);
     }
 
+    @Inject(method = "shouldDamagePlayer", at = @At("HEAD"), cancellable = true)
+    private void shouldDamagePlayer(PlayerEntity player, CallbackInfoReturnable<Boolean> cir) {
+        if (!PlayerManager.isPlayerPlaying((ServerPlayerEntity) player)) {
+            cir.setReturnValue(false);
+        }
+    }
+
     @Override
     protected void tickInVoid() {
         if (this.interactionManager.getGameMode() != GameMode.SPECTATOR) {
             super.tickInVoid();
         }
-    }
-
-    @Override
-    public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource) {
-        if (super.handleFallDamage(fallDistance, damageMultiplier, damageSource)) {
-            if (GameManager.gameUptime() < 1200 && this.computeFallDamage(fallDistance, damageMultiplier) > 0) {
-                PlayerManager.grantAdvancement((ServerPlayerEntity) (Object) this, UHCAdvancements.BROKEN_ANKLES);
-            }
-            return true;
-        }
-        return false;
     }
 }

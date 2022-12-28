@@ -2,6 +2,7 @@ package net.casualuhc.uhcmod.utils.screen;
 
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.TeamManager;
+import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.casualuhc.uhcmod.utils.uhc.ItemUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -14,6 +15,8 @@ import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
 
 import java.util.List;
 
@@ -40,7 +43,9 @@ public class SpectatorScreen extends CustomScreen {
 			return;
 		}
 		if (slotIndex == 7) {
-			player.openHandledScreen(SpectatorScreen.createScreenFactory(0, !this.spectators));
+			Vec3d spawn = Config.CURRENT_EVENT.getLobbySpawnPos();
+			((ServerPlayerEntity) player).teleport(UHCMod.SERVER.getOverworld(), spawn.getX(), spawn.getY(), spawn.getZ(), 0, 0);
+			((ServerPlayerEntity) player).interactionManager.changeGameMode(GameMode.ADVENTURE);
 			return;
 		}
 		if (slotIndex == 8) {
@@ -103,7 +108,7 @@ public class SpectatorScreen extends CustomScreen {
 			}
 
 			inventory.setStack(0, ItemUtils.literalNamed(Items.RED_STAINED_GLASS, "Previous"));
-			inventory.setStack(7, ItemUtils.literalNamed(Items.BLUE_STAINED_GLASS, "Spectators"));
+			inventory.setStack(7, ItemUtils.literalNamed(Items.BLUE_STAINED_GLASS, "Return to Bleachers"));
 			inventory.setStack(8, ItemUtils.literalNamed(Items.GREEN_STAINED_GLASS, "Next"));
 		});
 	}
