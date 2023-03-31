@@ -72,9 +72,11 @@ public abstract class CustomScreen extends ScreenHandler {;
 		return true;
 	}
 
+
+
 	@Override
-	public void close(PlayerEntity player) {
-		super.close(player);
+	public void onClosed(PlayerEntity player) {
+		super.onClosed(player);
 		player.playerScreenHandler.syncState();
 		// Scheduler.schedule(0, player.playerScreenHandler::syncState);
 	}

@@ -5,6 +5,7 @@ import carpet.api.settings.InvalidRuleValueException;
 import carpet.api.settings.SettingsManager;
 import carpet.fakes.SpawnGroupInterface;
 import carpet.utils.SpawnReporter;
+import net.casualuhc.arcade.utils.TickUtils;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.utils.data.WorldExtension;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
@@ -34,7 +35,7 @@ public class UHCUtils {
 	private UHCUtils() { }
 
 	public static float calculateMSPT() {
-		return (float) (MathHelper.average(UHCMod.SERVER.lastTickLengths) * 1.0E-6F);
+		return (float) TickUtils.calculateMSPT();
 	}
 
 	public static boolean detectFlexibleBlockPlacement(ServerWorld world, BlockPos pos, Direction side, BlockState oldState, ItemUsageContext context) {
@@ -96,7 +97,7 @@ public class UHCUtils {
 	public static void setDescriptor(MinecraftServer server) {
 		MutableText description = Text.literal("            §6፠ §bWelcome to Casual UHC! §6፠\n")
 			.append(Text.literal("     Yes, it's back! Is your team prepared?").formatted(Formatting.DARK_AQUA));
-		server.getServerMetadata().setDescription(description);
+		// server.getServerMetadata().description(description);
 	}
 
 	public static void setLobbyGamerules() {
@@ -118,7 +119,7 @@ public class UHCUtils {
 		server.setDifficulty(Difficulty.PEACEFUL, true);
 		server.getOverworld().setTimeOfDay(6000); // 6000 = noon
 		server.getOverworld().setWeather(999999, 0, false, false);
-		server.getOverworld().setSpawnPos(new BlockPos(Config.CURRENT_EVENT.getLobbySpawnPos()), 0);
+		server.getOverworld().setSpawnPos(BlockPos.ofFloored(Config.CURRENT_EVENT.getLobbySpawnPos()), 0);
 		server.getOverworld().getWorldBorder().setCenter(0, 0);
 		server.getWorlds().forEach(serverWorld -> {
 			serverWorld.getWorldBorder().setCenter(0, 0);

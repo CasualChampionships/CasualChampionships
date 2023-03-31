@@ -8,8 +8,8 @@ import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.screen.CustomScreen;
 import net.casualuhc.uhcmod.utils.uhc.Phase;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.Packet;
 import net.minecraft.network.message.*;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.c2s.play.ResourcePackStatusC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
@@ -62,7 +62,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 		return !(instance.currentScreenHandler instanceof CustomScreen) && instance.isSpectator();
 	}
 
-	@ModifyVariable(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At("HEAD"), argsOnly = true)
+	@ModifyVariable(method = "sendPacket(Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), argsOnly = true)
 	private Packet<?> onSendPacket(Packet<?> packet) {
 		if (packet instanceof EntityTrackerUpdateS2CPacket trackerUpdate) {
 			Entity glowingEntity = this.player.getWorld().getEntityById(trackerUpdate.id());
@@ -74,7 +74,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 		return packet;
 	}
 
-	@Inject(method = "onResourcePackStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V", shift = At.Shift.AFTER))
+	@Inject(method = "onResourcePackStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V", shift = At.Shift.AFTER))
 	private void onResourcePackStatus(ResourcePackStatusC2SPacket packet, CallbackInfo ci) {
 		if (packet.getStatus() == ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED) {
 			EventHandler.onResourcePackLoaded(this.player);

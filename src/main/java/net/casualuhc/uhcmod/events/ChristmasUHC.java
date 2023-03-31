@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod.events;
 
+import net.casualuhc.arcade.events.player.PlayerPackLoadEvent;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.GameManager;
 import net.casualuhc.uhcmod.managers.PlayerManager;
@@ -145,7 +146,7 @@ public class ChristmasUHC implements Event {
 				serverWorld.getChunkManager().getNoiseConfig().getMultiNoiseSampler()
 			);
 			chunk.setNeedsSaving(true);
-			serverWorld.getChunkManager().threadedAnvilChunkStorage.sendChunkPacketToWatchingPlayers(chunk);
 		}
+		serverWorld.getChunkManager().threadedAnvilChunkStorage.sendChunkBiomePackets(list);
 	}
 }

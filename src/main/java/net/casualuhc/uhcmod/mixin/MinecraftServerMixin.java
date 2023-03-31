@@ -22,7 +22,7 @@ public class MinecraftServerMixin {
         UHCMod.onServerStart((MinecraftServer) (Object) this);
     }
 
-    @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerMetadata;setDescription(Lnet/minecraft/text/Text;)V", shift = At.Shift.AFTER))
+    @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;createMetadata()Lnet/minecraft/server/ServerMetadata;", shift = At.Shift.AFTER))
     private void afterDescriptionSet(CallbackInfo ci) {
         UHCUtils.setDescriptor((MinecraftServer) (Object) this);
     }

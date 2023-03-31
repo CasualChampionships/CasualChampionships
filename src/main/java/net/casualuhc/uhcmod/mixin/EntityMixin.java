@@ -22,11 +22,11 @@ public class EntityMixin {
         double margin = shrinkingSpeed * (WorldBorderManager.PORTAL_ESCAPE_TIME_SECONDS * 1000);
         if (margin >= border.getSize() * 0.5) {
             // Border would reach size 0 within 30 seconds
-            return new BlockPos(border.getCenterX(), y, border.getCenterZ());
+            return new BlockPos(MathHelper.floor(border.getCenterX()), MathHelper.floor(y), MathHelper.floor(border.getCenterZ()));
         }
 
         x = MathHelper.clamp(x, border.getBoundWest() + margin, border.getBoundEast() - margin);
         z = MathHelper.clamp(z, border.getBoundNorth() + margin, border.getBoundSouth() - margin);
-        return new BlockPos(x, y, z);
+        return new BlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
     }
 }

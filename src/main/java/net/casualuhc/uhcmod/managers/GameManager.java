@@ -3,7 +3,6 @@ package net.casualuhc.uhcmod.managers;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.features.GoldenHeadRecipe;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.event.UHCEvents;
@@ -475,7 +474,7 @@ public class GameManager {
 			world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS, 0);
 		}
 		for (Entity entity : world.iterateEntities()) {
-			if (entity != null && entity.getScoreboardTags().contains("uhc")) {
+			if (entity != null && entity.getCommandTags().contains("uhc")) {
 				entity.kill();
 			}
 		}

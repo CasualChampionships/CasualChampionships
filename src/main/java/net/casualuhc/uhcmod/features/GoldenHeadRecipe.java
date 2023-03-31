@@ -7,6 +7,7 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
@@ -32,7 +33,7 @@ public class GoldenHeadRecipe extends SpecialCraftingRecipe {
 	}
 
 	@Override
-	public ItemStack craft(CraftingInventory inventory) {
+	public ItemStack craft(CraftingInventory inventory, DynamicRegistryManager registryManager) {
 		return ItemUtils.generateGoldenHead();
 	}
 
