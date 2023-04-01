@@ -1,16 +1,13 @@
 package net.casualuhc.uhcmod.utils.stat;
 
-import net.casualuhc.uhcmod.features.UHCAdvancements;
+import net.casualuhc.arcade.advancements.AdvancementHandler;
 import net.minecraft.advancement.Advancement;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class PlayerStats {
-	private final Map<UHCStat, Double> stats = new HashMap<>();
+	private final Map<UHCStat, Double> stats = new EnumMap<>(UHCStat.class);
 	private final Set<Advancement> advancements = new HashSet<>();
 
 	public PlayerStats() {
@@ -41,7 +38,7 @@ public class PlayerStats {
 	}
 
 	public void addAdvancement(Advancement advancement) {
-		if (UHCAdvancements.isUhcAdvancement(advancement)) {
+		if (AdvancementHandler.isCustom(advancement)) {
 			this.advancements.add(advancement);
 		}
 	}

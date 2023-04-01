@@ -1,15 +1,16 @@
-package net.casualuhc.uhcmod.events;
+package net.casualuhc.uhcmod.uhcs;
 
+import net.casualuhc.arcade.events.EventHandler;
 import net.casualuhc.arcade.events.player.PlayerPackLoadEvent;
+import net.casualuhc.arcade.scheduler.MinecraftTimeUnit;
+import net.casualuhc.arcade.scheduler.Scheduler;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.events.uhc.UHCLobbyEvent;
+import net.casualuhc.uhcmod.events.uhc.UHCStartEvent;
 import net.casualuhc.uhcmod.managers.PlayerManager;
-import net.casualuhc.uhcmod.utils.event.EventHandler;
-import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
-import net.casualuhc.uhcmod.utils.event.UHCEvents;
-import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
-import net.casualuhc.uhcmod.utils.uhc.Event;
+import net.casualuhc.uhcmod.managers.UHCManager;
 import net.casualuhc.uhcmod.utils.uhc.ItemUtils;
+import net.casualuhc.uhcmod.utils.uhc.UHC;
 import net.minecraft.entity.boss.BossBar;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Items;
@@ -17,7 +18,6 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer.ServerResourcePackProperties;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChristmasUHC implements Event {
+public class ChristmasUHC implements UHC {
 	private static final Vec3d LOBBY_SPAWN = new Vec3d(2, 272, 9);
 
 	private static final ServerResourcePackProperties PROPERTIES = new ServerResourcePackProperties(
@@ -82,35 +82,27 @@ public class ChristmasUHC implements Event {
 
 	@Override
 	public void load() {
-		EventHandler.register(new MinecraftEvents() {
-			@Override
-			public void onResourcePackLoaded(ServerPlayerEntity player) {
-				if (!GameManager.isGameActive()) {
-					Scheduler.schedule(Scheduler.secondsToTicks(3), () -> PlayerManager.playLobbyMusic(player, Scheduler.secondsToTicks(250)));
+		EventHandler.register(PlayerPackLoadEvent.class, event -> {
+			if (!UHCManager.isGameActive()) {
+				Scheduler.schedule(3, MinecraftTimeUnit.Seconds, () -> PlayerManager.playLobbyMusic(event.getPlayer(), 250 * 20));
 
-					PlayerInventory inventory = player.getInventory();
-					if (inventory.isEmpty()) {
-						inventory.armor.set(3, ItemUtils.translatableNamed(Items.CARVED_PUMPKIN, "uhc.christmas.santaHat"));
-					}
+				PlayerInventory inventory = event.getPlayer().getInventory();
+				if (inventory.isEmpty()) {
+					inventory.armor.set(3, ItemUtils.translatableNamed(Items.CARVED_PUMPKIN, "uhc.christmas.santaHat"));
 				}
 			}
 		});
-		EventHandler.register(new UHCEvents() {
-			@Override
-			public void onLobby() {
-				makeLobbySnowy();
-				UHCMod.SERVER.getOverworld().setWeather(0, 6000, true, false);
-			}
-
-			@Override
-			public void onStart() {
-				UHCMod.SERVER.getOverworld().setWeather(24000, 0, false, false);
-			}
+		EventHandler.register(UHCLobbyEvent.class, event -> {
+			makeLobbySnowy();
+			UHCMod.SERVER.getOverworld().setWeather(0, 6000, true, false);
+		});
+		EventHandler.register(UHCStartEvent.class, event -> {
+			UHCMod.SERVER.getOverworld().setWeather(24000, 0, false, false);
 		});
 	}
 
 	private static void makeLobbySnowy() {
-		Vec3i dimensions = GameManager.getLobby().getSize();
+		Vec3i dimensions = UHCManager.getLobby().getSize();
 		int topY = UHCMod.SERVER.getOverworld().getTopY();
 		int minX = -dimensions.getX() / 2;
 		int minY = UHCMod.SERVER.getOverworld().getTopY() - dimensions.getY() - 10;

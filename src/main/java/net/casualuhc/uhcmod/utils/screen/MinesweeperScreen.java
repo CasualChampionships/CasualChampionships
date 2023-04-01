@@ -2,11 +2,10 @@ package net.casualuhc.uhcmod.utils.screen;
 
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.casualuhc.arcade.events.server.ServerTickEvent;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
-import net.casualuhc.uhcmod.utils.event.EventHandler;
-import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.stat.PlayerStats;
 import net.casualuhc.uhcmod.utils.stat.UHCStat;
@@ -15,7 +14,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
@@ -52,13 +50,10 @@ public class MinesweeperScreen extends CustomScreen {
 		this.slots.get(88).setStack(literalNamed(Items.GRAY_STAINED_GLASS, ""));
 		this.slots.get(89).setStack(translatableNamed(Items.GREEN_STAINED_GLASS, "uhc.minesweeper.playAgain"));
 
-		EventHandler.register(new MinecraftEvents() {
-			@Override
-			public void onServerTick(MinecraftServer server) {
-				if (MinesweeperScreen.this.grid.startTime != 0 && !MinesweeperScreen.this.complete) {
-					int seconds = (int) Math.floor((System.nanoTime() - MinesweeperScreen.this.grid.startTime) / 1_000_000_000D);
-					MinesweeperScreen.this.clockItem.setCount(MathHelper.clamp(seconds, 1, 127));
-				}
+		net.casualuhc.arcade.events.EventHandler.register(ServerTickEvent.class, event -> {
+			if (MinesweeperScreen.this.grid.startTime != 0 && !MinesweeperScreen.this.complete) {
+				int seconds = (int) Math.floor((System.nanoTime() - MinesweeperScreen.this.grid.startTime) / 1_000_000_000D);
+				MinesweeperScreen.this.clockItem.setCount(MathHelper.clamp(seconds, 1, 127));
 			}
 		});
 	}

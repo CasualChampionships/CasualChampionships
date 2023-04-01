@@ -1,15 +1,17 @@
 package net.casualuhc.uhcmod.managers;
 
 import io.netty.buffer.Unpooled;
+import net.casualuhc.arcade.events.EventHandler;
+import net.casualuhc.arcade.events.player.*;
+import net.casualuhc.arcade.scheduler.MinecraftTimeUnit;
+import net.casualuhc.arcade.scheduler.Scheduler;
+import net.casualuhc.arcade.utils.PlayerUtils;
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.events.uhc.*;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
 import net.casualuhc.uhcmod.utils.data.PlayerFlag;
-import net.casualuhc.uhcmod.utils.event.EventHandler;
-import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
-import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
-import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.stat.UHCStat;
 import net.casualuhc.uhcmod.utils.uhc.*;
 import net.minecraft.advancement.Advancement;
@@ -21,10 +23,13 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.SkullItem;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
@@ -39,6 +44,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -50,7 +56,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static net.casualuhc.uhcmod.utils.scheduling.Scheduler.secondsToTicks;
 import static net.minecraft.text.Text.literal;
 import static net.minecraft.text.Text.translatable;
 
@@ -70,11 +75,7 @@ public class PlayerManager {
 	 * @param consumer the function to execute for each player.
 	 */
 	public static void forEveryPlayer(Consumer<ServerPlayerEntity> consumer) {
-		UHCMod.SERVER.execute(() -> {
-			for (ServerPlayerEntity playerEntity : UHCMod.SERVER.getPlayerManager().getPlayerList()) {
-				consumer.accept(playerEntity);
-			}
-		});
+		PlayerUtils.forEveryPlayer(consumer);
 	}
 
 	/**
@@ -136,6 +137,10 @@ public class PlayerManager {
 		return isPlayerPlaying(player) && isPlayerSurvival(player);
 	}
 
+	public static boolean isMessageGlobal(ServerPlayerEntity player, String message) {
+		return !UHCManager.isPhase(Phase.ACTIVE) || TeamManager.shouldIgnoreTeam(player.getScoreboardTeam()) || message.startsWith("!");
+	}
+
 	/**
 	 * Drops the player's head, or inserts it into another player's inventory, if possible.
 	 *
@@ -151,6 +156,34 @@ public class PlayerManager {
 			return;
 		}
 		player.dropItem(playerHead, true, false);
+	}
+
+	public static void giveHeadEffects(ServerPlayerEntity player, ItemStack stack, Hand hand) {
+		NbtCompound compound = stack.getNbt();
+		NbtCompound skullOwner; boolean isGolden = false;
+		if (compound != null && (skullOwner = compound.getCompound(SkullItem.SKULL_OWNER_KEY)) != null) {
+			String playerName = skullOwner.getString("Name");
+			if (Objects.equals(playerName, "PhantomTupac")) {
+				isGolden = true;
+			}
+		}
+
+		giveStatusEffect(player, StatusEffects.REGENERATION, isGolden ? 50 : 60, isGolden ? 3 : 2);
+		giveStatusEffect(player, StatusEffects.SPEED, (isGolden ? 20 : 15) * 20, 1);
+		giveStatusEffect(player, StatusEffects.SATURATION, 5, 4);
+
+		if (isGolden) {
+			giveStatusEffect(player, StatusEffects.ABSORPTION, 120 * 20, 0);
+			giveStatusEffect(player, StatusEffects.RESISTANCE, 5 * 20, 0);
+		}
+
+		player.swingHand(hand, true);
+		stack.decrement(1);
+		player.getItemCooldownManager().set(stack.getItem(), 20);
+	}
+
+	public static void giveStatusEffect(ServerPlayerEntity player, StatusEffect effect, int duration, int amplifier) {
+		player.addStatusEffect(new StatusEffectInstance(effect, duration, amplifier));
 	}
 
 	/**
@@ -191,9 +224,9 @@ public class PlayerManager {
 	 * @param player the player to play the music to.
 	 */
 	public static void playLobbyMusic(ServerPlayerEntity player, int tickInterval) {
-		if (!GameManager.isGameActive()) {
+		if (!UHCManager.isGameActive()) {
 			player.playSound(SoundEvents.MUSIC_DISC_5, SoundCategory.RECORDS, 1.0f, 1.0f);
-			Scheduler.schedule(tickInterval, () -> {
+			Scheduler.schedule(tickInterval, MinecraftTimeUnit.Ticks, () -> {
 				playLobbyMusic(player, tickInterval);
 			});
 		}
@@ -243,7 +276,7 @@ public class PlayerManager {
 			clearPlayerInventory(player);
 			setPlayerPlaying(player, true);
 
-			player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, secondsToTicks(10), 4, true, false));
+			player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 200, 4, true, false));
 			player.changeGameMode(GameMode.SURVIVAL);
 			return;
 		}
@@ -313,7 +346,7 @@ public class PlayerManager {
 	 * Resends resource pack to all players.
 	 */
 	public static void resendResourcePack() {
-		MinecraftServer.ServerResourcePackProperties properties = Config.CURRENT_EVENT.getResourcePack();
+		MinecraftServer.ServerResourcePackProperties properties = Config.CURRENT_UHC.getResourcePack();
 		if (properties != null) {
 			forEveryPlayer(player -> {
 				sendResourcePack(player, properties);
@@ -357,7 +390,7 @@ public class PlayerManager {
 		if (!GameSettings.FRIENDLY_PLAYER_GLOW.getValue()) {
 			return packet;
 		}
-		if (!GameManager.isPhase(Phase.ACTIVE)) {
+		if (!UHCManager.isPhase(Phase.ACTIVE)) {
 			return packet;
 		}
 		if (!PlayerManager.isPlayerSurvival(glowingPlayer)) {
@@ -406,58 +439,34 @@ public class PlayerManager {
 	public static void noop() { }
 
 	static {
-		EventHandler.register(new MinecraftEvents() {
-			@Override
-			public void onPlayerJoin(ServerPlayerEntity player) {
-				handlePlayerJoin(player);
-			}
-
-			@Override
-			public void onPlayerTick(ServerPlayerEntity player) {
-				updateHUD(player);
-				updateWorldBorderArrow(player);
-			}
-
-			@Override
-			public void onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
-				handlePlayerDeath(player, source);
-			}
-
-			@Override
-			public void onResourcePackLoaded(ServerPlayerEntity player) {
-				List<Runnable> tasks = RESOURCE_RELOADS.get(player);
-				if (tasks != null) {
-					for (Runnable task : tasks) {
-						task.run();
-					}
-					tasks.clear();
+		EventHandler.register(PlayerJoinEvent.class, event -> handlePlayerJoin(event.getPlayer()));
+		EventHandler.register(PlayerLeaveEvent.class, event -> RESOURCE_RELOADS.remove(event.getPlayer()));
+		EventHandler.register(PlayerDeathEvent.class, event -> handlePlayerDeath(event.getPlayer(), event.getSource()));
+		EventHandler.register(PlayerTickEvent.class, event -> {
+			updateHUD(event.getPlayer());
+			updateWorldBorderArrow(event.getPlayer());
+		});
+		EventHandler.register(PlayerPackLoadEvent.class, event -> {
+			List<Runnable> tasks = RESOURCE_RELOADS.get(event.getPlayer());
+			if (tasks != null) {
+				for (Runnable task : tasks) {
+					task.run();
 				}
-			}
-
-			@Override
-			public void onPlayerLeave(ServerPlayerEntity player) {
-				RESOURCE_RELOADS.remove(player);
+				tasks.clear();
 			}
 		});
 
-		EventHandler.register(new UHCEvents() {
-			@Override
-			public void onSetup() {
-				PlayerExtension.reset();
-				UHCMod.SERVER.getAdvancementLoader().getAdvancements().forEach(a -> forEveryPlayer(p -> revokeAdvancement(p, a)));
-				forEveryPlayer(p -> grantAdvancement(p, UHCAdvancements.ROOT));
-			}
-
-			@Override
-			public void onActive() {
-				forceUpdateGlowing();
-				forceUpdateFullBright();
-			}
-
-			@Override
-			public void onEnd() {
-				forceUpdateGlowing();
-			}
+		EventHandler.register(UHCSetupEvent.class, event -> {
+			PlayerExtension.reset();
+			UHCMod.SERVER.getAdvancementLoader().getAdvancements().forEach(a -> forEveryPlayer(p -> revokeAdvancement(p, a)));
+			forEveryPlayer(p -> grantAdvancement(p, UHCAdvancements.ROOT));
+		});
+		EventHandler.register(UHCActiveEvent.class, event -> {
+			forceUpdateGlowing();
+			forceUpdateFullBright();
+		});
+		EventHandler.register(UHCEndEvent.class, event -> {
+			forceUpdateGlowing();
 		});
 	}
 
@@ -467,7 +476,7 @@ public class PlayerManager {
 			player.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("Welcome to UHC Test!").formatted(Formatting.GOLD)));
 			player.sendMessage(Text.literal("Use /kit to get some items"));
 			player.sendMessage(Text.literal("You may also use /kill"));
-			Scheduler.schedule(20, player::markHealthDirty);
+			Scheduler.schedule(20, MinecraftTimeUnit.Ticks, player::markHealthDirty);
 			return;
 		}
 
@@ -476,10 +485,10 @@ public class PlayerManager {
 		});
 
 		Scoreboard scoreboard = UHCMod.SERVER.getScoreboard();
-		if (!GameManager.isGameActive()) {
+		if (!UHCManager.isGameActive()) {
 			if (!player.hasPermissionLevel(2)) {
 				player.changeGameMode(GameMode.ADVENTURE);
-				Vec3d spawn = Config.CURRENT_EVENT.getLobbySpawnPos();
+				Vec3d spawn = Config.CURRENT_UHC.getLobbySpawnPos();
 				player.teleport(UHCMod.SERVER.getOverworld(), spawn.getX(), spawn.getY(), spawn.getZ(), 0, 0);
 			} else {
 				if (Config.IS_DEV) {
@@ -505,7 +514,7 @@ public class PlayerManager {
 		}
 
 		// idk...
-		Scheduler.schedule(20, player::markHealthDirty);
+		Scheduler.schedule(20, MinecraftTimeUnit.Ticks, player::markHealthDirty);
 	}
 
 	private static void updateHUD(ServerPlayerEntity playerEntity) {
@@ -540,23 +549,23 @@ public class PlayerManager {
 	private static void handlePlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		sendWorldBorderPackets(player, player.world.getWorldBorder());
 
-		if (GameManager.isPhase(Phase.END)) {
+		if (UHCManager.isPhase(Phase.END)) {
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
 		}
 
-		if (GameManager.isPhase(Phase.ACTIVE)) {
+		if (UHCManager.isPhase(Phase.ACTIVE)) {
 			player.setSpawnPoint(player.world.getRegistryKey(), player.getBlockPos(), player.getSpawnAngle(), true, false);
 			player.interactionManager.changeGameMode(GameMode.SPECTATOR);
 
 			forceUpdateGlowingFlag(player);
 
-			if (GameManager.isUnclaimed(OneTimeAchievement.DEATH)) {
+			if (UHCManager.isUnclaimed(OneTimeAchievement.DEATH)) {
 				grantAdvancement(player, UHCAdvancements.EARLY_EXIT);
 			}
 
 			if (source.getAttacker() instanceof ServerPlayerEntity attacker) {
 				PlayerExtension.get(attacker).getStats().increment(UHCStat.KILLS, 1);
-				if (GameManager.isUnclaimed(OneTimeAchievement.KILL)) {
+				if (UHCManager.isUnclaimed(OneTimeAchievement.KILL)) {
 					grantAdvancement(attacker, UHCAdvancements.FIRST_BLOOD);
 				}
 			}
@@ -588,7 +597,7 @@ public class PlayerManager {
 			}
 
 			if (TeamManager.isLastTeam()) {
-				EventHandler.onEnd();
+				EventHandler.broadcast(new UHCEndEvent());
 			}
 		}
 	}

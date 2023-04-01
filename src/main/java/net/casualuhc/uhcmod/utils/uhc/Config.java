@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.*;
 import net.casualuhc.uhcmod.UHCMod;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.math.BlockPos;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +15,7 @@ public class Config {
 	private static final Path CONFIG_PATH;
 
 	public static final List<String> OPERATORS;
-	public static final Event CURRENT_EVENT;
+	public static final UHC CURRENT_UHC;
 	public static final String MONGO_URI;
 	public static final boolean IS_DEV;
 
@@ -25,7 +24,7 @@ public class Config {
 		CONFIG_PATH = getConfig("UHC Config.json");
 
 		List<String> operators = new ArrayList<>();
-		Event event = Event.DEFAULT;
+		UHC uhc = UHC.DEFAULT;
 		String uri = null;
 		boolean dev = true;
 		try {
@@ -40,10 +39,10 @@ public class Config {
 				config.get("operators").getAsJsonArray().forEach(e -> operators.add(e.getAsString()));
 				JsonElement element = config.get("event");
 				if (element != null && !element.getAsString().equals("default")) {
-					event = UHCMod.getEvent(element.getAsString());
-					if (event == null) {
+					uhc = UHCMod.getUHC(element.getAsString());
+					if (uhc == null) {
 						UHCMod.LOGGER.error("Invalid event name: {}", element.getAsString());
-						event = Event.DEFAULT;
+						uhc = uhc.DEFAULT;
 					}
 				}
 			}
@@ -51,7 +50,7 @@ public class Config {
 			UHCMod.LOGGER.error("Failed to read config", e);
 		}
 		OPERATORS = ImmutableList.copyOf(operators);
-		CURRENT_EVENT = event;
+		CURRENT_UHC = uhc;
 		MONGO_URI = uri;
 		IS_DEV = dev;
 	}

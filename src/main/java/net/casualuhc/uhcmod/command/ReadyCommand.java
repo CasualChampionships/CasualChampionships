@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.managers.UHCManager;
 import net.casualuhc.uhcmod.utils.uhc.Phase;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.managers.TeamManager;
@@ -38,7 +38,7 @@ public class ReadyCommand {
 			)
 			.then(literal("awaiting").requires(source -> source.hasPermissionLevel(4))
 				.executes(context -> {
-					if (!GameManager.isPhase(Phase.READY)) {
+					if (!UHCManager.isPhase(Phase.READY)) {
 						throw NOT_NOW.create();
 					}
 					ServerCommandSource source = context.getSource();
@@ -53,7 +53,7 @@ public class ReadyCommand {
 	}
 
 	private static int ready(CommandContext<ServerCommandSource> context, boolean isReady) throws CommandSyntaxException {
-		if (!GameManager.isPhase(Phase.READY)) {
+		if (!UHCManager.isPhase(Phase.READY)) {
 			throw NOT_NOW.create();
 		}
 		AbstractTeam team = context.getSource().getPlayerOrThrow().getScoreboardTeam();

@@ -25,6 +25,7 @@ public class PlayerExtension {
 	private final Set<PlayerFlag> flags = EnumSet.noneOf(PlayerFlag.class);
 
 	private Team realTeam = null;
+	private int halfHealthTicks = 0;
 
 	private PlayerExtension(String name) {
 		this.name = name;
@@ -80,6 +81,14 @@ public class PlayerExtension {
 		this.setFlag(FULL_BRIGHT_ENABLED, true);
 	}
 
+	public int incrementHalfHealthTicks() {
+		return ++this.halfHealthTicks;
+	}
+
+	public void resetHalfHealthTicks() {
+		this.halfHealthTicks = 0;
+	}
+
 	public static PlayerExtension get(PlayerEntity player) {
 		return PLAYERS.computeIfAbsent(player.getUuid(), u -> new PlayerExtension(player.getEntityName()));
 	}
@@ -97,6 +106,7 @@ public class PlayerExtension {
 			p.setRealTeam(null);
 			p.resetFlags();
 			p.stats.reset();
+			p.resetHalfHealthTicks();
 		});
 	}
 }

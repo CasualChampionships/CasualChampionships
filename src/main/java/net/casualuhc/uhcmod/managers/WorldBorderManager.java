@@ -1,18 +1,21 @@
 package net.casualuhc.uhcmod.managers;
 
+import net.casualuhc.arcade.border.CustomBorder;
+import net.casualuhc.arcade.events.EventHandler;
+import net.casualuhc.arcade.events.border.CustomBorderFinishEvent;
+import net.casualuhc.arcade.events.server.ServerTickEvent;
+import net.casualuhc.arcade.scheduler.MinecraftTimeUnit;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.utils.gamesettings.GameSetting;
-import net.casualuhc.uhcmod.utils.uhc.Config;
-import net.casualuhc.uhcmod.utils.uhc.Phase;
-import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
-import net.casualuhc.uhcmod.utils.event.EventHandler;
-import net.casualuhc.uhcmod.utils.event.UHCEvents;
+import net.casualuhc.uhcmod.events.uhc.UHCBorderCompleteEvent;
+import net.casualuhc.uhcmod.events.uhc.UHCGracePeriodEndEvent;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
+import net.casualuhc.uhcmod.utils.uhc.Phase;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.WorldBorder;
 
 public class WorldBorderManager {
 	private static final MinecraftServer SERVER = UHCMod.SERVER;
+	public static final CustomBorder GLOBAL_BORDER = new CustomBorder();
 	public static final int PORTAL_ESCAPE_TIME_SECONDS = 30;
 
 	public static void startWorldBorders() {
@@ -25,7 +28,7 @@ public class WorldBorderManager {
 
 		GameSettings.WORLD_BORDER_STAGE.setValueQuietly(stage);
 		if (stage == Stage.END) {
-			EventHandler.onWorldBorderComplete();
+			EventHandler.broadcast(new UHCBorderCompleteEvent());
 			return;
 		}
 
@@ -47,32 +50,30 @@ public class WorldBorderManager {
 	public static void noop() { }
 
 	static {
-		EventHandler.register(new UHCEvents() {
-			@Override
-			public void onGracePeriodEnd() {
-				startWorldBorders();
+		EventHandler.register(CustomBorderFinishEvent.class, event -> {
+			UHCMod.LOGGER.info("Finished world border: {}", GameSettings.WORLD_BORDER_STAGE.getValue());
+
+			Stage nextStage = GameSettings.WORLD_BORDER_STAGE.getValue().getNextStage();
+			if (nextStage == null || !UHCManager.isPhase(Phase.ACTIVE)) {
+				return;
 			}
 
-			@Override
-			public void onWorldBorderFinishShrinking() {
-				UHCMod.LOGGER.info("Finished world border: {}", GameSettings.WORLD_BORDER_STAGE.getValue());
-
-				Stage nextStage = GameSettings.WORLD_BORDER_STAGE.getValue().getNextStage();
-				if (nextStage == null || !GameManager.isPhase(Phase.ACTIVE)) {
-					return;
-				}
-
-				GameSettings.WORLD_BORDER_STAGE.setValueQuietly(nextStage);
-				if (nextStage == Stage.END) {
-					EventHandler.onWorldBorderComplete();
-					return;
-				}
-
-				GameManager.schedulePhaseTask(Scheduler.secondsToTicks(10), () -> {
-					double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
-					moveWorldBorders(nextStage.getEndSize(), nextStage.getTime(size));
-				});
+			GameSettings.WORLD_BORDER_STAGE.setValueQuietly(nextStage);
+			if (nextStage == Stage.END) {
+				EventHandler.broadcast(new UHCBorderCompleteEvent());
+				return;
 			}
+
+			UHCManager.schedulePhaseTask(10, MinecraftTimeUnit.Seconds, () -> {
+				double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
+				moveWorldBorders(nextStage.getEndSize(), nextStage.getTime(size));
+			});
+		});
+		EventHandler.register(UHCGracePeriodEndEvent.class, event -> {
+			startWorldBorders();
+		});
+		EventHandler.register(ServerTickEvent.class, event -> {
+			GLOBAL_BORDER.update();
 		});
 	}
 

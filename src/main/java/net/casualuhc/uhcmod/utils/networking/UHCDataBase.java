@@ -7,6 +7,9 @@ import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import net.casualuhc.arcade.Arcade;
+import net.casualuhc.arcade.events.EventHandler;
+import net.casualuhc.arcade.events.server.ServerStoppedEvent;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.managers.TeamManager;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
@@ -51,6 +54,7 @@ public class UHCDataBase {
 			TEAM_CONFIG = null;
 			EXECUTOR = null;
 		}
+		EventHandler.register(ServerStoppedEvent.class, event -> shutdown());
 	}
 
 	private UHCDataBase() { }

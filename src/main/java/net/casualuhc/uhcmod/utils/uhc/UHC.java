@@ -8,8 +8,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
-public interface Event {
-	Event DEFAULT = new Event() { };
+public interface UHC {
+	UHC DEFAULT = new UHC() { };
 	Vec3d DEFAULT_SPAWN = new Vec3d(0, 320, 0);
 
 	/**

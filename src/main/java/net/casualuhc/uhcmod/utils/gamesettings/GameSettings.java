@@ -2,7 +2,7 @@ package net.casualuhc.uhcmod.utils.gamesettings;
 
 import com.google.common.collect.ImmutableMap;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.managers.UHCManager;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager.Stage;
@@ -154,7 +154,7 @@ public class GameSettings {
 			getEnumOptions(Stage.class),
 			Stage.FIRST,
 			stageSetting -> {
-				if (GameManager.isPhase(Phase.ACTIVE)) {
+				if (UHCManager.isPhase(Phase.ACTIVE)) {
 					WorldBorderManager.moveWorldBorders(stageSetting.getValue().getStartSize(), 0);
 					WorldBorderManager.startWorldBorders();
 					return;

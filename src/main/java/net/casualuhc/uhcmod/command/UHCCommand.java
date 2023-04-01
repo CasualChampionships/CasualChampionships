@@ -5,12 +5,12 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.events.uhc.*;
+import net.casualuhc.uhcmod.managers.UHCManager;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.casualuhc.uhcmod.utils.screen.RuleScreen;
 import net.casualuhc.uhcmod.utils.uhc.UHCUtils;
-import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSetting;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
@@ -45,7 +45,7 @@ public class UHCCommand {
 							Text.literal("Start starting time to: %s in UTC".formatted(time)), false
 						);
 
-						GameManager.setStartTime(LocalTime.parse(time).toEpochSecond(LocalDate.now(), ZoneOffset.UTC) * 1000);
+						UHCManager.setStartTime(LocalTime.parse(time).toEpochSecond(LocalDate.now(), ZoneOffset.UTC) * 1000);
 						return 1;
 					})
 				)
@@ -86,14 +86,14 @@ public class UHCCommand {
 			.then(literal("phase")
 				.then(literal("cancel")
 					.executes(context -> {
-						GameManager.setPhase(Phase.LOBBY);
+						UHCManager.setPhase(Phase.LOBBY);
 						return 1;
 					})
 				)
 				.then(literal("current")
 					.executes(context -> {
 						context.getSource().sendFeedback(
-							Text.literal("Current phase is: %d".formatted(GameManager.getPhase().ordinal())), false
+							Text.literal("Current phase is: %d".formatted(UHCManager.getPhase().ordinal())), false
 						);
 						return 1;
 					})
@@ -101,31 +101,31 @@ public class UHCCommand {
 			)
 			.then(literal("setup")
 				.executes(context -> {
-					EventHandler.onSetup();
+					net.casualuhc.arcade.events.EventHandler.broadcast(new UHCSetupEvent());
 					return 1;
 				})
 			)
 			.then(literal("lobby")
 				.executes(context -> {
-					EventHandler.onLobby();
+					net.casualuhc.arcade.events.EventHandler.broadcast(new UHCLobbyEvent());
 					return 1;
 				})
 			)
 			.then(literal("start")
 				.executes(context -> {
-					EventHandler.onReady();
+					net.casualuhc.arcade.events.EventHandler.broadcast(new UHCReadyEvent());
 					return 1;
 				})
 				.then(literal("force")
 					.executes(context -> {
-						EventHandler.onStart();
+						net.casualuhc.arcade.events.EventHandler.broadcast(new UHCStartEvent());
 						return 1;
 					})
 				)
 				.then(literal("quiet")
 					.executes(context -> {
-						GameManager.setPhase(Phase.ACTIVE);
-						EventHandler.onGracePeriodEnd();
+						UHCManager.setPhase(Phase.ACTIVE);
+						net.casualuhc.arcade.events.EventHandler.broadcast(new UHCGracePeriodEndEvent());
 						UHCUtils.setUHCGamerules();
 						return 1;
 					})
@@ -133,7 +133,7 @@ public class UHCCommand {
 			)
 			.then(literal("endgame")
 				.executes(context -> {
-					EventHandler.onEnd();
+					net.casualuhc.arcade.events.EventHandler.broadcast(new UHCEndEvent());
 					return 1;
 				})
 			)
@@ -147,7 +147,7 @@ public class UHCCommand {
 					.then(getWorldBorderStagesEnd())
 					.then(literal("stop")
 						.executes(context -> {
-							if (!GameManager.isPhase(Phase.ACTIVE)) {
+							if (!UHCManager.isPhase(Phase.ACTIVE)) {
 								throw CANNOT_MODIFY_WB;
 							}
 							context.getSource().getServer().getWorlds().forEach(serverWorld -> serverWorld.getWorldBorder().setSize(serverWorld.getWorldBorder().getSize()));
@@ -219,7 +219,7 @@ public class UHCCommand {
 		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
 			commandBuilder.then(literal(stage.name())
 				.executes(context -> {
-					if (GameManager.isPhase(Phase.ACTIVE)) {
+					if (UHCManager.isPhase(Phase.ACTIVE)) {
 						WorldBorderManager.moveWorldBorders(stage.getStartSize(), 0);
 						WorldBorderManager.startWorldBorders();
 						return 1;
@@ -236,7 +236,7 @@ public class UHCCommand {
 		for (WorldBorderManager.Stage stage : WorldBorderManager.Stage.values()) {
 			commandBuilder.then(literal(stage.name())
 				.executes(context -> {
-					if (GameManager.isPhase(Phase.ACTIVE)) {
+					if (UHCManager.isPhase(Phase.ACTIVE)) {
 						WorldBorderManager.moveWorldBorders(stage.getEndSize(), 0);
 						WorldBorderManager.startWorldBorders();
 						return 1;

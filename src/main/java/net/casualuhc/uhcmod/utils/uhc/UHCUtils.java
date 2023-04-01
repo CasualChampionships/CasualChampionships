@@ -5,6 +5,8 @@ import carpet.api.settings.InvalidRuleValueException;
 import carpet.api.settings.SettingsManager;
 import carpet.fakes.SpawnGroupInterface;
 import carpet.utils.SpawnReporter;
+import net.casualuhc.arcade.events.EventHandler;
+import net.casualuhc.arcade.events.player.PlayerAttackEvent;
 import net.casualuhc.arcade.utils.TickUtils;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.utils.data.WorldExtension;
@@ -12,6 +14,7 @@ import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.PlaceableOnWaterItem;
@@ -24,8 +27,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
 
 import java.util.ArrayList;
@@ -119,7 +122,7 @@ public class UHCUtils {
 		server.setDifficulty(Difficulty.PEACEFUL, true);
 		server.getOverworld().setTimeOfDay(6000); // 6000 = noon
 		server.getOverworld().setWeather(999999, 0, false, false);
-		server.getOverworld().setSpawnPos(BlockPos.ofFloored(Config.CURRENT_EVENT.getLobbySpawnPos()), 0);
+		server.getOverworld().setSpawnPos(BlockPos.ofFloored(Config.CURRENT_UHC.getLobbySpawnPos()), 0);
 		server.getOverworld().getWorldBorder().setCenter(0, 0);
 		server.getWorlds().forEach(serverWorld -> {
 			serverWorld.getWorldBorder().setCenter(0, 0);

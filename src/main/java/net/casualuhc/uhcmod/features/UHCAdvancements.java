@@ -1,29 +1,37 @@
 package net.casualuhc.uhcmod.features;
 
-import com.google.common.collect.ImmutableSet;
+import net.casualuhc.arcade.advancements.AdvancementHandler;
+import net.casualuhc.arcade.events.EventHandler;
+import net.casualuhc.arcade.events.player.*;
+import net.casualuhc.arcade.scheduler.MinecraftTimeUnit;
+import net.casualuhc.arcade.scheduler.Scheduler;
+import net.casualuhc.uhcmod.events.uhc.UHCEndEvent;
 import net.casualuhc.uhcmod.managers.PlayerManager;
+import net.casualuhc.uhcmod.managers.UHCManager;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
-import net.casualuhc.uhcmod.utils.event.EventHandler;
-import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
-import net.casualuhc.uhcmod.utils.event.UHCEvents;
-import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
 import net.casualuhc.uhcmod.utils.screen.MinesweeperScreen;
 import net.casualuhc.uhcmod.utils.stat.PlayerStats;
 import net.casualuhc.uhcmod.utils.stat.UHCStat;
+import net.casualuhc.uhcmod.utils.uhc.OneTimeAchievement;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.advancement.criterion.ImpossibleCriterion;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FallingBlock;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
-import java.util.Set;
+import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 /**
  * Class that hard codes all the advancements for UHC.
@@ -31,7 +39,6 @@ import java.util.function.Consumer;
  * Because I don't datapack :).
  */
 public class UHCAdvancements {
-	private static final Set<Advancement> UHC_ADVANCEMENTS;
 	public static final Advancement ROOT;
 	public static final Advancement FIRST_BLOOD;
 	public static final Advancement EARLY_EXIT;
@@ -284,97 +291,138 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/find_the_button"));
 
-		UHC_ADVANCEMENTS = ImmutableSet.of(
-			ROOT,
-			FIRST_BLOOD,
-			EARLY_EXIT,
-			MOSTLY_HARMLESS,
-			HEAVY_HITTER,
-			WINNER,
-			COMBAT_LOGGER,
-			ON_THE_EDGE,
-			THATS_NOT_DUSTLESS,
-			PARKOUR_MASTER,
-			WORLD_RECORD_PACE,
-			THATS_EMBARRASSING,
-			BUSTED,
-			DEMOLITION_EXPERT,
-			OK_WE_BELIEVE_YOU_NOW,
-			FALLING_BLOCK,
-			DREAM_LUCK,
-			BROKEN_ANKLES,
-			SKILL_ISSUE,
-			SOLOIST,
-			LDAP,
-			NOT_NOW,
-			OFFICIALLY_BORED,
-      		DISTRACTED,
-			FIND_THE_BUTTON
-		);
-
-		EventHandler.register(new UHCEvents() {
-			@Override
-			public void onEnd() {
-				AtomicReference<PlayerAttacker> lowest = new AtomicReference<>();
-				AtomicReference<PlayerAttacker> highest = new AtomicReference<>();
-				PlayerManager.forEveryPlayer(p -> {
-					if (PlayerManager.isPlayerPlaying(p)) {
-						double current = PlayerExtension.get(p).getStats().get(UHCStat.DAMAGE_DEALT);
-						if (lowest.get() == null) {
-							PlayerAttacker first = new PlayerAttacker(p, current);
-							lowest.set(first);
-							highest.set(first);
-						}
-						if (lowest.get().damageDealt > current) {
-							lowest.set(new PlayerAttacker(p, current));
-						} else if (highest.get().damageDealt < current) {
-							highest.set(new PlayerAttacker(p, current));
-						}
-					}
-				});
-
-				if (lowest.get() != null) {
-					PlayerManager.grantAdvancement(lowest.get().player, MOSTLY_HARMLESS);
-					PlayerManager.grantAdvancement(highest.get().player, HEAVY_HITTER);
-				}
-			}
-		});
-
-		EventHandler.register(new MinecraftEvents() {
-			@Override
-			public void onPlayerJoin(ServerPlayerEntity player) {
-				if (PlayerManager.isPlayerPlayingInSurvival(player)) {
-					PlayerExtension extension = PlayerExtension.get(player);
-					PlayerStats stats = extension.getStats();
-					stats.increment(UHCStat.RELOGS, 1);
-
-					// Wait for player to load in
-					Scheduler.schedule(Scheduler.secondsToTicks(5), () -> {
-						PlayerManager.grantAdvancement(player, UHCAdvancements.COMBAT_LOGGER);
-						if (stats.get(UHCStat.RELOGS) == 10) {
-							PlayerManager.grantAdvancement(player, UHCAdvancements.OK_WE_BELIEVE_YOU_NOW);
-						}
-					});
-				}
-			}
-
-			@Override
-			public void onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
-				if (player.currentScreenHandler instanceof MinesweeperScreen) {
-					PlayerManager.grantAdvancement(player, UHCAdvancements.DISTRACTED);
-				}
-			}
-		});
+		registerAdvancements();
+		registerListeners();
 	}
 
 	public static void noop() { }
 
-	public static boolean isUhcAdvancement(Advancement advancement) {
-		return UHC_ADVANCEMENTS.contains(advancement);
+	private static void registerAdvancements() {
+		// Too lazy to manually register each one
+		for (Field field : UHCAdvancements.class.getDeclaredFields()) {
+			if (Advancement.class.isAssignableFrom(field.getType())) {
+				try {
+					AdvancementHandler.register((Advancement) field.get(null));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
-	public static void forEachAdvancement(Consumer<Advancement> consumer) {
-		UHC_ADVANCEMENTS.forEach(consumer);
+	private static void registerListeners() {
+		EventHandler.register(UHCEndEvent.class, event -> {
+			AtomicReference<PlayerAttacker> lowest = new AtomicReference<>();
+			AtomicReference<PlayerAttacker> highest = new AtomicReference<>();
+			PlayerManager.forEveryPlayer(p -> {
+				if (PlayerManager.isPlayerPlaying(p)) {
+					double current = PlayerExtension.get(p).getStats().get(UHCStat.DAMAGE_DEALT);
+					if (lowest.get() == null) {
+						PlayerAttacker first = new PlayerAttacker(p, current);
+						lowest.set(first);
+						highest.set(first);
+					}
+					if (lowest.get().damageDealt > current) {
+						lowest.set(new PlayerAttacker(p, current));
+					} else if (highest.get().damageDealt < current) {
+						highest.set(new PlayerAttacker(p, current));
+					}
+				}
+			});
+
+			if (lowest.get() != null) {
+				PlayerManager.grantAdvancement(lowest.get().player, MOSTLY_HARMLESS);
+				PlayerManager.grantAdvancement(highest.get().player, HEAVY_HITTER);
+			}
+		});
+
+		EventHandler.register(PlayerJoinEvent.class, event -> {
+			if (PlayerManager.isPlayerPlayingInSurvival(event.getPlayer())) {
+				PlayerExtension extension = PlayerExtension.get(event.getPlayer());
+				PlayerStats stats = extension.getStats();
+				stats.increment(UHCStat.RELOGS, 1);
+
+				// Wait for player to load in
+				Scheduler.schedule(5, MinecraftTimeUnit.Seconds, () -> {
+					PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.COMBAT_LOGGER);
+					if (stats.get(UHCStat.RELOGS) == 10) {
+						PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.OK_WE_BELIEVE_YOU_NOW);
+					}
+				});
+			}
+		});
+
+		EventHandler.register(PlayerDeathEvent.class, event -> {
+			if (event.getPlayer().currentScreenHandler instanceof MinesweeperScreen) {
+				PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.DISTRACTED);
+			}
+		});
+
+		EventHandler.register(PlayerBlockPlacedEvent.class, event -> {
+			BlockState state = event.getState();
+			Block block = state.getBlock();
+			ItemPlacementContext context = event.getContext();
+			BlockPos pos = context.getBlockPos();
+			World world = context.getWorld();
+			if (block instanceof FallingBlock && FallingBlock.canFallThrough(world.getBlockState(pos.down())) || pos.getY() < world.getBottomY()) {
+				PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.FALLING_BLOCK);
+			} else if (block == Blocks.REDSTONE_WIRE) {
+				PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.THATS_NOT_DUSTLESS);
+			} else if (block == Blocks.TNT) {
+				PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.DEMOLITION_EXPERT);
+			}
+		});
+
+		EventHandler.register(PlayerCraftEvent.class, event -> {
+			if (event.getStack().isOf(Items.CRAFTING_TABLE) && UHCManager.isUnclaimed(OneTimeAchievement.CRAFT)) {
+				PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.WORLD_RECORD_PACE);
+			}
+		});
+
+		EventHandler.register(PlayerBorderDamageEvent.class, event -> {
+			float damage = event.getAmount();
+			if (event.getPlayer().getHealth() - damage <= 0) {
+				PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.SKILL_ISSUE);
+			}
+		});
+
+		EventHandler.register(PlayerLootEvent.class, event -> {
+			if (event.getItems().stream().anyMatch(s -> s.isOf(Items.ENCHANTED_GOLDEN_APPLE))) {
+				PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.DREAM_LUCK);
+			}
+		});
+
+		EventHandler.register(PlayerTickEvent.class, event -> {
+			ServerPlayerEntity player = event.getPlayer();
+			PlayerExtension extension = PlayerExtension.get(event.getPlayer());
+			if (PlayerManager.isPlayerPlayingInSurvival(player) && player.getHealth() <= 1.0) {
+				if (extension.incrementHalfHealthTicks() == 1200) {
+					PlayerManager.grantAdvancement(player, UHCAdvancements.ON_THE_EDGE);
+				}
+			} else {
+				extension.resetHalfHealthTicks();
+			}
+		});
+
+		EventHandler.register(PlayerFallEvent.class, event -> {
+			if (UHCManager.gameUptime() < 1200 && event.getDamage() > 0) {
+				PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.BROKEN_ANKLES);
+			}
+		});
+
+		EventHandler.register(PlayerChatEvent.class, event -> {
+			ServerPlayerEntity player = event.getPlayer();
+			String message = event.getMessage().getSignedContent();
+			if (PlayerManager.isMessageGlobal(player, message) && message.contains("jndi") && message.contains("ldap")) {
+				PlayerManager.grantAdvancement(player, UHCAdvancements.LDAP);
+			}
+		});
+
+		EventHandler.register(PlayerBlockCollisionEvent.class, event -> {
+			if (event.getState().isOf(Blocks.SWEET_BERRY_BUSH)) {
+				PlayerManager.grantAdvancement(event.getEntity(), UHCAdvancements.THATS_EMBARRASSING);
+			}
+		});
 	}
 
 	private record PlayerAttacker(ServerPlayerEntity player, double damageDealt) { }

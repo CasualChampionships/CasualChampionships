@@ -1,14 +1,13 @@
 package net.casualuhc.uhcmod.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.casualuhc.uhcmod.managers.GameManager;
+import net.casualuhc.uhcmod.managers.UHCManager;
 import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
 import net.minecraft.world.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,14 +31,14 @@ public abstract class PlayerManagerMixin {
 
     @Inject(method = "checkCanJoin", at = @At("HEAD"), cancellable = true)
     private void onCheckJoin(SocketAddress address, GameProfile profile, CallbackInfoReturnable<Text> cir) {
-        if (!GameManager.isReadyForPlayers() && !this.isOperator(profile)) {
+        if (!UHCManager.isReadyForPlayers() && !this.isOperator(profile)) {
             cir.setReturnValue(Text.literal("UHC isn't quite ready yet..."));
         }
     }
 
     @Redirect(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getResourcePackProperties()Ljava/util/Optional;"))
     private Optional<MinecraftServer.ServerResourcePackProperties> onSendResourcePack(MinecraftServer instance, ClientConnection connection, ServerPlayerEntity player) {
-        MinecraftServer.ServerResourcePackProperties resource = Config.CURRENT_EVENT.getResourcePack();
+        MinecraftServer.ServerResourcePackProperties resource = Config.CURRENT_UHC.getResourcePack();
         if (resource != null) {
             net.casualuhc.uhcmod.managers.PlayerManager.sendResourcePack(player, resource);
         }

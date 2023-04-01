@@ -23,12 +23,12 @@ public class WorldExtension {
     }
 
     public void tick() {
-        blockChangesIndex = (blockChangesIndex + 1) % TICKS_TO_STORE_BLOCK_CHANGES;
-        blockChanges[blockChangesIndex].clear();
+        this.blockChangesIndex = (this.blockChangesIndex + 1) % TICKS_TO_STORE_BLOCK_CHANGES;
+        this.blockChanges[this.blockChangesIndex].clear();
     }
 
     public void storeBlockChange(BlockPos pos, BlockState oldState) {
-        blockChanges[blockChangesIndex].put(pos.asLong(), oldState);
+        this.blockChanges[this.blockChangesIndex].put(pos.asLong(), oldState);
     }
 
     public List<BlockState> getOldBlockStatesInLastNTicks(BlockPos pos, int n) {
@@ -37,7 +37,7 @@ public class WorldExtension {
         }
         List<BlockState> result = new ArrayList<>(0);
         for (int i = 0; i < n; i++) {
-            var map = blockChanges[Math.floorMod(blockChangesIndex - i, TICKS_TO_STORE_BLOCK_CHANGES)];
+            Long2ObjectMap<BlockState> map = this.blockChanges[Math.floorMod(this.blockChangesIndex - i, TICKS_TO_STORE_BLOCK_CHANGES)];
             BlockState state = map.get(pos.asLong());
             if (state != null) {
                 result.add(state);

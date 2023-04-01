@@ -1,15 +1,17 @@
 package net.casualuhc.uhcmod.managers;
 
+import net.casualuhc.arcade.events.EventHandler;
+import net.casualuhc.arcade.events.player.PlayerJoinEvent;
+import net.casualuhc.arcade.events.server.ServerTickEvent;
+import net.casualuhc.arcade.scheduler.MinecraftTimeUnit;
+import net.casualuhc.arcade.scheduler.Scheduler;
+import net.casualuhc.arcade.scheduler.Task;
+import net.casualuhc.arcade.utils.PlayerUtils;
 import net.casualuhc.uhcmod.UHCMod;
-import net.casualuhc.uhcmod.features.GoldenHeadRecipe;
+import net.casualuhc.uhcmod.events.uhc.*;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.utils.event.EventHandler;
-import net.casualuhc.uhcmod.utils.event.MinecraftEvents;
-import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.gamesettings.GameSettings;
 import net.casualuhc.uhcmod.utils.networking.UHCDataBase;
-import net.casualuhc.uhcmod.utils.scheduling.Scheduler;
-import net.casualuhc.uhcmod.utils.scheduling.Task;
 import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.casualuhc.uhcmod.utils.uhc.OneTimeAchievement;
 import net.casualuhc.uhcmod.utils.uhc.Phase;
@@ -23,7 +25,6 @@ import net.minecraft.entity.boss.CommandBossBar;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
-import net.minecraft.recipe.Recipe;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -47,9 +48,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static net.casualuhc.uhcmod.utils.scheduling.Scheduler.*;
-
-public class GameManager {
+public class UHCManager {
 	private static final List<Task> currentTasks = new LinkedList<>();
 	private static final Set<OneTimeAchievement> claimed = new HashSet<>();
 
@@ -60,7 +59,7 @@ public class GameManager {
 	private static long startTime = Long.MAX_VALUE;
 	private static int ticks;
 
-	private GameManager() { }
+	private UHCManager() { }
 
 	/**
 	 * Checks whether the UHC is at a certain Phase.
@@ -95,12 +94,11 @@ public class GameManager {
 	/**
 	 * Schedules a task that may be cancelled if the Phase changes.
 	 *
-	 * @param ticks the delay before running the task.
+	 * @param time the delay before running the task.
 	 * @param runnable the runnable to run.
-	 * @see net.casualuhc.uhcmod.utils.scheduling.Scheduler#schedule(int, Runnable)
 	 */
-	public static void schedulePhaseTask(int ticks, Runnable runnable) {
-		currentTasks.add(schedule(ticks, runnable));
+	public static void schedulePhaseTask(int time, MinecraftTimeUnit unit, Runnable runnable) {
+		currentTasks.add(Scheduler.schedule(time, unit, runnable));
 	}
 
 	/**
@@ -111,10 +109,9 @@ public class GameManager {
 	 * @param interval the interval between executions
 	 * @param duration the duration, this starts after the delay
 	 * @param runnable the runnable to run
-	 * @see net.casualuhc.uhcmod.utils.scheduling.Scheduler#scheduleInLoop(int, int, int, Runnable)
 	 */
-	public static void scheduleInLoopPhaseTask(int delay, int interval, int duration, Runnable runnable) {
-		currentTasks.add(scheduleInLoop(delay, interval, duration, runnable));
+	public static void scheduleInLoopPhaseTask(int delay, int interval, int duration, MinecraftTimeUnit unit, Runnable runnable) {
+		currentTasks.add(Scheduler.scheduleInLoop(delay, interval, duration, unit, runnable));
 	}
 
 	/**
@@ -176,14 +173,6 @@ public class GameManager {
 	}
 
 	/**
-	 * Gets all the custom recipes for the UHC.
-	 * @return the custom recipes.
-	 */
-	public static Iterable<Recipe<?>> getCustomRecipes() {
-		return List.of(new GoldenHeadRecipe());
-	}
-
-	/**
 	 * Gets the lobby structure template, loads it if it has not yet been loaded.
 	 *
 	 * @return the lobby structure.
@@ -191,7 +180,7 @@ public class GameManager {
 	public static StructureTemplate getLobby() {
 		if (lobby == null) {
 			try {
-				InputStream inputStream = Files.newInputStream(Config.getConfig("lobbies").resolve(Config.CURRENT_EVENT.getLobbyName() + ".nbt"));
+				InputStream inputStream = Files.newInputStream(Config.getConfig("lobbies").resolve(Config.CURRENT_UHC.getLobbyName() + ".nbt"));
 				NbtCompound nbtStructure = NbtIo.readCompressed(inputStream);
 				lobby = UHCMod.SERVER.getStructureTemplateManager().createTemplate(nbtStructure);
 			} catch (Exception e) {
@@ -206,87 +195,62 @@ public class GameManager {
 	// UHC logic
 
 	static {
-		EventHandler.register(new MinecraftEvents() {
-			@Override
-			public void onPlayerJoin(ServerPlayerEntity player) {
-				if (isPhase(Phase.LOBBY) && bossBar != null) {
-					bossBar.addPlayer(player);
-				}
-			}
-
-			@Override
-			public void onServerTick(MinecraftServer server) {
-				ticks++;
-				if (isPhase(Phase.LOBBY) && bossBar != null && ticks % 100 == 0 && startTime - 30 * 60 * 1000 < System.currentTimeMillis()) {
-					long millisLeft = startTime - System.currentTimeMillis();
-					float percentLeft = millisLeft / (float) (30 * 60 * 1000);
-					bossBar.setPercent(MathHelper.clamp(1 - percentLeft, 0, 1));
-					long minutesLeft = millisLeft / (60 * 1000);
-					MutableText startTime = minutesLeft <= 0 ? Text.translatable("uhc.lobby.starting.soon") :
-						minutesLeft == 1 ? Text.translatable("uhc.lobby.starting.one") : Text.translatable("uhc.lobby.starting.generic", minutesLeft);
-					bossBar.setName(Config.CURRENT_EVENT.getBossBarMessage().append(". ").append(startTime.formatted(Formatting.GREEN, Formatting.BOLD)));
-				}
+		EventHandler.register(PlayerJoinEvent.class, event -> {
+			if (isPhase(Phase.LOBBY) && bossBar != null) {
+				bossBar.addPlayer(event.getPlayer());
 			}
 		});
-
-		EventHandler.register(new UHCEvents() {
-			@Override
-			public void onSetup() {
-				setPhase(Phase.SETUP);
-				deleteAllBossBars();
-				UHCUtils.setLobbyGamerules();
+		EventHandler.register(ServerTickEvent.class, event -> {
+			ticks++;
+			if (isPhase(Phase.LOBBY) && bossBar != null && ticks % 100 == 0 && startTime - 30 * 60 * 1000 < System.currentTimeMillis()) {
+				long millisLeft = startTime - System.currentTimeMillis();
+				float percentLeft = millisLeft / (float) (30 * 60 * 1000);
+				bossBar.setPercent(MathHelper.clamp(1 - percentLeft, 0, 1));
+				long minutesLeft = millisLeft / (60 * 1000);
+				MutableText startTime = minutesLeft <= 0 ? Text.translatable("uhc.lobby.starting.soon") :
+					minutesLeft == 1 ? Text.translatable("uhc.lobby.starting.one") : Text.translatable("uhc.lobby.starting.generic", minutesLeft);
+				bossBar.setName(Config.CURRENT_UHC.getBossBarMessage().append(". ").append(startTime.formatted(Formatting.GREEN, Formatting.BOLD)));
 			}
-
-			@Override
-			public void onLobby() {
-				setPhase(Phase.LOBBY);
-				generateLobby();
-				generateBossBar();
-			}
-
-			@Override
-			public void onReady() {
-				setPhase(Phase.READY);
-			}
-
-			@Override
-			public void onStart() {
-				setPhase(Phase.START);
-				setStartTime(Long.MAX_VALUE);
-				hideBossBar();
-				deleteAllBossBars();
-				startCountDown();
-			}
-
-			@Override
-			public void onActive() {
-				setPhase(Phase.ACTIVE);
-				resetTrackers();
-				startGracePeriod();
-				UHCUtils.setUHCGamerules();
-			}
-
-			@Override
-			public void onEnd() {
-				setPhase(Phase.END);
-				endUHC();
-			}
-
-			@Override
-			public void onGracePeriodEnd() {
-				GameSettings.PVP.setValue(true);
-			}
-
-			@Override
-			public void onWorldBorderComplete() {
-				worldBorderComplete();
-			}
+		});
+		EventHandler.register(UHCSetupEvent.class, event -> {
+			setPhase(Phase.SETUP);
+			deleteAllBossBars();
+			UHCUtils.setLobbyGamerules();
+		});
+		EventHandler.register(UHCLobbyEvent.class, event -> {
+			setPhase(Phase.LOBBY);
+			generateLobby();
+			generateBossBar();
+		});
+		EventHandler.register(UHCReadyEvent.class, event -> setPhase(Phase.READY));
+		EventHandler.register(UHCStartEvent.class, event -> {
+			setPhase(Phase.START);
+			setStartTime(Long.MAX_VALUE);
+			hideBossBar();
+			deleteAllBossBars();
+			startCountDown();
+		});
+		EventHandler.register(UHCActiveEvent.class, event -> {
+			setPhase(Phase.ACTIVE);
+			resetTrackers();
+			startGracePeriod();
+			UHCUtils.setUHCGamerules();
+		});
+		EventHandler.register(UHCEndEvent.class, event -> {
+			setPhase(Phase.END);
+			endUHC();
+		});
+		EventHandler.register(UHCGracePeriodEndEvent.class, event -> {
+			GameSettings.PVP.setValue(true);
+		});
+		EventHandler.register(UHCBorderCompleteEvent.class, event -> {
+			worldBorderComplete();
 		});
 	}
 
 	private static void startCountDown() {
 		AtomicInteger integer = new AtomicInteger(10);
-		scheduleInLoopPhaseTask(0, secondsToTicks(1), secondsToTicks(10), () -> {
+		scheduleInLoopPhaseTask(0, 1, 10, MinecraftTimeUnit.Seconds, () -> {
 			int i = integer.getAndDecrement();
 			PlayerManager.forEveryPlayer(playerEntity -> {
 				playerEntity.networkHandler.sendPacket(new TitleS2CPacket(Text.literal(String.valueOf(i)).formatted(Formatting.GREEN)));
@@ -294,17 +258,19 @@ public class GameManager {
 			});
 		});
 
-		schedulePhaseTask(secondsToTicks(10), () -> {
+		schedulePhaseTask(10, MinecraftTimeUnit.Seconds, () -> {
 			PlayerManager.forEveryPlayer(PlayerManager::setPlayerForUHC);
 			PlayerManager.stopLobbyMusic();
 
 			deleteLobby();
 
 			// We need to schedule this because otherwise lobby entities won't get killed before it gets unloaded
-			Scheduler.schedule(2, () -> {
-				EventHandler.onActive();
+			Scheduler.schedule(2, MinecraftTimeUnit.Ticks, () -> {
+				EventHandler.broadcast(new UHCActiveEvent());
 				MinecraftServer server = UHCMod.SERVER;
-				server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
+				Collection<ServerPlayerEntity> players = PlayerUtils.players().stream().filter(p -> !TeamManager.shouldIgnoreTeam(p.getScoreboardTeam())).toList();
+				PlayerUtils.spread(server.getOverworld(), new Vec2f(0, 0), 500, 2900, true, players);
+				// server.getCommandManager().executeWithPrefix(server.getCommandSource(), "spreadplayers 0 0 500 2900 true @e[type=player]");
 			});
 		});
 	}
@@ -319,18 +285,18 @@ public class GameManager {
 		});
 
 		AtomicInteger integer = new AtomicInteger(10);
-		scheduleInLoopPhaseTask(minutesToTicks(2), minutesToTicks(2), minutesToTicks(8), () -> {
+		scheduleInLoopPhaseTask(2, 2, 8, MinecraftTimeUnit.Minutes, () -> {
 			int i = integer.addAndGet(-2);
-			PlayerManager.forEveryPlayer(playerEntity -> {
-				playerEntity.sendMessage(
+			PlayerManager.forEveryPlayer(player -> {
+				player.sendMessage(
 					Text.translatable("The grace period will end in %s minutes", i).formatted(Formatting.GOLD),
 					false
 				);
-				playerEntity.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 1.0F);
+				player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 1.0F, 1.0F);
 			});
 		});
 
-		schedulePhaseTask(minutesToTicks(10), () -> {
+		schedulePhaseTask(10, MinecraftTimeUnit.Minutes, () -> {
 			PlayerManager.forEveryPlayer(playerEntity -> {
 				playerEntity.sendMessage(
 					Text.translatable("uhc.game.grace.over").formatted(Formatting.RED, Formatting.BOLD),
@@ -339,13 +305,13 @@ public class GameManager {
 				playerEntity.playSound(SoundEvents.ENTITY_ENDER_DRAGON_AMBIENT, SoundCategory.MASTER, 1.0F, 1.0F);
 			});
 
-			EventHandler.onGracePeriodEnd();
+			EventHandler.broadcast(new UHCGracePeriodEndEvent());
 		});
 	}
 
 	private static void worldBorderComplete() {
 		UHCMod.LOGGER.info("World Border Completed");
-		schedulePhaseTask(minutesToTicks(5), () -> {
+		schedulePhaseTask(5, MinecraftTimeUnit.Minutes, () -> {
 			if (GameSettings.END_GAME_GLOW.getValue()) {
 				UHCMod.LOGGER.info("Players are now glowing");
 				PlayerManager.forEveryPlayer(playerEntity -> {
@@ -383,13 +349,13 @@ public class GameManager {
 		UHCDataBase.incrementWinDataBase(team.getName());
 		UHCDataBase.updateStats();
 
-		scheduleInLoopPhaseTask(0, 4, secondsToTicks(5), () -> {
+		scheduleInLoopPhaseTask(0, 4, 100, MinecraftTimeUnit.Ticks, () -> {
 			PlayerManager.forEveryPlayer(player -> {
 				player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST, SoundCategory.MASTER, 0.5f, 1f);
 				player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
 				player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST_FAR, SoundCategory.MASTER, 0.5f, 1f);
 			});
-			schedulePhaseTask(6, () -> {
+			schedulePhaseTask(6, MinecraftTimeUnit.Ticks, () -> {
 				PlayerManager.forEveryPlayer(player -> {
 					player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_SHOOT, SoundCategory.MASTER, 0.5f, 1f);
 					player.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.MASTER, 0.5f, 1f);
@@ -398,10 +364,10 @@ public class GameManager {
 			});
 		});
 
-		schedulePhaseTask(minutesToTicks(1), () -> {
+		schedulePhaseTask(2, MinecraftTimeUnit.Ticks, () -> {
 			PlayerManager.forEveryPlayer(PlayerManager::clearPlayerInventory);
-			EventHandler.onSetup();
-			EventHandler.onLobby();
+			EventHandler.broadcast(new UHCSetupEvent());
+			EventHandler.broadcast(new UHCLobbyEvent());
 		});
 	}
 
@@ -411,13 +377,13 @@ public class GameManager {
 			Identifier id = Identifier.of("uhc", "lobby");
 			bossBar = manager.get(id);
 			if (bossBar == null) {
-				bossBar = manager.add(id, Config.CURRENT_EVENT.getBossBarMessage());
+				bossBar = manager.add(id, Config.CURRENT_UHC.getBossBarMessage());
 			}
 		} else {
-			bossBar.setName(Config.CURRENT_EVENT.getBossBarMessage());
+			bossBar.setName(Config.CURRENT_UHC.getBossBarMessage());
 		}
 		bossBar.setPercent(1);
-		bossBar.setColor(Config.CURRENT_EVENT.getBossBarColour());
+		bossBar.setColor(Config.CURRENT_UHC.getBossBarColour());
 		PlayerManager.forEveryPlayer(p -> {
 			bossBar.addPlayer(p);
 		});
@@ -453,7 +419,7 @@ public class GameManager {
 				} else {
 					playerEntity.sendMessage(Text.literal("Successfully generated lobby!").formatted(Formatting.GREEN), false);
 				}
-				Vec3d spawn = Config.CURRENT_EVENT.getLobbySpawnPos();
+				Vec3d spawn = Config.CURRENT_UHC.getLobbySpawnPos();
 				playerEntity.teleport(UHCMod.SERVER.getOverworld(), spawn.getX(), spawn.getY(), spawn.getZ(), 0, 0);
 			});
 		} catch (Exception e) {
@@ -473,10 +439,14 @@ public class GameManager {
 			Clearable.clear(blockEntity);
 			world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS, 0);
 		}
+		List<Entity> toKill = new LinkedList<>();
 		for (Entity entity : world.iterateEntities()) {
-			if (entity != null && entity.getCommandTags().contains("uhc")) {
-				entity.kill();
+			if (entity.getCommandTags().contains("uhc")) {
+				toKill.add(entity);
 			}
+		}
+		for (Entity entity : toKill) {
+			entity.kill();
 		}
 	}
 }

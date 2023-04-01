@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod.features;
 
+import net.casualuhc.arcade.recipes.ArcadeRecipeSerializer;
 import net.casualuhc.uhcmod.utils.uhc.ItemUtils;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
@@ -44,6 +45,6 @@ public class GoldenHeadRecipe extends SpecialCraftingRecipe {
 
 	@Override
 	public RecipeSerializer<?> getSerializer() {
-		return null;
+		return ArcadeRecipeSerializer.INSTANCE;
 	}
 }

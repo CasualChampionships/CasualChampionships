@@ -2,10 +2,8 @@ package net.casualuhc.uhcmod.mixin;
 
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.utils.data.WorldExtension;
-import net.casualuhc.uhcmod.utils.event.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,26 +22,21 @@ public abstract class ServerWorldMixin implements WorldExtension.Holder {
         cir.setReturnValue(Math.abs(pos.getX()) < 30000000 && Math.abs(pos.getZ()) < 30000000);
     }
 
-    @Inject(method = "onPlayerConnected", at = @At("HEAD"))
-    private void onPlayerConnected(ServerPlayerEntity player, CallbackInfo ci) {
-        EventHandler.onPlayerJoin(player);
-    }
-
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
-        uhcmod_worldExtension.tick();
+        this.uhcmod_worldExtension.tick();
     }
 
     @Inject(method = "onBlockChanged", at = @At("HEAD"))
     private void onBlockChanged(BlockPos pos, BlockState oldBlock, BlockState newBlock, CallbackInfo ci) {
         if (UHCMod.SERVER.isOnThread() && oldBlock != newBlock) {
-            uhcmod_worldExtension.storeBlockChange(pos, oldBlock);
+            this.uhcmod_worldExtension.storeBlockChange(pos, oldBlock);
         }
     }
 
     @Override
     public WorldExtension getWorldExtension() {
-        return uhcmod_worldExtension;
+        return this.uhcmod_worldExtension;
     }
 }
 

@@ -4,10 +4,13 @@ import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.*;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.casualuhc.arcade.events.EventHandler;
 import net.casualuhc.uhcmod.UHCMod;
+import net.casualuhc.uhcmod.events.uhc.UHCActiveEvent;
+import net.casualuhc.uhcmod.events.uhc.UHCLobbyEvent;
+import net.casualuhc.uhcmod.events.uhc.UHCReadyEvent;
+import net.casualuhc.uhcmod.events.uhc.UHCSetupEvent;
 import net.casualuhc.uhcmod.utils.data.TeamExtension;
-import net.casualuhc.uhcmod.utils.event.EventHandler;
-import net.casualuhc.uhcmod.utils.event.UHCEvents;
 import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.argument.EntityArgumentType;
@@ -91,7 +94,7 @@ public class TeamManager {
 	 * @return whether the team should be ignored.
 	 */
 	public static boolean shouldIgnoreTeam(@Nullable AbstractTeam team) {
-		return team == null || IGNORED_TEAMS.contains(team);
+		return team == null || IGNORED_TEAMS.contains((Team) team);
 	}
 
 	/**
@@ -221,12 +224,12 @@ public class TeamManager {
 	 * Spawn all fake players.
 	 */
 	public static void spawnAllPlayers() {
-		if (GameManager.isGameActive()) {
+		if (UHCManager.isGameActive()) {
 			return;
 		}
 		MinecraftServer server = UHCMod.SERVER;
 		net.minecraft.server.PlayerManager playerManager = server.getPlayerManager();
-		Vec3d spawnPos = Config.CURRENT_EVENT.getLobbySpawnPos();
+		Vec3d spawnPos = Config.CURRENT_UHC.getLobbySpawnPos();
 		for (Team team : server.getScoreboard().getTeams()) {
 			for (String name : team.getPlayerList()) {
 				if (playerManager.getPlayer(name) == null) {
@@ -240,7 +243,7 @@ public class TeamManager {
 	 * Kill all fake players.
 	 */
 	public static void killAllPlayers() {
-		if (!GameManager.isGameActive()) {
+		if (!UHCManager.isGameActive()) {
 			PlayerManager.forEveryPlayer(p -> {
 				if (p instanceof EntityPlayerMPFake) {
 					p.kill();
@@ -307,32 +310,21 @@ public class TeamManager {
 	public static void noop() { }
 
 	static {
-		EventHandler.register(new UHCEvents() {
-			@Override
-			public void onSetup() {
-				createTeams();
+		EventHandler.register(UHCSetupEvent.class, event -> createTeams());
+		EventHandler.register(UHCReadyEvent.class, event -> {
+			unReadyAllTeams();
+			sendReadyMessage();
+		});
+		EventHandler.register(UHCLobbyEvent.class, event -> {
+			setCollisions(false);
+			for (Team team : IGNORED_TEAMS) {
+				team.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.ALWAYS);
 			}
-
-			@Override
-			public void onReady() {
-				unReadyAllTeams();
-				sendReadyMessage();
-			}
-
-			@Override
-			public void onLobby() {
-				setCollisions(false);
-				for (Team team : IGNORED_TEAMS) {
-					team.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.ALWAYS);
-				}
-			}
-
-			@Override
-			public void onActive() {
-				setCollisions(true);
-				for (Team team : IGNORED_TEAMS) {
-					team.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
-				}
+		});
+		EventHandler.register(UHCActiveEvent.class, event -> {
+			setCollisions(true);
+			for (Team team : IGNORED_TEAMS) {
+				team.setNameTagVisibilityRule(AbstractTeam.VisibilityRule.NEVER);
 			}
 		});
 	}

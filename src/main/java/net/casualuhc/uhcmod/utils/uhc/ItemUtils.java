@@ -12,7 +12,7 @@ import net.minecraft.util.Util;
 import static net.minecraft.text.Text.translatable;
 
 public class ItemUtils {
-	private static final ItemStack GOLDEN_HEAD = Util.make(generatePlayerHead("PhantomTupac", Config.CURRENT_EVENT.getGoldenHeadTexture()), i -> {
+	private static final ItemStack GOLDEN_HEAD = Util.make(generatePlayerHead("PhantomTupac", Config.CURRENT_UHC.getGoldenHeadTexture()), i -> {
 		i.setCustomName(translatable("uhc.game.goldenHead").formatted(Formatting.GOLD).styled(s -> s.withItalic(false)));
 	});
 
