@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface UHC {
 	UHC DEFAULT = new UHC() { };
-	Vec3d DEFAULT_SPAWN = new Vec3d(0, 320, 0);
+	Vec3d DEFAULT_SPAWN = new Vec3d(0.5, 320, 0.5);
 
 	/**
 	 * Returns the message displayed on the lobby boss bar.
@@ -18,7 +18,7 @@ public interface UHC {
 	 * @return the message to display.
 	 */
 	default MutableText getBossBarMessage() {
-		return Text.translatable("uhc.lobby.welcome").append("Casual UHC").formatted(Formatting.BOLD);
+		return Text.translatable("uhc.lobby.welcome").append(" ").append("Casual UHC").formatted(Formatting.BOLD);
 	}
 
 	/**
@@ -37,7 +37,11 @@ public interface UHC {
 	 */
 	@Nullable
 	default MinecraftServer.ServerResourcePackProperties getResourcePack() {
-		return null;
+		return new MinecraftServer.ServerResourcePackProperties(
+			"https://download.mc-packs.net/pack/b76b63212368d3fb4e39f54eb9ddd251445d1b8e.zip",
+			"b76b63212368d3fb4e39f54eb9ddd251445d1b8e",
+			true, Text.literal("Provides necessary features for UHC")
+		);
 	}
 
 	/**

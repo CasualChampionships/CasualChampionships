@@ -4,7 +4,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.casualuhc.arcade.events.EventHandler;
 import net.casualuhc.arcade.events.player.*;
 import net.casualuhc.arcade.events.server.ServerRegisterCommandEvent;
+import net.casualuhc.arcade.utils.PlayerUtils;
+import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.command.*;
+import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.managers.UHCManager;
 import net.casualuhc.uhcmod.utils.data.PlayerExtension;
@@ -22,6 +25,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
 public class GenericEvents {
@@ -35,6 +39,7 @@ public class GenericEvents {
 		EventHandler.register(PlayerChatEvent.class, GenericEvents::listenForTeamMessage);
 		EventHandler.register(PlayerItemUseEvent.class, GenericEvents::listenForUseHead);
 		EventHandler.register(PlayerItemUseOnEvent.class, GenericEvents::listenForUseHeadOn);
+		EventHandler.register(PlayerFallEvent.class, GenericEvents::listenForFallingOutOfLobby);
 	}
 
 	public static void noop() { }
@@ -127,6 +132,21 @@ public class GenericEvents {
 			ServerPlayerEntity player = event.getPlayer();
 			PlayerManager.giveHeadEffects(player, event.getStack(), event.getContext().getHand());
 			event.cancel(ActionResult.CONSUME);
+		}
+	}
+
+	private static void listenForFallingOutOfLobby(PlayerFallEvent event) {
+		if (UHCManager.isPhase(Phase.LOBBY)) {
+			ServerPlayerEntity player = event.getPlayer();
+			if (player.hasPermissionLevel(2)) {
+				return;
+			}
+			int bottom = UHCMod.SERVER.getOverworld().getTopY() - UHCManager.getLobby().getSize().getY() - 20;
+			if (player.getY() < bottom) {
+				Vec3d spawn = Config.CURRENT_UHC.getLobbySpawnPos();
+				player.teleport(UHCMod.SERVER.getOverworld(), spawn.getX(), spawn.getY(), spawn.getZ(), player.getYaw(), player.getPitch());
+				PlayerManager.grantAdvancement(player, UHCAdvancements.UH_OH);
+			}
 		}
 	}
 }

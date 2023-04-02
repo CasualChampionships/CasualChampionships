@@ -42,7 +42,7 @@ public class ChristmasUHC implements UHC {
 	private static final ServerResourcePackProperties PROPERTIES = new ServerResourcePackProperties(
 		"https://download.mc-packs.net/pack/19be7fedc4f16f68e406b6c76dd6c9cb652e168c.zip",
 		"19be7fedc4f16f68e406b6c76dd6c9cb652e168c",
-		false, Text.literal("This texture pack provides some festive features!")
+		true, Text.literal("This texture pack provides some festive features!")
 	);
 
 	@Override

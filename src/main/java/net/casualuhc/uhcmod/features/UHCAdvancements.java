@@ -64,6 +64,7 @@ public class UHCAdvancements {
 	public static final Advancement OFFICIALLY_BORED;
 	public static final Advancement FIND_THE_BUTTON;
 	public static final Advancement DISTRACTED;
+	public static final Advancement UH_OH;
 
 	static {
 		ROOT = Advancement.Builder.create().display(
@@ -282,6 +283,15 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/distracted"));
 
+		UH_OH = Advancement.Builder.create().parent(LDAP).display(
+			Items.BARRIER,
+			Text.translatable("uhc.advancements.uhOh"),
+			Text.translatable("uhc.advancements.uhOh.desc"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/uh_oh"));
+
 		FIND_THE_BUTTON = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
 			Items.STONE_BUTTON,
 			Text.translatable("uhc.advancements.findTheButton"),
@@ -291,8 +301,10 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/find_the_button"));
 
-		registerAdvancements();
-		registerListeners();
+		Scheduler.schedule(0, MinecraftTimeUnit.Ticks, () -> {
+			registerAdvancements();
+			registerListeners();
+		});
 	}
 
 	public static void noop() { }
@@ -404,8 +416,8 @@ public class UHCAdvancements {
 			}
 		});
 
-		EventHandler.register(PlayerFallEvent.class, event -> {
-			if (UHCManager.gameUptime() < 1200 && event.getDamage() > 0) {
+		EventHandler.register(PlayerLandEvent.class, event -> {
+			if (UHCManager.isGameActive() && UHCManager.gameUptime() < 1200 && event.getDamage() > 0) {
 				PlayerManager.grantAdvancement(event.getPlayer(), UHCAdvancements.BROKEN_ANKLES);
 			}
 		});

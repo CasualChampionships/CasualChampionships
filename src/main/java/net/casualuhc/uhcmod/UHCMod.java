@@ -12,11 +12,16 @@ import net.casualuhc.uhcmod.managers.UHCManager;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.managers.TeamManager;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
+import net.casualuhc.uhcmod.uhcs.EasterUHC;
 import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.casualuhc.uhcmod.utils.uhc.GenericEvents;
 import net.casualuhc.uhcmod.utils.uhc.UHC;
+import net.devtech.arrp.api.RRPCallback;
+import net.devtech.arrp.api.RuntimeResourcePack;
+import net.devtech.arrp.json.lang.JLang;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,5 +69,6 @@ public class UHCMod implements ModInitializer {
     @Override
     public void onInitialize() {
         addUHCEvent("christmas", new ChristmasUHC());
+        addUHCEvent("easter", new EasterUHC());
     }
 }
