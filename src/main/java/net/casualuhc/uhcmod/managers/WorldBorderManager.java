@@ -37,37 +37,37 @@ public class WorldBorderManager {
 
 	public static void moveWorldBorders(double newSize, long time) {
 		long modifiedTime = (long) (time * GameSettings.WORLD_BORDER_SPEED.getValue());
-		SERVER.getWorlds().forEach(world -> {
-			WorldBorder border = world.getWorldBorder();
-			if (modifiedTime != 0) {
-				border.interpolateSize(border.getSize(), newSize, modifiedTime * 1000);
-				return;
-			}
-			border.setSize(newSize);
-		});
+		WorldBorder border = WorldBorderManager.GLOBAL_BORDER;
+		if (modifiedTime != 0) {
+			border.interpolateSize(border.getSize(), newSize, modifiedTime * 1000);
+			return;
+		}
+		border.setSize(newSize);
 	}
 
 	public static void noop() { }
 
 	static {
 		EventHandler.register(CustomBorderFinishEvent.class, event -> {
-			UHCMod.LOGGER.info("Finished world border: {}", GameSettings.WORLD_BORDER_STAGE.getValue());
+			if (!event.getForced()) {
+				UHCMod.LOGGER.info("Finished world border: {}", GameSettings.WORLD_BORDER_STAGE.getValue());
 
-			Stage nextStage = GameSettings.WORLD_BORDER_STAGE.getValue().getNextStage();
-			if (nextStage == null || !UHCManager.isPhase(Phase.ACTIVE)) {
-				return;
+				Stage nextStage = GameSettings.WORLD_BORDER_STAGE.getValue().getNextStage();
+				if (nextStage == null || !UHCManager.isPhase(Phase.ACTIVE)) {
+					return;
+				}
+
+				GameSettings.WORLD_BORDER_STAGE.setValueQuietly(nextStage);
+				if (nextStage == Stage.END) {
+					EventHandler.broadcast(new UHCBorderCompleteEvent());
+					return;
+				}
+
+				UHCManager.schedulePhaseTask(10, MinecraftTimeUnit.Seconds, () -> {
+					double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
+					moveWorldBorders(nextStage.getEndSize(), nextStage.getTime(size));
+				});
 			}
-
-			GameSettings.WORLD_BORDER_STAGE.setValueQuietly(nextStage);
-			if (nextStage == Stage.END) {
-				EventHandler.broadcast(new UHCBorderCompleteEvent());
-				return;
-			}
-
-			UHCManager.schedulePhaseTask(10, MinecraftTimeUnit.Seconds, () -> {
-				double size = UHCMod.SERVER.getOverworld().getWorldBorder().getSize();
-				moveWorldBorders(nextStage.getEndSize(), nextStage.getTime(size));
-			});
 		});
 		EventHandler.register(UHCGracePeriodEndEvent.class, event -> {
 			startWorldBorders();

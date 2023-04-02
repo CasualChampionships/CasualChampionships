@@ -1,9 +1,9 @@
 package net.casualuhc.uhcmod.uhcs;
 
 import net.casualuhc.arcade.advancements.AdvancementHandler;
+import net.casualuhc.arcade.broadcaster.Broadcaster;
 import net.casualuhc.arcade.events.EventHandler;
 import net.casualuhc.arcade.events.player.PlayerBlockInteractionEvent;
-import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
 import net.casualuhc.uhcmod.managers.PlayerManager;
 import net.casualuhc.uhcmod.managers.UHCManager;
@@ -20,6 +20,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -74,8 +75,8 @@ public class EasterUHC implements UHC {
 	@Override
 	public MinecraftServer.ServerResourcePackProperties getResourcePack() {
 		return new MinecraftServer.ServerResourcePackProperties(
-			"https://download.mc-packs.net/pack/745b75724d8869708d450e7790fb1ed4d5a5bcec.zip",
-			"745b75724d8869708d450e7790fb1ed4d5a5bcec",
+			"https://download.mc-packs.net/pack/3d7cdfd954cecb983cfd3658ae19695c1e239228.zip",
+			"3d7cdfd954cecb983cfd3658ae19695c1e239228",
 			true, Text.literal("Provides necessary features for UHC")
 		);
 	}
@@ -113,6 +114,16 @@ public class EasterUHC implements UHC {
 	 */
 	@Override
 	public void load() {
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.easter.playerHeads"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.easter.chickenEggs"));
+
+
+		Broadcaster.addMessage(
+			Text.literal("Want a free golden head? Click ").append(
+				Text.literal("[HERE]").styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.youtube.com/watch?v=dQw4w9WgXcQ")))
+			)
+		);
+
 		AdvancementHandler.register(EASTER_EGG_HUNTER);
 
 		Map<UUID, Set<BlockPos>> eggs = new HashMap<>();

@@ -6,12 +6,9 @@ import net.casualuhc.arcade.recipes.RecipeHandler;
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit;
 import net.casualuhc.arcade.scheduler.Scheduler;
 import net.casualuhc.uhcmod.features.GoldenHeadRecipe;
+import net.casualuhc.uhcmod.managers.*;
 import net.casualuhc.uhcmod.uhcs.ChristmasUHC;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
-import net.casualuhc.uhcmod.managers.UHCManager;
-import net.casualuhc.uhcmod.managers.PlayerManager;
-import net.casualuhc.uhcmod.managers.TeamManager;
-import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.casualuhc.uhcmod.uhcs.EasterUHC;
 import net.casualuhc.uhcmod.utils.uhc.Config;
 import net.casualuhc.uhcmod.utils.uhc.GenericEvents;
@@ -50,7 +47,7 @@ public class UHCMod implements ModInitializer {
                 WorldBorderManager.noop();
                 PlayerManager.noop();
                 TeamManager.noop();
-                RecipeHandler.register(new GoldenHeadRecipe());
+                RecipeManager.registerRecipes();
 
                 Config.CURRENT_UHC.load();
             });

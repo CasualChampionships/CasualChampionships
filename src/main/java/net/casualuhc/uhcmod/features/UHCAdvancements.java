@@ -31,6 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -65,6 +66,7 @@ public class UHCAdvancements {
 	public static final Advancement FIND_THE_BUTTON;
 	public static final Advancement DISTRACTED;
 	public static final Advancement UH_OH;
+	public static final Advancement BASICALLY;
 
 	static {
 		ROOT = Advancement.Builder.create().display(
@@ -292,6 +294,15 @@ public class UHCAdvancements {
 			true, true, false
 		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/uh_oh"));
 
+		BASICALLY = Advancement.Builder.create().parent(LDAP).display(
+			Items.WHITE_WOOL,
+			Text.translatable("uhc.advancements.basically"),
+			Text.translatable("uhc.advancements.basically.desc"),
+			null,
+			AdvancementFrame.TASK,
+			true, true, false
+		).criterion("impossible", new ImpossibleCriterion.Conditions()).build(new Identifier("uhc/basically"));
+
 		FIND_THE_BUTTON = Advancement.Builder.create().parent(OFFICIALLY_BORED).display(
 			Items.STONE_BUTTON,
 			Text.translatable("uhc.advancements.findTheButton"),
@@ -424,9 +435,14 @@ public class UHCAdvancements {
 
 		EventHandler.register(PlayerChatEvent.class, event -> {
 			ServerPlayerEntity player = event.getPlayer();
-			String message = event.getMessage().getSignedContent();
-			if (PlayerManager.isMessageGlobal(player, message) && message.contains("jndi") && message.contains("ldap")) {
-				PlayerManager.grantAdvancement(player, UHCAdvancements.LDAP);
+			String message = event.getMessage().getSignedContent().toLowerCase(Locale.ROOT);
+			if (PlayerManager.isMessageGlobal(player, message)) {
+				if (message.contains("jndi") && message.contains("ldap")) {
+					PlayerManager.grantAdvancement(player, UHCAdvancements.LDAP);
+				}
+				if (message.contains("basically")) {
+					PlayerManager.grantAdvancement(player, UHCAdvancements.BASICALLY);
+				}
 			}
 		});
 

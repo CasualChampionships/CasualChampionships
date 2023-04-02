@@ -6,6 +6,7 @@
   "mixins": [
     "BrewingStandBlockEntityMixin",
     "ConcentricRingsStructurePlacementMixin",
+    "EggEntityMixin",
     "EntityMixin",
     "KillCommandMixin",
     "LeavesBlockMixin",

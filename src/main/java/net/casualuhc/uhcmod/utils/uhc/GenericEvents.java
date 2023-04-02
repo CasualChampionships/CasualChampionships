@@ -1,10 +1,10 @@
 package net.casualuhc.uhcmod.utils.uhc;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.casualuhc.arcade.broadcaster.Broadcaster;
 import net.casualuhc.arcade.events.EventHandler;
 import net.casualuhc.arcade.events.player.*;
 import net.casualuhc.arcade.events.server.ServerRegisterCommandEvent;
-import net.casualuhc.arcade.utils.PlayerUtils;
 import net.casualuhc.uhcmod.UHCMod;
 import net.casualuhc.uhcmod.command.*;
 import net.casualuhc.uhcmod.features.UHCAdvancements;
@@ -24,6 +24,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
@@ -40,6 +41,25 @@ public class GenericEvents {
 		EventHandler.register(PlayerItemUseEvent.class, GenericEvents::listenForUseHead);
 		EventHandler.register(PlayerItemUseOnEvent.class, GenericEvents::listenForUseHeadOn);
 		EventHandler.register(PlayerFallEvent.class, GenericEvents::listenForFallingOutOfLobby);
+
+		Broadcaster.setFormatter(text -> {
+			return Text.literal("================\n").formatted(Formatting.GREEN)
+				.append(text.copy().formatted(Formatting.GOLD)).append("\n")
+				.append(Text.literal("================").formatted(Formatting.GREEN));
+		});
+
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.hostedBy"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.borderWarning"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.spectator"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.noPotions"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.globalChat"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.nighVision"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.teamGlow"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.minesweeper"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.specCommand"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.playerHeads"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.joke"));
+		Broadcaster.addMessage(Text.translatable("uhc.broadcast.rules"));
 	}
 
 	public static void noop() { }

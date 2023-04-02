@@ -33,7 +33,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "carpet:fabric-carpet:${project.carpet_core_version}"
 
-    include modImplementation("com.github.CasualUHC:Arcade:9d2e5744bc5955bf9f419d3ea5fce728700aba93")
+    include modImplementation("com.github.CasualUHC:Arcade:519b573f82066de8e4e84d9b3f5d735f8e734b7b")
     include modImplementation("net.fabricmc:fabric-language-kotlin:1.9.2+kotlin.1.8.10")
     include implementation('org.mongodb:mongo-java-driver:3.12.11')
     include implementation('org.java-websocket:Java-WebSocket:1.5.3')

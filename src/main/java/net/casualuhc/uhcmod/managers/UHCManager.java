@@ -190,6 +190,11 @@ public class UHCManager {
 		return lobby;
 	}
 
+	public static void reloadLobby() {
+		lobby = null;
+		getLobby();
+	}
+
 	public static void noop() { }
 
 	// UHC logic

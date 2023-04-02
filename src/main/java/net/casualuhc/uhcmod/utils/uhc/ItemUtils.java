@@ -9,11 +9,15 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 
+import static net.minecraft.text.Text.literal;
 import static net.minecraft.text.Text.translatable;
 
 public class ItemUtils {
 	private static final ItemStack GOLDEN_HEAD = Util.make(generatePlayerHead("PhantomTupac", Config.CURRENT_UHC.getGoldenHeadTexture()), i -> {
 		i.setCustomName(translatable("uhc.game.goldenHead").formatted(Formatting.GOLD).styled(s -> s.withItalic(false)));
+	});
+	private static final ItemStack CRAFTED_HEAD = Util.make(generatePlayerHead("steve", Config.CURRENT_UHC.getCraftedHeadTexture()), i -> {
+		i.setCustomName(literal("Player Head").formatted(Formatting.OBFUSCATED));
 	});
 
 	/**
@@ -95,6 +99,10 @@ public class ItemUtils {
 	 */
 	public static ItemStack generateGoldenHead() {
 		return GOLDEN_HEAD.copy();
+	}
+
+	public static ItemStack generateCraftedHead() {
+		return CRAFTED_HEAD.copy();
 	}
 
 	/**
