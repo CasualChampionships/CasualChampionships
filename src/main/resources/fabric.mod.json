@@ -2,24 +2,22 @@
   "schemaVersion": 1,
   "id": "uhcmod",
   "version": "${version}",
-  "name": "Casual UHC mod",
+  "name": "Casual UHC Mod",
   "description": "UHC mod for Casual UHC",
   "authors": [
-    "Kerb",
-    "FX",
-    "SuperSanta",
-    "Kman",
     "Sensei"
   ],
   "contact": {
     "repo": "https://github.com/CasualUHC/uhc-mod.git"
   },
   "license": "MIT",
-  "icon": "assets/uhcmod/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.casualuhc.uhcmod.UHCMod"
+      {
+        "adapter": "kotlin",
+        "value": "net.casualuhc.uhcmod.UHCMod"
+      }
     ]
   },
   "mixins": [
@@ -27,8 +25,9 @@
   ],
   "accessWidener" : "uhcmod.accesswidener",
   "depends": {
-    "fabricloader": ">=0.11.1",
-    "minecraft": "1.19.*",
-    "carpet": ">=1.4.78"
+    "fabricloader": ">=0.14.12",
+    "minecraft": "1.19.x",
+    "java": ">=17",
+    "fabric-language-kotlin": ">=1.9.0+kotlin.1.8.0"
   }
 }
