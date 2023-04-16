@@ -7,7 +7,7 @@ import net.minecraft.world.BossEvent
 
 interface BossBarHandler {
     fun getTitle(): MutableComponent {
-        return Texts.LOBBY_WELCOME.append(" ").append("Casual UHC")
+        return Texts.LOBBY_WELCOME.append(" ").append(Texts.CASUAL_UHC)
     }
 
     fun getColour(): BossEvent.BossBarColor {

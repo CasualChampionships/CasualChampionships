@@ -19,13 +19,12 @@ import net.casualuhc.uhcmod.extensions.PlayerStat.DamageDealt
 import net.casualuhc.uhcmod.extensions.PlayerStat.Relogs
 import net.casualuhc.uhcmod.extensions.PlayerStatsExtension.Companion.uhcStats
 import net.casualuhc.uhcmod.extensions.PlayerUHCExtension
-import net.casualuhc.uhcmod.extensions.TeamFlag
 import net.casualuhc.uhcmod.extensions.TeamFlag.Eliminated
 import net.casualuhc.uhcmod.extensions.TeamFlagsExtension.Companion.flags
 import net.casualuhc.uhcmod.managers.PlayerManager.isMessageGlobal
 import net.casualuhc.uhcmod.managers.UHCManager
-import net.casualuhc.uhcmod.util.Texts
 import net.casualuhc.uhcmod.screen.MinesweeperScreen
+import net.casualuhc.uhcmod.util.Texts
 import net.minecraft.advancements.Advancement
 import net.minecraft.advancements.FrameType
 import net.minecraft.resources.ResourceLocation

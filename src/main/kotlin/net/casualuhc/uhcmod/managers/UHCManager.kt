@@ -7,17 +7,19 @@ import com.google.gson.JsonObject
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.EventHandler
 import net.casualuhc.arcade.events.core.Event
-import net.casualuhc.arcade.events.player.*
+import net.casualuhc.arcade.events.player.PlayerJoinEvent
+import net.casualuhc.arcade.events.player.PlayerLeaveEvent
 import net.casualuhc.arcade.events.server.ServerLoadedEvent
 import net.casualuhc.arcade.events.server.ServerRecipeReloadEvent
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.arcade.events.server.ServerTickEvent
-import net.casualuhc.arcade.recipes.CraftingRecipeBuilder
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit
-import net.casualuhc.arcade.scheduler.MinecraftTimeUnit.Seconds
-import net.casualuhc.arcade.scheduler.MinecraftTimeUnit.Ticks
+import net.casualuhc.arcade.scheduler.MinecraftTimeUnit.*
 import net.casualuhc.arcade.scheduler.Task
 import net.casualuhc.arcade.scheduler.TaskScheduler
+import net.casualuhc.arcade.scoreboards.ArcadeSidebar
+import net.casualuhc.arcade.scoreboards.ConstantRow
+import net.casualuhc.arcade.scoreboards.SidebarRow
 import net.casualuhc.arcade.utils.ComponentUtils.bold
 import net.casualuhc.arcade.utils.ComponentUtils.gold
 import net.casualuhc.arcade.utils.ComponentUtils.lime
@@ -29,13 +31,20 @@ import net.casualuhc.arcade.utils.PlayerUtils.grantAdvancement
 import net.casualuhc.arcade.utils.PlayerUtils.isSurvival
 import net.casualuhc.arcade.utils.PlayerUtils.sendSound
 import net.casualuhc.arcade.utils.PlayerUtils.sendTitle
+import net.casualuhc.arcade.utils.TeamUtils
 import net.casualuhc.arcade.utils.TeamUtils.getServerPlayers
 import net.casualuhc.uhcmod.UHCMod
 import net.casualuhc.uhcmod.advancement.RaceAdvancement
 import net.casualuhc.uhcmod.advancement.UHCAdvancements
 import net.casualuhc.uhcmod.events.uhc.*
+import net.casualuhc.uhcmod.extensions.PlayerFlag.Won
+import net.casualuhc.uhcmod.extensions.PlayerFlagsExtension.Companion.flags
+import net.casualuhc.uhcmod.extensions.PlayerStat
+import net.casualuhc.uhcmod.extensions.PlayerStatsExtension.Companion.uhcStats
+import net.casualuhc.uhcmod.extensions.PlayerUHCExtension.Companion.uhc
 import net.casualuhc.uhcmod.extensions.TeamFlag.Ignored
 import net.casualuhc.uhcmod.extensions.TeamFlagsExtension.Companion.flags
+import net.casualuhc.uhcmod.extensions.TeamUHCExtension.Companion.uhc
 import net.casualuhc.uhcmod.managers.PlayerManager.belongsToTeam
 import net.casualuhc.uhcmod.managers.PlayerManager.sendUHCResourcePack
 import net.casualuhc.uhcmod.managers.PlayerManager.setForUHC
@@ -47,17 +56,19 @@ import net.casualuhc.uhcmod.uhc.DefaultUHC
 import net.casualuhc.uhcmod.uhc.UHCEvent
 import net.casualuhc.uhcmod.uhc.UHCEvents
 import net.casualuhc.uhcmod.util.Config
-import net.casualuhc.uhcmod.util.HeadUtils
 import net.casualuhc.uhcmod.util.RuleUtils
 import net.casualuhc.uhcmod.util.Texts
+import net.casualuhc.uhcmod.util.Texts.monospaced
+import net.casualuhc.uhcmod.util.TimeUtils
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.bossevents.CustomBossEvent
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.Mth
-import net.minecraft.world.item.Items
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.Vec2
 import java.nio.file.Files
@@ -69,7 +80,8 @@ object UHCManager {
     private val claimed = HashSet<RaceAdvancement>()
     private val scheduler = TaskScheduler()
 
-    private var bossBar: CustomBossEvent? = null
+    private var sidebar: ArcadeSidebar? = null
+    private var bossbar: CustomBossEvent? = null
     private var startTime = Long.MAX_VALUE
 
     private var glowing = false
@@ -82,6 +94,9 @@ object UHCManager {
     var uptime = 0
         private set
 
+    var paused = false
+        private set
+
     fun isPhase(phase: Phase): Boolean {
         return this.phase == phase
     }
@@ -91,6 +106,21 @@ object UHCManager {
         this.phase = phase
 
         EventHandler.broadcast(phase.eventFactory())
+    }
+
+    fun pause() {
+        this.paused = true
+        if (this.isActivePhase()) {
+            // Pause border
+            WorldBorderManager.moveWorldBorders(WorldBorderManager.getGlobalBorder().size)
+        }
+    }
+
+    fun unpause() {
+        this.paused = false
+        if (this.isActivePhase()) {
+            WorldBorderManager.startWorldBorders()
+        }
     }
 
     fun schedulePhaseTask(time: Int, unit: MinecraftTimeUnit, task: Task) {
@@ -175,6 +205,11 @@ object UHCManager {
         // Do not call this.setPhase, prevents event broadcasting
         this.phase = Phase.valueOf(json["phase"].asString)
         this.glowing = json["glowing"].asBoolean
+        this.paused = json["paused"]?.asBoolean ?: false
+
+        if (this.isActivePhase()) {
+            this.createActiveSidebar()
+        }
 
         val tasks = UHCLoadTasksEvent()
         EventHandler.broadcast(tasks)
@@ -205,6 +240,7 @@ object UHCManager {
         val json = JsonObject()
         json.addProperty("phase", this.phase.name)
         json.addProperty("glowing", this.glowing)
+        json.addProperty("paused", this.paused)
 
         val tasks = JsonArray()
         for ((tick, queue) in this.scheduler.tasks) {
@@ -236,10 +272,12 @@ object UHCManager {
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val player = event.player
 
-        val bar = this.bossBar
-        if (bar != null && this.isLobbyPhase()) {
-            bar.addPlayer(player)
+        if (this.isLobbyPhase()) {
+            this.bossbar?.addPlayer(player)
         }
+
+        this.sidebar?.addPlayer(player)
+
         if (this.isActivePhase() && this.glowing && player.isSurvival) {
             player.setGlowingTag(true)
         }
@@ -254,10 +292,14 @@ object UHCManager {
     }
 
     private fun onServerTick() {
+        if (this.paused) {
+            return
+        }
+
         this.scheduler.tick()
 
         this.uptime++
-        val bar = this.bossBar
+        val bar = this.bossbar
         if (!this.isLobbyPhase() || bar == null) {
             return
         }
@@ -276,17 +318,31 @@ object UHCManager {
     }
 
     private fun onUHCSetup() {
-        this.deleteAllBossBars()
+
     }
 
     private fun onUHCLobby() {
+        this.sidebar?.clearPlayers()
+        this.sidebar = null
+
+        this.deleteAllBossBars()
         RuleUtils.setLobbyGamerules()
 
         val handler = this.event.getLobbyHandler()
-        handler.place()
+        handler.getArea().place()
+
         PlayerUtils.forEveryPlayer { player ->
-            handler.forceTeleport(player)
+            if (!player.hasPermissions(4)) {
+                player.setGameMode(GameType.ADVENTURE)
+                handler.tryTeleport(player)
+            }
         }
+        TeamUtils.forEachTeam { team ->
+            for (player in team.uhc.players) {
+                Arcade.server.scoreboard.addPlayerToTeam(player, team)
+            }
+        }
+
         this.generateBossBar()
     }
 
@@ -306,11 +362,12 @@ object UHCManager {
         }
         this.schedulePhaseTask(10, Seconds) {
             PlayerUtils.forEveryPlayer { player ->
-                player.setForUHC(true)
                 player.sendUHCResourcePack()
             }
 
-            this.event.getLobbyHandler().remove()
+            val area = this.event.getLobbyHandler().getArea()
+            area.removeEntities { it !is Player }
+            area.remove()
 
             this.setPhase(Active)
             val players = PlayerUtils.players().filter { player ->
@@ -318,6 +375,10 @@ object UHCManager {
                 team !== null && !team.flags.has(Ignored)
             }
             PlayerUtils.spread(LevelUtils.overworld(), Vec2(0.0F, 0.0F), 500.0, 2900.0, true, players)
+
+            PlayerUtils.forEveryPlayer { player ->
+                player.setForUHC(true)
+            }
         }
     }
 
@@ -325,12 +386,14 @@ object UHCManager {
         this.resetTrackers()
         RuleUtils.setActiveGamerules()
 
+        this.createActiveSidebar()
+
         PlayerUtils.forEveryPlayer { player ->
             player.sendSystemMessage(Texts.UHC_GRACE_FIRST.gold())
             player.sendSound(SoundEvents.NOTE_BLOCK_PLING.value())
         }
         var minutes = 10
-        this.scheduleInLoopPhaseTask(2, 2, 8, MinecraftTimeUnit.Minutes) {
+        this.scheduleInLoopPhaseTask(2, 2, 8, Minutes) {
             minutes -= 2
             val message = Texts.UHC_GRACE_GENERIC.generate(minutes).gold()
             PlayerUtils.forEveryPlayer { player ->
@@ -338,7 +401,7 @@ object UHCManager {
                 player.sendSound(SoundEvents.NOTE_BLOCK_PLING.value())
             }
         }
-        this.schedulePhaseTask(10, MinecraftTimeUnit.Minutes, GracePeriodOverTask())
+        this.schedulePhaseTask(10, Minutes, GracePeriodOverTask())
     }
 
     private fun onUHCEnd() {
@@ -353,7 +416,6 @@ object UHCManager {
         }
 
         for (player in alive) {
-            player.setGameMode(GameType.ADVENTURE)
             player.abilities.mayfly = true
             player.abilities.invulnerable = true
             player.onUpdateAbilities()
@@ -361,6 +423,7 @@ object UHCManager {
 
         PlayerUtils.forEveryPlayer { player ->
             if (player.belongsToTeam(team)) {
+                player.flags.set(Won, true)
                 player.grantAdvancement(UHCAdvancements.WINNER)
             }
             player.setGlowingTag(false)
@@ -388,27 +451,58 @@ object UHCManager {
         }
 
 
-        this.schedulePhaseTask(2, Ticks) {
-            PlayerUtils.forEveryPlayer { it.clearPlayerInventory() }
+        this.schedulePhaseTask(20, Seconds) {
+            PlayerUtils.forEveryPlayer {
+                it.clearPlayerInventory()
+            }
             this.setPhase(Lobby)
         }
     }
 
     private fun onWorldBorderComplete() {
         UHCMod.logger.info("World Border Completed")
-        this.schedulePhaseTask(5, MinecraftTimeUnit.Minutes, BorderEndTask())
+        this.schedulePhaseTask(5, Minutes, BorderEndTask())
+
+        val endTaskTime = this.uptime + Minutes.toTicks(5)
+        this.sidebar?.addRow {
+            val delta = (endTaskTime - this.uptime).coerceAtLeast(0)
+            val time = TimeUtils.secondsToString(Ticks.toSeconds(delta.toDouble()).toInt())
+            Texts.SIDEBAR_UNTIL_GLOWING.generate(time).monospaced()
+        }
+    }
+
+    private fun createActiveSidebar() {
+        val sidebar = ArcadeSidebar(ConstantRow(Texts.CASUAL_UHC.gold().bold()))
+
+        sidebar.addRow(ConstantRow(Texts.SIDEBAR_TEAMMATES.monospaced()))
+        for (i in 0 until this.event.getTeamSize()) {
+            sidebar.addRow(TeammateRow(i))
+        }
+        sidebar.addRow(ConstantRow(Component.empty()))
+        sidebar.addRow { player ->
+            Texts.SIDEBAR_KILLS.generate(Mth.ceil(player.uhcStats[PlayerStat.Kills])).monospaced()
+        }
+        sidebar.addRow {
+            val time = TimeUtils.secondsToString(Ticks.toSeconds(this.uptime.toDouble()).toInt())
+            Texts.SIDEBAR_ELAPSED.generate(time).monospaced()
+        }
+
+        PlayerUtils.forEveryPlayer {
+            sidebar.addPlayer(it)
+        }
+        this.sidebar = sidebar
     }
 
     private fun generateBossBar() {
         val bar: CustomBossEvent
         val handler = this.event.getBossBarHandler()
-        if (this.bossBar == null) {
+        if (this.bossbar == null) {
             val manager = Arcade.server.customBossEvents
             val id = ResourceLocation("uhc", "lobby")
             bar = manager.get(id) ?: manager.create(id, handler.getTitle())
-            this.bossBar = bar
+            this.bossbar = bar
         } else {
-            bar = this.bossBar!!
+            bar = this.bossbar!!
             bar.name = handler.getTitle()
         }
         bar.progress = 1.0F
@@ -417,7 +511,7 @@ object UHCManager {
     }
 
     private fun hideBossBar() {
-        this.bossBar?.removeAllPlayers()
+        this.bossbar?.removeAllPlayers()
     }
 
     private fun deleteAllBossBars() {
@@ -435,6 +529,38 @@ object UHCManager {
         Start(::UHCStartEvent),
         Active(::UHCActiveEvent),
         End(::UHCEndEvent)
+    }
+
+    private class TeammateRow(val index: Int): SidebarRow {
+        override fun getComponent(player: ServerPlayer): Component {
+            val team = player.uhc.originalTeam ?: player.team
+            if (team == null || team.flags.has(Ignored)) {
+                return Component.literal(" - ").monospaced().append(Texts.ICON_CROSS)
+            }
+            val players = team.uhc.players
+            if (this.index >= players.size) {
+                return Component.literal(" - ").monospaced().append(Texts.ICON_CROSS)
+            }
+            val name: String
+            val teammate: ServerPlayer?
+            if (this.index == 0) {
+                name = player.scoreboardName
+                teammate = player
+            } else {
+                name = players.filter { it != player.scoreboardName }[this.index - 1]
+                teammate = PlayerUtils.player(name)
+            }
+            val longName = Component.literal(name + " ".repeat(17 - name.length)).withStyle(team.color)
+            val start = Component.literal(" - ").append(longName).append(" ").monospaced()
+            if (teammate !== null) {
+                if (teammate.isSurvival && teammate.isAlive) {
+                    val health = "% 4.1f".format(teammate.health / 2.0)
+                    return start.append(health).append(Texts.space(1)).append(Texts.ICON_HEART)
+                }
+                return start.append("     ").append(Texts.ICON_CROSS)
+            }
+            return start.append("     ").append(Texts.ICON_NO_CONNECTION)
+        }
     }
 
     private class GracePeriodOverTask: SavableTask() {

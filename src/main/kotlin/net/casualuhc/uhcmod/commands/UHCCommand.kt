@@ -86,7 +86,11 @@ object UHCCommand: Command {
                     )
                 )
             ).then(
-                Commands.literal("phase").executes(this::getPhase)
+                Commands.literal("phase").then(
+                    Commands.literal("pause").executes(this::pausePhase)
+                ).then(
+                    Commands.literal("unpause").executes(this::unpausePhase)
+                ).executes(this::getPhase)
             ).then(
                 Commands.literal("setup").executes {
                     this.setPhase(Setup)
@@ -94,6 +98,8 @@ object UHCCommand: Command {
             ).then(
                 Commands.literal("lobby").then(
                     Commands.literal("reload")
+                ).then(
+                    Commands.literal("tp").executes(this::teleportToLobby)
                 ).executes {
                     this.setPhase(Lobby)
                 }
@@ -181,6 +187,24 @@ object UHCCommand: Command {
         return 1
     }
 
+    private fun pausePhase(context: CommandContext<CommandSourceStack>): Int {
+        if (UHCManager.paused) {
+            context.source.sendFailure(Component.literal("Current phase was already paused!"))
+        }
+        UHCManager.pause()
+        context.source.sendSuccess(Component.literal("Successfully paused the current phase ${UHCManager.phase}"), true)
+        return 1
+    }
+
+    private fun unpausePhase(context: CommandContext<CommandSourceStack>): Int {
+        if (!UHCManager.paused) {
+            context.source.sendFailure(Component.literal("Current phase was not paused!"))
+        }
+        UHCManager.unpause()
+        context.source.sendSuccess(Component.literal("Successfully unpaused the current phase ${UHCManager.phase}"), true)
+        return 1
+    }
+
     private fun getPhase(context: CommandContext<CommandSourceStack>): Int {
         context.source.sendSuccess(Component.literal("The current phase is ${UHCManager.phase.name}"), false)
         return 1
@@ -188,6 +212,12 @@ object UHCCommand: Command {
 
     private fun setPhase(phase: Phase): Int {
         UHCManager.setPhase(phase)
+        return 1
+    }
+
+    private fun teleportToLobby(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+        UHCManager.event.getLobbyHandler().forceTeleport(player)
         return 1
     }
 

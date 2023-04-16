@@ -1,0 +1,40 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "uhc:font/hardcore_heart.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\uE000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/no_connection.png",
+      "ascent": 7,
+      "height": 7,
+      "chars": [
+        "\uE001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/cross.png",
+      "ascent": 7,
+      "height": 7,
+      "chars": [
+        "\uE002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/uhc.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE003"
+      ]
+    }
+  ]
+}

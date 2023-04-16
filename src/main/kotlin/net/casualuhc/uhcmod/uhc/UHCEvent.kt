@@ -7,6 +7,8 @@ import net.casualuhc.uhcmod.uhc.handlers.ResourceHandler
 interface UHCEvent {
     fun getName(): String
 
+    fun getTeamSize(): Int
+
     fun getLobbyHandler(): LobbyHandler
 
     fun getBossBarHandler(): BossBarHandler

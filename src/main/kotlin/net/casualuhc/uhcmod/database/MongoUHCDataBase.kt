@@ -9,6 +9,7 @@ import com.mongodb.MongoClientURI
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.ReplaceOptions
 import net.casualuhc.uhcmod.extensions.PlayerFlag.Participating
+import net.casualuhc.uhcmod.extensions.PlayerFlag.Won
 import net.casualuhc.uhcmod.extensions.PlayerFlagsExtension.Companion.flags
 import net.casualuhc.uhcmod.extensions.PlayerStat
 import net.casualuhc.uhcmod.extensions.PlayerStatsExtension.Companion.uhcStats
@@ -20,10 +21,8 @@ import org.bson.BsonDocument
 import org.bson.Document
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
-import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 
 class MongoUHCDataBase(
     name: String,
@@ -54,6 +53,7 @@ class MongoUHCDataBase(
             val filter = Filters.eq("_id", player.stringUUID)
             val latest = Document("_id", player.stringUUID)
             latest["participated"] = player.flags.has(Participating)
+            latest["won"] = player.flags.has(Won)
             for (stat in PlayerStat.values()) {
                 latest[stat.id()] = stats[stat]
             }
@@ -81,15 +81,18 @@ class MongoUHCDataBase(
                 val filter = Filters.eq("_id", stats["_id"])
                 val cursor = this.combinedPlayerStats.find(filter).cursor()
                 val participated = stats.remove("participated") as Boolean
+                val won = stats.remove("participated") as Boolean
 
                 if (!cursor.hasNext()) {
                     stats["plays"] = if (participated) 1 else 0
+                    stats["wins"] = if (won) 1 else 0
                     this.combinedPlayerStats.insertOne(stats)
                     continue
                 }
 
                 val total = cursor.next()
-                total["plays"] = total.getDouble("plays") + if (participated) 1 else 0
+                total["plays"] = total.getInteger("plays") + if (participated) 1 else 0
+                total["wins"] = total.getInteger("wins") + if (won) 1 else 0
                 for (stat in PlayerStat.values()) {
                     val id = stat.id()
                     val new = stat.merger(total.getDouble(id), stats.getDouble(id))

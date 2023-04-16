@@ -26,6 +26,7 @@ import net.casualuhc.uhcmod.extensions.TeamFlag.Ignored
 import net.casualuhc.uhcmod.extensions.TeamFlag.Ready
 import net.casualuhc.uhcmod.extensions.TeamFlagsExtension
 import net.casualuhc.uhcmod.extensions.TeamFlagsExtension.Companion.flags
+import net.casualuhc.uhcmod.extensions.TeamUHCExtension
 import net.casualuhc.uhcmod.managers.PlayerManager.setForUHC
 import net.casualuhc.uhcmod.util.Config
 import net.casualuhc.uhcmod.util.Texts
@@ -180,7 +181,7 @@ object TeamManager {
             return false
         }
         val players = Arcade.server.playerList
-        val location = UHCManager.event.getLobbyHandler().getSpawnLocation()
+        val location = UHCManager.event.getLobbyHandler().getSpawn()
         for (team in TeamUtils.teams()) {
             for (name in team.players) {
                 if (players.getPlayerByName(name) == null) {
@@ -211,11 +212,16 @@ object TeamManager {
     }
 
     internal fun registerEvents() {
-        EventHandler.register<TeamCreatedEvent> { it.team.addExtension(TeamFlagsExtension()) }
+        EventHandler.register<TeamCreatedEvent> { this.onTeamCreated(it) }
         EventHandler.register<UHCSetupEvent> { this.createTeams() }
         EventHandler.register<UHCReadyEvent> { this.onUHCReady() }
         EventHandler.register<UHCLobbyEvent> { this.onUHCLobby() }
         EventHandler.register<UHCActiveEvent> { this.onUHCActive() }
+    }
+
+    private fun onTeamCreated(event: TeamCreatedEvent) {
+        event.team.addExtension(TeamFlagsExtension())
+        event.team.addExtension(TeamUHCExtension())
     }
 
     private fun onUHCReady() {

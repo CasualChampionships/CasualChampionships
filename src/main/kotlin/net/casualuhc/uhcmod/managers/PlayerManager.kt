@@ -26,7 +26,9 @@ import net.casualuhc.arcade.utils.PlayerUtils.sendSound
 import net.casualuhc.arcade.utils.PlayerUtils.sendSubtitle
 import net.casualuhc.arcade.utils.PlayerUtils.sendTitle
 import net.casualuhc.arcade.utils.PlayerUtils.teamMessage
+import net.casualuhc.arcade.utils.TeamUtils
 import net.casualuhc.arcade.utils.TickUtils
+import net.casualuhc.uhcmod.UHCMod
 import net.casualuhc.uhcmod.advancement.RaceAdvancement.Death
 import net.casualuhc.uhcmod.advancement.RaceAdvancement.Kill
 import net.casualuhc.uhcmod.advancement.UHCAdvancements
@@ -45,6 +47,7 @@ import net.casualuhc.uhcmod.extensions.PlayerUHCExtension.Companion.uhc
 import net.casualuhc.uhcmod.extensions.TeamFlag.Eliminated
 import net.casualuhc.uhcmod.extensions.TeamFlag.Ignored
 import net.casualuhc.uhcmod.extensions.TeamFlagsExtension.Companion.flags
+import net.casualuhc.uhcmod.extensions.TeamUHCExtension.Companion.uhc
 import net.casualuhc.uhcmod.managers.TeamManager.hasAlivePlayers
 import net.casualuhc.uhcmod.managers.UHCManager.Phase.End
 import net.casualuhc.uhcmod.settings.GameSettings
@@ -52,6 +55,7 @@ import net.casualuhc.uhcmod.util.Config
 import net.casualuhc.uhcmod.util.DirectionUtils.opposite
 import net.casualuhc.uhcmod.util.HeadUtils
 import net.casualuhc.uhcmod.util.Texts
+import net.casualuhc.uhcmod.util.Texts.regular
 import net.casualuhc.uhcmod.util.shapes.ArrowShape
 import net.minecraft.ChatFormatting.*
 import net.minecraft.core.BlockPos
@@ -154,6 +158,8 @@ object PlayerManager {
             flags.set(Radius, true)
             flags.set(Distance, true)
 
+            this.uhc.originalTeam = team
+            team.uhc.add(this.scoreboardName)
 
             this.addEffect(MobEffectInstance(DAMAGE_RESISTANCE, 200, 4, true, false))
             this.setGameMode(GameType.SURVIVAL)
@@ -177,7 +183,25 @@ object PlayerManager {
     }
 
     fun ServerPlayer.belongsToTeam(team: Team): Boolean {
-        return this.team === team || this.uhc.originalTeam === team
+        if (this.team === team) {
+            return true
+        }
+        val original = this.uhc.originalTeam
+        val players = team.uhc.players
+        if (original == team) {
+            if (!players.contains(this.scoreboardName)) {
+                UHCMod.logger.warn(
+                    "Player ${this.scoreboardName} had team ${team.name} registered, but team didn't recognise player??!"
+                )
+            }
+            return true
+        } else if (players.contains(this.scoreboardName)) {
+            UHCMod.logger.warn(
+                "Team ${team.name} had player ${this.scoreboardName} registered, but player didn't recognise team??!"
+            )
+            return true
+        }
+        return false
     }
 
     fun ServerPlayer.giveHeadEffects(stack: ItemStack, hand: InteractionHand) {
@@ -364,7 +388,7 @@ object PlayerManager {
 
     private fun onPlayerTick(event: PlayerTickEvent) {
         this.updateDisplay(event.player)
-        if (!event.player.isSurvival) {
+        if (event.player.isSurvival) {
             this.updateWorldBorder(event.player)
         }
     }
@@ -436,6 +460,9 @@ object PlayerManager {
             }
             player.grantAdvancement(UHCAdvancements.ROOT)
         }
+        TeamUtils.forEachTeam { team ->
+            team.uhc.players.clear()
+        }
     }
 
     private fun onPlayerFlag(event: PlayerFlagEvent) {
@@ -459,12 +486,12 @@ object PlayerManager {
         if (UHCManager.uptime % 20 == 0 && GameSettings.DISPLAY_TAB.value) {
             val tps = TickUtils.calculateTPS()
             val formatting = if (tps >= 20) DARK_GREEN else if (tps > 15) YELLOW else if (tps > 10) RED else DARK_RED
-            val header = Component.literal("Casual UHC\n")
+            val header = Texts.ICON_UHC.append(Texts.space()).append(Texts.CASUAL_UHC.regular().gold().bold()).append(Texts.space()).append(Texts.ICON_UHC)
             val footer = Component.literal("\nServer TPS: ")
                 .append(Component.literal("%.1f".format(tps)).withStyle(formatting))
                 .append("\n")
-                .append(Texts.TAB_HOSTED)
-            player.connection.send(ClientboundTabListPacket(header.gold().bold(), footer.aqua().bold()))
+                .append(Texts.TAB_HOSTED.aqua().bold())
+            player.connection.send(ClientboundTabListPacket(header, footer))
         }
 
         val flags = player.flags
@@ -492,9 +519,14 @@ object PlayerManager {
                 if (previous) {
                     display.append(" | ")
                 }
-                val distanceToBorder = player.distanceToNearestBorder()
-                val multiplier = if (distanceToBorder.x < 0 || distanceToBorder.z < 0) -1 else 1
-                display.append(Texts.UHC_DISTANCE_TO_WB.generate(multiplier * distanceToBorder.length().toInt()))
+                val vectorToBorder = player.distanceToNearestBorder()
+                val multiplier = if (vectorToBorder.x < 0 || vectorToBorder.z < 0) -1 else 1
+                val distanceToBorder =  multiplier * vectorToBorder.length().toInt()
+
+                val percent: Double = distanceToBorder / (border.size / 2.0)
+                val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
+
+                display.append(Texts.UHC_DISTANCE_TO_WB.generate(Component.literal(distanceToBorder.toString()).withStyle(colour)))
                 previous = true
             }
             if (hasRadius) {
@@ -544,9 +576,10 @@ object PlayerManager {
         }
 
         val direction = player.directionToNearestBorder()
+        val fakeDirection = direction.opposite()
 
-        val fakeCenterX = border.centerX + direction.stepX * border.size
-        val fakeCenterZ = border.centerZ + direction.stepZ * border.size
+        val fakeCenterX = border.centerX + fakeDirection.stepX * border.size
+        val fakeCenterZ = border.centerZ + fakeDirection.stepZ * border.size
 
         val fakeBorder = player.uhc.border
         fakeBorder.setCenter(fakeCenterX, fakeCenterZ)

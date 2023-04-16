@@ -10,11 +10,20 @@ import net.minecraft.core.Direction
 import net.minecraft.core.Direction8
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.Style
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.Mth
 
 object Texts {
     private val lang = HashMap<String, String>()
 
-    val PACK_MESSAGE: MutableComponent get() = this.translatable("uhc.pack.message")
+    val MOZART_FONT = ResourceLocation("uhc", "mozart")
+    val ICON_FONT = ResourceLocation("uhc", "icons")
+    val SPACES_FONT = ResourceLocation("space", "spaces")
+
+    val CASUAL_UHC: MutableComponent get() = Component.literal("Casual UHC")
+
+    val PACK_MESSAGE get() = this.translatable("uhc.pack.message")
 
     val TAB_HOSTED get() = this.translatable("uhc.tab.hosted")
 
@@ -160,6 +169,30 @@ object Texts {
     val UHC_TOGGLE_ENABLED get() = this.translatable("uhc.toggle.enabled").green()
     val UHC_TOGGLE_DISABLED get() = this.translatable("uhc.toggle.disabled").crimson()
 
+    val SIDEBAR_TEAMMATES get() = this.translatable("uhc.sidebar.teammates")
+    val SIDEBAR_KILLS get() = this.generator("uhc.sidebar.kills")
+    val SIDEBAR_ELAPSED get() = this.generator("uhc.sidebar.elapsed")
+    val SIDEBAR_UNTIL_GLOWING get() = this.generator("uhc.sidebar.untilGlowing")
+
+    val ICON_HEART get() = this.literal("\uE000").iconed()
+    val ICON_NO_CONNECTION get() = this.literal("\uE001").iconed()
+    val ICON_CROSS get() = this.literal("\uE002").iconed()
+    val ICON_UHC get() = this.literal("\uE003").iconed()
+
+    fun literal(literal: String): MutableComponent {
+        return Component.literal(literal)
+    }
+
+    fun space(space: Int = 4): MutableComponent {
+        val clamped = Mth.clamp(space, -8192, 8192)
+        return this.translatable("space.${clamped}").withStyle { it.withFont(SPACES_FONT) }
+    }
+
+    fun offset(offset: Int): MutableComponent {
+        val clamped = Mth.clamp(offset, -8192, 8192)
+        return this.translatable("offset.${clamped}").withStyle { it.withFont(SPACES_FONT) }
+    }
+
     fun translatable(key: String): MutableComponent {
         return Component.translatableWithFallback(key, this.lang[key])
     }
@@ -203,6 +236,18 @@ object Texts {
             Direction8.WEST -> UHC_WEST
             Direction8.NORTH_WEST -> UHC_NORTH_WEST
         }
+    }
+
+    fun MutableComponent.monospaced(): MutableComponent {
+        return this.withStyle { it.withFont(MOZART_FONT) }
+    }
+
+    fun MutableComponent.iconed(): MutableComponent {
+        return this.withStyle { it.withFont(ICON_FONT) }
+    }
+
+    fun MutableComponent.regular(): MutableComponent {
+        return this.withStyle { it.withFont(Style.DEFAULT_FONT) }
     }
 
     internal fun registerEvents() {

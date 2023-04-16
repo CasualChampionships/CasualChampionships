@@ -35,7 +35,6 @@ object GameSettings {
     @JvmField val OP_POTIONS: Bool
     @JvmField val PLAYER_DROPS_HEAD_ON_DEATH: Bool
     @JvmField val GENERATE_PORTAL: Bool
-    @JvmField val TESTING: Bool
     @JvmField val MINESWEEPER_ANNOUNCEMENT: Bool
     @JvmField val HEADS_CONSUMABLE: Bool
     @JvmField val WORLD_BORDER_STAGE: Enumerated<Stage>
@@ -107,10 +106,6 @@ object GameSettings {
         GENERATE_PORTAL = register(
             Items.CRYING_OBSIDIAN.literalNamed("Generate Nether Portals"),
             true
-        )
-        TESTING = register(
-            Items.REDSTONE_BLOCK.literalNamed("Testing"),
-            false
         )
         MINESWEEPER_ANNOUNCEMENT = register(
             Items.JUKEBOX.literalNamed("Minesweeper Announcement"),

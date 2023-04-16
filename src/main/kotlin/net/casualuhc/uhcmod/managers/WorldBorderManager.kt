@@ -33,7 +33,7 @@ object WorldBorderManager {
     fun moveWorldBorders(newSize: Double, percent: Double = -1.0) {
         val seconds = (percent * GameSettings.WORLD_BORDER_TIME.value).toLong()
         val border = global
-        if (seconds <= 0) {
+        if (seconds > 0) {
             this.global.lerpSizeBetween(border.size, newSize, seconds * 1000L)
             return
         }
@@ -62,6 +62,7 @@ object WorldBorderManager {
 
         if (next == Stage.END) {
             EventHandler.broadcast(UHCBorderCompleteEvent())
+            return
         }
         UHCManager.schedulePhaseTask(10, Seconds) {
             this.moveWorldBorders(next.endSize, next.getRemainingTimeAsPercent(this.global.size))

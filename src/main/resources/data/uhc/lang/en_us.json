@@ -146,5 +146,10 @@
   "uhc.display.radius": "%s world border radius on HUD display",
 
   "uhc.toggle.enabled": "Enabled",
-  "uhc.toggle.disabled": "Disabled"
+  "uhc.toggle.disabled": "Disabled",
+
+  "uhc.sidebar.teammates": "Teammates:",
+  "uhc.sidebar.kills": "Kills: %s",
+  "uhc.sidebar.elapsed": "Time Elapsed: %s",
+  "uhc.sidebar.untilGlowing": "Glowing In: %s"
 }
