@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import net.casualuhc.arcade.Arcade
-import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.core.Event
 import net.casualuhc.arcade.events.player.PlayerJoinEvent
 import net.casualuhc.arcade.events.player.PlayerLeaveEvent
@@ -13,13 +13,13 @@ import net.casualuhc.arcade.events.server.ServerLoadedEvent
 import net.casualuhc.arcade.events.server.ServerRecipeReloadEvent
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.arcade.events.server.ServerTickEvent
+import net.casualuhc.arcade.gui.ArcadeBossbar
+import net.casualuhc.arcade.gui.ArcadeSidebar
+import net.casualuhc.arcade.gui.suppliers.ComponentSupplier
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit.*
 import net.casualuhc.arcade.scheduler.Task
-import net.casualuhc.arcade.scheduler.TaskScheduler
-import net.casualuhc.arcade.scoreboards.ArcadeSidebar
-import net.casualuhc.arcade.scoreboards.ConstantRow
-import net.casualuhc.arcade.scoreboards.SidebarRow
+import net.casualuhc.arcade.scheduler.TickedScheduler
 import net.casualuhc.arcade.utils.ComponentUtils.bold
 import net.casualuhc.arcade.utils.ComponentUtils.gold
 import net.casualuhc.arcade.utils.ComponentUtils.lime
@@ -68,6 +68,8 @@ import net.minecraft.server.bossevents.CustomBossEvent
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.Mth
+import net.minecraft.world.BossEvent.BossBarColor
+import net.minecraft.world.BossEvent.BossBarOverlay
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.Vec2
@@ -78,10 +80,11 @@ import kotlin.io.path.exists
 object UHCManager {
     private val configPath = Config.resolve("manager.json")
     private val claimed = HashSet<RaceAdvancement>()
-    private val scheduler = TaskScheduler()
+    private val scheduler = TickedScheduler()
 
     private var sidebar: ArcadeSidebar? = null
     private var bossbar: CustomBossEvent? = null
+    private var bossbar2: ArcadeBossbar? = null
     private var startTime = Long.MAX_VALUE
 
     private var glowing = false
@@ -105,7 +108,7 @@ object UHCManager {
         this.scheduler.tasks.clear()
         this.phase = phase
 
-        EventHandler.broadcast(phase.eventFactory())
+        GlobalEventHandler.broadcast(phase.eventFactory())
     }
 
     fun pause() {
@@ -173,21 +176,21 @@ object UHCManager {
     }
 
     internal fun registerEvents() {
-        EventHandler.register<UHCLoadTasksEvent> { it.add(BorderEndTask()).add(GracePeriodOverTask()) }
-        EventHandler.register<UHCConfigLoadedEvent>(0) { this.onConfigLoaded() }
-        EventHandler.register<ServerLoadedEvent> { this.onServerLoaded() }
-        EventHandler.register<ServerStoppedEvent> { this.onServerStopped() }
-        EventHandler.register<ServerTickEvent> { this.onServerTick() }
-        EventHandler.register<PlayerJoinEvent> { this.onPlayerJoin(it) }
-        EventHandler.register<PlayerLeaveEvent> { this.onPlayerLeave(it) }
-        EventHandler.register<ServerRecipeReloadEvent> { this.onRecipeReload(it) }
+        GlobalEventHandler.register<UHCLoadTasksEvent> { it.add(BorderEndTask()).add(GracePeriodOverTask()) }
+        GlobalEventHandler.register<UHCConfigLoadedEvent>(0) { this.onConfigLoaded() }
+        GlobalEventHandler.register<ServerLoadedEvent> { this.onServerLoaded() }
+        GlobalEventHandler.register<ServerStoppedEvent> { this.onServerStopped() }
+        GlobalEventHandler.register<ServerTickEvent> { this.onServerTick() }
+        GlobalEventHandler.register<PlayerJoinEvent> { this.onPlayerJoin(it) }
+        GlobalEventHandler.register<PlayerLeaveEvent> { this.onPlayerLeave(it) }
+        GlobalEventHandler.register<ServerRecipeReloadEvent> { this.onRecipeReload(it) }
 
-        EventHandler.register<UHCSetupEvent> { this.onUHCSetup() }
-        EventHandler.register<UHCLobbyEvent> { this.onUHCLobby() }
-        EventHandler.register<UHCStartEvent> { this.onUHCStart() }
-        EventHandler.register<UHCActiveEvent> { this.onUHCActive() }
-        EventHandler.register<UHCEndEvent> { this.onUHCEnd() }
-        EventHandler.register<UHCBorderCompleteEvent> { this.onWorldBorderComplete() }
+        GlobalEventHandler.register<UHCSetupEvent> { this.onUHCSetup() }
+        GlobalEventHandler.register<UHCLobbyEvent> { this.onUHCLobby() }
+        GlobalEventHandler.register<UHCStartEvent> { this.onUHCStart() }
+        GlobalEventHandler.register<UHCActiveEvent> { this.onUHCActive() }
+        GlobalEventHandler.register<UHCEndEvent> { this.onUHCEnd() }
+        GlobalEventHandler.register<UHCBorderCompleteEvent> { this.onWorldBorderComplete() }
     }
 
     private fun onConfigLoaded() {
@@ -212,7 +215,7 @@ object UHCManager {
         }
 
         val tasks = UHCLoadTasksEvent()
-        EventHandler.broadcast(tasks)
+        GlobalEventHandler.broadcast(tasks)
 
         for (element in json.getAsJsonArray("tasks")) {
             val delay = (element as JsonObject)["delay"].asInt
@@ -472,13 +475,13 @@ object UHCManager {
     }
 
     private fun createActiveSidebar() {
-        val sidebar = ArcadeSidebar(ConstantRow(Texts.CASUAL_UHC.gold().bold()))
+        val sidebar = ArcadeSidebar(ComponentSupplier.of(Texts.CASUAL_UHC.gold().bold()))
 
-        sidebar.addRow(ConstantRow(Texts.SIDEBAR_TEAMMATES.monospaced()))
+        sidebar.addRow(ComponentSupplier.of(Texts.SIDEBAR_TEAMMATES.monospaced()))
         for (i in 0 until this.event.getTeamSize()) {
             sidebar.addRow(TeammateRow(i))
         }
-        sidebar.addRow(ConstantRow(Component.empty()))
+        sidebar.addRow(ComponentSupplier.of(Component.empty()))
         sidebar.addRow { player ->
             Texts.SIDEBAR_KILLS.generate(Mth.ceil(player.uhcStats[PlayerStat.Kills])).monospaced()
         }
@@ -508,6 +511,17 @@ object UHCManager {
         bar.progress = 1.0F
         bar.color = handler.getColour()
         PlayerUtils.forEveryPlayer(bar::addPlayer)
+
+
+        this.bossbar2 = ArcadeBossbar(
+            { Texts.SIDEBAR_ELAPSED.generate(this.uptime) },
+            { 1.0F },
+            { BossBarColor.BLUE },
+            { BossBarOverlay.PROGRESS }
+        )
+        PlayerUtils.forEveryPlayer {
+            this.bossbar2!!.addPlayer(it)
+        }
     }
 
     private fun hideBossBar() {
@@ -531,7 +545,7 @@ object UHCManager {
         End(::UHCEndEvent)
     }
 
-    private class TeammateRow(val index: Int): SidebarRow {
+    private class TeammateRow(val index: Int): ComponentSupplier {
         override fun getComponent(player: ServerPlayer): Component {
             val team = player.uhc.originalTeam ?: player.team
             if (team == null || team.flags.has(Ignored)) {
@@ -574,7 +588,7 @@ object UHCManager {
             }
             GameSettings.PVP.setValue(true)
 
-            EventHandler.broadcast(UHCGracePeriodEndEvent())
+            GlobalEventHandler.broadcast(UHCGracePeriodEndEvent())
         }
     }
 

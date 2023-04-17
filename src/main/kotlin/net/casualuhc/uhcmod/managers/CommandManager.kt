@@ -1,12 +1,12 @@
 package net.casualuhc.uhcmod.managers
 
-import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerRegisterCommandEvent
 import net.casualuhc.uhcmod.commands.*
 
 object CommandManager {
     internal fun registerEvents() {
-        EventHandler.register<ServerRegisterCommandEvent> { event ->
+        GlobalEventHandler.register<ServerRegisterCommandEvent> { event ->
             val dispatcher = event.dispatcher
             DisplayCommand.register(dispatcher)
             FullbrightCommand.register(dispatcher)

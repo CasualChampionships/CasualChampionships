@@ -1,8 +1,8 @@
 package net.casualuhc.uhcmod.uhc
 
 import net.casualuhc.arcade.Arcade
-import net.casualuhc.arcade.area.PlaceableArea
-import net.casualuhc.arcade.area.PlaceableBox
+import net.casualuhc.arcade.map.BoxMap
+import net.casualuhc.arcade.map.PlaceableMap
 import net.casualuhc.arcade.math.Location
 import net.casualuhc.uhcmod.minigame.Dimensions
 import net.casualuhc.uhcmod.uhc.handlers.BossBarHandler
@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3
 enum class DefaultUHC: UHCEvent, LobbyHandler, BossBarHandler, ResourceHandler {
     INSTANCE;
 
-    private val area by lazy { PlaceableBox(Vec3i(0, 300, 0), 40, 10, Dimensions.getLobbyLevel()) }
+    private val area by lazy { BoxMap(Vec3i(0, 300, 0), 40, 10, Dimensions.getLobbyLevel()) }
 
     override fun getName(): String {
         return "default"
@@ -29,7 +29,7 @@ enum class DefaultUHC: UHCEvent, LobbyHandler, BossBarHandler, ResourceHandler {
         return Location(this.area.level, Vec3.atCenterOf(this.area.center.above(2)), Vec2(0.0F, 0.0F))
     }
 
-    override fun getArea(): PlaceableArea {
+    override fun getArea(): PlaceableMap {
         return this.area
     }
 

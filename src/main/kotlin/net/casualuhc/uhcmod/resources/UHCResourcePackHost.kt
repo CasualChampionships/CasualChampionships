@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.resources
 
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.arcade.resources.LocalResourcePackHost
 import net.casualuhc.arcade.resources.ResourcePackHost
@@ -23,7 +24,7 @@ object UHCResourcePackHost {
     }
 
     internal fun registerEvents() {
-        EventHandler.register<ServerStoppedEvent> { this.host.shutdown() }
-        EventHandler.register<UHCConfigLoadedEvent> { this.host.start() }
+        GlobalEventHandler.register<ServerStoppedEvent> { this.host.shutdown() }
+        GlobalEventHandler.register<UHCConfigLoadedEvent> { this.host.start() }
     }
 }

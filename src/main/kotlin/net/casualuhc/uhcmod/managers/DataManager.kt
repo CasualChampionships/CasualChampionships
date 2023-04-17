@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.managers
 
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.uhcmod.database.EmptyUHCDataBase
 import net.casualuhc.uhcmod.database.MongoUHCDataBase
@@ -19,8 +20,8 @@ object DataManager {
         private set
 
     internal fun registerEvents() {
-        EventHandler.register<UHCConfigLoadedEvent> { this.onConfigLoaded() }
-        EventHandler.register<ServerStoppedEvent> { this.database.shutdown() }
+        GlobalEventHandler.register<UHCConfigLoadedEvent> { this.onConfigLoaded() }
+        GlobalEventHandler.register<ServerStoppedEvent> { this.database.shutdown() }
     }
 
     private fun onConfigLoaded() {

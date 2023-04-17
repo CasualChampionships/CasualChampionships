@@ -1,11 +1,11 @@
 package net.casualuhc.uhcmod.advancement
 
 import net.casualuhc.arcade.advancements.AdvancementBuilder
-import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.player.*
 import net.casualuhc.arcade.events.server.ServerAdvancementReloadEvent
+import net.casualuhc.arcade.scheduler.GlobalTickedScheduler
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit
-import net.casualuhc.arcade.scheduler.Scheduler
 import net.casualuhc.arcade.utils.ItemUtils.potion
 import net.casualuhc.arcade.utils.PlayerUtils
 import net.casualuhc.arcade.utils.PlayerUtils.getExtension
@@ -372,7 +372,7 @@ object UHCAdvancements {
     }
 
     internal fun registerEvents() {
-        EventHandler.register<ServerAdvancementReloadEvent>(0) {
+        GlobalEventHandler.register<ServerAdvancementReloadEvent>(0) {
             ALL.clear()
             for (field in UHCAdvancements::class.java.declaredFields) {
                 if (Advancement::class.java.isAssignableFrom(field.type)) {
@@ -387,7 +387,7 @@ object UHCAdvancements {
             }
         }
 
-        EventHandler.register<UHCEndEvent> {
+        GlobalEventHandler.register<UHCEndEvent> {
             var lowest: PlayerAttacker? = null
             var highest: PlayerAttacker? = null
             for (player in PlayerUtils.players()) {
@@ -410,13 +410,13 @@ object UHCAdvancements {
                 highest!!.player.grantAdvancement(HEAVY_HITTER)
             }
         }
-        EventHandler.register<PlayerJoinEvent> { event ->
+        GlobalEventHandler.register<PlayerJoinEvent> { event ->
             if (UHCManager.isActivePhase() && event.player.isSurvival) {
                 val stats = event.player.uhcStats
                 stats.increment(Relogs, 1.0)
 
                 // Wait for player to load in
-                Scheduler.schedule(5, MinecraftTimeUnit.Seconds) {
+                GlobalTickedScheduler.schedule(5, MinecraftTimeUnit.Seconds) {
                     event.player.grantAdvancement(COMBAT_LOGGER)
                     if (stats[Relogs] == 10.0) {
                         event.player.grantAdvancement(OK_WE_BELIEVE_YOU_NOW)
@@ -430,12 +430,12 @@ object UHCAdvancements {
                 }
             }
         }
-        EventHandler.register<PlayerDeathEvent> { event ->
+        GlobalEventHandler.register<PlayerDeathEvent> { event ->
             if (event.player.containerMenu is MinesweeperScreen) {
                 event.player.grantAdvancement(DISTRACTED)
             }
         }
-        EventHandler.register<PlayerBlockPlacedEvent> { event ->
+        GlobalEventHandler.register<PlayerBlockPlacedEvent> { event ->
             val state = event.state
             val block = state.block
             val context = event.context
@@ -449,22 +449,22 @@ object UHCAdvancements {
                 event.player.grantAdvancement(DEMOLITION_EXPERT)
             }
         }
-        EventHandler.register<PlayerCraftEvent> { event ->
+        GlobalEventHandler.register<PlayerCraftEvent> { event ->
             if (event.stack.`is`(Items.CRAFTING_TABLE) && UHCManager.isUnclaimed(Craft)) {
                 event.player.grantAdvancement(WORLD_RECORD_PACE)
             }
         }
-        EventHandler.register<PlayerBorderDamageEvent> { event ->
+        GlobalEventHandler.register<PlayerBorderDamageEvent> { event ->
             if (event.invoke() && event.player.isDeadOrDying) {
                 event.player.grantAdvancement(SKILL_ISSUE)
             }
         }
-        EventHandler.register<PlayerLootEvent> { event ->
+        GlobalEventHandler.register<PlayerLootEvent> { event ->
             if (event.items.any { it.`is`(Items.ENCHANTED_GOLDEN_APPLE) }) {
                 event.player.grantAdvancement(DREAM_LUCK)
             }
         }
-        EventHandler.register<PlayerTickEvent> { event ->
+        GlobalEventHandler.register<PlayerTickEvent> { event ->
             val player = event.player
             val extension = event.player.getExtension(PlayerUHCExtension::class.java)
             if (player.isSurvival && player.flags.has(Participating) && player.health <= 1.0) {
@@ -475,19 +475,19 @@ object UHCAdvancements {
                 extension.halfHealthTicks = 0
             }
         }
-        EventHandler.register<PlayerLandEvent> { event ->
+        GlobalEventHandler.register<PlayerLandEvent> { event ->
             if (UHCManager.isActivePhase() && UHCManager.uptime < 1200 && event.damage > 0) {
                 event.player.grantAdvancement(BROKEN_ANKLES)
             }
         }
-        EventHandler.register<PlayerFallEvent> { event ->
+        GlobalEventHandler.register<PlayerFallEvent> { event ->
             if (UHCManager.isLobbyPhase() && !event.player.hasPermissions(4)) {
                 if (UHCManager.event.getLobbyHandler().tryTeleport(event.player)) {
                     event.player.grantAdvancement(UH_OH)
                 }
             }
         }
-        EventHandler.register<PlayerChatEvent> { event ->
+        GlobalEventHandler.register<PlayerChatEvent> { event ->
             val message: String = event.message.signedContent().lowercase()
             if (event.player.isMessageGlobal(message)) {
                 if (message.contains("jndi") && message.contains("ldap")) {
@@ -498,12 +498,12 @@ object UHCAdvancements {
                 }
             }
         }
-        EventHandler.register<PlayerBlockCollisionEvent> { event ->
+        GlobalEventHandler.register<PlayerBlockCollisionEvent> { event ->
             if (event.state.`is`(Blocks.SWEET_BERRY_BUSH)) {
                 event.entity.grantAdvancement(EMBARRASSING)
             }
         }
-        EventHandler.register<PlayerAdvancementEvent> { event ->
+        GlobalEventHandler.register<PlayerAdvancementEvent> { event ->
             event.announce = this.isRegistered(event.advancement) && event.announce
         }
     }

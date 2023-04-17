@@ -4,6 +4,7 @@ import carpet.patches.EntityPlayerMPFake
 import com.google.gson.JsonObject
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.team.TeamCreatedEvent
 import net.casualuhc.arcade.utils.ComponentUtils.bold
 import net.casualuhc.arcade.utils.ComponentUtils.gold
@@ -212,11 +213,11 @@ object TeamManager {
     }
 
     internal fun registerEvents() {
-        EventHandler.register<TeamCreatedEvent> { this.onTeamCreated(it) }
-        EventHandler.register<UHCSetupEvent> { this.createTeams() }
-        EventHandler.register<UHCReadyEvent> { this.onUHCReady() }
-        EventHandler.register<UHCLobbyEvent> { this.onUHCLobby() }
-        EventHandler.register<UHCActiveEvent> { this.onUHCActive() }
+        GlobalEventHandler.register<TeamCreatedEvent> { this.onTeamCreated(it) }
+        GlobalEventHandler.register<UHCSetupEvent> { this.createTeams() }
+        GlobalEventHandler.register<UHCReadyEvent> { this.onUHCReady() }
+        GlobalEventHandler.register<UHCLobbyEvent> { this.onUHCLobby() }
+        GlobalEventHandler.register<UHCActiveEvent> { this.onUHCActive() }
     }
 
     private fun onTeamCreated(event: TeamCreatedEvent) {

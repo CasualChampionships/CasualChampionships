@@ -3,6 +3,7 @@ package net.casualuhc.uhcmod.screen
 import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerTickEvent
 import net.casualuhc.arcade.utils.ItemUtils.literalNamed
 import net.casualuhc.arcade.utils.PlayerUtils
@@ -53,7 +54,7 @@ class MinesweeperScreen(
         this.slots[88].set(Items.GRAY_STAINED_GLASS.literalNamed(""))
         this.slots[89].set(Items.GREEN_STAINED_GLASS.defaultInstance.setHoverName(Texts.MINESWEEPER_PLAY_AGAIN))
 
-        EventHandler.register<ServerTickEvent> { _ ->
+        GlobalEventHandler.register<ServerTickEvent> { _ ->
             if (this.grid.startTime != 0L && !this.complete) {
                 val seconds = floor((System.nanoTime() - this.grid.startTime) / 1000000000.0).toInt()
                 this.clockItem.count = Mth.clamp(seconds, 1, 127)

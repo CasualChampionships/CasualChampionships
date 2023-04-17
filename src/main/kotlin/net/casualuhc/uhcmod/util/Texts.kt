@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.util
 
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.utils.ComponentUtils.crimson
 import net.casualuhc.arcade.utils.ComponentUtils.green
 import net.casualuhc.uhcmod.events.uhc.UHCConfigLoadedEvent
@@ -251,7 +252,7 @@ object Texts {
     }
 
     internal fun registerEvents() {
-        EventHandler.register<UHCConfigLoadedEvent> {
+        GlobalEventHandler.register<UHCConfigLoadedEvent> {
             this.loadLang()
         }
     }

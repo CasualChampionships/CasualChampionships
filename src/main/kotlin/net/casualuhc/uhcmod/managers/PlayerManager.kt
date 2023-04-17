@@ -3,9 +3,10 @@ package net.casualuhc.uhcmod.managers
 import io.netty.buffer.Unpooled
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.player.*
+import net.casualuhc.arcade.scheduler.GlobalTickedScheduler
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit.Seconds
-import net.casualuhc.arcade.scheduler.Scheduler.schedule
 import net.casualuhc.arcade.utils.ComponentUtils.aqua
 import net.casualuhc.arcade.utils.ComponentUtils.bold
 import net.casualuhc.arcade.utils.ComponentUtils.gold
@@ -272,23 +273,23 @@ object PlayerManager {
     }
 
     internal fun registerEvents() {
-        EventHandler.register<PlayerCreatedEvent> { this.onPlayerCreated(it) }
+        GlobalEventHandler.register<PlayerCreatedEvent> { this.onPlayerCreated(it) }
 
-        EventHandler.register<PlayerJoinEvent> { this.onPlayerJoin(it) }
-        EventHandler.register<PlayerPackLoadEvent> { this.onPlayerPack(it) }
-        EventHandler.register<PlayerItemReleaseEvent> { this.onPlayerItemRelease(it) }
-        EventHandler.register<PlayerAttackEvent> { this.onPlayerAttack(it) }
-        EventHandler.register<PlayerDamageEvent> { this.onPlayerDamage(it) }
-        EventHandler.register<PlayerVoidDamageEvent> { this.onPlayerVoidDamage(it) }
-        EventHandler.register<PlayerChatEvent> { this.onPlayerChat(it) }
-        EventHandler.register<PlayerItemUseEvent> { this.onPlayerUseItem(it) }
-        EventHandler.register<PlayerItemUseOnEvent> { this.onPlayerUseItemOn(it) }
-        EventHandler.register<PlayerTickEvent> { this.onPlayerTick(it) }
-        EventHandler.register<PlayerDeathEvent> { this.onPlayerDeath(it) }
-        EventHandler.register<PlayerAdvancementEvent> { this.onPlayerAdvancement(it) }
+        GlobalEventHandler.register<PlayerJoinEvent> { this.onPlayerJoin(it) }
+        GlobalEventHandler.register<PlayerPackLoadEvent> { this.onPlayerPack(it) }
+        GlobalEventHandler.register<PlayerItemReleaseEvent> { this.onPlayerItemRelease(it) }
+        GlobalEventHandler.register<PlayerAttackEvent> { this.onPlayerAttack(it) }
+        GlobalEventHandler.register<PlayerDamageEvent> { this.onPlayerDamage(it) }
+        GlobalEventHandler.register<PlayerVoidDamageEvent> { this.onPlayerVoidDamage(it) }
+        GlobalEventHandler.register<PlayerChatEvent> { this.onPlayerChat(it) }
+        GlobalEventHandler.register<PlayerItemUseEvent> { this.onPlayerUseItem(it) }
+        GlobalEventHandler.register<PlayerItemUseOnEvent> { this.onPlayerUseItemOn(it) }
+        GlobalEventHandler.register<PlayerTickEvent> { this.onPlayerTick(it) }
+        GlobalEventHandler.register<PlayerDeathEvent> { this.onPlayerDeath(it) }
+        GlobalEventHandler.register<PlayerAdvancementEvent> { this.onPlayerAdvancement(it) }
 
-        EventHandler.register<UHCSetupEvent> { this.onUHCSetup() }
-        EventHandler.register<PlayerFlagEvent> { this.onPlayerFlag(it) }
+        GlobalEventHandler.register<UHCSetupEvent> { this.onUHCSetup() }
+        GlobalEventHandler.register<PlayerFlagEvent> { this.onPlayerFlag(it) }
     }
 
     private fun onPlayerCreated(event: PlayerCreatedEvent) {
@@ -329,7 +330,7 @@ object PlayerManager {
         }
 
         // Needed for updating the player's health
-        schedule(1, Seconds, player::resetSentInfo)
+        GlobalTickedScheduler.schedule(1, Seconds, player::resetSentInfo)
     }
 
     private fun onPlayerPack(event: PlayerPackLoadEvent) {

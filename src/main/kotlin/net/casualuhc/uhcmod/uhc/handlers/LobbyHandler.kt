@@ -1,12 +1,12 @@
 package net.casualuhc.uhcmod.uhc.handlers
 
-import net.casualuhc.arcade.area.PlaceableArea
+import net.casualuhc.arcade.map.PlaceableMap
 import net.casualuhc.arcade.math.Location
 import net.casualuhc.arcade.utils.PlayerUtils.teleportTo
 import net.minecraft.server.level.ServerPlayer
 
 interface LobbyHandler {
-    fun getArea(): PlaceableArea
+    fun getArea(): PlaceableMap
 
     fun getSpawn(): Location
 

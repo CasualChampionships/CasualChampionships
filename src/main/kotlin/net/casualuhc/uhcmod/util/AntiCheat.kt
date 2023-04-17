@@ -2,6 +2,7 @@ package net.casualuhc.uhcmod.util
 
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.level.LevelBlockChangedEvent
 import net.casualuhc.arcade.events.level.LevelCreatedEvent
 import net.casualuhc.arcade.events.level.LevelTickEvent
@@ -24,10 +25,10 @@ import net.minecraft.world.phys.shapes.CollisionContext
 
 object AntiCheat {
     internal fun registerEvents() {
-        EventHandler.register<LevelCreatedEvent> { it.level.addExtension(WorldBlockTrackerExtension()) }
-        EventHandler.register<LevelTickEvent> { it.level.blockTracker.tick() }
-        EventHandler.register<LevelBlockChangedEvent> { this.onBlockChanged(it) }
-        EventHandler.register<PlayerBlockPlacedEvent> { this.onPlayerBlockPlaced(it) }
+        GlobalEventHandler.register<LevelCreatedEvent> { it.level.addExtension(WorldBlockTrackerExtension()) }
+        GlobalEventHandler.register<LevelTickEvent> { it.level.blockTracker.tick() }
+        GlobalEventHandler.register<LevelBlockChangedEvent> { this.onBlockChanged(it) }
+        GlobalEventHandler.register<PlayerBlockPlacedEvent> { this.onPlayerBlockPlaced(it) }
     }
 
     private fun onBlockChanged(event: LevelBlockChangedEvent) {

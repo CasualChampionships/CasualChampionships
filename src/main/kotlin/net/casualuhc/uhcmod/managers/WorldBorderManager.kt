@@ -4,6 +4,7 @@ import net.casualuhc.arcade.border.ArcadeBorder
 import net.casualuhc.arcade.border.BorderState
 import net.casualuhc.arcade.border.StillBorderState
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerTickEvent
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit.Seconds
 import net.casualuhc.uhcmod.UHCMod
@@ -24,7 +25,7 @@ object WorldBorderManager {
         }
         GameSettings.WORLD_BORDER_STAGE.setValueQuietly(stage)
         if (stage == Stage.END) {
-            EventHandler.broadcast(UHCBorderCompleteEvent())
+            GlobalEventHandler.broadcast(UHCBorderCompleteEvent())
             return
         }
         this.moveWorldBorders(stage.endSize, stage.getRemainingTimeAsPercent(size))
@@ -46,8 +47,8 @@ object WorldBorderManager {
     }
 
     internal fun registerEvents() {
-        EventHandler.register<ServerTickEvent> { this.global.update() }
-        EventHandler.register<UHCGracePeriodEndEvent> { this.startWorldBorders() }
+        GlobalEventHandler.register<ServerTickEvent> { this.global.update() }
+        GlobalEventHandler.register<UHCGracePeriodEndEvent> { this.startWorldBorders() }
     }
 
     private fun onBorderStageComplete() {
@@ -61,7 +62,7 @@ object WorldBorderManager {
         GameSettings.WORLD_BORDER_STAGE.setValueQuietly(next)
 
         if (next == Stage.END) {
-            EventHandler.broadcast(UHCBorderCompleteEvent())
+            GlobalEventHandler.broadcast(UHCBorderCompleteEvent())
             return
         }
         UHCManager.schedulePhaseTask(10, Seconds) {

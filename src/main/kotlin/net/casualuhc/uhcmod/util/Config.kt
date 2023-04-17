@@ -2,6 +2,7 @@ package net.casualuhc.uhcmod.util
 
 import com.google.gson.*
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerLoadedEvent
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.uhcmod.events.uhc.UHCConfigLoadedEvent
@@ -39,7 +40,7 @@ object Config {
             }
         }
 
-        EventHandler.broadcast(UHCConfigLoadedEvent())
+        GlobalEventHandler.broadcast(UHCConfigLoadedEvent())
     }
 
     fun write() {
@@ -121,8 +122,8 @@ object Config {
     }
 
     internal fun registerEvents() {
-        EventHandler.register<ServerLoadedEvent>(0) { reload() }
-        EventHandler.register<ServerStoppedEvent> { this.write() }
+        GlobalEventHandler.register<ServerLoadedEvent>(0) { reload() }
+        GlobalEventHandler.register<ServerStoppedEvent> { this.write() }
     }
 
     private inline fun <reified T: Any> getAs(key: String): T {

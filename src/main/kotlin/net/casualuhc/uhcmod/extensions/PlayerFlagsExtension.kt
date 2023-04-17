@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.extensions
 
 import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.extensions.DataExtension
 import net.casualuhc.arcade.utils.PlayerUtils.getExtension
 import net.casualuhc.uhcmod.events.player.PlayerFlagEvent
@@ -27,7 +28,7 @@ class PlayerFlagsExtension(
         } else if (!this.flags.remove(flag)) {
             return
         }
-        EventHandler.broadcast(PlayerFlagEvent(this.player, flag, set))
+        GlobalEventHandler.broadcast(PlayerFlagEvent(this.player, flag, set))
     }
 
     fun toggle(flag: PlayerFlag) {
