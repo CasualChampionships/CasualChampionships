@@ -1,6 +1,5 @@
 package net.casualuhc.uhcmod.util
 
-import net.casualuhc.arcade.events.EventHandler
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.utils.ComponentUtils.crimson
 import net.casualuhc.arcade.utils.ComponentUtils.green
@@ -174,11 +173,14 @@ object Texts {
     val SIDEBAR_KILLS get() = this.generator("uhc.sidebar.kills")
     val SIDEBAR_ELAPSED get() = this.generator("uhc.sidebar.elapsed")
     val SIDEBAR_UNTIL_GLOWING get() = this.generator("uhc.sidebar.untilGlowing")
+    val SIDEBAR_GRACE get() = this.generator("uhc.sidebar.grace")
 
     val ICON_HEART get() = this.literal("\uE000").iconed()
     val ICON_NO_CONNECTION get() = this.literal("\uE001").iconed()
     val ICON_CROSS get() = this.literal("\uE002").iconed()
     val ICON_UHC get() = this.literal("\uE003").iconed()
+    val ICON_WIDE_BACKGROUND get() = this.literal("\uE004").iconed()
+    val ICON_BACKGROUND get() = this.literal("\uE005").iconed()
 
     fun literal(literal: String): MutableComponent {
         return Component.literal(literal)
@@ -189,9 +191,9 @@ object Texts {
         return this.translatable("space.${clamped}").withStyle { it.withFont(SPACES_FONT) }
     }
 
-    fun offset(offset: Int): MutableComponent {
+    fun offset(offset: Int, component: Component): MutableComponent {
         val clamped = Mth.clamp(offset, -8192, 8192)
-        return this.translatable("offset.${clamped}").withStyle { it.withFont(SPACES_FONT) }
+        return this.translatable("offset.${clamped}", arrayOf(component)).withStyle { it.withFont(SPACES_FONT) }
     }
 
     fun translatable(key: String): MutableComponent {
@@ -249,6 +251,10 @@ object Texts {
 
     fun MutableComponent.regular(): MutableComponent {
         return this.withStyle { it.withFont(Style.DEFAULT_FONT) }
+    }
+
+    fun MutableComponent.shadowless(): MutableComponent {
+        return this.withStyle { it.withColor(0x4E5C24) }
     }
 
     internal fun registerEvents() {

@@ -151,5 +151,6 @@
   "uhc.sidebar.teammates": "Teammates:",
   "uhc.sidebar.kills": "Kills: %s",
   "uhc.sidebar.elapsed": "Time Elapsed: %s",
-  "uhc.sidebar.untilGlowing": "Glowing In: %s"
+  "uhc.sidebar.grace": "Grace: %s",
+  "uhc.sidebar.untilGlowing": "Glowing: %s"
 }

@@ -59,6 +59,7 @@ import net.casualuhc.uhcmod.util.Config
 import net.casualuhc.uhcmod.util.RuleUtils
 import net.casualuhc.uhcmod.util.Texts
 import net.casualuhc.uhcmod.util.Texts.monospaced
+import net.casualuhc.uhcmod.util.Texts.shadowless
 import net.casualuhc.uhcmod.util.TimeUtils
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -469,7 +470,7 @@ object UHCManager {
         val endTaskTime = this.uptime + Minutes.toTicks(5)
         this.sidebar?.addRow {
             val delta = (endTaskTime - this.uptime).coerceAtLeast(0)
-            val time = TimeUtils.secondsToString(Ticks.toSeconds(delta.toDouble()).toInt())
+            val time = TimeUtils.formatMMSS(delta, Ticks)
             Texts.SIDEBAR_UNTIL_GLOWING.generate(time).monospaced()
         }
     }
@@ -477,18 +478,13 @@ object UHCManager {
     private fun createActiveSidebar() {
         val sidebar = ArcadeSidebar(ComponentSupplier.of(Texts.CASUAL_UHC.gold().bold()))
 
-        sidebar.addRow(ComponentSupplier.of(Texts.SIDEBAR_TEAMMATES.monospaced()))
+        val buffer = "   "
+
+        sidebar.addRow(ComponentSupplier.of(Component.empty().append(buffer).append(Texts.SIDEBAR_TEAMMATES.monospaced())))
         for (i in 0 until this.event.getTeamSize()) {
-            sidebar.addRow(TeammateRow(i))
+            sidebar.addRow(TeammateRow(i, buffer))
         }
         sidebar.addRow(ComponentSupplier.of(Component.empty()))
-        sidebar.addRow { player ->
-            Texts.SIDEBAR_KILLS.generate(Mth.ceil(player.uhcStats[PlayerStat.Kills])).monospaced()
-        }
-        sidebar.addRow {
-            val time = TimeUtils.secondsToString(Ticks.toSeconds(this.uptime.toDouble()).toInt())
-            Texts.SIDEBAR_ELAPSED.generate(time).monospaced()
-        }
 
         PlayerUtils.forEveryPlayer {
             sidebar.addPlayer(it)
@@ -497,26 +493,71 @@ object UHCManager {
     }
 
     private fun generateBossBar() {
-        val bar: CustomBossEvent
-        val handler = this.event.getBossBarHandler()
-        if (this.bossbar == null) {
-            val manager = Arcade.server.customBossEvents
-            val id = ResourceLocation("uhc", "lobby")
-            bar = manager.get(id) ?: manager.create(id, handler.getTitle())
-            this.bossbar = bar
-        } else {
-            bar = this.bossbar!!
-            bar.name = handler.getTitle()
-        }
-        bar.progress = 1.0F
-        bar.color = handler.getColour()
-        PlayerUtils.forEveryPlayer(bar::addPlayer)
+        // val bar: CustomBossEvent
+        // val handler = this.event.getBossBarHandler()
+        // if (this.bossbar == null) {
+        //     val manager = Arcade.server.customBossEvents
+        //     val id = ResourceLocation("uhc", "lobby")
+        //     bar = manager.get(id) ?: manager.create(id, handler.getTitle())
+        //     this.bossbar = bar
+        // } else {
+        //     bar = this.bossbar!!
+        //     bar.name = handler.getTitle()
+        // }
+        // bar.progress = 1.0F
+        // bar.color = handler.getColour()
+        // PlayerUtils.forEveryPlayer(bar::addPlayer)
 
+        // This WORKS!
+        this.bossbar2 = ArcadeBossbar(
+            {
+                Component.empty().append(
+                    Texts.offset(64, Texts.ICON_WIDE_BACKGROUND.shadowless())
+                ).append(
+                    Texts.offset(
+                        -90,
+                        Texts.SIDEBAR_ELAPSED.generate(TimeUtils.formatHHMMSS(this.uptime, Ticks)).monospaced()
+                    )
+                )
+            },
+            { 1.0F },
+            { BossBarColor.YELLOW },
+            { BossBarOverlay.PROGRESS }
+        )
+        PlayerUtils.forEveryPlayer {
+            this.bossbar2!!.addPlayer(it)
+        }
+
+        var progress = 0.0F
+        this.bossbar2 = ArcadeBossbar(
+            {
+                Component.empty().append(
+                    Texts.offset(40, Texts.ICON_BACKGROUND.shadowless())
+                ).append(
+                    Texts.offset(-68, Texts.SIDEBAR_UNTIL_GLOWING.generate(TimeUtils.formatMMSS(this.uptime, Ticks)).monospaced())
+                )
+            },
+            {
+                progress += 0.01F
+                progress
+            },
+            { BossBarColor.GREEN },
+            { BossBarOverlay.PROGRESS }
+        )
+        PlayerUtils.forEveryPlayer {
+            this.bossbar2!!.addPlayer(it)
+        }
 
         this.bossbar2 = ArcadeBossbar(
-            { Texts.SIDEBAR_ELAPSED.generate(this.uptime) },
+            {
+                Component.empty().append(
+                    Texts.offset(35, Texts.ICON_BACKGROUND.shadowless())
+                ).append(
+                    Texts.offset(-68, Texts.SIDEBAR_GRACE.generate(TimeUtils.formatMMSS(this.uptime, Ticks)).monospaced())
+                )
+            },
             { 1.0F },
-            { BossBarColor.BLUE },
+            { BossBarColor.GREEN },
             { BossBarOverlay.PROGRESS }
         )
         PlayerUtils.forEveryPlayer {
@@ -545,16 +586,19 @@ object UHCManager {
         End(::UHCEndEvent)
     }
 
-    private class TeammateRow(val index: Int): ComponentSupplier {
+    private class TeammateRow(val index: Int, val buffer: String = ""): ComponentSupplier {
         override fun getComponent(player: ServerPlayer): Component {
             val team = player.uhc.originalTeam ?: player.team
             if (team == null || team.flags.has(Ignored)) {
-                return Component.literal(" - ").monospaced().append(Texts.ICON_CROSS)
+                return Component.literal("${this.buffer} - ").monospaced().append(Texts.ICON_CROSS)
             }
             val players = team.uhc.players
             if (this.index >= players.size) {
-                return Component.literal(" - ").monospaced().append(Texts.ICON_CROSS)
+                return Component.literal("${this.buffer} - ").monospaced().append(Texts.ICON_CROSS)
             }
+
+            val length = (players.maxOfOrNull { it.length } ?: 16)
+
             val name: String
             val teammate: ServerPlayer?
             if (this.index == 0) {
@@ -564,8 +608,8 @@ object UHCManager {
                 name = players.filter { it != player.scoreboardName }[this.index - 1]
                 teammate = PlayerUtils.player(name)
             }
-            val longName = Component.literal(name + " ".repeat(17 - name.length)).withStyle(team.color)
-            val start = Component.literal(" - ").append(longName).append(" ").monospaced()
+            val longName = Component.literal(name + " ".repeat(length - name.length)).withStyle(team.color)
+            val start = Component.literal("${this.buffer} - ").append(longName).append(" ").monospaced()
             if (teammate !== null) {
                 if (teammate.isSurvival && teammate.isAlive) {
                     val health = "% 4.1f".format(teammate.health / 2.0)

@@ -35,6 +35,24 @@
       "chars": [
         "\uE003"
       ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/background240.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE004"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/background180.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE005"
+      ]
     }
   ]
 }

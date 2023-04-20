@@ -1,13 +1,12 @@
 package net.casualuhc.uhcmod.resources
 
-import net.casualuhc.arcade.events.EventHandler
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.arcade.resources.LocalResourcePackHost
 import net.casualuhc.arcade.resources.ResourcePackHost
 import net.casualuhc.uhcmod.events.uhc.UHCConfigLoadedEvent
 import net.casualuhc.uhcmod.util.Config
-import kotlin.io.path.*
+import kotlin.io.path.createDirectories
 
 object UHCResourcePackHost {
     private val packs = Config.resolve("packs")
