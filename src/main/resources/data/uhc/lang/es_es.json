@@ -151,13 +151,13 @@
   "uhc.sidebar.teammates": "Teammates:",
   "uhc.sidebar.kills": "Kills: %s",
 
-  "uhc.bossbar.elapsed": "Time Elapsed: %s",
-  "uhc.bossbar.elapsed.space.1": "\uDAFF\uDFE6", // -26
-  "uhc.bossbar.elapsed.space.2": "\uDAFF\uDF66", // -154
-  "uhc.bossbar.grace": "Grace: %s",
-  "uhc.bossbar.grace.space.1": "\uDAFF\uDFDF", // -33
-  "uhc.bossbar.grace.space.2": "\uDAFF\uDF99", // -103
-  "uhc.bossbar.glowing": "Glowing: %s",
-  "uhc.bossbar.glowing.space.1": "\uDAFF\uDFE4", // -28
-  "uhc.bossbar.glowing.space.2": "\uDAFF\uDF94" // -108
+  "uhc.bossbar.elapsed": "Tiempo transcurrido: %s",
+  "uhc.bossbar.elapsed.space.1": "\uDAFF\uDFF9", // -7
+  "uhc.bossbar.elapsed.space.2": "\uDAFF\uDF51", // -175
+  "uhc.bossbar.grace": "Gracia: %s",
+  "uhc.bossbar.grace.space.1": "\uDAFF\uDFE1", // -31
+  "uhc.bossbar.grace.space.2": "\uDAFF\uDF97", // -105
+  "uhc.bossbar.glowing": "Luminiscencia: %s",
+  "uhc.bossbar.glowing.space.1": "\uDAFF\uDFF6", // -10
+  "uhc.bossbar.glowing.space.2": "\uDAFF\uDF82" // -126
 }

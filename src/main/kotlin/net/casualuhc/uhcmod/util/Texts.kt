@@ -171,9 +171,10 @@ object Texts {
 
     val SIDEBAR_TEAMMATES get() = this.translatable("uhc.sidebar.teammates")
     val SIDEBAR_KILLS get() = this.generator("uhc.sidebar.kills")
-    val SIDEBAR_ELAPSED get() = this.generator("uhc.sidebar.elapsed")
-    val SIDEBAR_UNTIL_GLOWING get() = this.generator("uhc.sidebar.untilGlowing")
-    val SIDEBAR_GRACE get() = this.generator("uhc.sidebar.grace")
+
+    val BOSSBAR_ELAPSED get() = this.bossbar("uhc.bossbar.elapsed", ICON_WIDE_BACKGROUND)
+    val BOSSBAR_GRACE get() = this.bossbar("uhc.bossbar.grace", ICON_BACKGROUND)
+    val BOSSBAR_GLOWING get() = this.bossbar("uhc.bossbar.glowing", ICON_BACKGROUND)
 
     val ICON_HEART get() = this.literal("\uE000").iconed()
     val ICON_NO_CONNECTION get() = this.literal("\uE001").iconed()
@@ -216,6 +217,20 @@ object Texts {
 
     fun toggleGenerator(key: String): ToggleComponentGenerators {
         return ToggleComponentGenerators { this.translatable(key, arrayOf(this.toggle(it))) }
+    }
+
+    fun bossbar(key: String, background: MutableComponent): ComponentGenerator {
+        return ComponentGenerator { args ->
+            Component.empty().append(
+                this.translatable("$key.space.1").withStyle { it.withFont(SPACES_FONT) }
+            ).append(
+                background.shadowless()
+            ).append(
+                this.translatable("$key.space.2").withStyle { it.withFont(SPACES_FONT) }
+            ).append(
+                this.translatable(key, args).monospaced()
+            )
+        }
     }
 
     fun direction(direction: Direction): MutableComponent {

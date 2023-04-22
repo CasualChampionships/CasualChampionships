@@ -467,12 +467,12 @@ object UHCManager {
         UHCMod.logger.info("World Border Completed")
         this.schedulePhaseTask(5, Minutes, BorderEndTask())
 
-        val endTaskTime = this.uptime + Minutes.toTicks(5)
-        this.sidebar?.addRow {
-            val delta = (endTaskTime - this.uptime).coerceAtLeast(0)
-            val time = TimeUtils.formatMMSS(delta, Ticks)
-            Texts.SIDEBAR_UNTIL_GLOWING.generate(time).monospaced()
-        }
+        // val endTaskTime = this.uptime + Minutes.toTicks(5)
+        // this.sidebar?.addRow {
+        //     val delta = (endTaskTime - this.uptime).coerceAtLeast(0)
+        //     val time = TimeUtils.formatMMSS(delta, Ticks)
+        //     Texts.SIDEBAR_UNTIL_GLOWING.generate(time).monospaced()
+        // }
     }
 
     private fun createActiveSidebar() {
@@ -511,14 +511,7 @@ object UHCManager {
         // This WORKS!
         this.bossbar2 = ArcadeBossbar(
             {
-                Component.empty().append(
-                    Texts.offset(64, Texts.ICON_WIDE_BACKGROUND.shadowless())
-                ).append(
-                    Texts.offset(
-                        -90,
-                        Texts.SIDEBAR_ELAPSED.generate(TimeUtils.formatHHMMSS(this.uptime, Ticks)).monospaced()
-                    )
-                )
+                Texts.BOSSBAR_ELAPSED.generate(TimeUtils.formatHHMMSS(this.uptime, Ticks))
             },
             { 1.0F },
             { BossBarColor.YELLOW },
@@ -528,19 +521,11 @@ object UHCManager {
             this.bossbar2!!.addPlayer(it)
         }
 
-        var progress = 0.0F
         this.bossbar2 = ArcadeBossbar(
             {
-                Component.empty().append(
-                    Texts.offset(40, Texts.ICON_BACKGROUND.shadowless())
-                ).append(
-                    Texts.offset(-68, Texts.SIDEBAR_UNTIL_GLOWING.generate(TimeUtils.formatMMSS(this.uptime, Ticks)).monospaced())
-                )
+                Texts.BOSSBAR_GRACE.generate(TimeUtils.formatMMSS(this.uptime, Ticks))
             },
-            {
-                progress += 0.01F
-                progress
-            },
+            { 1.0F },
             { BossBarColor.GREEN },
             { BossBarOverlay.PROGRESS }
         )
@@ -550,11 +535,7 @@ object UHCManager {
 
         this.bossbar2 = ArcadeBossbar(
             {
-                Component.empty().append(
-                    Texts.offset(35, Texts.ICON_BACKGROUND.shadowless())
-                ).append(
-                    Texts.offset(-68, Texts.SIDEBAR_GRACE.generate(TimeUtils.formatMMSS(this.uptime, Ticks)).monospaced())
-                )
+                Texts.BOSSBAR_GLOWING.generate(TimeUtils.formatMMSS(this.uptime, Ticks))
             },
             { 1.0F },
             { BossBarColor.GREEN },
