@@ -6,9 +6,7 @@ import net.casualuhc.uhcmod.commands.*
 
 object CommandManager {
     internal fun registerEvents() {
-        GlobalEventHandler.register<ServerRegisterCommandEvent> { event ->
-            val dispatcher = event.dispatcher
-            DisplayCommand.register(dispatcher)
+        GlobalEventHandler.register<ServerRegisterCommandEvent> { (dispatcher, _) ->
             FullbrightCommand.register(dispatcher)
             LookCommand.register(dispatcher)
             MinesweeperCommand.register(dispatcher)

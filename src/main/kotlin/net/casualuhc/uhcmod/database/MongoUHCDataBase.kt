@@ -81,7 +81,7 @@ class MongoUHCDataBase(
                 val filter = Filters.eq("_id", stats["_id"])
                 val cursor = this.combinedPlayerStats.find(filter).cursor()
                 val participated = stats.remove("participated") as Boolean
-                val won = stats.remove("participated") as Boolean
+                val won = stats.remove("won") as Boolean
 
                 if (!cursor.hasNext()) {
                     stats["plays"] = if (participated) 1 else 0

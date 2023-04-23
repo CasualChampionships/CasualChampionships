@@ -4,6 +4,8 @@ import net.casualuhc.uhcmod.advancement.UHCAdvancements
 import net.casualuhc.uhcmod.managers.*
 import net.casualuhc.uhcmod.minigame.Dimensions
 import net.casualuhc.uhcmod.resources.UHCResourcePackHost
+import net.casualuhc.uhcmod.uhc.EasterUHC
+import net.casualuhc.uhcmod.uhc.UHCEvents
 import net.casualuhc.uhcmod.util.AntiCheat
 import net.casualuhc.uhcmod.util.Config
 import net.casualuhc.uhcmod.util.Texts
@@ -17,6 +19,8 @@ class UHCMod: ModInitializer {
     }
 
     override fun onInitialize() {
+        this.registerEvents()
+
         Texts.registerEvents()
         UHCManager.registerEvents()
         UHCAdvancements.registerEvents()
@@ -31,6 +35,10 @@ class UHCMod: ModInitializer {
         Dimensions.noop()
 
         Config.registerEvents()
+    }
+
+    fun registerEvents() {
+        UHCEvents.register("easter", ::EasterUHC)
     }
 
     // TODO:

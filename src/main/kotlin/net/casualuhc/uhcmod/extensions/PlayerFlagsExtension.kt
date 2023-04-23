@@ -1,6 +1,5 @@
 package net.casualuhc.uhcmod.extensions
 
-import net.casualuhc.arcade.events.EventHandler
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.extensions.DataExtension
 import net.casualuhc.arcade.utils.PlayerUtils.getExtension
@@ -51,7 +50,11 @@ class PlayerFlagsExtension(
 
     override fun deserialize(element: Tag) {
         (element as ListTag).forEach {
-            this.flags.add(PlayerFlag.valueOf(it.asString))
+            try {
+                this.flags.add(PlayerFlag.valueOf(it.asString))
+            } catch (_: Exception) {
+
+            }
         }
     }
 

@@ -20,4 +20,10 @@ interface ResourceHandler {
     fun getGoldenHeadTexture(): String {
         return HeadUtils.GOLDEN
     }
+
+    companion object {
+        fun default(): ResourceHandler {
+            return object: ResourceHandler { }
+        }
+    }
 }

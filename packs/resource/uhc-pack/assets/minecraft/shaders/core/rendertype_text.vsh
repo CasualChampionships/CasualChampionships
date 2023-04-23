@@ -33,7 +33,7 @@ void main() {
     }
 
     // Delete sidebar numbers
-    if (Color.xyz == vec3(255/255., 85/255., 85/255.) && Position.z == 0.0) {
-        gl_Position = vec4(2,2,2,1); // move shadow off screen
+    if (Color.xyz == vec3(255/255., 85/255., 85/255.) && Position.z == 0.0 && gl_Position.x >= 0.9) {
+        gl_Position = vec4(2,2,2,1); 
     }
 }

@@ -7,9 +7,6 @@
   "uhc.commands.pos": "I'm at %s",
 
   "uhc.lobby.welcome": "Welcome to",
-  "uhc.lobby.starting.soon": "Starting soon!",
-  "uhc.lobby.starting.one": "Starting in 1 minute!",
-  "uhc.lobby.starting.generic": "Starting in %s minutes!",
   "uhc.lobby.ready.question": "Is your team ready?",
   "uhc.lobby.ready.yes": "YES",
   "uhc.lobby.ready.no": "NO",
@@ -151,6 +148,9 @@
   "uhc.sidebar.teammates": "Teammates:",
   "uhc.sidebar.kills": "Kills: %s",
 
+  "uhc.bossbar.starting": "Comenzando en: %s",
+  "uhc.bossbar.starting.space.1": "\uDAFF\uDFE9", // -23
+  "uhc.bossbar.starting.space.2": "\uDAFF\uDF63", // -157
   "uhc.bossbar.elapsed": "Tiempo transcurrido: %s",
   "uhc.bossbar.elapsed.space.1": "\uDAFF\uDFF9", // -7
   "uhc.bossbar.elapsed.space.2": "\uDAFF\uDF51", // -175

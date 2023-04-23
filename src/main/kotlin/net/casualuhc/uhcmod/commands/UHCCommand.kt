@@ -4,6 +4,9 @@ import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import net.casualuhc.arcade.commands.EnumArgument
+import net.casualuhc.arcade.commands.TimeArgument
+import net.casualuhc.arcade.commands.TimeZoneArgument
+import net.casualuhc.arcade.utils.TimeUtils
 import net.casualuhc.uhcmod.extensions.PlayerFlag
 import net.casualuhc.uhcmod.extensions.PlayerFlagsExtension.Companion.flags
 import net.casualuhc.uhcmod.extensions.TeamFlag
@@ -99,6 +102,8 @@ object UHCCommand: Command {
                 Commands.literal("lobby").then(
                     Commands.literal("reload")
                 ).then(
+                    Commands.literal("delete").executes(this::deleteLobby)
+                ).then(
                     Commands.literal("tp").executes(this::teleportToLobby)
                 ).executes {
                     this.setPhase(Lobby)
@@ -108,6 +113,12 @@ object UHCCommand: Command {
                     Commands.literal("force").executes {
                         this.setPhase(Start)
                     }
+                ).then(
+                    Commands.literal("time").then(
+                        Commands.argument("time", TimeArgument.time()).then(
+                            Commands.argument("zone", TimeZoneArgument.timeZone()).executes(this::setTime)
+                        )
+                    )
                 ).executes {
                     this.setPhase(Ready)
                 }
@@ -215,6 +226,20 @@ object UHCCommand: Command {
         return 1
     }
 
+    private fun setTime(context: CommandContext<CommandSourceStack>): Int {
+        val time = TimeArgument.getTime(context, "time")
+        val zone = TimeZoneArgument.getTimeZone(context, "zone")
+        UHCManager.setStartTime(TimeUtils.toEpoch(time, zone) * 1_000)
+        context.source.sendSuccess(Component.literal("Set UHC start time to $time in zone $zone"), true)
+        return 1
+    }
+
+    private fun deleteLobby(context: CommandContext<CommandSourceStack>): Int {
+        UHCManager.event.getLobbyHandler().getMap().remove()
+        context.source.sendSuccess(Component.literal("Successfully removed the lobby"), false)
+        return 1
+    }
+
     private fun teleportToLobby(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
         UHCManager.event.getLobbyHandler().forceTeleport(player)
@@ -229,6 +254,7 @@ object UHCCommand: Command {
 
     private fun reloadConfig(context: CommandContext<CommandSourceStack>): Int {
         Config.reload()
+        context.source.sendSuccess(Component.literal("Successfully reloaded config"), true)
         return 1
     }
 }

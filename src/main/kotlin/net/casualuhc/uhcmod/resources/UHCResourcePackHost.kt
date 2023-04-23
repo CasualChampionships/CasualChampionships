@@ -2,7 +2,7 @@ package net.casualuhc.uhcmod.resources
 
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
-import net.casualuhc.arcade.resources.LocalResourcePackHost
+import net.casualuhc.arcade.resources.PathPackSupplier
 import net.casualuhc.arcade.resources.ResourcePackHost
 import net.casualuhc.uhcmod.events.uhc.UHCConfigLoadedEvent
 import net.casualuhc.uhcmod.util.Config
@@ -12,9 +12,10 @@ object UHCResourcePackHost {
     private val packs = Config.resolve("packs")
     // Note to self: if resource packs don't work press F3 + T before
     // you waste 2 hours trying to debug a non-existent issue
-    private val host = LocalResourcePackHost(this.packs, 1)
+    private val host = ResourcePackHost(1)
 
     init {
+        this.host.addPacks(PathPackSupplier(this.packs))
         this.packs.createDirectories()
     }
 

@@ -6,7 +6,7 @@ import net.casualuhc.arcade.utils.PlayerUtils.teleportTo
 import net.minecraft.server.level.ServerPlayer
 
 interface LobbyHandler {
-    fun getArea(): PlaceableMap
+    fun getMap(): PlaceableMap
 
     fun getSpawn(): Location
 
@@ -19,7 +19,7 @@ interface LobbyHandler {
     }
 
     fun tryTeleport(player: ServerPlayer): Boolean {
-        if (player.level != this.getSpawn().level || !this.getArea().getEntityBoundingBox().contains(player.position())) {
+        if (player.level != this.getSpawn().level || !this.getMap().getEntityBoundingBox().contains(player.position())) {
             this.forceTeleport(player)
             return true
         }

@@ -7,13 +7,16 @@ import com.google.gson.JsonObject
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.core.Event
+import net.casualuhc.arcade.events.player.PlayerDeathEvent
 import net.casualuhc.arcade.events.player.PlayerJoinEvent
 import net.casualuhc.arcade.events.player.PlayerLeaveEvent
+import net.casualuhc.arcade.events.player.PlayerTickEvent
 import net.casualuhc.arcade.events.server.ServerLoadedEvent
 import net.casualuhc.arcade.events.server.ServerRecipeReloadEvent
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.arcade.events.server.ServerTickEvent
 import net.casualuhc.arcade.gui.ArcadeBossbar
+import net.casualuhc.arcade.gui.ArcadeNameDisplay
 import net.casualuhc.arcade.gui.ArcadeSidebar
 import net.casualuhc.arcade.gui.suppliers.ComponentSupplier
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit
@@ -27,19 +30,21 @@ import net.casualuhc.arcade.utils.ComponentUtils.red
 import net.casualuhc.arcade.utils.LevelUtils
 import net.casualuhc.arcade.utils.PlayerUtils
 import net.casualuhc.arcade.utils.PlayerUtils.clearPlayerInventory
+import net.casualuhc.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casualuhc.arcade.utils.PlayerUtils.grantAdvancement
 import net.casualuhc.arcade.utils.PlayerUtils.isSurvival
 import net.casualuhc.arcade.utils.PlayerUtils.sendSound
 import net.casualuhc.arcade.utils.PlayerUtils.sendTitle
 import net.casualuhc.arcade.utils.TeamUtils
 import net.casualuhc.arcade.utils.TeamUtils.getServerPlayers
+import net.casualuhc.arcade.utils.TimeUtils
 import net.casualuhc.uhcmod.UHCMod
 import net.casualuhc.uhcmod.advancement.RaceAdvancement
 import net.casualuhc.uhcmod.advancement.UHCAdvancements
 import net.casualuhc.uhcmod.events.uhc.*
 import net.casualuhc.uhcmod.extensions.PlayerFlag.Won
 import net.casualuhc.uhcmod.extensions.PlayerFlagsExtension.Companion.flags
-import net.casualuhc.uhcmod.extensions.PlayerStat
+import net.casualuhc.uhcmod.extensions.PlayerStat.Kills
 import net.casualuhc.uhcmod.extensions.PlayerStatsExtension.Companion.uhcStats
 import net.casualuhc.uhcmod.extensions.PlayerUHCExtension.Companion.uhc
 import net.casualuhc.uhcmod.extensions.TeamFlag.Ignored
@@ -55,17 +60,16 @@ import net.casualuhc.uhcmod.task.SavableTask
 import net.casualuhc.uhcmod.uhc.DefaultUHC
 import net.casualuhc.uhcmod.uhc.UHCEvent
 import net.casualuhc.uhcmod.uhc.UHCEvents
+import net.casualuhc.uhcmod.util.BossbarUtils
 import net.casualuhc.uhcmod.util.Config
 import net.casualuhc.uhcmod.util.RuleUtils
 import net.casualuhc.uhcmod.util.Texts
 import net.casualuhc.uhcmod.util.Texts.monospaced
 import net.casualuhc.uhcmod.util.Texts.shadowless
-import net.casualuhc.uhcmod.util.TimeUtils
+import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.server.bossevents.CustomBossEvent
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.Mth
@@ -75,17 +79,16 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.Vec2
 import java.nio.file.Files
-import java.util.*
 import kotlin.io.path.exists
 
 object UHCManager {
     private val configPath = Config.resolve("manager.json")
     private val claimed = HashSet<RaceAdvancement>()
     private val scheduler = TickedScheduler()
+    private val bossbars = ArrayList<ArcadeBossbar>()
 
     private var sidebar: ArcadeSidebar? = null
-    private var bossbar: CustomBossEvent? = null
-    private var bossbar2: ArcadeBossbar? = null
+    private var health: ArcadeNameDisplay? = null
     private var startTime = Long.MAX_VALUE
 
     private var glowing = false
@@ -161,9 +164,6 @@ object UHCManager {
 
     fun setStartTime(newStartTime: Long) {
         this.startTime = newStartTime
-        if (this.startTime - 30 * 60 * 1000 >= System.currentTimeMillis()) {
-            this.generateBossBar()
-        }
     }
 
     fun isUnclaimed(achievement: RaceAdvancement): Boolean {
@@ -183,6 +183,8 @@ object UHCManager {
         GlobalEventHandler.register<ServerStoppedEvent> { this.onServerStopped() }
         GlobalEventHandler.register<ServerTickEvent> { this.onServerTick() }
         GlobalEventHandler.register<PlayerJoinEvent> { this.onPlayerJoin(it) }
+        GlobalEventHandler.register<PlayerTickEvent> { this.onPlayerTick(it) }
+        GlobalEventHandler.register<PlayerDeathEvent> { this.onPlayerDeath(it) }
         GlobalEventHandler.register<PlayerLeaveEvent> { this.onPlayerLeave(it) }
         GlobalEventHandler.register<ServerRecipeReloadEvent> { this.onRecipeReload(it) }
 
@@ -213,6 +215,7 @@ object UHCManager {
 
         if (this.isActivePhase()) {
             this.createActiveSidebar()
+            this.createActiveBossbar()
         }
 
         val tasks = UHCLoadTasksEvent()
@@ -276,14 +279,30 @@ object UHCManager {
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val player = event.player
 
-        if (this.isLobbyPhase()) {
-            this.bossbar?.addPlayer(player)
+        for (bossbar in this.bossbars) {
+            bossbar.addPlayer(player)
         }
 
         this.sidebar?.addPlayer(player)
 
         if (this.isActivePhase() && this.glowing && player.isSurvival) {
             player.setGlowingTag(true)
+        }
+
+        if (this.isActivePhase() && player.isSpectator) {
+            this.health?.addPlayer(player)
+        }
+    }
+
+    private fun onPlayerTick(event: PlayerTickEvent) {
+        if (this.isActivePhase()) {
+            this.health?.setScore(event.player, (event.player.health / 2.0F).toInt())
+        }
+    }
+
+    private fun onPlayerDeath(event: PlayerDeathEvent) {
+        if (this.isActivePhase()) {
+            this.health?.addPlayer(event.player)
         }
     }
 
@@ -303,22 +322,6 @@ object UHCManager {
         this.scheduler.tick()
 
         this.uptime++
-        val bar = this.bossbar
-        if (!this.isLobbyPhase() || bar == null) {
-            return
-        }
-        if (this.uptime % 100 == 0 && this.startTime - 30 * 60 * 1000 < System.currentTimeMillis()) {
-            val millisLeft = startTime - System.currentTimeMillis()
-            val percentLeft = millisLeft / (30 * 60 * 1000).toFloat()
-            bar.progress = Mth.clamp(1 - percentLeft, 0.0F, 1.0F)
-            val minutesLeft = millisLeft / (60 * 1000)
-            val startTime = when {
-                minutesLeft <= 0 -> Texts.LOBBY_STARTING_SOON
-                minutesLeft == 1L -> Texts.LOBBY_STARTING_ONE
-                else -> Texts.LOBBY_STARTING_GENERIC.generate(minutesLeft)
-            }.lime().bold()
-            bar.name = this.event.getBossBarHandler().getTitle().append(". ").append(startTime)
-        }
     }
 
     private fun onUHCSetup() {
@@ -326,14 +329,16 @@ object UHCManager {
     }
 
     private fun onUHCLobby() {
+        this.removeBossbars()
         this.sidebar?.clearPlayers()
         this.sidebar = null
+        this.health?.clearPlayers()
+        this.health = null
 
-        this.deleteAllBossBars()
         RuleUtils.setLobbyGamerules()
 
         val handler = this.event.getLobbyHandler()
-        handler.getArea().place()
+        handler.getMap().place()
 
         PlayerUtils.forEveryPlayer { player ->
             if (!player.hasPermissions(4)) {
@@ -347,13 +352,36 @@ object UHCManager {
             }
         }
 
-        this.generateBossBar()
+        val start = ArcadeBossbar(
+            {
+                val time = when (this.startTime) {
+                    Long.MAX_VALUE -> "99:99:99"
+                    else -> {
+                        val secondsLeft = (this.startTime - System.currentTimeMillis()) / 1_000
+                        TimeUtils.formatHHMMSS(secondsLeft, Seconds)
+                    }
+                }
+                Texts.BOSSBAR_STARTING.generate(time)
+            },
+            {
+                val millisLeft = this.startTime - System.currentTimeMillis()
+                val percentLeft = millisLeft / (30 * 60 * 1000).toFloat()
+                Mth.clamp(1 - percentLeft, 0.0F, 1.0F)
+            },
+            {
+                BossBarColor.YELLOW
+            },
+            {
+                BossBarOverlay.PROGRESS
+            }
+        )
+        this.bossbars.add(start)
+        this.reloadBossbars()
     }
 
     private fun onUHCStart() {
+        this.removeBossbars()
         this.setStartTime(Long.MAX_VALUE)
-        this.hideBossBar()
-        this.deleteAllBossBars()
 
         // Countdown
         var starting = 10
@@ -368,8 +396,11 @@ object UHCManager {
             PlayerUtils.forEveryPlayer { player ->
                 player.sendUHCResourcePack()
             }
+            TeamUtils.forEachTeam { team ->
+                team.uhc.players.clear()
+            }
 
-            val area = this.event.getLobbyHandler().getArea()
+            val area = this.event.getLobbyHandler().getMap()
             area.removeEntities { it !is Player }
             area.remove()
 
@@ -378,10 +409,17 @@ object UHCManager {
                 val team = player.team
                 team !== null && !team.flags.has(Ignored)
             }
-            PlayerUtils.spread(LevelUtils.overworld(), Vec2(0.0F, 0.0F), 500.0, 2900.0, true, players)
+            val overworld = LevelUtils.overworld()
+            PlayerUtils.spread(overworld, Vec2(0.0F, 0.0F), 500.0, 2900.0, true, players)
 
             PlayerUtils.forEveryPlayer { player ->
                 player.setForUHC(true)
+                if (player.isSpectator) {
+                    if (player.level != overworld) {
+                        player.teleportTo(overworld, 0.0, 200.0, 0.0, 0.0F, 0.0F)
+                    }
+                    this.health?.addPlayer(player)
+                }
             }
         }
     }
@@ -391,21 +429,37 @@ object UHCManager {
         RuleUtils.setActiveGamerules()
 
         this.createActiveSidebar()
+        this.createActiveBossbar()
 
         PlayerUtils.forEveryPlayer { player ->
             player.sendSystemMessage(Texts.UHC_GRACE_FIRST.gold())
             player.sendSound(SoundEvents.NOTE_BLOCK_PLING.value())
         }
-        var minutes = 10
-        this.scheduleInLoopPhaseTask(2, 2, 8, Minutes) {
-            minutes -= 2
-            val message = Texts.UHC_GRACE_GENERIC.generate(minutes).gold()
-            PlayerUtils.forEveryPlayer { player ->
-                player.sendSystemMessage(message)
-                player.sendSound(SoundEvents.NOTE_BLOCK_PLING.value())
-            }
-        }
         this.schedulePhaseTask(10, Minutes, GracePeriodOverTask())
+
+        val graceEnd = this.uptime + Minutes.toTicks(10)
+        val grace = ArcadeBossbar(
+            {
+                val remaining = graceEnd - this.uptime
+                Texts.BOSSBAR_GRACE.generate(TimeUtils.formatMMSS(remaining, Ticks))
+            },
+            {
+                val percent = (graceEnd - this.uptime) / Minutes.toTicks(10).toFloat()
+                BossbarUtils.shrink(0.0F.coerceAtLeast(percent), 0.75F)
+            },
+            { BossBarColor.GREEN },
+            { BossBarOverlay.PROGRESS }
+        )
+        this.bossbars.add(grace)
+        this.reloadBossbars()
+
+        this.schedulePhaseTask(10, Minutes) {
+            this.bossbars.remove(grace)
+            grace.clearPlayers()
+        }
+
+        this.health = ArcadeNameDisplay(Texts.ICON_HEART)
+        this.health?.setTitle(Texts.ICON_HEART)
     }
 
     private fun onUHCEnd() {
@@ -467,12 +521,30 @@ object UHCManager {
         UHCMod.logger.info("World Border Completed")
         this.schedulePhaseTask(5, Minutes, BorderEndTask())
 
-        // val endTaskTime = this.uptime + Minutes.toTicks(5)
-        // this.sidebar?.addRow {
-        //     val delta = (endTaskTime - this.uptime).coerceAtLeast(0)
-        //     val time = TimeUtils.formatMMSS(delta, Ticks)
-        //     Texts.SIDEBAR_UNTIL_GLOWING.generate(time).monospaced()
-        // }
+        val endTaskTime = this.uptime + Minutes.toTicks(5)
+        val endBossbar = ArcadeBossbar(
+            {
+                val remaining = (endTaskTime - this.uptime).coerceAtLeast(0)
+                Texts.BOSSBAR_GLOWING.generate(TimeUtils.formatMMSS(remaining, Ticks))
+            },
+            {
+                val percent = (endTaskTime - this.uptime) / Minutes.toTicks(5).toFloat()
+                BossbarUtils.shrink(0.0F.coerceAtLeast(percent), 0.75F)
+            },
+            {
+                BossBarColor.GREEN
+            },
+            {
+                BossBarOverlay.PROGRESS
+            }
+        )
+        this.bossbars.add(endBossbar)
+        this.reloadBossbars()
+
+        this.schedulePhaseTask(5, Minutes) {
+            this.bossbars.remove(endBossbar)
+            endBossbar.clearPlayers()
+        }
     }
 
     private fun createActiveSidebar() {
@@ -485,6 +557,19 @@ object UHCManager {
             sidebar.addRow(TeammateRow(i, buffer))
         }
         sidebar.addRow(ComponentSupplier.of(Component.empty()))
+        sidebar.addRow { player ->
+            val vectorToBorder = player.distanceToNearestBorder()
+            val multiplier = if (vectorToBorder.x < 0 || vectorToBorder.z < 0) -1 else 1
+            val distanceToBorder =  multiplier * vectorToBorder.length().toInt()
+
+            val percent = distanceToBorder / (player.level.worldBorder.size / 2.0)
+            val colour = if (percent > 0.4) ChatFormatting.DARK_GREEN else if (percent > 0.2) ChatFormatting.YELLOW else if (percent > 0.1) ChatFormatting.RED else ChatFormatting.DARK_RED
+            Component.literal(buffer).append(Texts.UHC_DISTANCE_TO_WB.generate(Component.literal(distanceToBorder.toString()).withStyle(colour))).monospaced()
+        }
+        sidebar.addRow { player ->
+            Component.literal(buffer).append(Texts.UHC_WB_RADIUS.generate((player.level.worldBorder.size / 2.0).toInt())).monospaced()
+        }
+        sidebar.addRow(ComponentSupplier.of(Component.empty()))
 
         PlayerUtils.forEveryPlayer {
             sidebar.addPlayer(it)
@@ -492,69 +577,29 @@ object UHCManager {
         this.sidebar = sidebar
     }
 
-    private fun generateBossBar() {
-        // val bar: CustomBossEvent
-        // val handler = this.event.getBossBarHandler()
-        // if (this.bossbar == null) {
-        //     val manager = Arcade.server.customBossEvents
-        //     val id = ResourceLocation("uhc", "lobby")
-        //     bar = manager.get(id) ?: manager.create(id, handler.getTitle())
-        //     this.bossbar = bar
-        // } else {
-        //     bar = this.bossbar!!
-        //     bar.name = handler.getTitle()
-        // }
-        // bar.progress = 1.0F
-        // bar.color = handler.getColour()
-        // PlayerUtils.forEveryPlayer(bar::addPlayer)
-
-        // This WORKS!
-        this.bossbar2 = ArcadeBossbar(
-            {
-                Texts.BOSSBAR_ELAPSED.generate(TimeUtils.formatHHMMSS(this.uptime, Ticks))
-            },
+    private fun createActiveBossbar() {
+        val elapsed = ArcadeBossbar(
+            UHCBossbarUI(),
             { 1.0F },
             { BossBarColor.YELLOW },
             { BossBarOverlay.PROGRESS }
         )
-        PlayerUtils.forEveryPlayer {
-            this.bossbar2!!.addPlayer(it)
-        }
-
-        this.bossbar2 = ArcadeBossbar(
-            {
-                Texts.BOSSBAR_GRACE.generate(TimeUtils.formatMMSS(this.uptime, Ticks))
-            },
-            { 1.0F },
-            { BossBarColor.GREEN },
-            { BossBarOverlay.PROGRESS }
-        )
-        PlayerUtils.forEveryPlayer {
-            this.bossbar2!!.addPlayer(it)
-        }
-
-        this.bossbar2 = ArcadeBossbar(
-            {
-                Texts.BOSSBAR_GLOWING.generate(TimeUtils.formatMMSS(this.uptime, Ticks))
-            },
-            { 1.0F },
-            { BossBarColor.GREEN },
-            { BossBarOverlay.PROGRESS }
-        )
-        PlayerUtils.forEveryPlayer {
-            this.bossbar2!!.addPlayer(it)
-        }
+        this.bossbars.add(elapsed)
+        this.reloadBossbars()
     }
 
-    private fun hideBossBar() {
-        this.bossbar?.removeAllPlayers()
+    private fun removeBossbars() {
+        for (bossbar in this.bossbars) {
+            bossbar.clearPlayers()
+        }
+        this.bossbars.clear()
     }
 
-    private fun deleteAllBossBars() {
-        val manager = Arcade.server.customBossEvents
-        for (bar in LinkedList(manager.events)) {
-            bar.removeAllPlayers()
-            manager.remove(bar)
+    private fun reloadBossbars() {
+        for (bossbar in this.bossbars) {
+            PlayerUtils.forEveryPlayer {
+                bossbar.addPlayer(it)
+            }
         }
     }
 
@@ -565,6 +610,27 @@ object UHCManager {
         Start(::UHCStartEvent),
         Active(::UHCActiveEvent),
         End(::UHCEndEvent)
+    }
+
+    private class UHCBossbarUI: ComponentSupplier {
+        override fun getComponent(player: ServerPlayer): Component {
+            val start = Component.empty()
+                .append(Texts.space(-2))
+                .append(Texts.ICON_SHORT_BACKGROUND.shadowless())
+                .append(Texts.space(-27))
+                .append(Texts.literal("%02d".format(PlayerUtils.players().filter { it.isSurvival }.size)).monospaced())
+                .append(Texts.ICON_PLAYERS)
+                .append(Texts.space(42))
+                .append(Texts.space(1, 2))
+            val end = Component.empty()
+                .append(Texts.space(39))
+                .append(Texts.ICON_SHORT_BACKGROUND.shadowless())
+                .append(Texts.space(-27))
+                .append(Texts.literal("%02d".format(player.uhcStats[Kills].toInt())).monospaced())
+                .append(Texts.ICON_KILLS)
+            val middle = Texts.BOSSBAR_ELAPSED.generate(TimeUtils.formatHHMMSS(uptime, Ticks))
+            return start.append(middle).append(end)
+        }
     }
 
     private class TeammateRow(val index: Int, val buffer: String = ""): ComponentSupplier {

@@ -56,6 +56,7 @@ import net.casualuhc.uhcmod.util.Config
 import net.casualuhc.uhcmod.util.DirectionUtils.opposite
 import net.casualuhc.uhcmod.util.HeadUtils
 import net.casualuhc.uhcmod.util.Texts
+import net.casualuhc.uhcmod.util.Texts.monospaced
 import net.casualuhc.uhcmod.util.Texts.regular
 import net.casualuhc.uhcmod.util.shapes.ArrowShape
 import net.minecraft.ChatFormatting.*
@@ -154,10 +155,6 @@ object PlayerManager {
 
             flags.set(Participating, true)
             flags.set(TeamGlow, true)
-            flags.set(Coords, true)
-            flags.set(Facing, true)
-            flags.set(Radius, true)
-            flags.set(Distance, true)
 
             this.uhc.originalTeam = team
             team.uhc.add(this.scoreboardName)
@@ -435,8 +432,8 @@ object PlayerManager {
             if (original !== null && !original.flags.has(Eliminated) && !original.hasAlivePlayers()) {
                 original.flags.set(Eliminated, true)
                 PlayerUtils.forEveryPlayer {
-                    player.sendSound(SoundEvents.LIGHTNING_BOLT_THUNDER, volume = 0.5F)
-                    player.sendSystemMessage(Texts.UHC_ELIMINATED.generate(original.name).withStyle(original.color).bold())
+                    it.sendSound(SoundEvents.LIGHTNING_BOLT_THUNDER, volume = 0.5F)
+                    it.sendSystemMessage(Texts.UHC_ELIMINATED.generate(original.name).withStyle(original.color).bold())
                 }
             }
 
@@ -493,50 +490,6 @@ object PlayerManager {
                 .append("\n")
                 .append(Texts.TAB_HOSTED.aqua().bold())
             player.connection.send(ClientboundTabListPacket(header, footer))
-        }
-
-        val flags = player.flags
-
-        val hasCoords = flags.has(Coords)
-        val hasDirection = flags.has(Facing)
-        val hasDistance = flags.has(Distance)
-        val hasRadius = flags.has(Radius)
-        if (hasCoords || hasDirection || hasDistance || hasRadius) {
-            val border = player.level.worldBorder
-            val display = Component.empty()
-            var previous = false
-            if (hasCoords) {
-                display.append("(${player.blockX}, ${player.blockY}, ${player.blockZ})")
-                previous = true
-            }
-            if (hasDirection) {
-                if (previous) {
-                    display.append(" | ")
-                }
-                display.append(Texts.UHC_DIRECTION.generate(Texts.direction(player.direction)))
-                previous = true
-            }
-            if (hasDistance) {
-                if (previous) {
-                    display.append(" | ")
-                }
-                val vectorToBorder = player.distanceToNearestBorder()
-                val multiplier = if (vectorToBorder.x < 0 || vectorToBorder.z < 0) -1 else 1
-                val distanceToBorder =  multiplier * vectorToBorder.length().toInt()
-
-                val percent: Double = distanceToBorder / (border.size / 2.0)
-                val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
-
-                display.append(Texts.UHC_DISTANCE_TO_WB.generate(Component.literal(distanceToBorder.toString()).withStyle(colour)))
-                previous = true
-            }
-            if (hasRadius) {
-                if (previous) {
-                    display.append(" | ")
-                }
-                display.append(Texts.UHC_WB_RADIUS.generate((border.size / 2.0).toInt()))
-            }
-            player.sendSystemMessage(display, true)
         }
     }
 

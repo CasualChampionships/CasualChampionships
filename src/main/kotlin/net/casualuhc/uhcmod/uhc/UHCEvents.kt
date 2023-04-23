@@ -1,13 +1,13 @@
 package net.casualuhc.uhcmod.uhc
 
 object UHCEvents {
-    private val events = HashMap<String, UHCEvent>()
+    private val events = HashMap<String, () -> UHCEvent>()
 
     fun getUHC(name: String): UHCEvent? {
-        return this.events[name]
+        return this.events[name]?.invoke()
     }
 
-    fun register(uhc: UHCEvent) {
-        this.events[uhc.getName()] = uhc
+    fun register(name: String, factory: () -> UHCEvent) {
+        this.events[name] = factory
     }
 }

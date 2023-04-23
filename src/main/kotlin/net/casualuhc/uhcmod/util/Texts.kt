@@ -31,9 +31,6 @@ object Texts {
     val COMMAND_POS get() = this.generator("uhc.commands.pos")
 
     val LOBBY_WELCOME get() = this.translatable("uhc.lobby.welcome")
-    val LOBBY_STARTING_SOON get() = this.translatable("uhc.lobby.starting.soon")
-    val LOBBY_STARTING_ONE get() = this.translatable("uhc.lobby.starting.one")
-    val LOBBY_STARTING_GENERIC = this.generator("uhc.lobby.starting.generic")
     val LOBBY_READY_QUESTION get() = this.translatable("uhc.lobby.ready.question")
     val LOBBY_YES get() = this.translatable("uhc.lobby.ready.yes")
     val LOBBY_NO get() = this.translatable("uhc.lobby.ready.no")
@@ -127,9 +124,9 @@ object Texts {
     val MINESWEEPER_FLAG get() = this.translatable("uhc.minesweeper.flag")
     val MINESWEEPER_TIMER get() = this.translatable("uhc.minesweeper.timer")
     val MINESWEEPER_PLAY_AGAIN get() = this.translatable("uhc.minesweeper.playAgain")
-    val MINESWEEPER_WON = this.generator("uhc.minesweeper.won")
+    val MINESWEEPER_WON get() = this.generator("uhc.minesweeper.won")
     val MINESWEEPER_LOST get() = this.translatable("uhc.minesweeper.lost")
-    val MINESWEEPER_RECORD = this.generator("uhc.minesweeper.record")
+    val MINESWEEPER_RECORD get() = this.generator("uhc.minesweeper.record")
 
     val UHC_DIRECTION get() = this.generator("uhc.game.direction")
     val UHC_DISTANCE_TO_WB get() = this.generator("uhc.game.distance")
@@ -137,22 +134,22 @@ object Texts {
     val UHC_GRACE_FIRST get() = this.translatable("uhc.game.grace.first")
     val UHC_GRACE_GENERIC = this.generator("uhc.game.grace.generic")
     val UHC_GRACE_OVER get() = this.translatable("uhc.game.grace.over")
-    val UHC_ELIMINATED = this.generator("uhc.game.eliminated")
-    val UHC_OUTSIDE_BORDER = this.generator("uhc.game.outsideBorder")
-    val UHC_NORTH = this.translatable("uhc.game.north")
-    val UHC_NORTH_EAST = this.translatable("uhc.game.northEast")
-    val UHC_EAST = this.translatable("uhc.game.east")
-    val UHC_SOUTH_EAST = this.translatable("uhc.game.southEast")
-    val UHC_SOUTH = this.translatable("uhc.game.south")
-    val UHC_SOUTH_WEST = this.translatable("uhc.game.southWest")
-    val UHC_WEST = this.translatable("uhc.game.west")
-    val UHC_NORTH_WEST = this.translatable("uhc.game.northWest")
-    val UHC_ADDED_TO_TEAM = this.generator("uhc.game.addedToTeam")
+    val UHC_ELIMINATED get() = this.generator("uhc.game.eliminated")
+    val UHC_OUTSIDE_BORDER get() = this.generator("uhc.game.outsideBorder")
+    val UHC_NORTH get() = this.translatable("uhc.game.north")
+    val UHC_NORTH_EAST get() = this.translatable("uhc.game.northEast")
+    val UHC_EAST get() = this.translatable("uhc.game.east")
+    val UHC_SOUTH_EAST get() = this.translatable("uhc.game.southEast")
+    val UHC_SOUTH get() = this.translatable("uhc.game.south")
+    val UHC_SOUTH_WEST get() = this.translatable("uhc.game.southWest")
+    val UHC_WEST get() = this.translatable("uhc.game.west")
+    val UHC_NORTH_WEST get() = this.translatable("uhc.game.northWest")
+    val UHC_ADDED_TO_TEAM get() = this.generator("uhc.game.addedToTeam")
     val UHC_GOLDEN_HEAD get() = this.translatable("uhc.game.goldenHead")
-    val UHC_WON = this.generator("uhc.game.won")
+    val UHC_WON get() = this.generator("uhc.game.won")
 
     val SPECTATOR_NOT_SPECTATING get() = this.translatable("uhc.spectator.notDead")
-    val SPECTATOR_NOT_ONLINE = this.generator("uhc.spectator.notOnline")
+    val SPECTATOR_NOT_ONLINE get() = this.generator("uhc.spectator.notOnline")
     val SPECTATOR_SCREEN get() = this.translatable("uhc.spectator.screen")
     val SPECTATOR_PREVIOUS get() = this.translatable("uhc.spectator.previous")
     val SPECTATOR_SPECTATORS get() = this.translatable("uhc.spectator.spectators")
@@ -172,6 +169,7 @@ object Texts {
     val SIDEBAR_TEAMMATES get() = this.translatable("uhc.sidebar.teammates")
     val SIDEBAR_KILLS get() = this.generator("uhc.sidebar.kills")
 
+    val BOSSBAR_STARTING get() = this.bossbar("uhc.bossbar.starting", ICON_WIDE_BACKGROUND)
     val BOSSBAR_ELAPSED get() = this.bossbar("uhc.bossbar.elapsed", ICON_WIDE_BACKGROUND)
     val BOSSBAR_GRACE get() = this.bossbar("uhc.bossbar.grace", ICON_BACKGROUND)
     val BOSSBAR_GLOWING get() = this.bossbar("uhc.bossbar.glowing", ICON_BACKGROUND)
@@ -182,14 +180,21 @@ object Texts {
     val ICON_UHC get() = this.literal("\uE003").iconed()
     val ICON_WIDE_BACKGROUND get() = this.literal("\uE004").iconed()
     val ICON_BACKGROUND get() = this.literal("\uE005").iconed()
+    val ICON_SHORT_BACKGROUND get() = this.literal("\uE008").iconed()
+    val ICON_KILLS get() = this.literal("\uE009").iconed()
+    val ICON_PLAYERS get() = this.literal("\uE00A").iconed()
 
     fun literal(literal: String): MutableComponent {
         return Component.literal(literal)
     }
 
+    fun space(top: Int, bottom: Int): MutableComponent {
+        return this.translatable("space.$top/$bottom").withStyle { it.withFont(SPACES_FONT) }
+    }
+
     fun space(space: Int = 4): MutableComponent {
         val clamped = Mth.clamp(space, -8192, 8192)
-        return this.translatable("space.${clamped}").withStyle { it.withFont(SPACES_FONT) }
+        return this.translatable("space.$clamped").withStyle { it.withFont(SPACES_FONT) }
     }
 
     fun offset(offset: Int, component: Component): MutableComponent {
