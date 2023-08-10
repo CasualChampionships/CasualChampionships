@@ -65,7 +65,7 @@ class SpectatorScreen(
             return
         }
         (player as ServerPlayer).teleportTo(
-            target.getLevel(),
+            target.serverLevel(),
             target.x,
             target.y,
             target.z,

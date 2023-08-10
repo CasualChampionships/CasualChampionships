@@ -15,6 +15,7 @@
     "feature.ScoreboardMixin",
     "feature.ServerGamePacketListenerImplMixin",
     "feature.ServerLevelMixin",
+    "performance.NaturalSpawnerMixin",
     "performance.PersistentEntitySectionManagerMixin",
     "settings.BrewingStandBlockEntityMixin"
   ],

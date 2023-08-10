@@ -353,17 +353,22 @@ object UHCManager {
         }
 
         val start = ArcadeBossbar(
-            {
+            title = {
                 val time = when (this.startTime) {
                     Long.MAX_VALUE -> "99:99:99"
                     else -> {
-                        val secondsLeft = (this.startTime - System.currentTimeMillis()) / 1_000
-                        TimeUtils.formatHHMMSS(secondsLeft, Seconds)
+                        if (this.startTime < 0) {
+                            "00:00:00"
+                        } else {
+                            val secondsLeft = (this.startTime - System.currentTimeMillis()) / 1_000
+                            TimeUtils.formatHHMMSS(secondsLeft, Seconds)
+                        }
+
                     }
                 }
                 Texts.BOSSBAR_STARTING.generate(time)
             },
-            {
+            progress = {
                 val millisLeft = this.startTime - System.currentTimeMillis()
                 val percentLeft = millisLeft / (30 * 60 * 1000).toFloat()
                 Mth.clamp(1 - percentLeft, 0.0F, 1.0F)
@@ -415,7 +420,7 @@ object UHCManager {
             PlayerUtils.forEveryPlayer { player ->
                 player.setForUHC(true)
                 if (player.isSpectator) {
-                    if (player.level != overworld) {
+                    if (player.level() != overworld) {
                         player.teleportTo(overworld, 0.0, 200.0, 0.0, 0.0F, 0.0F)
                     }
                     this.health?.addPlayer(player)
@@ -439,11 +444,11 @@ object UHCManager {
 
         val graceEnd = this.uptime + Minutes.toTicks(10)
         val grace = ArcadeBossbar(
-            {
+            title = {
                 val remaining = graceEnd - this.uptime
                 Texts.BOSSBAR_GRACE.generate(TimeUtils.formatMMSS(remaining, Ticks))
             },
-            {
+            progress = {
                 val percent = (graceEnd - this.uptime) / Minutes.toTicks(10).toFloat()
                 BossbarUtils.shrink(0.0F.coerceAtLeast(percent), 0.75F)
             },
@@ -523,11 +528,11 @@ object UHCManager {
 
         val endTaskTime = this.uptime + Minutes.toTicks(5)
         val endBossbar = ArcadeBossbar(
-            {
+            title = {
                 val remaining = (endTaskTime - this.uptime).coerceAtLeast(0)
                 Texts.BOSSBAR_GLOWING.generate(TimeUtils.formatMMSS(remaining, Ticks))
             },
-            {
+            progress = {
                 val percent = (endTaskTime - this.uptime) / Minutes.toTicks(5).toFloat()
                 BossbarUtils.shrink(0.0F.coerceAtLeast(percent), 0.75F)
             },
@@ -562,12 +567,12 @@ object UHCManager {
             val multiplier = if (vectorToBorder.x < 0 || vectorToBorder.z < 0) -1 else 1
             val distanceToBorder =  multiplier * vectorToBorder.length().toInt()
 
-            val percent = distanceToBorder / (player.level.worldBorder.size / 2.0)
+            val percent = distanceToBorder / (player.level().worldBorder.size / 2.0)
             val colour = if (percent > 0.4) ChatFormatting.DARK_GREEN else if (percent > 0.2) ChatFormatting.YELLOW else if (percent > 0.1) ChatFormatting.RED else ChatFormatting.DARK_RED
             Component.literal(buffer).append(Texts.UHC_DISTANCE_TO_WB.generate(Component.literal(distanceToBorder.toString()).withStyle(colour))).monospaced()
         }
         sidebar.addRow { player ->
-            Component.literal(buffer).append(Texts.UHC_WB_RADIUS.generate((player.level.worldBorder.size / 2.0).toInt())).monospaced()
+            Component.literal(buffer).append(Texts.UHC_WB_RADIUS.generate((player.level().worldBorder.size / 2.0).toInt())).monospaced()
         }
         sidebar.addRow(ComponentSupplier.of(Component.empty()))
 

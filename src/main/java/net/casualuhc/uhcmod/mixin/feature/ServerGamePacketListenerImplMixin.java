@@ -36,7 +36,7 @@ public class ServerGamePacketListenerImplMixin {
 	)
 	private Packet<?> onSendPacket(Packet<?> packet) {
 		if (packet instanceof ClientboundSetEntityDataPacket dataUpdate) {
-			Entity glowing = this.player.level.getEntity(dataUpdate.id());
+			Entity glowing = this.player.serverLevel().getEntity(dataUpdate.id());
 			if (glowing instanceof ServerPlayer target) {
 				packet = PlayerManager.handleTrackerUpdatePacketForTeamGlowing(target, this.player, dataUpdate);
 			}

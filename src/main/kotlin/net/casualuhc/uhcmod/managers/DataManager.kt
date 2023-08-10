@@ -1,6 +1,5 @@
 package net.casualuhc.uhcmod.managers
 
-import net.casualuhc.arcade.events.EventHandler
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.uhcmod.database.EmptyUHCDataBase

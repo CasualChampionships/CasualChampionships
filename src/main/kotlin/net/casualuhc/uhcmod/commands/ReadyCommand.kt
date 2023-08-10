@@ -3,6 +3,7 @@ package net.casualuhc.uhcmod.commands
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
+import net.casualuhc.arcade.utils.CommandSourceUtils.success
 import net.casualuhc.arcade.utils.PlayerUtils
 import net.casualuhc.arcade.utils.TeamUtils.asPlayerTeam
 import net.casualuhc.uhcmod.extensions.TeamFlag.Ignored
@@ -72,9 +73,9 @@ object ReadyCommand: Command {
         if (!UHCManager.isReadyPhase()) {
             throw NOT_NOW.create()
         }
-        context.source.sendSuccess(Component.literal("The following teams are not ready:"), true)
+        context.source.success(Component.literal("The following teams are not ready:"), true)
         for (team in TeamManager.getUnreadyTeams()) {
-            context.source.sendSuccess(team.displayName, true)
+            context.source.success(team.displayName, true)
         }
         return 1
     }

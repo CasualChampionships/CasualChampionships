@@ -396,12 +396,12 @@ object PlayerManager {
         val player = event.player
 
         if (UHCManager.isPhase(End)) {
-            player.setRespawnPosition(player.level.dimension(), player.blockPosition(), player.xRot, true, false)
+            player.setRespawnPosition(player.level().dimension(), player.blockPosition(), player.xRot, true, false)
             player.setGameMode(GameType.SPECTATOR)
             return
         }
         if (UHCManager.isActivePhase()) {
-            player.setRespawnPosition(player.level.dimension(), player.blockPosition(), player.xRot, true, false)
+            player.setRespawnPosition(player.level().dimension(), player.blockPosition(), player.xRot, true, false)
             player.setGameMode(GameType.SPECTATOR)
 
             if (UHCManager.isUnclaimed(Death)) {
@@ -494,7 +494,7 @@ object PlayerManager {
     }
 
     private fun updateWorldBorder(player: ServerPlayer) {
-        val level = player.level
+        val level = player.level()
         val border = level.worldBorder
 
         if (border.isWithinBounds(player.boundingBox)) {

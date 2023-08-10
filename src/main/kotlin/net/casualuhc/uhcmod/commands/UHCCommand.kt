@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext
 import net.casualuhc.arcade.commands.EnumArgument
 import net.casualuhc.arcade.commands.TimeArgument
 import net.casualuhc.arcade.commands.TimeZoneArgument
+import net.casualuhc.arcade.utils.CommandSourceUtils.success
 import net.casualuhc.arcade.utils.TimeUtils
 import net.casualuhc.uhcmod.extensions.PlayerFlag
 import net.casualuhc.uhcmod.extensions.PlayerFlagsExtension.Companion.flags
@@ -157,14 +158,14 @@ object UHCCommand: Command {
         val value = BoolArgumentType.getBool(context, "value")
         team.flags.set(flag, value)
         val message = Component.literal("${flag.name} has been set to $value for ").append(team.formattedDisplayName)
-        context.source.sendSuccess(message, true)
+        context.source.success(message, true)
         return 1
     }
 
     private fun getTeamFlags(context: CommandContext<CommandSourceStack>): Int {
         val team = TeamArgument.getTeam(context, "team")
         val message = team.formattedDisplayName.append(" has the following flags enabled: ${team.flags.get().joinToString()}")
-        context.source.sendSuccess(message, false)
+        context.source.success(message, false)
         return 1
     }
 
@@ -177,7 +178,7 @@ object UHCCommand: Command {
         val message = Component.literal("${player.scoreboardName} has joined team ")
             .append(team.formattedDisplayName)
             .append(" and has ${if (teleport) "been teleported to a random teammate" else "not been teleported"}")
-        context.source.sendSuccess(message, true)
+        context.source.success(message, true)
         return 1
     }
 
@@ -187,37 +188,40 @@ object UHCCommand: Command {
         val value = BoolArgumentType.getBool(context, "value")
         player.flags.set(flag, value)
         val message = Component.literal("${flag.name} has been set to $value for ").append(player.displayName)
-        context.source.sendSuccess(message, true)
+        context.source.success(message, true)
         return 1
     }
 
     private fun getPlayerFlags(context: CommandContext<CommandSourceStack>): Int {
         val player = EntityArgument.getPlayer(context, "player")
         val message = player.displayName.copy().append(" has the following flags enabled: ${player.flags.get().joinToString()}")
-        context.source.sendSuccess(message, false)
+        context.source.success(message, false)
         return 1
     }
 
     private fun pausePhase(context: CommandContext<CommandSourceStack>): Int {
         if (UHCManager.paused) {
             context.source.sendFailure(Component.literal("Current phase was already paused!"))
+            return 0
         }
         UHCManager.pause()
-        context.source.sendSuccess(Component.literal("Successfully paused the current phase ${UHCManager.phase}"), true)
+        context.source.success(Component.literal("Successfully paused the current phase ${UHCManager.phase}"), true)
         return 1
     }
 
     private fun unpausePhase(context: CommandContext<CommandSourceStack>): Int {
         if (!UHCManager.paused) {
             context.source.sendFailure(Component.literal("Current phase was not paused!"))
+            return 0
         }
         UHCManager.unpause()
-        context.source.sendSuccess(Component.literal("Successfully unpaused the current phase ${UHCManager.phase}"), true)
+        context.source.success(Component.literal("Successfully unpaused the current phase ${UHCManager.phase}"), true)
         return 1
     }
 
     private fun getPhase(context: CommandContext<CommandSourceStack>): Int {
-        context.source.sendSuccess(Component.literal("The current phase is ${UHCManager.phase.name}"), false)
+        val paused = "the scheduler is ${if (UHCManager.paused) "paused" else "running"}"
+        context.source.success(Component.literal("The current phase is ${UHCManager.phase.name}, $paused"), false)
         return 1
     }
 
@@ -230,13 +234,13 @@ object UHCCommand: Command {
         val time = TimeArgument.getTime(context, "time")
         val zone = TimeZoneArgument.getTimeZone(context, "zone")
         UHCManager.setStartTime(TimeUtils.toEpoch(time, zone) * 1_000)
-        context.source.sendSuccess(Component.literal("Set UHC start time to $time in zone $zone"), true)
+        context.source.success(Component.literal("Set UHC start time to $time in zone $zone"), true)
         return 1
     }
 
     private fun deleteLobby(context: CommandContext<CommandSourceStack>): Int {
         UHCManager.event.getLobbyHandler().getMap().remove()
-        context.source.sendSuccess(Component.literal("Successfully removed the lobby"), false)
+        context.source.success(Component.literal("Successfully removed the lobby"), false)
         return 1
     }
 
@@ -254,7 +258,7 @@ object UHCCommand: Command {
 
     private fun reloadConfig(context: CommandContext<CommandSourceStack>): Int {
         Config.reload()
-        context.source.sendSuccess(Component.literal("Successfully reloaded config"), true)
+        context.source.success(Component.literal("Successfully reloaded config"), true)
         return 1
     }
 }

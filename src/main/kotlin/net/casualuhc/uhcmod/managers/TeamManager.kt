@@ -1,9 +1,7 @@
 package net.casualuhc.uhcmod.managers
 
-import carpet.patches.EntityPlayerMPFake
 import com.google.gson.JsonObject
 import net.casualuhc.arcade.Arcade
-import net.casualuhc.arcade.events.EventHandler
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.team.TeamCreatedEvent
 import net.casualuhc.arcade.utils.ComponentUtils.bold
@@ -37,7 +35,6 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.level.GameType
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import java.util.*
@@ -181,34 +178,34 @@ object TeamManager {
         if (!UHCManager.isLobbyPhase()) {
             return false
         }
-        val players = Arcade.server.playerList
-        val location = UHCManager.event.getLobbyHandler().getSpawn()
-        for (team in TeamUtils.teams()) {
-            for (name in team.players) {
-                if (players.getPlayerByName(name) == null) {
-                    EntityPlayerMPFake.createFake(
-                        name,
-                        Arcade.server,
-                        location.x,
-                        location.y,
-                        location.z,
-                        location.yaw.toDouble(),
-                        location.pitch.toDouble(),
-                        location.level.dimension(),
-                        GameType.ADVENTURE,
-                        false
-                    )
-                }
-            }
-        }
+        // val players = Arcade.server.playerList
+        // val location = UHCManager.event.getLobbyHandler().getSpawn()
+        // for (team in TeamUtils.teams()) {
+        //     for (name in team.players) {
+        //         if (players.getPlayerByName(name) == null) {
+        //             EntityPlayerMPFake.createFake(
+        //                 name,
+        //                 Arcade.server,
+        //                 location.x,
+        //                 location.y,
+        //                 location.z,
+        //                 location.yaw.toDouble(),
+        //                 location.pitch.toDouble(),
+        //                 location.level.dimension(),
+        //                 GameType.ADVENTURE,
+        //                 false
+        //             )
+        //         }
+        //     }
+        // }
         return true
     }
 
     fun killAllFakePlayers() {
         PlayerUtils.forEveryPlayer { player ->
-            if (player is EntityPlayerMPFake) {
-                player.kill()
-            }
+            // if (player is EntityPlayerMPFake) {
+            //     player.kill()
+            // }
         }
     }
 
