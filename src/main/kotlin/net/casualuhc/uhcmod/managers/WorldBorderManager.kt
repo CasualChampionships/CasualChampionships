@@ -26,6 +26,10 @@ object WorldBorderManager: MultiLevelBorderListener {
     val multiplier: Long
         get() = GameSettings.WORLD_BORDER_TIME.value
 
+    init {
+        this.tracker.addListener(this)
+    }
+
     fun startWorldBorders() {
         if (this.stage == Stage.END) {
             GlobalEventHandler.broadcast(UHCBorderCompleteEvent())

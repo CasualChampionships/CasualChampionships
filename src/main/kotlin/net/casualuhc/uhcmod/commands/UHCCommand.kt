@@ -26,6 +26,7 @@ import net.casualuhc.uhcmod.managers.UHCManager.Phase
 import net.casualuhc.uhcmod.managers.UHCManager.Phase.*
 import net.casualuhc.uhcmod.resources.UHCResourcePack
 import net.casualuhc.uhcmod.resources.UHCResourcePackHost
+import net.casualuhc.uhcmod.screen.ItemsScreen
 import net.casualuhc.uhcmod.screen.RuleScreen
 import net.casualuhc.uhcmod.util.Config
 import net.minecraft.commands.CommandSourceStack
@@ -156,6 +157,8 @@ object UHCCommand: Command {
                 ).then(
                     Commands.literal("reload").executes(this::reloadResources)
                 )
+            ).then(
+                Commands.literal("items").executes(this::openItemsMenu)
             )
         )
     }
@@ -310,6 +313,11 @@ object UHCCommand: Command {
             context.source.success(Component.literal("Successfully reloaded resources, resending pack..."))
             PlayerUtils.forEveryPlayer { it.sendUHCResourcePack() }
         }, server)
+        return 1
+    }
+
+    private fun openItemsMenu(context: CommandContext<CommandSourceStack>): Int {
+        context.source.playerOrException.openMenu(ItemsScreen.createScreenFactory(0))
         return 1
     }
 }
