@@ -7,7 +7,7 @@ abstract class ReloadableUHCEvent: UHCEvent {
 
     abstract fun onReload()
 
-    final override fun load() {
+    final override fun initialise() {
         if (this.loaded) {
             this.onReload()
         } else {

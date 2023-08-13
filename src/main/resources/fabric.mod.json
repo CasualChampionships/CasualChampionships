@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "uhcmod",
+  "id": "uhc",
   "version": "${version}",
   "name": "Casual UHC Mod",
   "description": "UHC mod for Casual UHC",
@@ -10,6 +10,7 @@
   "contact": {
     "repo": "https://github.com/CasualUHC/uhc-mod.git"
   },
+  "icon": "icon.png",
   "license": "MIT",
   "environment": "*",
   "entrypoints": {

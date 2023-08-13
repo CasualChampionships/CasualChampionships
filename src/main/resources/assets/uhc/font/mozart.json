@@ -1,0 +1,14 @@
+{
+  "providers": [
+    {
+      "type": "ttf",
+      "file": "uhc:mozart.ttf",
+      "size": 12.5,
+      "shift": [
+        0.0,
+        0.0
+      ],
+      "oversample": 4.0
+    }
+  ]
+}

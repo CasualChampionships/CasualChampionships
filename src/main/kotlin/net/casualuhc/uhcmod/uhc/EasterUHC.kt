@@ -35,7 +35,7 @@ class EasterUHC: UHCEvent, LobbyHandler {
         return ResourceHandler.default()
     }
 
-    override fun load() {
+    override fun initialise() {
 
     }
 

@@ -2,7 +2,6 @@ package net.casualuhc.uhcmod.managers
 
 import io.netty.buffer.Unpooled
 import net.casualuhc.arcade.Arcade
-import net.casualuhc.arcade.events.EventHandler
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.player.*
 import net.casualuhc.arcade.scheduler.GlobalTickedScheduler
@@ -17,7 +16,6 @@ import net.casualuhc.arcade.utils.PlayerUtils.addExtension
 import net.casualuhc.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casualuhc.arcade.utils.PlayerUtils.directionToNearestBorder
 import net.casualuhc.arcade.utils.PlayerUtils.directionVectorToNearestBorder
-import net.casualuhc.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casualuhc.arcade.utils.PlayerUtils.grantAdvancement
 import net.casualuhc.arcade.utils.PlayerUtils.isSurvival
 import net.casualuhc.arcade.utils.PlayerUtils.message
@@ -56,7 +54,6 @@ import net.casualuhc.uhcmod.util.Config
 import net.casualuhc.uhcmod.util.DirectionUtils.opposite
 import net.casualuhc.uhcmod.util.HeadUtils
 import net.casualuhc.uhcmod.util.Texts
-import net.casualuhc.uhcmod.util.Texts.monospaced
 import net.casualuhc.uhcmod.util.Texts.regular
 import net.casualuhc.uhcmod.util.shapes.ArrowShape
 import net.minecraft.ChatFormatting.*
@@ -102,13 +99,28 @@ object PlayerManager {
     }
 
     fun ServerPlayer.dropHead(attacker: Entity? = null) {
-        val head = HeadUtils.generateHead(this)
+        val head = HeadUtils.createPlayerHead(this)
         if (attacker is ServerPlayer) {
             if (attacker.inventory.add(head)) {
                 return
             }
         }
         this.drop(head, true, false)
+    }
+
+    fun ServerPlayer.isAliveSolo(): Boolean {
+        if (!this.isSurvival) {
+            return false
+        }
+
+        val team = this.team ?: return false
+        for (name in team.players) {
+            val player = Arcade.server.playerList.getPlayerByName(name)
+            if (player != null && player != this && player.isSurvival) {
+                return false
+            }
+        }
+        return true
     }
 
     fun ServerPlayer.resetUHCHealth() {
@@ -200,31 +212,6 @@ object PlayerManager {
             return true
         }
         return false
-    }
-
-    fun ServerPlayer.giveHeadEffects(stack: ItemStack, hand: InteractionHand) {
-        val compound = stack.tag
-        var isGolden = false
-        if (compound != null) {
-            val skullOwner = compound.getCompound(PlayerHeadItem.TAG_SKULL_OWNER)
-            if (skullOwner != null) {
-                val playerName: String = skullOwner.getString("Name")
-                if (playerName == "PhantomTupac") {
-                    isGolden = true
-                }
-            }
-        }
-        this.addEffect(MobEffectInstance(REGENERATION, if (isGolden) 50 else 60, if (isGolden) 3 else 2))
-        this.addEffect(MobEffectInstance(MOVEMENT_SPEED, (if (isGolden) 20 else 15) * 20, 1))
-        this.addEffect(MobEffectInstance(SATURATION, 5, 4))
-
-        if (isGolden) {
-            this.addEffect(MobEffectInstance(ABSORPTION, 120 * 20, 0))
-            this.addEffect(MobEffectInstance(DAMAGE_RESISTANCE, 5 * 20, 0))
-        }
-        this.swing(hand, true)
-        stack.shrink(1)
-        this.cooldowns.addCooldown(stack.item, 20)
     }
 
     @JvmStatic
@@ -371,17 +358,11 @@ object PlayerManager {
     }
 
     private fun onPlayerUseItem(event: PlayerItemUseEvent) {
-        if (GameSettings.HEADS_CONSUMABLE.value && event.stack.`is`(Items.PLAYER_HEAD)) {
-            event.player.giveHeadEffects(event.stack, event.hand)
-            event.cancel(InteractionResultHolder.consume(event.stack))
-        }
+
     }
 
     private fun onPlayerUseItemOn(event: PlayerItemUseOnEvent) {
-        if (GameSettings.HEADS_CONSUMABLE.value && event.stack.`is`(Items.PLAYER_HEAD)) {
-            event.player.giveHeadEffects(event.stack, event.context.hand)
-            event.cancel(InteractionResult.CONSUME)
-        }
+
     }
 
     private fun onPlayerTick(event: PlayerTickEvent) {
@@ -392,7 +373,7 @@ object PlayerManager {
     }
 
     private fun onPlayerDeath(event: PlayerDeathEvent) {
-        event.invoke()
+        event.invoke() // Post event
         val player = event.player
 
         if (UHCManager.isPhase(End)) {
@@ -413,6 +394,11 @@ object PlayerManager {
                 attacker.uhcStats.increment(Kills, 1.0)
                 if (UHCManager.isUnclaimed(Kill)) {
                     attacker.grantAdvancement(UHCAdvancements.FIRST_BLOOD)
+                }
+
+                val team = player.team
+                if (team != null && GameSettings.SOLO_BUFF.value && team.hasAlivePlayers() && attacker.isAliveSolo()) {
+
                 }
             }
 

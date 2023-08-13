@@ -148,6 +148,8 @@
   "uhc.sidebar.teammates": "Teammates:",
   "uhc.sidebar.kills": "Kills: %s",
 
+  "uhc.tooltips.head": "Eat me!",
+
   "uhc.bossbar.starting": "Comenzando en: %s",
   "uhc.bossbar.starting.space.1": "\uDAFF\uDFE9", // -23
   "uhc.bossbar.starting.space.2": "\uDAFF\uDF63", // -157
@@ -159,5 +161,5 @@
   "uhc.bossbar.grace.space.2": "\uDAFF\uDF97", // -105
   "uhc.bossbar.glowing": "Luminiscencia: %s",
   "uhc.bossbar.glowing.space.1": "\uDAFF\uDFF6", // -10
-  "uhc.bossbar.glowing.space.2": "\uDAFF\uDF82" // -126
+  "uhc.bossbar.glowing.space.2": "\uDAFF\uDF82" // -126,
 }

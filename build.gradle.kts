@@ -42,9 +42,9 @@ dependencies {
     include(modImplementation("com.github.CasualUHC:Arcade:${property("arcade_version")}")!!)
     include(modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")!!)
 
-    // include(modImplementation("eu.pb4:polymer-core:0.4.7+1.19.4")!!)
-    // include(modImplementation("eu.pb4:polymer-blocks:0.4.7+1.19.4")!!)
-    // include(modImplementation("eu.pb4:polymer-resource-pack:0.4.7+1.19.4")!!)
+    include(modImplementation("eu.pb4:polymer-core:0.5.8+1.20.1")!!)
+    include(modImplementation("eu.pb4:polymer-blocks:0.5.8+1.20.1")!!)
+    include(modImplementation("eu.pb4:polymer-resource-pack:0.5.8+1.20.1")!!)
 
     include(implementation("org.mongodb:mongo-java-driver:3.12.11")!!)
     // include(implementation("org.java-websocket:Java-WebSocket:1.5.3")!!)

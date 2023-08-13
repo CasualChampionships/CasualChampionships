@@ -7,10 +7,7 @@ import com.google.gson.JsonObject
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.core.Event
-import net.casualuhc.arcade.events.player.PlayerDeathEvent
-import net.casualuhc.arcade.events.player.PlayerJoinEvent
-import net.casualuhc.arcade.events.player.PlayerLeaveEvent
-import net.casualuhc.arcade.events.player.PlayerTickEvent
+import net.casualuhc.arcade.events.player.*
 import net.casualuhc.arcade.events.server.ServerLoadedEvent
 import net.casualuhc.arcade.events.server.ServerRecipeReloadEvent
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
@@ -186,6 +183,7 @@ object UHCManager {
         GlobalEventHandler.register<PlayerTickEvent> { this.onPlayerTick(it) }
         GlobalEventHandler.register<PlayerDeathEvent> { this.onPlayerDeath(it) }
         GlobalEventHandler.register<PlayerLeaveEvent> { this.onPlayerLeave(it) }
+        GlobalEventHandler.register<PlayerGameModeChangeEvent> { this.onPlayerGameModeChange(it) }
         GlobalEventHandler.register<ServerRecipeReloadEvent> { this.onRecipeReload(it) }
 
         GlobalEventHandler.register<UHCSetupEvent> { this.onUHCSetup() }
@@ -198,7 +196,7 @@ object UHCManager {
 
     private fun onConfigLoaded() {
         this.event = UHCEvents.getUHC(Config.string("event")) ?: DefaultUHC.INSTANCE
-        this.event.load()
+        this.event.initialise()
     }
 
     private fun onServerLoaded() {
@@ -301,13 +299,21 @@ object UHCManager {
     }
 
     private fun onPlayerDeath(event: PlayerDeathEvent) {
-        if (this.isActivePhase()) {
-            this.health?.addPlayer(event.player)
-        }
+
     }
 
     private fun onPlayerLeave(event: PlayerLeaveEvent) {
         DataManager.database.updateStats(event.player)
+    }
+
+    private fun onPlayerGameModeChange(event: PlayerGameModeChangeEvent) {
+        if (this.isActivePhase()) {
+            if (event.player.isSpectator) {
+                this.health?.addPlayer(event.player)
+            } else {
+                this.health?.removePlayer(event.player)
+            }
+        }
     }
 
     private fun onRecipeReload(event: ServerRecipeReloadEvent) {
@@ -357,13 +363,8 @@ object UHCManager {
                 val time = when (this.startTime) {
                     Long.MAX_VALUE -> "99:99:99"
                     else -> {
-                        if (this.startTime < 0) {
-                            "00:00:00"
-                        } else {
-                            val secondsLeft = (this.startTime - System.currentTimeMillis()) / 1_000
-                            TimeUtils.formatHHMMSS(secondsLeft, Seconds)
-                        }
-
+                        val secondsLeft = (this.startTime - System.currentTimeMillis()) / 1_000
+                        if (secondsLeft < 0) "00:00:00" else TimeUtils.formatHHMMSS(secondsLeft, Seconds)
                     }
                 }
                 Texts.BOSSBAR_STARTING.generate(time)

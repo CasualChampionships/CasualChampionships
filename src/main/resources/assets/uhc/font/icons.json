@@ -1,0 +1,94 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "uhc:font/hardcore_heart.png",
+      "ascent": 7,
+      "height": 7,
+      "chars": [
+        "\uE000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/no_connection.png",
+      "ascent": 7,
+      "height": 7,
+      "chars": [
+        "\uE001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/cross.png",
+      "ascent": 7,
+      "height": 7,
+      "chars": [
+        "\uE002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/uhc.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE003"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/background240.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE004"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/background180.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE005"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/background120.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE006"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/background40.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE008"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/kills.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE009"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "uhc:font/players.png",
+      "ascent": 10,
+      "height": 11,
+      "chars": [
+        "\uE00A"
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import net.casualuhc.arcade.resources.PathPackSupplier
 import net.casualuhc.arcade.resources.ResourcePackHost
 import net.casualuhc.uhcmod.events.uhc.UHCConfigLoadedEvent
 import net.casualuhc.uhcmod.util.Config
+import java.util.concurrent.CompletableFuture
 import kotlin.io.path.createDirectories
 
 object UHCResourcePackHost {
@@ -23,8 +24,12 @@ object UHCResourcePackHost {
         return this.host.getHostedPack(name)
     }
 
+    internal fun reload(): CompletableFuture<Void> {
+        return this.host.start()
+    }
+
     internal fun registerEvents() {
         GlobalEventHandler.register<ServerStoppedEvent> { this.host.shutdown() }
-        GlobalEventHandler.register<UHCConfigLoadedEvent> { this.host.start() }
+        GlobalEventHandler.register<UHCConfigLoadedEvent> { this.reload() }
     }
 }

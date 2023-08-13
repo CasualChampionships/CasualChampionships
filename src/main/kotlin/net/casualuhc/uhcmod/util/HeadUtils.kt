@@ -2,26 +2,27 @@ package net.casualuhc.uhcmod.util
 
 import net.casualuhc.arcade.utils.ComponentUtils.gold
 import net.casualuhc.arcade.utils.ComponentUtils.unItalicise
-import net.casualuhc.arcade.utils.ItemUtils
-import net.casualuhc.uhcmod.managers.UHCManager
+import net.casualuhc.uhcmod.items.UHCItems
+import net.minecraft.nbt.NbtUtils
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.PlayerHeadItem
 
 object HeadUtils {
-    private val GOLDEN_HEAD: ItemStack = ItemUtils.generatePlayerHead(
-        "PhantomTupac",
-        UHCManager.event.getResourcePackHandler().getGoldenHeadTexture()
-    ).setHoverName(Texts.UHC_GOLDEN_HEAD.copy().gold().unItalicise())
-
-    fun generateGoldenHead(): ItemStack {
-        return GOLDEN_HEAD.copy()
+    fun createGoldenHead(): ItemStack {
+        return ItemStack(UHCItems.GOLDEN_HEAD).setHoverName(Texts.UHC_GOLDEN_HEAD.copy().gold().unItalicise())
     }
 
-    fun generateHead(player: ServerPlayer): ItemStack {
-        return ItemUtils.generatePlayerHead(player.scoreboardName)
+    fun createPlayerHead(player: ServerPlayer): ItemStack {
+        val stack = ItemStack(UHCItems.PLAYER_HEAD)
+        val owner = stack.getOrCreateTagElement(PlayerHeadItem.TAG_SKULL_OWNER)
+        NbtUtils.writeGameProfile(owner, player.gameProfile)
+        return stack
     }
 
     const val GOLDEN = "ewogICJ0aW1lc3RhbXAiIDogMTY3MDg2MDkyNTE4MywKICAicHJvZmlsZUlkIiA6ICI1N2E4NzA0ZGIzZjQ0YzhmYmVhMDY0Njc1MDExZmU3YiIsCiAgInByb2ZpbGVOYW1lIiA6ICJQaGFudG9tVHVwYWMiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjk4Nzg4NTM2NTRjM2JiMjZmZDMzZTgwZjhlZDNjZGYwM2FiMzI0N2Y3MzY3ODQ2NGUwNmRhMTQzZGJkMGMxNyIKICAgIH0sCiAgICAiQ0FQRSIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjM0MGMwZTAzZGQyNGExMWIxNWE4YjMzYzJhN2U5ZTMyYWJiMjA1MWIyNDgxZDBiYTdkZWZkNjM1Y2E3YTkzMyIKICAgIH0KICB9Cn0"
+    const val STEVE = "ewogICJ0aW1lc3RhbXAiIDogMTY4NDcwMTg1ODQ5MCwKICAicHJvZmlsZUlkIiA6ICIzY2YzYjgzNzhkYjc0ZDZlYmIxMDFjMDYzZmQ1MjVjNyIsCiAgInByb2ZpbGVOYW1lIiA6ICJSeW9yaTE2IiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzYwNDdiYjhhMGFlNzY1ZDQzMmVjYjUyOWFlNTJhZmFkMmNkNjYwYzM4ZjQxY2EyODcwYjZiOTFmN2Q0NTJmNTciCiAgICB9CiAgfQp9"
+
     const val RED = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2M0ZDdhM2JjM2RlODMzZDMwMzJlODVhMGJmNmYyYmVmNzY4Nzg2MmIzYzZiYzQwY2U3MzEwNjRmNjE1ZGQ5ZCJ9fX0="
     const val BLACK = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTY3YTJmMjE4YTZlNmUzOGYyYjU0NWY2YzE3NzMzZjRlZjliYmIyODhlNzU0MDI5NDljMDUyMTg5ZWUifX19"
     const val DARK_BLUE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWY4NjkwNDhmMDZkMzE4ZTUwNThiY2EwYTg3NmE1OTg2MDc5ZjQ1YTc2NGQxMmFiMzRhNDkzMWRiNmI4MGFkYyJ9fX0="

@@ -93,7 +93,7 @@ class SpectatorScreen(
                 val itemStacks: List<ItemStack> = team.getServerPlayers()
                     .stream()
                     .limit(7)
-                    .map { HeadUtils.generateHead(it).setHoverName(Component.literal(it.scoreboardName).unItalicise()) }
+                    .map { HeadUtils.createPlayerHead(it).setHoverName(Component.literal(it.scoreboardName).unItalicise()) }
                     .toList()
                 val options = itemStacks.size
                 for (j in 0 until options) {
@@ -118,7 +118,7 @@ class SpectatorScreen(
                 .flatMap { it.getServerPlayers().stream() }
                 .skip(45L * page)
                 .limit(45)
-                .map { HeadUtils.generateHead(it).setHoverName(Component.literal(it.scoreboardName).unItalicise()) }
+                .map { HeadUtils.createPlayerHead(it).setHoverName(Component.literal(it.scoreboardName).unItalicise()) }
                 .toList()
             for (i in itemStacks.indices) {
                 val stack: ItemStack = itemStacks[i]

@@ -36,7 +36,7 @@ enum class DefaultUHC: UHCEvent, LobbyHandler, ResourceHandler {
         return this
     }
 
-    override fun load() {
+    override fun initialise() {
         Arcade.server.motd = "            §6፠ §bWelcome to Casual UHC! §6፠\n     §6Yes, it's back! Is your team prepared?"
     }
 }

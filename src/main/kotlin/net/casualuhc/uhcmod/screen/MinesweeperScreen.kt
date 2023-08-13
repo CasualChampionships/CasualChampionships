@@ -2,7 +2,6 @@ package net.casualuhc.uhcmod.screen
 
 import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
-import net.casualuhc.arcade.events.EventHandler
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerTickEvent
 import net.casualuhc.arcade.utils.ItemUtils.literalNamed
@@ -11,7 +10,12 @@ import net.casualuhc.arcade.utils.PlayerUtils.grantAdvancement
 import net.casualuhc.uhcmod.advancement.UHCAdvancements
 import net.casualuhc.uhcmod.extensions.PlayerStat.MinesweeperRecord
 import net.casualuhc.uhcmod.extensions.PlayerStatsExtension.Companion.uhcStats
+import net.casualuhc.uhcmod.items.MinesweeperItem
+import net.casualuhc.uhcmod.items.MinesweeperItem.Companion.EMPTY
+import net.casualuhc.uhcmod.items.MinesweeperItem.Companion.MINE
+import net.casualuhc.uhcmod.items.MinesweeperItem.Companion.UNKNOWN
 import net.casualuhc.uhcmod.settings.GameSettings
+import net.casualuhc.uhcmod.util.ItemModelUtils.addUHCModel
 import net.casualuhc.uhcmod.util.Texts
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -21,7 +25,6 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import net.minecraft.world.level.block.LightBlock
 import org.lwjgl.glfw.GLFW
 import java.util.*
 import kotlin.math.floor
@@ -33,7 +36,6 @@ class MinesweeperScreen(
     private val guessed = IntArraySet()
     private val flags = IntArraySet()
     private val grid = Grid(9, 9)
-    private val unknown = LightBlock.setLightOnStack(ItemStack(Items.LIGHT), 1).literalNamed("?")
     private val flagItem = Items.MANGROVE_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_FLAGS)
     private val clockItem: ItemStack = Items.CLOCK.defaultInstance.setHoverName(Texts.MINESWEEPER_TIMER)
     private var complete = false
@@ -41,18 +43,18 @@ class MinesweeperScreen(
     init {
         this.flagItem.count = Grid.mineCount
         for (i in 0..80) {
-            this.slots[i].set(this.unknown)
+            this.slots[i].set(UNKNOWN_TILE)
         }
 
-        this.slots[81].set(Items.RED_STAINED_GLASS.defaultInstance.setHoverName(Texts.MINESWEEPER_EXIT))
-        this.slots[82].set(Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_1))
-        this.slots[83].set(Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_2))
-        this.slots[84].set(Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_3))
-        this.slots[85].set(Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_4))
+        this.slots[81].set(EXIT_TILE)
+        this.slots[82].set(DESC_TILE_1)
+        this.slots[83].set(DESC_TILE_2)
+        this.slots[84].set(DESC_TILE_3)
+        this.slots[85].set(DESC_TILE_4)
         this.slots[86].set(this.flagItem)
         this.slots[87].set(this.clockItem)
-        this.slots[88].set(Items.GRAY_STAINED_GLASS.literalNamed(""))
-        this.slots[89].set(Items.GREEN_STAINED_GLASS.defaultInstance.setHoverName(Texts.MINESWEEPER_PLAY_AGAIN))
+        this.slots[88].set(BLANK_TILE)
+        this.slots[89].set(PLAY_AGAIN_TILE)
 
         GlobalEventHandler.register<ServerTickEvent> { _ ->
             if (this.grid.startTime != 0L && !this.complete) {
@@ -64,7 +66,7 @@ class MinesweeperScreen(
 
     override fun clicked(slotId: Int, button: Int, clickType: ClickType, player: Player) {
         if (slotId >= 0 && slotId < this.grid.capacity) {
-            if (clickType !== ClickType.PICKUP || complete) {
+            if (clickType !== ClickType.PICKUP || this.complete) {
                 return
             }
             if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !this.flags.contains(slotId)) {
@@ -116,12 +118,12 @@ class MinesweeperScreen(
 
     private fun rightClickTile(index: Int) {
         val current = this.slots[index]
-        if (current.item !== this.unknown && !this.flags.contains(index)) {
+        if (current.item !== UNKNOWN_TILE && !this.flags.contains(index)) {
             return
         }
         val stack = if (this.flags.contains(index)) {
             this.flags.remove(index)
-            this.unknown
+            UNKNOWN_TILE
         } else {
             this.flags.add(index)
             Items.MANGROVE_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_FLAG)
@@ -168,9 +170,9 @@ class MinesweeperScreen(
     private fun getTileStack(tile: Int): ItemStack {
         check(!(tile > 8 || tile < -1)) { "Invalid tile: $tile" }
         return when (tile) {
-            -1 -> LightBlock.setLightOnStack(ItemStack(Items.LIGHT), 0).setHoverName(Texts.MINESWEEPER_MINE)
-            0 -> LightBlock.setLightOnStack(ItemStack(Items.LIGHT), 10).literalNamed("")
-            else -> LightBlock.setLightOnStack(ItemStack(Items.LIGHT), tile + 1).literalNamed(tile.toString())
+            -1 -> MinesweeperItem.STATES.createStack(MINE) { s, d -> s.addUHCModel(d).setHoverName(Texts.MINESWEEPER_MINE) }
+            0 -> MinesweeperItem.STATES.createStack(EMPTY) { s, d -> s.addUHCModel(d).literalNamed("") }
+            else -> MinesweeperItem.STATES.createStack(tile) { s, d -> s.addUHCModel(d).literalNamed(tile.toString()) }
         }
     }
 
@@ -278,6 +280,15 @@ class MinesweeperScreen(
     }
 
     companion object {
+        private val UNKNOWN_TILE = MinesweeperItem.STATES.createStack(UNKNOWN) { s, d -> s.addUHCModel(d).literalNamed("?") }
+        private val EXIT_TILE = Items.RED_STAINED_GLASS.defaultInstance.setHoverName(Texts.MINESWEEPER_EXIT)
+        private val DESC_TILE_1 = Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_1)
+        private val DESC_TILE_2 = Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_2)
+        private val DESC_TILE_3 = Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_3)
+        private val DESC_TILE_4 = Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_4)
+        private val BLANK_TILE = Items.GRAY_STAINED_GLASS.literalNamed("")
+        private val PLAY_AGAIN_TILE = Items.GREEN_STAINED_GLASS.defaultInstance.setHoverName(Texts.MINESWEEPER_PLAY_AGAIN)
+
         private var record = 127.0
 
         fun createScreenFactory(): SimpleMenuProvider {

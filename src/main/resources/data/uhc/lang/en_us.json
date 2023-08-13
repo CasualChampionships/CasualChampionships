@@ -148,6 +148,8 @@
   "uhc.sidebar.teammates": "Teammates:",
   "uhc.sidebar.kills": "Kills: %s",
 
+  "uhc.tooltips.head": "Eat me!",
+
   "uhc.bossbar.starting": "Starting in: %s",
   "uhc.bossbar.starting.space.1": "\uDAFF\uDFE3", // -29
   "uhc.bossbar.starting.space.2": "\uDAFF\uDF69", // -151

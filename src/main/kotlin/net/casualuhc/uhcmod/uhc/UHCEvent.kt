@@ -10,5 +10,5 @@ interface UHCEvent {
 
     fun getResourcePackHandler(): ResourceHandler
 
-    fun load()
+    fun initialise()
 }

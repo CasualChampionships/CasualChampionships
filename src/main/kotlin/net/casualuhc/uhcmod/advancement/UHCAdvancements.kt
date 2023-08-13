@@ -24,6 +24,8 @@ import net.casualuhc.uhcmod.extensions.TeamFlagsExtension.Companion.flags
 import net.casualuhc.uhcmod.managers.PlayerManager.isMessageGlobal
 import net.casualuhc.uhcmod.managers.UHCManager
 import net.casualuhc.uhcmod.screen.MinesweeperScreen
+import net.casualuhc.uhcmod.util.ResourceUtils
+import net.casualuhc.uhcmod.util.ResourceUtils.id
 import net.casualuhc.uhcmod.util.Texts
 import net.minecraft.advancements.Advancement
 import net.minecraft.advancements.FrameType
@@ -69,7 +71,7 @@ object UHCAdvancements {
 
     init {
         ROOT = AdvancementBuilder.create {
-            id = ResourceLocation("uhc", "root")
+            id = id("root")
             display(Items.GOLDEN_APPLE)
             title = Texts.ADVANCEMENT_ROOT
             description = Texts.ADVANCEMENT_ROOT_DESC
@@ -78,7 +80,7 @@ object UHCAdvancements {
         }.build()
         FIRST_BLOOD = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "first_blood")
+            id = id("first_blood")
             display(Items.IRON_SWORD)
             title = Texts.ADVANCEMENT_FIRST_BLOOD
             description = Texts.ADVANCEMENT_FIRST_BLOOD_DESC
@@ -88,7 +90,7 @@ object UHCAdvancements {
         }.build()
         EARLY_EXIT = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "early_exit")
+            id = id("early_exit")
             display(Items.POISONOUS_POTATO)
             title = Texts.ADVANCEMENT_EARLY_EXIT
             description = Texts.ADVANCEMENT_EARLY_EXIT_DESC
@@ -98,7 +100,7 @@ object UHCAdvancements {
         }.build()
         MOSTLY_HARMLESS = AdvancementBuilder.create {
             parent = EARLY_EXIT
-            id = ResourceLocation("uhc", "mostly_harmless")
+            id = id("mostly_harmless")
             display(Items.FEATHER)
             title = Texts.ADVANCEMENT_MOSTLY_HARMLESS
             description = Texts.ADVANCEMENT_MOSTLY_HARMLESS_DESC
@@ -109,7 +111,7 @@ object UHCAdvancements {
         }.build()
         HEAVY_HITTER = AdvancementBuilder.create {
             parent = FIRST_BLOOD
-            id = ResourceLocation("uhc", "heavy_hitter")
+            id = id("heavy_hitter")
             display(Items.ANVIL)
             title = Texts.ADVANCEMENT_HEAVY_HITTER
             description = Texts.ADVANCEMENT_HEAVY_HITTER_DESC
@@ -120,7 +122,7 @@ object UHCAdvancements {
         }.build()
         WINNER = AdvancementBuilder.create {
             parent = FIRST_BLOOD
-            id = ResourceLocation("uhc", "winner")
+            id = id("winner")
             display(Items.TOTEM_OF_UNDYING)
             title = Texts.ADVANCEMENT_WINNER
             description = Texts.ADVANCEMENT_WINNER_DESC
@@ -131,7 +133,7 @@ object UHCAdvancements {
         }.build()
         COMBAT_LOGGER = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "combat_logger")
+            id = id("combat_logger")
             display(Items.WOODEN_SWORD)
             title = Texts.ADVANCEMENT_COMBAT_LOGGER
             description = Texts.ADVANCEMENT_COMBAT_LOGGER_DESC
@@ -141,7 +143,7 @@ object UHCAdvancements {
         }.build()
         NOT_DUSTLESS = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "thats_not_dustless")
+            id = id("thats_not_dustless")
             display(Items.REDSTONE)
             title = Texts.ADVANCEMENT_NOT_DUSTLESS
             description = Texts.ADVANCEMENT_NOT_DUSTLESS_DESC
@@ -151,7 +153,7 @@ object UHCAdvancements {
         }.build()
         PARKOUR_MASTER = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "parkour_master")
+            id = id("parkour_master")
             display(Items.NETHERITE_BOOTS)
             title = Texts.ADVANCEMENT_PARKOUR_MASTER
             description = Texts.ADVANCEMENT_PARKOUR_MASTER_DESC
@@ -162,7 +164,7 @@ object UHCAdvancements {
         }.build()
         WORLD_RECORD_PACE = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "world_record_pace")
+            id = id("world_record_pace")
             display = Items.SPLASH_POTION.defaultInstance.potion(Potions.SWIFTNESS)
             title = Texts.ADVANCEMENT_WORLD_RECORD_PACE
             description = Texts.ADVANCEMENT_WORLD_RECORD_PACE_DESC
@@ -172,7 +174,7 @@ object UHCAdvancements {
         }.build()
         EMBARRASSING = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "thats_embarrassing")
+            id = id("thats_embarrassing")
             display(Items.SWEET_BERRIES)
             title = Texts.ADVANCEMENT_EMBARRASSING
             description = Texts.ADVANCEMENT_EMBARRASSING_DESC
@@ -182,7 +184,7 @@ object UHCAdvancements {
         }.build()
         BUSTED = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "busted")
+            id = id("busted")
             display(Items.BARRIER)
             title = Texts.ADVANCEMENT_BUSTED
             description = Texts.ADVANCEMENT_BUSTED_DESC
@@ -192,7 +194,7 @@ object UHCAdvancements {
         }.build()
         DEMOLITION_EXPERT = AdvancementBuilder.create {
             parent = EARLY_EXIT
-            id = ResourceLocation("uhc", "demolition_expert")
+            id = id("demolition_expert")
             display(Items.TNT)
             title = Texts.ADVANCEMENT_DEMOLITION_EXPERT
             description = Texts.ADVANCEMENT_DEMOLITION_EXPERT_DESC
@@ -202,7 +204,7 @@ object UHCAdvancements {
         }.build()
         OK_WE_BELIEVE_YOU_NOW = AdvancementBuilder.create {
             parent = COMBAT_LOGGER
-            id = ResourceLocation("uhc", "ok_we_believe_you_now")
+            id = id("ok_we_believe_you_now")
             display(Items.WOODEN_HOE)
             title = Texts.ADVANCEMENT_WE_BELIEVE
             description = Texts.ADVANCEMENT_WE_BELIEVE_DESC
@@ -212,7 +214,7 @@ object UHCAdvancements {
         }.build()
         FALLING_BLOCK = AdvancementBuilder.create {
             parent = NOT_DUSTLESS
-            id = ResourceLocation("uhc", "falling_block")
+            id = id("falling_block")
             display(Items.SAND)
             title = Texts.ADVANCEMENT_FALLING_BLOCK
             description = Texts.ADVANCEMENT_FALLING_BLOCK_DESC
@@ -222,7 +224,7 @@ object UHCAdvancements {
         }.build()
         DREAM_LUCK = AdvancementBuilder.create {
             parent = BUSTED
-            id = ResourceLocation("uhc", "dream_luck")
+            id = id("dream_luck")
             display(Items.ENCHANTED_GOLDEN_APPLE)
             title = Texts.ADVANCEMENT_DREAM_LUCK
             description = Texts.ADVANCEMENT_DREAM_LUCK_DESC
@@ -232,7 +234,7 @@ object UHCAdvancements {
         }.build()
         BROKEN_ANKLES = AdvancementBuilder.create {
             parent = EMBARRASSING
-            id = ResourceLocation("uhc", "broken_ankles")
+            id = id("broken_ankles")
             display(Items.LEATHER_BOOTS)
             title = Texts.ADVANCEMENT_BROKEN_ANKLES
             description = Texts.ADVANCEMENT_BROKEN_ANKLES_DESC
@@ -242,7 +244,7 @@ object UHCAdvancements {
         }.build()
         ON_THE_EDGE = AdvancementBuilder.create {
             parent = BROKEN_ANKLES
-            id = ResourceLocation("uhc", "on_the_edge")
+            id = id("on_the_edge")
             display = Items.SPLASH_POTION.defaultInstance.potion(Potions.STRONG_HARMING)
             title = Texts.ADVANCEMENT_ON_THE_EDGE
             description = Texts.ADVANCEMENT_ON_THE_EDGE_DESC
@@ -252,7 +254,7 @@ object UHCAdvancements {
         }.build()
         SKILL_ISSUE = AdvancementBuilder.create {
             parent = EARLY_EXIT
-            id = ResourceLocation("uhc", "skill_issue")
+            id = id("skill_issue")
             display(Items.BONE)
             title = Texts.ADVANCEMENT_SKILL_ISSUE
             description = Texts.ADVANCEMENT_SKILL_ISSUE_DESC
@@ -262,7 +264,7 @@ object UHCAdvancements {
         }.build()
         SOLOIST = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "soloist")
+            id = id("soloist")
             display(Items.PLAYER_HEAD)
             title = Texts.ADVANCEMENT_SOLOIST
             description = Texts.ADVANCEMENT_SOLOIST_DESC
@@ -272,7 +274,7 @@ object UHCAdvancements {
         }.build()
         NOT_NOW = AdvancementBuilder.create {
             parent = ROOT
-            id = ResourceLocation("uhc", "not_now")
+            id = id("not_now")
             display(Items.NETHERITE_SWORD)
             title = Texts.ADVANCEMENT_NOT_NOW
             description = Texts.ADVANCEMENT_NOT_NOW_DESC
@@ -282,7 +284,7 @@ object UHCAdvancements {
         }.build()
         LDAP = AdvancementBuilder.create {
             parent = NOT_NOW
-            id = ResourceLocation("uhc", "ldap")
+            id = id("ldap")
             display(Items.EMERALD_BLOCK)
             title = Texts.ADVANCEMENT_KATIE
             description = Texts.ADVANCEMENT_KATIE_DESC
@@ -292,7 +294,7 @@ object UHCAdvancements {
         }.build()
         OFFICIALLY_BORED = AdvancementBuilder.create {
             parent = WORLD_RECORD_PACE
-            id = ResourceLocation("uhc", "officially_bored")
+            id = id("officially_bored")
             display(Items.COMMAND_BLOCK)
             title = Texts.ADVANCEMENT_BORED
             description = Texts.ADVANCEMENT_BORED_DESC
@@ -302,7 +304,7 @@ object UHCAdvancements {
         }.build()
         DISTRACTED = AdvancementBuilder.create {
             parent = OFFICIALLY_BORED
-            id = ResourceLocation("uhc", "distracted")
+            id = id("distracted")
             display(Items.CHAIN_COMMAND_BLOCK)
             title = Texts.ADVANCEMENT_DISTRACTED
             description = Texts.ADVANCEMENT_DISTRACTED_DESC
@@ -312,7 +314,7 @@ object UHCAdvancements {
         }.build()
         UH_OH = AdvancementBuilder.create {
             parent = LDAP
-            id = ResourceLocation("uhc", "uh_oh")
+            id = id("uh_oh")
             display(Items.BARRIER)
             title = Texts.ADVANCEMENT_UH_OH
             description = Texts.ADVANCEMENT_UH_OH_DESC
@@ -322,7 +324,7 @@ object UHCAdvancements {
         }.build()
         BASICALLY = AdvancementBuilder.create {
             parent = LDAP
-            id = ResourceLocation("uhc", "basically")
+            id = id("basically")
             display(Items.WHITE_WOOL)
             title = Texts.ADVANCEMENT_BASICALLY
             description = Texts.ADVANCEMENT_BASICALLY_DESC
@@ -332,7 +334,7 @@ object UHCAdvancements {
         }.build()
         TEAM_PLAYER = AdvancementBuilder.create {
             parent = SOLOIST
-            id = ResourceLocation("uhc", "team_player")
+            id = id("team_player")
             display(Items.LIME_BANNER)
             title = Texts.ADVANCEMENT_TEAM_PLAYER
             description = Texts.ADVANCEMENT_TEAM_PLAYER_DESC
@@ -342,7 +344,7 @@ object UHCAdvancements {
         }.build()
         FIND_THE_BUTTON = AdvancementBuilder.create {
             parent = OFFICIALLY_BORED
-            id = ResourceLocation("uhc", "find_the_button")
+            id = id("find_the_button")
             display(Items.STONE_BUTTON)
             title = Texts.ADVANCEMENT_FIND_THE_BUTTON
             description = Texts.ADVANCEMENT_FIND_THE_BUTTON_DESC
@@ -353,7 +355,7 @@ object UHCAdvancements {
         }.build()
         LAST_MAN_STANDING = AdvancementBuilder.create {
             parent = SOLOIST
-            id = ResourceLocation("uhc", "soloist")
+            id = id("soloist")
             display(Items.ARROW)
             title = Texts.ADVANCEMENT_LAST_MAN
             description = Texts.ADVANCEMENT_LAST_MAN_DESC

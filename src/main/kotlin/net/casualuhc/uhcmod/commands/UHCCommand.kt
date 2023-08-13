@@ -2,20 +2,30 @@ package net.casualuhc.uhcmod.commands
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.BoolArgumentType
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.context.CommandContext
 import net.casualuhc.arcade.commands.EnumArgument
 import net.casualuhc.arcade.commands.TimeArgument
 import net.casualuhc.arcade.commands.TimeZoneArgument
+import net.casualuhc.arcade.scheduler.GlobalTickedScheduler
+import net.casualuhc.arcade.scheduler.MinecraftTimeUnit
+import net.casualuhc.arcade.utils.CommandSourceUtils.fail
 import net.casualuhc.arcade.utils.CommandSourceUtils.success
+import net.casualuhc.arcade.utils.PlayerUtils
 import net.casualuhc.arcade.utils.TimeUtils
+import net.casualuhc.uhcmod.UHCMod
 import net.casualuhc.uhcmod.extensions.PlayerFlag
 import net.casualuhc.uhcmod.extensions.PlayerFlagsExtension.Companion.flags
 import net.casualuhc.uhcmod.extensions.TeamFlag
 import net.casualuhc.uhcmod.extensions.TeamFlagsExtension.Companion.flags
+import net.casualuhc.uhcmod.managers.PlayerManager
+import net.casualuhc.uhcmod.managers.PlayerManager.sendUHCResourcePack
 import net.casualuhc.uhcmod.managers.TeamManager
 import net.casualuhc.uhcmod.managers.UHCManager
 import net.casualuhc.uhcmod.managers.UHCManager.Phase
 import net.casualuhc.uhcmod.managers.UHCManager.Phase.*
+import net.casualuhc.uhcmod.resources.UHCResourcePack
+import net.casualuhc.uhcmod.resources.UHCResourcePackHost
 import net.casualuhc.uhcmod.screen.RuleScreen
 import net.casualuhc.uhcmod.util.Config
 import net.minecraft.commands.CommandSourceStack
@@ -23,6 +33,7 @@ import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.network.chat.Component
+import java.util.concurrent.TimeUnit
 
 object UHCCommand: Command {
     override fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
@@ -115,9 +126,15 @@ object UHCCommand: Command {
                         this.setPhase(Start)
                     }
                 ).then(
-                    Commands.literal("time").then(
+                    Commands.literal("at").then(
                         Commands.argument("time", TimeArgument.time()).then(
-                            Commands.argument("zone", TimeZoneArgument.timeZone()).executes(this::setTime)
+                            Commands.argument("zone", TimeZoneArgument.timeZone()).executes(this::atTime)
+                        )
+                    )
+                ).then(
+                    Commands.literal("in").then(
+                        Commands.argument("time", IntegerArgumentType.integer(1)).then(
+                            Commands.argument("unit", EnumArgument.enumeration(TimeUnit::class.java)).executes(this::inTime)
                         )
                     )
                 ).executes {
@@ -132,6 +149,12 @@ object UHCCommand: Command {
             ).then(
                 Commands.literal("config").then(
                     Commands.literal("reload").executes(this::reloadConfig)
+                )
+            ).then(
+                Commands.literal("resources").then(
+                    Commands.literal("regenerate").executes(this::regenerateResources)
+                ).then(
+                    Commands.literal("reload").executes(this::reloadResources)
                 )
             )
         )
@@ -230,11 +253,19 @@ object UHCCommand: Command {
         return 1
     }
 
-    private fun setTime(context: CommandContext<CommandSourceStack>): Int {
+    private fun atTime(context: CommandContext<CommandSourceStack>): Int {
         val time = TimeArgument.getTime(context, "time")
         val zone = TimeZoneArgument.getTimeZone(context, "zone")
         UHCManager.setStartTime(TimeUtils.toEpoch(time, zone) * 1_000)
         context.source.success(Component.literal("Set UHC start time to $time in zone $zone"), true)
+        return 1
+    }
+
+    private fun inTime(context: CommandContext<CommandSourceStack>): Int {
+        val time = IntegerArgumentType.getInteger(context, "time")
+        val unit = EnumArgument.getEnumeration<TimeUnit>(context, "unit")
+        UHCManager.setStartTime(System.currentTimeMillis() + unit.toMillis(time.toLong()))
+        context.source.success(Component.literal("UHC will start in $time ${unit.toChronoUnit()}"), true)
         return 1
     }
 
@@ -259,6 +290,26 @@ object UHCCommand: Command {
     private fun reloadConfig(context: CommandContext<CommandSourceStack>): Int {
         Config.reload()
         context.source.success(Component.literal("Successfully reloaded config"), true)
+        return 1
+    }
+
+    private fun regenerateResources(context: CommandContext<CommandSourceStack>): Int {
+        val success = UHCResourcePack.generate()
+        if (success) {
+            context.source.success(Component.literal("Successfully regenerated resources, reload resources to refresh clients"))
+            return 1
+        }
+        context.source.fail(Component.literal("Failed to regenerate resources..."))
+        return 0
+    }
+
+    private fun reloadResources(context: CommandContext<CommandSourceStack>): Int {
+        val server = context.source.server
+        context.source.success(Component.literal("Reloading resources..."))
+        UHCResourcePackHost.reload().thenRunAsync({
+            context.source.success(Component.literal("Successfully reloaded resources, resending pack..."))
+            PlayerUtils.forEveryPlayer { it.sendUHCResourcePack() }
+        }, server)
         return 1
     }
 }

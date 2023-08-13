@@ -37,6 +37,7 @@ object GameSettings {
     @JvmField val GENERATE_PORTAL: Bool
     @JvmField val MINESWEEPER_ANNOUNCEMENT: Bool
     @JvmField val HEADS_CONSUMABLE: Bool
+    @JvmField val SOLO_BUFF: Bool
     @JvmField val WORLD_BORDER_STAGE: Enumerated<Stage>
 
     init {
@@ -112,7 +113,11 @@ object GameSettings {
             true
         )
         HEADS_CONSUMABLE = register(
-            HeadUtils.generateGoldenHead().setHoverName(Component.literal("Consumable Heads")),
+            HeadUtils.createGoldenHead().setHoverName(Component.literal("Consumable Heads")),
+            true
+        )
+        SOLO_BUFF = register(
+            Items.BLACK_BED.literalNamed("Solo Buff"),
             true
         )
         WORLD_BORDER_STAGE = register(
