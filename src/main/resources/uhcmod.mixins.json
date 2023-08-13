@@ -8,7 +8,6 @@
     "feature.DedicatedServerMixin",
     "feature.EntityMixin",
     "feature.LevelMixin",
-    "feature.MinecraftServerMixin",
     "feature.PlayerListMixin",
     "feature.PlayerTeamMixin",
     "feature.PortalForcerMixin",

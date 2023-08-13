@@ -1,108 +1,127 @@
 package net.casualuhc.uhcmod.managers
 
-import net.casualuhc.arcade.border.ArcadeBorder
-import net.casualuhc.arcade.border.BorderState
-import net.casualuhc.arcade.border.StillBorderState
-import net.casualuhc.arcade.events.EventHandler
+import net.casualuhc.arcade.border.MultiLevelBorderListener
+import net.casualuhc.arcade.border.MultiLevelBorderTracker
+import net.casualuhc.arcade.border.TrackedBorder
 import net.casualuhc.arcade.events.GlobalEventHandler
-import net.casualuhc.arcade.events.server.ServerTickEvent
+import net.casualuhc.arcade.events.server.ServerLoadedEvent
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit.Seconds
+import net.casualuhc.arcade.utils.BorderUtils
+import net.casualuhc.arcade.utils.LevelUtils
 import net.casualuhc.uhcmod.UHCMod
 import net.casualuhc.uhcmod.events.uhc.UHCBorderCompleteEvent
 import net.casualuhc.uhcmod.events.uhc.UHCGracePeriodEndEvent
 import net.casualuhc.uhcmod.settings.GameSettings
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.level.Level
 
-object WorldBorderManager {
-    private val global = UHCBorder()
+object WorldBorderManager: MultiLevelBorderListener {
+    private val tracker = MultiLevelBorderTracker()
+
     const val PORTAL_ESCAPE_TIME_SECONDS = 30
 
+    var stage: Stage
+        get() = GameSettings.WORLD_BORDER_STAGE.value
+        private set(value) = GameSettings.WORLD_BORDER_STAGE.setValueQuietly(value)
+    val multiplier: Long
+        get() = GameSettings.WORLD_BORDER_TIME.value
+
     fun startWorldBorders() {
-        val size = this.global.size
-        var stage = Stage.getStage(size)
-        if (stage == null) {
-            stage = Stage.FIRST
-            moveWorldBorders(Stage.FIRST.startSize)
-        }
-        GameSettings.WORLD_BORDER_STAGE.setValueQuietly(stage)
-        if (stage == Stage.END) {
+        if (this.stage == Stage.END) {
             GlobalEventHandler.broadcast(UHCBorderCompleteEvent())
             return
         }
-        this.moveWorldBorders(stage.endSize, stage.getRemainingTimeAsPercent(size))
+        this.moveWorldBorders(this.stage)
     }
 
-    fun moveWorldBorders(newSize: Double, percent: Double = -1.0) {
-        val seconds = (percent * GameSettings.WORLD_BORDER_TIME.value).toLong()
-        val border = global
-        if (seconds > 0) {
-            this.global.lerpSizeBetween(border.size, newSize, seconds * 1000L)
-            return
+    fun moveWorldBorders(stage: Stage, size: Size = Size.END, instant: Boolean = false) {
+        for ((border, level) in this.tracker.getAllTracking()) {
+            this.moveWorldBorder(border, level, stage, size, instant)
         }
-        border.size = newSize
     }
 
-    @JvmStatic
-    fun getGlobalBorder(): ArcadeBorder {
-        return this.global
+    fun pauseWorldBorders() {
+        for ((border, _) in this.tracker.getAllTracking()) {
+            this.moveWorldBorder(border, border.size)
+        }
     }
 
-    internal fun registerEvents() {
-        GlobalEventHandler.register<ServerTickEvent> { this.global.update() }
-        GlobalEventHandler.register<UHCGracePeriodEndEvent> { this.startWorldBorders() }
-    }
-
-    private fun onBorderStageComplete() {
-        UHCMod.logger.info("Finished world border stage: ${GameSettings.WORLD_BORDER_STAGE.value}")
-
+    override fun onAllBordersComplete(borders: Map<TrackedBorder, ServerLevel>) {
+        UHCMod.logger.info("Finished world border stage: ${this.stage}")
         if (!UHCManager.isActivePhase()) {
             return
         }
-
-        val next = GameSettings.WORLD_BORDER_STAGE.value.getNextStage()
-        GameSettings.WORLD_BORDER_STAGE.setValueQuietly(next)
+        val next = this.stage.getNextStage()
+        this.stage = next
 
         if (next == Stage.END) {
             GlobalEventHandler.broadcast(UHCBorderCompleteEvent())
             return
         }
+        super.onAllBordersComplete(borders)
+    }
+
+    override fun onAllBordersComplete(border: TrackedBorder, level: ServerLevel) {
+        // We don't shrink past the fifth stage in the end because
+        // otherwise it becomes impossible to enter the end dimension
+        if (level.dimension() == Level.END && this.stage > Stage.FIFTH) {
+            return
+        }
+
         UHCManager.schedulePhaseTask(10, Seconds) {
-            this.moveWorldBorders(next.endSize, next.getRemainingTimeAsPercent(this.global.size))
+            this.moveWorldBorder(border, level, this.stage, Size.END)
         }
     }
 
-    private class UHCBorder: ArcadeBorder() {
-        override var state: BorderState = StillBorderState(this, Stage.FIRST.startSize)
+    internal fun registerEvents() {
+        GlobalEventHandler.register<ServerLoadedEvent> { this.onServerLoadedEvent() }
+        GlobalEventHandler.register<UHCGracePeriodEndEvent> { this.startWorldBorders() }
+    }
 
-        override fun tick() {
-            // We don't tick because this would get called by every world
-        }
+    private fun moveWorldBorder(border: TrackedBorder, level: Level, stage: Stage, size: Size, instant: Boolean = false) {
+        val dest = if (size == Size.END) stage.getEndSizeFor(level) else stage.getStartSizeFor(level)
+        val time = if (instant) -1.0 else stage.getRemainingTimeAsPercent(border.size, level)
+        this.moveWorldBorder(border, dest, time)
+    }
 
-        fun update() {
-            val previous = this.state
-            super.tick()
-            if (this.state !== previous) {
-                onBorderStageComplete()
-            }
+    private fun moveWorldBorder(border: TrackedBorder, newSize: Double, percent: Double = -1.0) {
+        val seconds = (percent * this.multiplier).toLong()
+        if (seconds > 0) {
+            border.lerpSizeBetween(border.size, newSize, seconds * 1000L)
+            return
         }
+        border.size = newSize
+    }
+
+    private fun onServerLoadedEvent() {
+        this.tracker.addLevelBorder(LevelUtils.overworld())
+        this.tracker.addLevelBorder(LevelUtils.nether())
+        this.tracker.addLevelBorder(LevelUtils.end())
+
+        BorderUtils.isolateWorldBorders()
+    }
+
+    enum class Size {
+        START, END
     }
 
     enum class Stage(
-        val startSize: Double,
-        val endSize: Double,
+        private val startSize: Double,
+        private val endSize: Double,
         private val weight: Double
     ) {
         FIRST(6128.0, 3064.0, 18.0),
-        SECOND(FIRST.endSize, 1532.0, 15.0),
-        THIRD(SECOND.endSize, 766.0, 9.0),
-        FOURTH(THIRD.endSize, 383.0, 8.0),
-        FIFTH(FOURTH.endSize, 180.0, 7.0),
+        SECOND(FIRST.endSize, 1500.0, 15.0),
+        THIRD(SECOND.endSize, 780.0, 9.0),
+        FOURTH(THIRD.endSize, 400.0, 8.0),
+        FIFTH(FOURTH.endSize, 220.0, 7.0),
         SIX(FIFTH.endSize, 50.0, 5.0),
         FINAL(SIX.endSize, 20.0, 2.0),
         END(FINAL.endSize, 0.0, 0.0);
 
-        fun getRemainingTimeAsPercent(size: Double): Double {
-            val remainingSize = size - this.endSize
-            val totalSize = this.startSize - this.endSize
+        fun getRemainingTimeAsPercent(size: Double, level: Level): Double {
+            val remainingSize = size - this.getEndSizeFor(level)
+            val totalSize = this.getStartSizeFor(level) - this.getEndSizeFor(level)
             return (remainingSize / totalSize) * (this.weight / TOTAL_WEIGHT)
         }
 
@@ -112,19 +131,36 @@ object WorldBorderManager {
             return if (next < values.size) values[next] else END
         }
 
+        fun getStartSizeFor(level: Level): Double {
+            return adjustSize(this.startSize, level)
+        }
+
+        fun getEndSizeFor(level: Level): Double {
+            return adjustSize(this.endSize, level)
+        }
+
         companion object {
             val TOTAL_WEIGHT = values().sumOf { it.weight }
 
-            fun getStage(size: Double): Stage? {
-                if (size <= FINAL.endSize) {
+            fun getStage(size: Double, level: Level): Stage? {
+                val adjusted = reverseAdjustSize(size, level)
+                if (adjusted <= FINAL.endSize) {
                     return END
                 }
                 for (stage in values()) {
-                    if (size <= stage.startSize && size > stage.endSize) {
+                    if (adjusted <= stage.startSize && adjusted > stage.endSize) {
                         return stage
                     }
                 }
                 return null
+            }
+
+            fun adjustSize(size: Double, level: Level): Double {
+                return size / level.dimensionType().coordinateScale
+            }
+
+            fun reverseAdjustSize(size: Double, level: Level): Double {
+                return size * level.dimensionType().coordinateScale
             }
         }
     }

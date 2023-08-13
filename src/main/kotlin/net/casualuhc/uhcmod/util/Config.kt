@@ -1,7 +1,6 @@
 package net.casualuhc.uhcmod.util
 
 import com.google.gson.*
-import net.casualuhc.arcade.events.EventHandler
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerLoadedEvent
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
@@ -119,6 +118,10 @@ object Config {
 
     fun <T> listOrDefault(key: String, default: List<T> = emptyList()): List<T> {
         return this.getAsOrDefault(key, default)
+    }
+
+    fun add(key: String, any: Any) {
+        this.configs[key] = any
     }
 
     internal fun registerEvents() {

@@ -2,6 +2,7 @@ package net.casualuhc.uhcmod.util
 
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.utils.LevelUtils
+import net.casualuhc.uhcmod.managers.WorldBorderManager
 import net.casualuhc.uhcmod.settings.GameSettings
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.Difficulty
@@ -29,10 +30,8 @@ object RuleUtils {
             dayTime = 6000
             setWeatherParameters(999999, 0, false, false)
         }
-        LevelUtils.forEachLevel { level ->
-            level.worldBorder.setCenter(0.0, 0.0)
-            level.worldBorder.size = 6128.0
-        }
+
+        WorldBorderManager.moveWorldBorders(WorldBorderManager.Stage.FIRST, WorldBorderManager.Size.START, true)
 
         GameSettings.PVP.setValue(false)
     }

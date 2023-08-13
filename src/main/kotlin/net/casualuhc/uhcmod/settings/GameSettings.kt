@@ -2,12 +2,15 @@ package net.casualuhc.uhcmod.settings
 
 import com.google.common.collect.ImmutableMap
 import net.casualuhc.arcade.Arcade
+import net.casualuhc.arcade.events.GlobalEventHandler
+import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.arcade.utils.ItemUtils.literalNamed
 import net.casualuhc.arcade.utils.ItemUtils.potion
 import net.casualuhc.uhcmod.UHCMod
 import net.casualuhc.uhcmod.managers.UHCManager
 import net.casualuhc.uhcmod.managers.WorldBorderManager
 import net.casualuhc.uhcmod.managers.WorldBorderManager.Stage
+import net.casualuhc.uhcmod.util.Config
 import net.casualuhc.uhcmod.util.HeadUtils
 import net.casualuhc.uhcmod.utils.gamesettings.GameSetting
 import net.casualuhc.uhcmod.utils.gamesettings.GameSetting.*
@@ -19,6 +22,8 @@ import net.minecraft.world.item.alchemy.Potions
 import java.util.*
 import java.util.concurrent.TimeUnit.MINUTES
 import java.util.function.Consumer
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 object GameSettings {
     val RULES = LinkedHashMap<ItemStack, GameSetting<*>>()
@@ -125,12 +130,44 @@ object GameSettings {
             Stage.FIRST
         ) { setting ->
             if (UHCManager.isActivePhase()) {
-                WorldBorderManager.moveWorldBorders(setting.value.startSize)
+                WorldBorderManager.moveWorldBorders(setting.value, WorldBorderManager.Size.START, true)
                 WorldBorderManager.startWorldBorders()
             } else {
                 UHCMod.logger.error("Could not set world border since game is not active")
             }
         }
+
+        readConfig()
+        GlobalEventHandler.register<ServerStoppedEvent>(0) { this.writeConfig() }
+    }
+
+    private fun readConfig() {
+        val list = Config.listOrNull<Map<String, String>>("game_settings") ?: return
+        for (config in list) {
+            try {
+                val name = config["name"]!!
+                val value = config["value"]!!
+                for (rule in RULES.values) {
+                    if (rule.name == name) {
+                        rule.setFromString(value)
+                        break
+                    }
+                }
+            } catch (e: Exception) {
+                UHCMod.logger.error("Failed reading config", e)
+            }
+        }
+    }
+
+    private fun writeConfig() {
+        val configs = ArrayList<Map<String, String>>()
+        for (rule in RULES.values) {
+            val config = HashMap<String, String>()
+            config["name"] = rule.name
+            config["value"] = rule.value.toString()
+            configs.add(config)
+        }
+        Config.add("game_settings", configs)
     }
 
     private fun register(

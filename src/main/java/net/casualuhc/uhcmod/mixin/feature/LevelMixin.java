@@ -1,5 +1,6 @@
 package net.casualuhc.uhcmod.mixin.feature;
 
+import net.casualuhc.arcade.border.TrackedBorder;
 import net.casualuhc.uhcmod.managers.WorldBorderManager;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -39,6 +40,8 @@ public class LevelMixin {
 		int maxChain,
 		CallbackInfo ci
 	) {
-		this.worldBorder = WorldBorderManager.getGlobalBorder();
+		if (dimension == Level.OVERWORLD || dimension == Level.NETHER || dimension == Level.END) {
+			this.worldBorder = new TrackedBorder(WorldBorderManager.Stage.FIRST.getStartSizeFor((Level) (Object) this));
+		}
 	}
 }

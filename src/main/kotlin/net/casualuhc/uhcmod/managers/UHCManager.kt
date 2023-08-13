@@ -116,7 +116,7 @@ object UHCManager {
         this.paused = true
         if (this.isActivePhase()) {
             // Pause border
-            WorldBorderManager.moveWorldBorders(WorldBorderManager.getGlobalBorder().size)
+            WorldBorderManager.pauseWorldBorders()
         }
     }
 

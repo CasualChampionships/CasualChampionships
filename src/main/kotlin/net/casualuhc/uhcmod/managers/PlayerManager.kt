@@ -74,6 +74,7 @@ import net.minecraft.world.InteractionResult
 import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION
+import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.effect.MobEffects.*
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
@@ -266,8 +267,6 @@ object PlayerManager {
         GlobalEventHandler.register<PlayerDamageEvent> { this.onPlayerDamage(it) }
         GlobalEventHandler.register<PlayerVoidDamageEvent> { this.onPlayerVoidDamage(it) }
         GlobalEventHandler.register<PlayerChatEvent> { this.onPlayerChat(it) }
-        GlobalEventHandler.register<PlayerItemUseEvent> { this.onPlayerUseItem(it) }
-        GlobalEventHandler.register<PlayerItemUseOnEvent> { this.onPlayerUseItemOn(it) }
         GlobalEventHandler.register<PlayerTickEvent> { this.onPlayerTick(it) }
         GlobalEventHandler.register<PlayerDeathEvent> { this.onPlayerDeath(it) }
         GlobalEventHandler.register<PlayerAdvancementEvent> { this.onPlayerAdvancement(it) }
@@ -357,14 +356,6 @@ object PlayerManager {
         event.cancel()
     }
 
-    private fun onPlayerUseItem(event: PlayerItemUseEvent) {
-
-    }
-
-    private fun onPlayerUseItemOn(event: PlayerItemUseOnEvent) {
-
-    }
-
     private fun onPlayerTick(event: PlayerTickEvent) {
         this.updateDisplay(event.player)
         if (event.player.isSurvival) {
@@ -398,7 +389,7 @@ object PlayerManager {
 
                 val team = player.team
                 if (team != null && GameSettings.SOLO_BUFF.value && team.hasAlivePlayers() && attacker.isAliveSolo()) {
-
+                    this.buffSoloPlayer(attacker)
                 }
             }
 
@@ -427,6 +418,10 @@ object PlayerManager {
                 UHCManager.setPhase(End)
             }
         }
+    }
+
+    private fun buffSoloPlayer(player: ServerPlayer) {
+        player.addEffect(MobEffectInstance(REGENERATION, 60, 2))
     }
 
     private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
