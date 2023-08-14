@@ -1,6 +1,7 @@
 package net.casualuhc.uhcmod.managers
 
 import io.netty.buffer.Unpooled
+import me.senseiwells.replay.player.PlayerRecorders
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.player.*
@@ -69,19 +70,13 @@ import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION
-import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.effect.MobEffects.*
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import net.minecraft.world.item.PlayerHeadItem
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.ClipContext.Block.VISUAL
 import net.minecraft.world.level.ClipContext.Fluid.SOURCE_ONLY
@@ -89,6 +84,7 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.HitResult.Type.MISS
 import net.minecraft.world.scores.Team
 import java.util.*
+import java.util.function.Predicate
 import kotlin.math.atan2
 
 object PlayerManager {
@@ -261,6 +257,7 @@ object PlayerManager {
         GlobalEventHandler.register<PlayerCreatedEvent> { this.onPlayerCreated(it) }
 
         GlobalEventHandler.register<PlayerJoinEvent> { this.onPlayerJoin(it) }
+        GlobalEventHandler.register<PlayerLeaveEvent> { this.onPlayerLeave(it) }
         GlobalEventHandler.register<PlayerPackLoadEvent> { this.onPlayerPack(it) }
         GlobalEventHandler.register<PlayerItemReleaseEvent> { this.onPlayerItemRelease(it) }
         GlobalEventHandler.register<PlayerAttackEvent> { this.onPlayerAttack(it) }
@@ -273,6 +270,10 @@ object PlayerManager {
 
         GlobalEventHandler.register<UHCSetupEvent> { this.onUHCSetup() }
         GlobalEventHandler.register<PlayerFlagEvent> { this.onPlayerFlag(it) }
+
+        PlayerRecorders.predicate = Predicate { player ->
+            !UHCManager.isPhase(End) && !(UHCManager.hasUHCStarted() && player.isSpectator)
+        }
     }
 
     private fun onPlayerCreated(event: PlayerCreatedEvent) {
@@ -314,6 +315,12 @@ object PlayerManager {
 
         // Needed for updating the player's health
         GlobalTickedScheduler.schedule(1, Seconds, player::resetSentInfo)
+    }
+
+    private fun onPlayerLeave(event: PlayerLeaveEvent) {
+        if (!UHCManager.hasUHCStarted()) {
+            PlayerRecorders.get(event.player)?.stop(false)
+        }
     }
 
     private fun onPlayerPack(event: PlayerPackLoadEvent) {
@@ -366,6 +373,11 @@ object PlayerManager {
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         event.invoke() // Post event
         val player = event.player
+
+        // We can stop recording now...
+        GlobalTickedScheduler.schedule(1, Seconds) {
+            PlayerRecorders.get(player)?.stop()
+        }
 
         if (UHCManager.isPhase(End)) {
             player.setRespawnPosition(player.level().dimension(), player.blockPosition(), player.xRot, true, false)

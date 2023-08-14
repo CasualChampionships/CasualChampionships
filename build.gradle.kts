@@ -39,6 +39,7 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 
     include(modImplementation("xyz.nucleoid:server-translations-api:${property("server_translations_api_version")}")!!)
+    include(modImplementation("com.github.Senseiwells:ServerReplay:${property("server_replay_version")}")!!)
     include(modImplementation("com.github.CasualUHC:Arcade:${property("arcade_version")}")!!)
     include(modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")!!)
 

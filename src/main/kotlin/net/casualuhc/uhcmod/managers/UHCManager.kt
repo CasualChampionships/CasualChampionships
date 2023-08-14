@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import me.senseiwells.replay.player.PlayerRecorders
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.core.Event
@@ -518,6 +519,7 @@ object UHCManager {
         this.schedulePhaseTask(20, Seconds) {
             PlayerUtils.forEveryPlayer {
                 it.clearPlayerInventory()
+                PlayerRecorders.get(it)?.stop()
             }
             this.setPhase(Lobby)
         }
