@@ -57,7 +57,7 @@ dependencies {
 
 tasks {
     loom {
-        accessWidenerPath.set(file("src/main/resources/uhcmod.accesswidener"))
+        accessWidenerPath.set(file("src/main/resources/uhc.accesswidener"))
     }
 
     processResources {

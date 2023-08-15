@@ -17,14 +17,14 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "net.casualuhc.uhcmod.UHCMod"
+        "value": "net.casualuhc.uhc.UHCMod"
       }
     ]
   },
   "mixins": [
-    "uhcmod.mixins.json"
+    "uhc.mixins.json"
   ],
-  "accessWidener" : "uhcmod.accesswidener",
+  "accessWidener": "uhc.accesswidener",
   "depends": {
     "fabricloader": ">=0.14.12",
     "minecraft": "1.20.x",
