@@ -7,6 +7,8 @@ import net.casualuhc.uhcmod.util.Config
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Item
 import kotlin.io.path.exists
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 import kotlin.io.path.readBytes
 
 object UHCResourcePack {
@@ -15,6 +17,13 @@ object UHCResourcePack {
 
     fun initialise() {
         this.pack.addAssetSource(UHCMod.ID)
+        // We also include translations in the pack for replay mod
+        this.pack.creationEvent.register { builder ->
+            val lang = UHCMod.uhc.findPath("data/uhc/lang").get()
+            for (path in lang.listDirectoryEntries()) {
+                builder.addData("assets/uhc/lang/${path.name}", path.readBytes())
+            }
+        }
 
         this.pack.setPackDescription("Provides resources for Casual UHC")
 
