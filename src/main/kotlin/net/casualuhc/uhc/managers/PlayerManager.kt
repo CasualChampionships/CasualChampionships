@@ -226,11 +226,10 @@ object PlayerManager {
             return packet
         }
 
-        /* val tracked = */ packet.packedItems ?: return packet
-        // Even if the player has no shared flags we want to update them...
-        // if (tracked.none { it.id == Entity.DATA_SHARED_FLAGS_ID.id }) {
-        //     return packet
-        // }
+        val tracked = packet.packedItems ?: return packet
+        if (tracked.none { it.id == Entity.DATA_SHARED_FLAGS_ID.id }) {
+            return packet
+        }
 
         // Make a copy of the packet, because other players are sent the same instance of
         // The packet and may not be on the same team
@@ -241,15 +240,15 @@ object PlayerManager {
         val iterator = new.packedItems.listIterator()
         while (iterator.hasNext()) {
             val value = iterator.next()
+            // Need to compare ids because they're not the same instance once re-serialized
             if (value.id() == Entity.DATA_SHARED_FLAGS_ID.id) {
-                iterator.remove()
+                @Suppress("UNCHECKED_CAST")
+                val byteValue = value as DataValue<Byte>
+                var flags = byteValue.value()
+                flags = (flags.toInt() or (1 shl Entity.FLAG_GLOWING)).toByte()
+                iterator.set(DataValue.create(Entity.DATA_SHARED_FLAGS_ID, flags))
             }
         }
-
-        // Terrible way of doing it, but reliable...
-        var flags = glowingPlayer.entityData.get(Entity.DATA_SHARED_FLAGS_ID)
-        flags = (flags.toInt() or (1 shl Entity.FLAG_GLOWING)).toByte()
-        new.packedItems.add(DataValue.create(Entity.DATA_SHARED_FLAGS_ID, flags))
         return new
     }
 
@@ -286,6 +285,8 @@ object PlayerManager {
 
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val player = event.player
+
+        player.updateGlowingTag()
 
         player.sendUHCResourcePack()
 
@@ -448,14 +449,22 @@ object PlayerManager {
 
         if (packet is ClientboundBundlePacket || packet is ClientboundSetEntityDataPacket) {
             @Suppress("UNCHECKED_CAST")
-            val updated = this.handlePacket(player, packet as Packet<ClientGamePacketListener>)
+            val updated = this.updatePacket(player, packet as Packet<ClientGamePacketListener>)
             if (updated !== packet) {
                 event.cancel(updated)
             }
         }
+
+        if (packet is ClientboundBundlePacket) {
+            for (sub in packet.subPackets()) {
+                this.onPacket(player, sub)
+            }
+        } else {
+            this.onPacket(player, packet)
+        }
     }
 
-    private fun handlePacket(player: ServerPlayer, packet: Packet<ClientGamePacketListener>): Packet<ClientGamePacketListener> {
+    private fun updatePacket(player: ServerPlayer, packet: Packet<ClientGamePacketListener>): Packet<ClientGamePacketListener> {
         if (packet is ClientboundSetEntityDataPacket) {
             val glowing = player.serverLevel().getEntity(packet.id())
             if (glowing is ServerPlayer) {
@@ -465,11 +474,18 @@ object PlayerManager {
         if (packet is ClientboundBundlePacket) {
             val updated = ArrayList<Packet<ClientGamePacketListener>>()
             for (sub in packet.subPackets()) {
-                 updated.add(this.handlePacket(player, sub))
+                 updated.add(this.updatePacket(player, sub))
             }
             return ClientboundBundlePacket(updated)
         }
         return packet
+    }
+
+    private fun onPacket(player: ServerPlayer, packet: Packet<*>) {
+        if (packet is ClientboundAddPlayerPacket) {
+            val newPlayer = player.server.playerList.getPlayer(packet.playerId)
+            newPlayer?.updateGlowingTag()
+        }
     }
 
     private fun onUHCSetup() {
