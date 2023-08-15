@@ -27,6 +27,7 @@ import net.casualuhc.arcade.utils.PlayerUtils.sendSubtitle
 import net.casualuhc.arcade.utils.PlayerUtils.sendTitle
 import net.casualuhc.arcade.utils.PlayerUtils.teamMessage
 import net.casualuhc.arcade.utils.TeamUtils
+import net.casualuhc.arcade.utils.TeamUtils.getServerPlayers
 import net.casualuhc.arcade.utils.TickUtils
 import net.casualuhc.uhc.UHCMod
 import net.casualuhc.uhc.advancement.RaceAdvancement.Death
@@ -62,11 +63,10 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
-import net.minecraft.network.protocol.game.ClientboundTabListPacket
+import net.minecraft.network.protocol.Packet
+import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.network.syncher.SynchedEntityData.DataValue
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
@@ -211,7 +211,6 @@ object PlayerManager {
         return false
     }
 
-    @JvmStatic
     fun handleTrackerUpdatePacketForTeamGlowing(
         glowingPlayer: ServerPlayer,
         observingPlayer: ServerPlayer,
@@ -227,10 +226,11 @@ object PlayerManager {
             return packet
         }
 
-        val tracked = packet.packedItems ?: return packet
-        if (tracked.none { it.id == Entity.DATA_SHARED_FLAGS_ID.id }) {
-            return packet
-        }
+        /* val tracked = */ packet.packedItems ?: return packet
+        // Even if the player has no shared flags we want to update them...
+        // if (tracked.none { it.id == Entity.DATA_SHARED_FLAGS_ID.id }) {
+        //     return packet
+        // }
 
         // Make a copy of the packet, because other players are sent the same instance of
         // The packet and may not be on the same team
@@ -241,15 +241,15 @@ object PlayerManager {
         val iterator = new.packedItems.listIterator()
         while (iterator.hasNext()) {
             val value = iterator.next()
-            // Need to compare ids because they're not the same instance once re-serialized
             if (value.id() == Entity.DATA_SHARED_FLAGS_ID.id) {
-                @Suppress("UNCHECKED_CAST")
-                val byteValue = value as SynchedEntityData.DataValue<Byte>
-                var flags = byteValue.value()
-                flags = (flags.toInt() or (1 shl Entity.FLAG_GLOWING)).toByte()
-                iterator.set(SynchedEntityData.DataValue.create(Entity.DATA_SHARED_FLAGS_ID, flags))
+                iterator.remove()
             }
         }
+
+        // Terrible way of doing it, but reliable...
+        var flags = glowingPlayer.entityData.get(Entity.DATA_SHARED_FLAGS_ID)
+        flags = (flags.toInt() or (1 shl Entity.FLAG_GLOWING)).toByte()
+        new.packedItems.add(DataValue.create(Entity.DATA_SHARED_FLAGS_ID, flags))
         return new
     }
 
@@ -267,6 +267,7 @@ object PlayerManager {
         GlobalEventHandler.register<PlayerTickEvent> { this.onPlayerTick(it) }
         GlobalEventHandler.register<PlayerDeathEvent> { this.onPlayerDeath(it) }
         GlobalEventHandler.register<PlayerAdvancementEvent> { this.onPlayerAdvancement(it) }
+        GlobalEventHandler.register<PlayerClientboundPacketEvent> { this.onPlayerClientboundPacket(it) }
 
         GlobalEventHandler.register<UHCSetupEvent> { this.onUHCSetup() }
         GlobalEventHandler.register<PlayerFlagEvent> { this.onPlayerFlag(it) }
@@ -374,6 +375,8 @@ object PlayerManager {
         event.invoke() // Post event
         val player = event.player
 
+        player.flags.set(TeamGlow, false)
+
         // We can stop recording now...
         GlobalTickedScheduler.schedule(1, Seconds) {
             PlayerRecorders.get(player)?.stop()
@@ -440,6 +443,35 @@ object PlayerManager {
         event.player.uhcStats.add(event.advancement)
     }
 
+    private fun onPlayerClientboundPacket(event: PlayerClientboundPacketEvent) {
+        val (player, packet) = event
+
+        if (packet is ClientboundBundlePacket || packet is ClientboundSetEntityDataPacket) {
+            @Suppress("UNCHECKED_CAST")
+            val updated = this.handlePacket(player, packet as Packet<ClientGamePacketListener>)
+            if (updated !== packet) {
+                event.cancel(updated)
+            }
+        }
+    }
+
+    private fun handlePacket(player: ServerPlayer, packet: Packet<ClientGamePacketListener>): Packet<ClientGamePacketListener> {
+        if (packet is ClientboundSetEntityDataPacket) {
+            val glowing = player.serverLevel().getEntity(packet.id())
+            if (glowing is ServerPlayer) {
+                return this.handleTrackerUpdatePacketForTeamGlowing(glowing, player, packet)
+            }
+        }
+        if (packet is ClientboundBundlePacket) {
+            val updated = ArrayList<Packet<ClientGamePacketListener>>()
+            for (sub in packet.subPackets()) {
+                 updated.add(this.handlePacket(player, sub))
+            }
+            return ClientboundBundlePacket(updated)
+        }
+        return packet
+    }
+
     private fun onUHCSetup() {
         PlayerUtils.forEveryPlayer { player ->
             player.flags.clear()
@@ -460,7 +492,10 @@ object PlayerManager {
         val player = event.player
         when (event.flag) {
             TeamGlow -> {
-                player.updateGlowingTag()
+                val team = player.team ?: return
+                for (member in team.getServerPlayers()) {
+                    member.updateGlowingTag()
+                }
             }
             FullBright -> {
                 if (event.value) {

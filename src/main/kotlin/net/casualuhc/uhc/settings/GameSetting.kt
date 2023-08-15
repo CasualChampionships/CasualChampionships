@@ -15,7 +15,7 @@ abstract class GameSetting<T> protected constructor(
     var value: T = value
         private set
 
-    val name: String = this.display.displayName.string
+    val name: String = this.display.hoverName.string
 
     init {
         this.resetSelected()
