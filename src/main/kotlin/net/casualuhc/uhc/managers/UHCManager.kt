@@ -90,6 +90,7 @@ object UHCManager {
     private var startTime = Long.MAX_VALUE
 
     private var glowing = false
+    private var grace = true
 
     lateinit var event: UHCEvent
         private set
@@ -123,7 +124,7 @@ object UHCManager {
 
     fun unpause() {
         this.paused = false
-        if (this.isActivePhase()) {
+        if (this.isActivePhase() && !this.grace) {
             WorldBorderManager.startWorldBorders()
         }
     }
@@ -211,10 +212,14 @@ object UHCManager {
         this.phase = Phase.valueOf(json["phase"].asString)
         this.glowing = json["glowing"].asBoolean
         this.paused = json["paused"]?.asBoolean ?: false
+        this.grace = json["grace"]?.asBoolean ?: true
 
         if (this.isActivePhase()) {
             this.createActiveSidebar()
             this.createActiveBossbar()
+        }
+        if (this.isLobbyPhase()) {
+            // Lobby bossbar?
         }
 
         val tasks = UHCLoadTasksEvent()
@@ -247,6 +252,7 @@ object UHCManager {
         json.addProperty("phase", this.phase.name)
         json.addProperty("glowing", this.glowing)
         json.addProperty("paused", this.paused)
+        json.addProperty("grace", this.grace)
 
         val tasks = JsonArray()
         for ((tick, queue) in this.scheduler.tasks) {
@@ -667,7 +673,7 @@ object UHCManager {
             val start = Component.literal("${this.buffer} - ").append(longName).append(" ").monospaced()
             if (teammate !== null) {
                 if (teammate.isSurvival && teammate.isAlive) {
-                    val health = "% 4.1f".format(teammate.health / 2.0)
+                    val health = " %04.1f".format(teammate.health / 2.0)
                     return start.append(health).append(Texts.space(1)).append(Texts.ICON_HEART)
                 }
                 return start.append("     ").append(Texts.ICON_CROSS)
@@ -686,6 +692,7 @@ object UHCManager {
                 player.sendSound(SoundEvents.ENDER_DRAGON_AMBIENT)
             }
             GameSettings.PVP.setValue(true)
+            grace = false
 
             GlobalEventHandler.broadcast(UHCGracePeriodEndEvent())
         }

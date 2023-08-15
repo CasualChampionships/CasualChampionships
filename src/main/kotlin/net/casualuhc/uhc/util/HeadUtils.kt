@@ -3,7 +3,7 @@ package net.casualuhc.uhc.util
 import net.casualuhc.arcade.utils.ComponentUtils.gold
 import net.casualuhc.arcade.utils.ComponentUtils.unItalicise
 import net.casualuhc.uhc.items.UHCItems
-import net.minecraft.nbt.NbtUtils
+import net.minecraft.nbt.StringTag
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.PlayerHeadItem
@@ -15,8 +15,7 @@ object HeadUtils {
 
     fun createPlayerHead(player: ServerPlayer): ItemStack {
         val stack = ItemStack(UHCItems.PLAYER_HEAD)
-        val owner = stack.getOrCreateTagElement(PlayerHeadItem.TAG_SKULL_OWNER)
-        NbtUtils.writeGameProfile(owner, player.gameProfile)
+        stack.addTagElement(PlayerHeadItem.TAG_SKULL_OWNER, StringTag.valueOf(player.scoreboardName))
         return stack
     }
 

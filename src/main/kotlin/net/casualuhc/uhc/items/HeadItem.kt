@@ -4,7 +4,7 @@ import eu.pb4.polymer.core.api.item.PolymerItem
 import net.casualuhc.uhc.settings.GameSettings
 import net.casualuhc.uhc.util.Texts
 import net.minecraft.ChatFormatting
-import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.Tag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Blocks
 
 abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerItem {
-    abstract fun getSkullOwner(stack: ItemStack): CompoundTag
+    abstract fun getSkullOwner(stack: ItemStack): Tag
 
     abstract fun addEffects(player: ServerPlayer)
 
@@ -26,7 +26,11 @@ abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerIte
             this.addEffects(player)
             player.swing(usedHand, true)
             player.cooldowns.addCooldown(this, 20)
-            return InteractionResultHolder.consume(player.getItemInHand(usedHand))
+            val stack = player.getItemInHand(usedHand)
+            if (!player.abilities.instabuild) {
+                stack.shrink(1)
+            }
+            return InteractionResultHolder.consume(stack)
         }
         return super.use(level, player, usedHand)
     }
@@ -37,6 +41,9 @@ abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerIte
             this.addEffects(player)
             player.swing(context.hand, true)
             player.cooldowns.addCooldown(this, 20)
+            if (!player.abilities.instabuild) {
+                context.itemInHand.shrink(1)
+            }
             return InteractionResult.CONSUME
         }
         return super.useOn(context)
