@@ -309,7 +309,7 @@ object UHCManager {
 
     private fun onPlayerGameModeChange(event: PlayerGameModeChangeEvent) {
         if (this.isActivePhase()) {
-            if (event.player.isSpectator) {
+            if (event.current == GameType.SPECTATOR) {
                 this.health?.addPlayer(event.player)
             } else {
                 this.health?.removePlayer(event.player)
