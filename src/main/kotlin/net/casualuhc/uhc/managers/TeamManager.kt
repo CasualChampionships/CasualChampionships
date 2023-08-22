@@ -4,37 +4,22 @@ import com.google.gson.JsonObject
 import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.team.TeamCreatedEvent
-import net.casualuhc.arcade.utils.ComponentUtils.bold
 import net.casualuhc.arcade.utils.ComponentUtils.gold
 import net.casualuhc.arcade.utils.ComponentUtils.green
-import net.casualuhc.arcade.utils.ComponentUtils.red
 import net.casualuhc.arcade.utils.PlayerUtils
 import net.casualuhc.arcade.utils.PlayerUtils.isSurvival
-import net.casualuhc.arcade.utils.PlayerUtils.location
-import net.casualuhc.arcade.utils.PlayerUtils.teleportTo
-import net.casualuhc.arcade.utils.TeamUtils
 import net.casualuhc.arcade.utils.TeamUtils.addExtension
 import net.casualuhc.uhc.UHCMod
-import net.casualuhc.uhc.events.uhc.UHCActiveEvent
-import net.casualuhc.uhc.events.uhc.UHCLobbyEvent
-import net.casualuhc.uhc.events.uhc.UHCReadyEvent
-import net.casualuhc.uhc.events.uhc.UHCSetupEvent
-import net.casualuhc.uhc.extensions.PlayerFlag.Participating
-import net.casualuhc.uhc.extensions.PlayerFlagsExtension.Companion.flags
 import net.casualuhc.uhc.extensions.TeamFlag.Ignored
 import net.casualuhc.uhc.extensions.TeamFlag.Ready
 import net.casualuhc.uhc.extensions.TeamFlagsExtension
 import net.casualuhc.uhc.extensions.TeamFlagsExtension.Companion.flags
 import net.casualuhc.uhc.extensions.TeamUHCExtension
-import net.casualuhc.uhc.managers.PlayerManager.setForUHC
 import net.casualuhc.uhc.util.Config
 import net.casualuhc.uhc.util.Texts
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import java.util.*
@@ -115,22 +100,6 @@ object TeamManager {
         return teams
     }
 
-    fun forceAddPlayer(team: PlayerTeam, target: ServerPlayer, teleport: Boolean) {
-        Arcade.server.scoreboard.addPlayerToTeam(target.scoreboardName, team)
-        target.sendSystemMessage(Texts.UHC_ADDED_TO_TEAM.generate(team.formattedDisplayName))
-
-        target.setForUHC(!target.flags.has(Participating))
-
-        if (teleport) {
-            for (player in PlayerUtils.players()) {
-                if (team.players.contains(player.scoreboardName) && player.isSurvival && target != player) {
-                    target.teleportTo(player.location)
-                    break
-                }
-            }
-        }
-    }
-
     fun createTeams() {
         val scoreboard = Arcade.server.scoreboard
         for (team in LinkedList(scoreboard.playerTeams)) {
@@ -174,99 +143,13 @@ object TeamManager {
         }
     }
 
-    fun spawnFakeUHCPlayers(): Boolean {
-        if (!UHCManager.isLobbyPhase()) {
-            return false
-        }
-        // val players = Arcade.server.playerList
-        // val location = UHCManager.event.getLobbyHandler().getSpawn()
-        // for (team in TeamUtils.teams()) {
-        //     for (name in team.players) {
-        //         if (players.getPlayerByName(name) == null) {
-        //             EntityPlayerMPFake.createFake(
-        //                 name,
-        //                 Arcade.server,
-        //                 location.x,
-        //                 location.y,
-        //                 location.z,
-        //                 location.yaw.toDouble(),
-        //                 location.pitch.toDouble(),
-        //                 location.level.dimension(),
-        //                 GameType.ADVENTURE,
-        //                 false
-        //             )
-        //         }
-        //     }
-        // }
-        return true
-    }
-
-    fun killAllFakePlayers() {
-        PlayerUtils.forEveryPlayer { player ->
-            // if (player is EntityPlayerMPFake) {
-            //     player.kill()
-            // }
-        }
-    }
-
     internal fun registerEvents() {
         GlobalEventHandler.register<TeamCreatedEvent> { this.onTeamCreated(it) }
-        GlobalEventHandler.register<UHCSetupEvent> { this.createTeams() }
-        GlobalEventHandler.register<UHCReadyEvent> { this.onUHCReady() }
-        GlobalEventHandler.register<UHCLobbyEvent> { this.onUHCLobby() }
-        GlobalEventHandler.register<UHCActiveEvent> { this.onUHCActive() }
     }
 
     private fun onTeamCreated(event: TeamCreatedEvent) {
         event.team.addExtension(TeamFlagsExtension())
         event.team.addExtension(TeamUHCExtension())
-    }
-
-    private fun onUHCReady() {
-        for (team in TeamUtils.teams()) {
-            team.flags.set(Ready, false)
-        }
-
-        val bar = Component.literal("══════════════════").gold()
-        val yes = Component.literal("[").append(Texts.LOBBY_YES).append("]").bold().green().withStyle {
-            it.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes"))
-        }
-        val no = Component.literal("[").append(Texts.LOBBY_NO).append("]").bold().red().withStyle {
-            it.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no"))
-        }
-        val readyMessage = bar.copy()
-            .append("\n      ")
-            .append(Texts.LOBBY_READY_QUESTION)
-            .append("\n\n\n       ")
-            .append(yes)
-            .append("        ")
-            .append(no)
-            .append("\n\n\n")
-            .append(bar)
-
-        PlayerUtils.forEveryPlayer { player ->
-            val team = player.team
-            if (team != null && !team.flags.has(Ignored)) {
-                player.playNotifySound(SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.MASTER, 1.0F, 1.0F)
-                player.sendSystemMessage(readyMessage)
-            }
-        }
-    }
-
-    private fun onUHCLobby() {
-        this.setCollisions(false)
-        for (team in Arcade.server.scoreboard.playerTeams) {
-            team.nameTagVisibility = Team.Visibility.ALWAYS
-        }
-    }
-
-    private fun onUHCActive() {
-        this.setCollisions(true)
-        for (team in Arcade.server.scoreboard.playerTeams) {
-            if (team.flags.has(Ignored)) {
-                team.nameTagVisibility = Team.Visibility.NEVER
-            }
-        }
     }
 
     private fun createTeamFromJson(json: JsonObject) {

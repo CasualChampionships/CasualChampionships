@@ -25,7 +25,7 @@ class ArrowShape private constructor(
     private inner class ArrowIterator(
         val steps: Int
     ): Iterator<Vec3> {
-        private val delta = 1.0 / steps
+        private val delta = 1.0 / this.steps
 
         private var from = back
         private var current = 0

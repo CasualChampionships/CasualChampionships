@@ -2,38 +2,15 @@ package net.casualuhc.uhc.advancement
 
 import net.casualuhc.arcade.advancements.AdvancementBuilder
 import net.casualuhc.arcade.events.GlobalEventHandler
-import net.casualuhc.arcade.events.player.*
 import net.casualuhc.arcade.events.server.ServerAdvancementReloadEvent
-import net.casualuhc.arcade.scheduler.GlobalTickedScheduler
-import net.casualuhc.arcade.scheduler.MinecraftTimeUnit
 import net.casualuhc.arcade.utils.ItemUtils.potion
-import net.casualuhc.arcade.utils.PlayerUtils
-import net.casualuhc.arcade.utils.PlayerUtils.getExtension
-import net.casualuhc.arcade.utils.PlayerUtils.grantAdvancement
-import net.casualuhc.arcade.utils.PlayerUtils.isSurvival
-import net.casualuhc.uhc.advancement.RaceAdvancement.Craft
-import net.casualuhc.uhc.events.uhc.UHCEndEvent
-import net.casualuhc.uhc.extensions.PlayerFlag.Participating
-import net.casualuhc.uhc.extensions.PlayerFlagsExtension.Companion.flags
-import net.casualuhc.uhc.extensions.PlayerStat.DamageDealt
-import net.casualuhc.uhc.extensions.PlayerStat.Relogs
-import net.casualuhc.uhc.extensions.PlayerStatsExtension.Companion.uhcStats
-import net.casualuhc.uhc.extensions.PlayerUHCExtension
-import net.casualuhc.uhc.extensions.TeamFlag.Eliminated
-import net.casualuhc.uhc.extensions.TeamFlagsExtension.Companion.flags
-import net.casualuhc.uhc.managers.PlayerManager.isMessageGlobal
-import net.casualuhc.uhc.managers.UHCManager
-import net.casualuhc.uhc.screen.MinesweeperScreen
 import net.casualuhc.uhc.util.ResourceUtils.id
 import net.casualuhc.uhc.util.Texts
 import net.minecraft.advancements.Advancement
 import net.minecraft.advancements.FrameType
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.FallingBlock
 
 object UHCAdvancements {
     private val ALL = HashSet<Advancement>()
@@ -387,130 +364,5 @@ object UHCAdvancements {
                 }
             }
         }
-
-        GlobalEventHandler.register<UHCEndEvent> {
-            var lowest: PlayerAttacker? = null
-            var highest: PlayerAttacker? = null
-            for (player in PlayerUtils.players()) {
-                if (player.flags.has(Participating)) {
-                    val current = player.uhcStats[DamageDealt]
-                    if (lowest === null) {
-                        val first = PlayerAttacker(player, current)
-                        lowest = first
-                        highest = first
-                    }
-                    if (lowest.damageDealt > current) {
-                        lowest = PlayerAttacker(player, current)
-                    } else if (highest!!.damageDealt < current) {
-                        highest = PlayerAttacker(player, current)
-                    }
-                }
-            }
-            if (lowest != null) {
-                lowest.player.grantAdvancement(MOSTLY_HARMLESS)
-                highest!!.player.grantAdvancement(HEAVY_HITTER)
-            }
-        }
-        GlobalEventHandler.register<PlayerJoinEvent> { event ->
-            if (UHCManager.isActivePhase() && event.player.isSurvival) {
-                val stats = event.player.uhcStats
-                stats.increment(Relogs, 1.0)
-
-                // Wait for player to load in
-                GlobalTickedScheduler.schedule(5, MinecraftTimeUnit.Seconds) {
-                    event.player.grantAdvancement(COMBAT_LOGGER)
-                    if (stats[Relogs] == 10.0) {
-                        event.player.grantAdvancement(OK_WE_BELIEVE_YOU_NOW)
-                    }
-                }
-
-                val team = event.player.team
-                if (team !== null && team.flags.has(Eliminated)) {
-                    team.flags.set(Eliminated, false)
-                    event.player.grantAdvancement(TEAM_PLAYER)
-                }
-            }
-        }
-        GlobalEventHandler.register<PlayerDeathEvent> { event ->
-            if (event.player.containerMenu is MinesweeperScreen) {
-                event.player.grantAdvancement(DISTRACTED)
-            }
-        }
-        GlobalEventHandler.register<PlayerBlockPlacedEvent> { event ->
-            val state = event.state
-            val block = state.block
-            val context = event.context
-            val pos = context.clickedPos
-            val world = context.level
-            if (block is FallingBlock && FallingBlock.isFree(world.getBlockState(pos.below())) || pos.y < world.minBuildHeight) {
-                event.player.grantAdvancement(FALLING_BLOCK)
-            } else if (block === Blocks.REDSTONE_WIRE) {
-                event.player.grantAdvancement(NOT_DUSTLESS)
-            } else if (block === Blocks.TNT) {
-                event.player.grantAdvancement(DEMOLITION_EXPERT)
-            }
-        }
-        GlobalEventHandler.register<PlayerCraftEvent> { event ->
-            if (event.stack.`is`(Items.CRAFTING_TABLE) && UHCManager.isUnclaimed(Craft)) {
-                event.player.grantAdvancement(WORLD_RECORD_PACE)
-            }
-        }
-        GlobalEventHandler.register<PlayerBorderDamageEvent> { event ->
-            if (event.invoke() && event.player.isDeadOrDying) {
-                event.player.grantAdvancement(SKILL_ISSUE)
-            }
-        }
-        GlobalEventHandler.register<PlayerLootEvent> { event ->
-            if (event.items.any { it.`is`(Items.ENCHANTED_GOLDEN_APPLE) }) {
-                event.player.grantAdvancement(DREAM_LUCK)
-            }
-        }
-        GlobalEventHandler.register<PlayerTickEvent> { event ->
-            val player = event.player
-            val extension = event.player.getExtension(PlayerUHCExtension::class.java)
-            if (player.isSurvival && player.flags.has(Participating) && player.health <= 1.0) {
-                if (++extension.halfHealthTicks == 1200) {
-                    player.grantAdvancement(ON_THE_EDGE)
-                }
-            } else {
-                extension.halfHealthTicks = 0
-            }
-        }
-        GlobalEventHandler.register<PlayerLandEvent> { event ->
-            if (UHCManager.isActivePhase() && UHCManager.uptime < 1200 && event.damage > 0) {
-                event.player.grantAdvancement(BROKEN_ANKLES)
-            }
-        }
-        GlobalEventHandler.register<PlayerFallEvent> { event ->
-            if (UHCManager.isLobbyPhase() && !event.player.hasPermissions(4)) {
-                if (UHCManager.event.getLobbyHandler().tryTeleport(event.player)) {
-                    event.player.grantAdvancement(UH_OH)
-                }
-            }
-        }
-        GlobalEventHandler.register<PlayerChatEvent> { event ->
-            val message: String = event.message.signedContent().lowercase()
-            if (event.player.isMessageGlobal(message)) {
-                if (message.contains("jndi") && message.contains("ldap")) {
-                    event.player.grantAdvancement(LDAP)
-                }
-                if (message.contains("basically")) {
-                    event.player.grantAdvancement(BASICALLY)
-                }
-            }
-        }
-        GlobalEventHandler.register<PlayerBlockCollisionEvent> { event ->
-            if (event.state.`is`(Blocks.SWEET_BERRY_BUSH)) {
-                event.entity.grantAdvancement(EMBARRASSING)
-            }
-        }
-        GlobalEventHandler.register<PlayerAdvancementEvent> { event ->
-            event.announce = this.isRegistered(event.advancement) && event.announce
-        }
     }
-
-    private class PlayerAttacker(
-        val player: ServerPlayer,
-        val damageDealt: Double
-    )
 }

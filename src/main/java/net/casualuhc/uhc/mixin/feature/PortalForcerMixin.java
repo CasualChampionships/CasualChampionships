@@ -1,6 +1,6 @@
 package net.casualuhc.uhc.mixin.feature;
 
-import net.casualuhc.uhc.managers.WorldBorderManager;
+import net.casualuhc.uhc.settings.GameSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.PortalForcer;
@@ -35,7 +35,7 @@ public class PortalForcerMixin {
 			// Border is static or expanding
 			return instance.isWithinBounds(pos);
 		}
-		double margin = shrinkingSpeed * (WorldBorderManager.PORTAL_ESCAPE_TIME_SECONDS * 1000);
+		double margin = shrinkingSpeed * (GameSettings.PORTAL_ESCAPE_TIME.getValue() * 1000);
 		margin = Math.min(margin, instance.getSize() * 0.5 - 1);
 		return pos.getX() >= instance.getMinX() + margin && pos.getX() + 1 <= instance.getMaxX() - margin
 			&& pos.getZ() >= instance.getMinZ() + margin && pos.getZ() + 1 <= instance.getMaxZ() - margin;

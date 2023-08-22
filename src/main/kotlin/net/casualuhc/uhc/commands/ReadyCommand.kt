@@ -6,11 +6,11 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import net.casualuhc.arcade.utils.CommandSourceUtils.success
 import net.casualuhc.arcade.utils.PlayerUtils
 import net.casualuhc.arcade.utils.TeamUtils.asPlayerTeam
+import net.casualuhc.uhc.UHCMod
 import net.casualuhc.uhc.extensions.TeamFlag.Ignored
 import net.casualuhc.uhc.extensions.TeamFlag.Ready
 import net.casualuhc.uhc.extensions.TeamFlagsExtension.Companion.flags
 import net.casualuhc.uhc.managers.TeamManager
-import net.casualuhc.uhc.managers.UHCManager
 import net.casualuhc.uhc.util.Texts
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
@@ -44,7 +44,7 @@ object ReadyCommand: Command {
     }
 
     private fun ready(context: CommandContext<CommandSourceStack>, ready: Boolean): Int {
-        if (!UHCManager.isReadyPhase()) {
+        if (!UHCMod.minigame.isReadyPhase()) {
             throw NOT_NOW.create()
         }
         val team = context.source.playerOrException.team
@@ -70,7 +70,7 @@ object ReadyCommand: Command {
     }
 
     private fun awaiting(context: CommandContext<CommandSourceStack>): Int {
-        if (!UHCManager.isReadyPhase()) {
+        if (!UHCMod.minigame.isReadyPhase()) {
             throw NOT_NOW.create()
         }
         context.source.success(Component.literal("The following teams are not ready:"), true)

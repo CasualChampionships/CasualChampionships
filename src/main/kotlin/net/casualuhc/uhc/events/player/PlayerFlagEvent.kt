@@ -8,4 +8,4 @@ class PlayerFlagEvent(
     val player: ServerPlayer,
     val flag: PlayerFlag,
     val value: Boolean
-): Event()
+): Event

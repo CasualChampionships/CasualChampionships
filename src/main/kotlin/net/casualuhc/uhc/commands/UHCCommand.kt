@@ -10,21 +10,24 @@ import net.casualuhc.arcade.commands.TimeZoneArgument
 import net.casualuhc.arcade.utils.CommandSourceUtils.fail
 import net.casualuhc.arcade.utils.CommandSourceUtils.success
 import net.casualuhc.arcade.utils.PlayerUtils
+import net.casualuhc.arcade.utils.PlayerUtils.isSurvival
+import net.casualuhc.arcade.utils.PlayerUtils.location
+import net.casualuhc.arcade.utils.PlayerUtils.teleportTo
 import net.casualuhc.arcade.utils.TimeUtils
+import net.casualuhc.uhc.UHCMod
 import net.casualuhc.uhc.extensions.PlayerFlag
 import net.casualuhc.uhc.extensions.PlayerFlagsExtension.Companion.flags
 import net.casualuhc.uhc.extensions.TeamFlag
 import net.casualuhc.uhc.extensions.TeamFlagsExtension.Companion.flags
-import net.casualuhc.uhc.managers.PlayerManager.sendUHCResourcePack
+import net.casualuhc.uhc.util.UHCPlayerUtils.sendUHCResourcePack
 import net.casualuhc.uhc.managers.TeamManager
-import net.casualuhc.uhc.managers.UHCManager
-import net.casualuhc.uhc.managers.UHCManager.Phase
-import net.casualuhc.uhc.managers.UHCManager.Phase.*
 import net.casualuhc.uhc.resources.UHCResourcePack
 import net.casualuhc.uhc.resources.UHCResourcePackHost
 import net.casualuhc.uhc.screen.ItemsScreen
 import net.casualuhc.uhc.screen.RuleScreen
 import net.casualuhc.uhc.util.Config
+import net.casualuhc.uhc.util.Texts
+import net.casualuhc.uhc.util.UHCPlayerUtils.setForUHC
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
@@ -105,7 +108,7 @@ object UHCCommand: Command {
                 ).executes(this::getPhase)
             ).then(
                 Commands.literal("setup").executes {
-                    this.setPhase(Setup)
+                    UHCMod.minigame.onSetup().run { 1 }
                 }
             ).then(
                 Commands.literal("lobby").then(
@@ -115,12 +118,12 @@ object UHCCommand: Command {
                 ).then(
                     Commands.literal("tp").executes(this::teleportToLobby)
                 ).executes {
-                    this.setPhase(Lobby)
+                    UHCMod.minigame.onLobby().run { 1 }
                 }
             ).then(
                 Commands.literal("start").then(
                     Commands.literal("force").executes {
-                        this.setPhase(Start)
+                        UHCMod.minigame.onStart().run { 1 }
                     }
                 ).then(
                     Commands.literal("at").then(
@@ -135,11 +138,11 @@ object UHCCommand: Command {
                         )
                     )
                 ).executes {
-                    this.setPhase(Ready)
+                    UHCMod.minigame.onReady().run { 1 }
                 }
             ).then(
                 Commands.literal("finish").executes {
-                    this.setPhase(End)
+                    UHCMod.minigame.onEnd().run { 1 }
                 }
             ).then(
                 Commands.literal("settings").executes(this::openSettingsMenu)
@@ -165,12 +168,10 @@ object UHCCommand: Command {
     }
 
     private fun spawnFakes(): Int {
-        TeamManager.spawnFakeUHCPlayers()
         return 1
     }
 
     private fun killFakes(): Int {
-        TeamManager.killAllFakePlayers()
         return 1
     }
 
@@ -192,12 +193,26 @@ object UHCCommand: Command {
     }
 
     private fun setPlayerTeam(context: CommandContext<CommandSourceStack>, bool: Boolean): Int {
-        val player = EntityArgument.getPlayer(context, "player")
+        val target = EntityArgument.getPlayer(context, "player")
         val team = TeamArgument.getTeam(context, "team")
         val teleport = bool || BoolArgumentType.getBool(context, "teleport")
-        TeamManager.forceAddPlayer(team, player, teleport)
 
-        val message = Component.literal("${player.scoreboardName} has joined team ")
+        val server = context.source.server
+        server.scoreboard.addPlayerToTeam(target.scoreboardName, team)
+        target.sendSystemMessage(Texts.UHC_ADDED_TO_TEAM.generate(team.formattedDisplayName))
+
+        target.setForUHC(!target.flags.has(PlayerFlag.Participating))
+
+        if (teleport) {
+            for (player in PlayerUtils.players()) {
+                if (team.players.contains(player.scoreboardName) && player.isSurvival && target != player) {
+                    target.teleportTo(player.location)
+                    break
+                }
+            }
+        }
+
+        val message = Component.literal("${target.scoreboardName} has joined team ")
             .append(team.formattedDisplayName)
             .append(" and has ${if (teleport) "been teleported to a random teammate" else "not been teleported"}")
         context.source.success(message, true)
@@ -222,40 +237,35 @@ object UHCCommand: Command {
     }
 
     private fun pausePhase(context: CommandContext<CommandSourceStack>): Int {
-        if (UHCManager.paused) {
+        if (UHCMod.minigame.paused) {
             context.source.sendFailure(Component.literal("Current phase was already paused!"))
             return 0
         }
-        UHCManager.pause()
-        context.source.success(Component.literal("Successfully paused the current phase ${UHCManager.phase}"), true)
+        UHCMod.minigame.pause()
+        context.source.success(Component.literal("Successfully paused the current phase ${UHCMod.minigame.phase}"), true)
         return 1
     }
 
     private fun unpausePhase(context: CommandContext<CommandSourceStack>): Int {
-        if (!UHCManager.paused) {
+        if (!UHCMod.minigame.paused) {
             context.source.sendFailure(Component.literal("Current phase was not paused!"))
             return 0
         }
-        UHCManager.unpause()
-        context.source.success(Component.literal("Successfully unpaused the current phase ${UHCManager.phase}"), true)
+        UHCMod.minigame.unpause()
+        context.source.success(Component.literal("Successfully unpaused the current phase ${UHCMod.minigame.phase}"), true)
         return 1
     }
 
     private fun getPhase(context: CommandContext<CommandSourceStack>): Int {
-        val paused = "the scheduler is ${if (UHCManager.paused) "paused" else "running"}"
-        context.source.success(Component.literal("The current phase is ${UHCManager.phase.name}, $paused"), false)
-        return 1
-    }
-
-    private fun setPhase(phase: Phase): Int {
-        UHCManager.setPhase(phase)
+        val paused = "the scheduler is ${if (UHCMod.minigame.paused) "paused" else "running"}"
+        context.source.success(Component.literal("The current phase is ${UHCMod.minigame.phase.id}, $paused"), false)
         return 1
     }
 
     private fun atTime(context: CommandContext<CommandSourceStack>): Int {
         val time = TimeArgument.getTime(context, "time")
         val zone = TimeZoneArgument.getTimeZone(context, "zone")
-        UHCManager.setStartTime(TimeUtils.toEpoch(time, zone) * 1_000)
+        UHCMod.minigame.setStartTime(TimeUtils.toEpoch(time, zone) * 1_000)
         context.source.success(Component.literal("Set UHC start time to $time in zone $zone"), true)
         return 1
     }
@@ -263,20 +273,20 @@ object UHCCommand: Command {
     private fun inTime(context: CommandContext<CommandSourceStack>): Int {
         val time = IntegerArgumentType.getInteger(context, "time")
         val unit = EnumArgument.getEnumeration<TimeUnit>(context, "unit")
-        UHCManager.setStartTime(System.currentTimeMillis() + unit.toMillis(time.toLong()))
+        UHCMod.minigame.setStartTime(System.currentTimeMillis() + unit.toMillis(time.toLong()))
         context.source.success(Component.literal("UHC will start in $time ${unit.toChronoUnit()}"), true)
         return 1
     }
 
     private fun deleteLobby(context: CommandContext<CommandSourceStack>): Int {
-        UHCManager.event.getLobbyHandler().getMap().remove()
+        UHCMod.minigame.event.getLobbyHandler().getMap().remove()
         context.source.success(Component.literal("Successfully removed the lobby"), false)
         return 1
     }
 
     private fun teleportToLobby(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
-        UHCManager.event.getLobbyHandler().forceTeleport(player)
+        UHCMod.minigame.event.getLobbyHandler().forceTeleport(player)
         return 1
     }
 

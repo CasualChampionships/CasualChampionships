@@ -7,13 +7,10 @@ import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.arcade.utils.ItemUtils.literalNamed
 import net.casualuhc.arcade.utils.ItemUtils.potion
 import net.casualuhc.uhc.UHCMod
-import net.casualuhc.uhc.managers.UHCManager
-import net.casualuhc.uhc.managers.WorldBorderManager
-import net.casualuhc.uhc.managers.WorldBorderManager.Stage
+import net.casualuhc.uhc.minigame.uhc.UHCBorderStage
 import net.casualuhc.uhc.util.Config
 import net.casualuhc.uhc.util.HeadUtils
-import net.casualuhc.uhc.utils.gamesettings.GameSetting
-import net.casualuhc.uhc.utils.gamesettings.GameSetting.*
+import net.casualuhc.uhc.settings.GameSetting.*
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -29,6 +26,7 @@ object GameSettings {
     val RULES = LinkedHashMap<ItemStack, GameSetting<*>>()
 
     @JvmField val WORLD_BORDER_TIME: Int64
+    @JvmField val PORTAL_ESCAPE_TIME: Int64
     @JvmField val BOW_COOLDOWN: Float64
     @JvmField val HEALTH: Float64
     @JvmField val END_GAME_GLOW: Bool
@@ -43,7 +41,7 @@ object GameSettings {
     @JvmField val MINESWEEPER_ANNOUNCEMENT: Bool
     @JvmField val HEADS_CONSUMABLE: Bool
     @JvmField val SOLO_BUFF: Bool
-    @JvmField val WORLD_BORDER_STAGE: Enumerated<Stage>
+    @JvmField val WORLD_BORDER_STAGE: Enumerated<UHCBorderStage>
 
     init {
         WORLD_BORDER_TIME = register(
@@ -55,6 +53,17 @@ object GameSettings {
                 Items.RED_STAINED_GLASS_PANE.literalNamed("3 Hours"), MINUTES.toSeconds(180)
             ),
             MINUTES.toSeconds(150)
+        )
+        PORTAL_ESCAPE_TIME = register(
+            Items.OBSIDIAN.literalNamed("Portal Escape Time"),
+            ImmutableMap.of(
+                Items.CLOCK.literalNamed("None"), 0,
+                Items.CLOCK.literalNamed("10 Seconds"), 10,
+                Items.CLOCK.literalNamed("20 Second"), 20,
+                Items.CLOCK.literalNamed("30 Seconds"), 30,
+                Items.CLOCK.literalNamed("60 Seconds"), 60,
+            ),
+            30
         )
         BOW_COOLDOWN = register(
             Items.BOW.literalNamed("Bow Cooldown"),
@@ -127,14 +136,14 @@ object GameSettings {
         )
         WORLD_BORDER_STAGE = register(
             Items.BARRIER.literalNamed("World Border Stage"),
-            Stage.FIRST
+            UHCBorderStage.FIRST
         ) { setting ->
-            if (UHCManager.isActivePhase()) {
-                WorldBorderManager.moveWorldBorders(setting.value, WorldBorderManager.Size.START, true)
-                WorldBorderManager.startWorldBorders()
-            } else {
-                UHCMod.logger.error("Could not set world border since game is not active")
-            }
+            // if (UHCManager.isActivePhase()) {
+            //     UHCBorder.moveWorldBorders(setting.value, UHCBorder.Size.START, true)
+            //     UHCBorder.startWorldBorders()
+            // } else {
+            //     UHCMod.logger.error("Could not set world border since game is not active")
+            // }
         }
 
         readConfig()

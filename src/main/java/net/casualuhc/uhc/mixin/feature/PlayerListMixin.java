@@ -1,7 +1,7 @@
 package net.casualuhc.uhc.mixin.feature;
 
 import com.mojang.authlib.GameProfile;
-import net.casualuhc.uhc.managers.UHCManager;
+import net.casualuhc.uhc.UHCMod;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.storage.LevelData;
@@ -35,7 +35,7 @@ public abstract class PlayerListMixin {
 		cancellable = true
 	)
 	private void canPlayerJoin(SocketAddress socketAddress, GameProfile gameProfile, CallbackInfoReturnable<Component> cir) {
-		if (!UHCManager.INSTANCE.isReadyForPlayers() && !this.isOp(gameProfile)) {
+		if (!UHCMod.minigame.isReadyForPlayers() && !this.isOp(gameProfile)) {
 			cir.setReturnValue(Component.literal("UHC isn't quite ready yet..."));
 		}
 	}

@@ -1,6 +1,5 @@
 package net.casualuhc.uhc.util
 
-import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.level.LevelBlockChangedEvent
 import net.casualuhc.arcade.events.level.LevelCreatedEvent
@@ -31,7 +30,7 @@ object AntiCheat {
     }
 
     private fun onBlockChanged(event: LevelBlockChangedEvent) {
-        if (Arcade.server.isSameThread && event.old != event.new)  {
+        if (event.level.server.isSameThread && event.old != event.new)  {
             event.level.blockTracker.track(event.pos, event.old)
         }
     }

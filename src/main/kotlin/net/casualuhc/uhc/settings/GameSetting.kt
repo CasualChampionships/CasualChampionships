@@ -1,4 +1,4 @@
-package net.casualuhc.uhc.utils.gamesettings
+package net.casualuhc.uhc.settings
 
 import net.casualuhc.arcade.utils.ItemUtils.enableGlint
 import net.casualuhc.arcade.utils.ItemUtils.removeEnchantments

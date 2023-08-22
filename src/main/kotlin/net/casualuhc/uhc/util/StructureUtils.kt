@@ -7,6 +7,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 object StructureUtils {
+    @Deprecated("")
     fun read(path: Path): StructureTemplate {
         val inputStream = Files.newInputStream(path)
         val structureNBT = NbtIo.readCompressed(inputStream)

@@ -1,6 +1,6 @@
 package net.casualuhc.uhc.mixin.feature;
 
-import net.casualuhc.uhc.managers.WorldBorderManager;
+import net.casualuhc.uhc.settings.GameSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -25,7 +25,7 @@ public class EntityMixin {
 			// Border is static or expanding
 			return border.clampToBounds(x, y, z);
 		}
-		double margin = shrinkingSpeed * (WorldBorderManager.PORTAL_ESCAPE_TIME_SECONDS * 1000);
+		double margin = shrinkingSpeed * (GameSettings.PORTAL_ESCAPE_TIME.getValue() * 1000);
 		if (margin >= border.getSize() * 0.5) {
 			// Border would reach size 0 within 30 seconds
 			return BlockPos.containing(border.getCenterX(), y, border.getCenterZ());
