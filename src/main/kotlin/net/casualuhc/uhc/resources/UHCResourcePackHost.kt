@@ -4,7 +4,7 @@ import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.arcade.resources.PathPackSupplier
 import net.casualuhc.arcade.resources.ResourcePackHost
-import net.casualuhc.uhc.events.uhc.UHCConfigLoadedEvent
+import net.casualuhc.uhc.events.uhc.UHCConfigReloadedEvent
 import net.casualuhc.uhc.util.Config
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.createDirectories
@@ -30,6 +30,6 @@ object UHCResourcePackHost {
 
     internal fun registerEvents() {
         GlobalEventHandler.register<ServerStoppedEvent> { this.host.shutdown() }
-        GlobalEventHandler.register<UHCConfigLoadedEvent> { this.reload() }
+        GlobalEventHandler.register<UHCConfigReloadedEvent> { this.reload() }
     }
 }

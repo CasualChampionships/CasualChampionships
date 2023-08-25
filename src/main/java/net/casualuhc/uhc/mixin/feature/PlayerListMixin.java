@@ -35,8 +35,9 @@ public abstract class PlayerListMixin {
 		cancellable = true
 	)
 	private void canPlayerJoin(SocketAddress socketAddress, GameProfile gameProfile, CallbackInfoReturnable<Component> cir) {
-		if (!UHCMod.minigame.isReadyForPlayers() && !this.isOp(gameProfile)) {
-			cir.setReturnValue(Component.literal("UHC isn't quite ready yet..."));
-		}
+		// TODO:
+		// if (!UHCMod.minigame.isReadyForPlayers() && !this.isOp(gameProfile)) {
+		// 	cir.setReturnValue(Component.literal("UHC isn't quite ready yet..."));
+		// }
 	}
 }

@@ -8,6 +8,9 @@ import net.casualuhc.arcade.Arcade
 import net.casualuhc.arcade.border.MultiLevelBorderListener
 import net.casualuhc.arcade.border.MultiLevelBorderTracker
 import net.casualuhc.arcade.border.TrackedBorder
+import net.casualuhc.arcade.events.block.BrewingStandBrewEvent
+import net.casualuhc.arcade.events.entity.EntityStartTrackingEvent
+import net.casualuhc.arcade.events.entity.MobCategorySpawnEvent
 import net.casualuhc.arcade.events.minigame.MinigamePauseEvent
 import net.casualuhc.arcade.events.minigame.MinigameUnpauseEvent
 import net.casualuhc.arcade.events.player.*
@@ -22,12 +25,15 @@ import net.casualuhc.arcade.minigame.SavableMinigame
 import net.casualuhc.arcade.scheduler.GlobalTickedScheduler
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit
 import net.casualuhc.arcade.scheduler.Task
+import net.casualuhc.arcade.settings.DisplayableGameSettingBuilder
 import net.casualuhc.arcade.utils.BorderUtils
 import net.casualuhc.arcade.utils.ComponentUtils.bold
 import net.casualuhc.arcade.utils.ComponentUtils.gold
 import net.casualuhc.arcade.utils.ComponentUtils.green
 import net.casualuhc.arcade.utils.ComponentUtils.lime
 import net.casualuhc.arcade.utils.ComponentUtils.red
+import net.casualuhc.arcade.utils.ItemUtils.literalNamed
+import net.casualuhc.arcade.utils.ItemUtils.potion
 import net.casualuhc.arcade.utils.JsonUtils.array
 import net.casualuhc.arcade.utils.JsonUtils.boolean
 import net.casualuhc.arcade.utils.JsonUtils.int
@@ -44,11 +50,14 @@ import net.casualuhc.arcade.utils.PlayerUtils.sendSound
 import net.casualuhc.arcade.utils.PlayerUtils.sendSubtitle
 import net.casualuhc.arcade.utils.PlayerUtils.sendTitle
 import net.casualuhc.arcade.utils.PlayerUtils.teamMessage
+import net.casualuhc.arcade.utils.SettingsUtils.defaultOptions
 import net.casualuhc.arcade.utils.TeamUtils
 import net.casualuhc.arcade.utils.TeamUtils.getServerPlayers
 import net.casualuhc.uhc.UHCMod
 import net.casualuhc.uhc.advancement.RaceAdvancement
 import net.casualuhc.uhc.advancement.UHCAdvancements
+import net.casualuhc.uhc.events.border.BorderEntityPortalEntryPointEvent
+import net.casualuhc.uhc.events.border.BorderPortalWithinBoundsEvent
 import net.casualuhc.uhc.extensions.PlayerFlag
 import net.casualuhc.uhc.extensions.PlayerFlagsExtension.Companion.flags
 import net.casualuhc.uhc.extensions.PlayerStat
@@ -57,6 +66,7 @@ import net.casualuhc.uhc.extensions.PlayerUHCExtension.Companion.uhc
 import net.casualuhc.uhc.extensions.TeamFlag
 import net.casualuhc.uhc.extensions.TeamFlagsExtension.Companion.flags
 import net.casualuhc.uhc.extensions.TeamUHCExtension.Companion.uhc
+import net.casualuhc.uhc.items.MinesweeperItem
 import net.casualuhc.uhc.managers.DataManager
 import net.casualuhc.uhc.managers.TeamManager
 import net.casualuhc.uhc.managers.TeamManager.hasAlivePlayers
@@ -69,7 +79,6 @@ import net.casualuhc.uhc.minigame.uhc.task.GlowingTask
 import net.casualuhc.uhc.minigame.uhc.task.GracePeriodOverTask
 import net.casualuhc.uhc.recipes.GoldenHeadRecipe
 import net.casualuhc.uhc.screen.MinesweeperScreen
-import net.casualuhc.uhc.settings.GameSettings
 import net.casualuhc.uhc.uhc.DefaultUHC
 import net.casualuhc.uhc.uhc.UHCEvent
 import net.casualuhc.uhc.util.*
@@ -91,15 +100,19 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
+import net.minecraft.util.Mth
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Items
+import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
@@ -108,12 +121,15 @@ import net.minecraft.world.level.block.FallingBlock
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec2
 import net.minecraft.world.scores.Team
+import java.util.concurrent.TimeUnit.MINUTES
 import kotlin.math.atan2
 
 class UHCMinigame(
+    server: MinecraftServer,
     event: UHCEvent = DefaultUHC.INSTANCE
 ): SavableMinigame(
     ResourceUtils.id("uhc_minigame"),
+    server,
     Config.resolve("uhc_minigame.json")
 ), MultiLevelBorderListener {
     private val tracker = MultiLevelBorderTracker()
@@ -126,6 +142,8 @@ class UHCMinigame(
 
     private var glowing = false
     private var grace = true
+
+    val settings = Settings()
 
     var event: UHCEvent = event
         private set
@@ -142,6 +160,14 @@ class UHCMinigame(
         this.registerMinigameEvent<MinigamePauseEvent> { this.onPause() }
         this.registerMinigameEvent<MinigameUnpauseEvent> { this.onUnpause() }
 
+        this.registerMinigameEvent<MobCategorySpawnEvent> { this.onMobCategorySpawn(it) }
+        this.registerMinigameEvent<EntityStartTrackingEvent> { this.onEntityStartTracking(it) }
+
+        this.registerMinigameEvent<BrewingStandBrewEvent> { this.onBrewingStandBrew(it) }
+
+        this.registerMinigameEvent<BorderEntityPortalEntryPointEvent> { this.onBorderEntityPortalEntryPointEvent(it) }
+        this.registerMinigameEvent<BorderPortalWithinBoundsEvent> { this.onBorderWithinBoundsEvent(it) }
+
         this.registerMinigameEvent<PlayerAdvancementEvent> { this.onPlayerAdvancement(it) }
         this.registerMinigameEvent<PlayerAttackEvent> { this.onPlayerAttack(it) }
         this.registerMinigameEvent<PlayerChatEvent> { this.onPlayerChat(it) }
@@ -157,10 +183,9 @@ class UHCMinigame(
 
         this.registerUHCAdvancementEvents()
         this.initialiseBorderTracker()
-    }
 
-    fun isReadyForPlayers(): Boolean {
-        return this.phase >= Lobby && GameSettings.FLOODGATE.value
+        this.initialise()
+        this.event.initialise(this)
     }
 
     fun hasUHCStarted(): Boolean {
@@ -184,7 +209,7 @@ class UHCMinigame(
     }
 
     fun startWorldBorders() {
-        this.moveWorldBorders(GameSettings.WORLD_BORDER_STAGE.value)
+        this.moveWorldBorders(this.settings.borderStage)
     }
 
     fun moveWorldBorders(stage: UHCBorderStage, size: UHCBorderSize = UHCBorderSize.END, instant: Boolean = false) {
@@ -194,31 +219,19 @@ class UHCMinigame(
     }
 
     override fun onAllBordersComplete(borders: Map<TrackedBorder, ServerLevel>) {
-        val stage = GameSettings.WORLD_BORDER_STAGE.value
+        val stage = this.settings.borderStage
         UHCMod.logger.info("Finished world border stage: $stage")
         if (!this.isActivePhase()) {
             return
         }
         val next = stage.getNextStage()
-        GameSettings.WORLD_BORDER_STAGE.setValueQuietly(next)
 
         if (next == UHCBorderStage.END) {
             this.onWorldBorderComplete()
             return
         }
-        super.onAllBordersComplete(borders)
-    }
-
-    override fun onAllBordersComplete(border: TrackedBorder, level: ServerLevel) {
-        val stage = GameSettings.WORLD_BORDER_STAGE.value
-        // We don't shrink past the fifth stage in the end because
-        // otherwise it becomes impossible to enter the end dimension
-        if (level.dimension() == Level.END && stage > UHCBorderStage.FIFTH) {
-            return
-        }
-
         this.schedulePhaseTask(10, MinecraftTimeUnit.Seconds) {
-            this.moveWorldBorder(border, level, stage, UHCBorderSize.END)
+            this.settings.borderStage = next
         }
     }
 
@@ -235,13 +248,13 @@ class UHCMinigame(
                 player.sendSystemMessage(message)
                 player.sendSound(SoundEvents.ENDER_DRAGON_AMBIENT)
             }
-            GameSettings.PVP.setValue(true)
+            this.server.isPvpAllowed = true
             this.grace = false
         }
     }
 
     fun onBorderFinish() {
-        if (GameSettings.END_GAME_GLOW.value) {
+        if (this.settings.endGameGlow) {
             this.glowing = true
             var count = 0
             PlayerUtils.forEveryPlayer { player ->
@@ -252,7 +265,7 @@ class UHCMinigame(
             }
             UHCMod.logger.info("$count player's are now glowing")
         }
-        if (GameSettings.GENERATE_PORTAL.value) {
+        if (this.settings.generatePortals) {
             LevelUtils.overworld().portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
             LevelUtils.nether().portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
         }
@@ -274,6 +287,14 @@ class UHCMinigame(
             GracePeriodOverTask.ID -> GracePeriodOverTask(this, data.int("end"))
             else -> null
         }
+    }
+
+    override fun getLevels(): Collection<ServerLevel> {
+        return listOf(
+            LevelUtils.overworld(),
+            LevelUtils.nether(),
+            LevelUtils.end()
+        )
     }
 
     override fun getPhases(): Collection<MinigamePhase> {
@@ -410,7 +431,7 @@ class UHCMinigame(
             PlayerUtils.spread(overworld, Vec2(0.0F, 0.0F), 500.0, 2900.0, true, players)
 
             PlayerUtils.forEveryPlayer { player ->
-                player.setForUHC(true)
+                player.setForUHC(this, true)
                 if (player.isSpectator) {
                     if (player.level() != overworld) {
                         player.teleportTo(overworld, 0.0, 200.0, 0.0, 0.0F, 0.0F)
@@ -448,7 +469,7 @@ class UHCMinigame(
     }
 
     fun onEnd() {
-        this.setPhase(UHCPhase.End)
+        this.setPhase(End)
         val team = TeamManager.getAnyAliveTeam()
         if (team == null) {
             UHCMod.logger.error("Last team was null!")
@@ -527,6 +548,71 @@ class UHCMinigame(
         }
     }
 
+    private fun onMobCategorySpawn(event: MobCategorySpawnEvent) {
+        val (_, category, _, state) = event
+        val i = category.maxInstancesPerChunk * state.spawnableChunkCount / 289
+        if (state.mobCategoryCounts.getInt(category) >= i * PerformanceUtils.MOBCAP_MULTIPLIER) {
+            event.cancel()
+        }
+    }
+
+    private fun onEntityStartTracking(event: EntityStartTrackingEvent) {
+        val entity = event.entity
+        if (entity is Mob && PerformanceUtils.isEntityAIDisabled(entity)) {
+            entity.isNoAi = true;
+        }
+    }
+
+    private fun onBrewingStandBrew(event: BrewingStandBrewEvent) {
+        if (!this.settings.opPotions) {
+            val ingredient = event.entity.getItem(3)
+            if (ingredient.`is`(Items.GLOWSTONE_DUST) || ingredient.`is`(Items.GLISTERING_MELON_SLICE)) {
+                event.cancel()
+            }
+        }
+    }
+
+    private fun onBorderEntityPortalEntryPointEvent(event: BorderEntityPortalEntryPointEvent) {
+        val (border, _, _, pos) = event
+
+        // Blocks per millisecond
+        val shrinkingSpeed = border.lerpSpeed
+        if (shrinkingSpeed <= 0) {
+            // Border is static or expanding
+            return
+        }
+        val margin = shrinkingSpeed * (this.settings.portalEscapeTime * 1000)
+        if (margin >= border.size * 0.5) {
+            // Border would reach size 0 within 30 seconds
+            event.cancel(BlockPos.containing(border.centerX, pos.y, border.centerZ))
+            return
+        }
+
+        event.cancel(BlockPos.containing(
+            Mth.clamp(pos.x, border.minX + margin, border.maxX - margin),
+            pos.y,
+            Mth.clamp(pos.z, border.minZ + margin, border.maxZ - margin)
+        ))
+    }
+
+    private fun onBorderWithinBoundsEvent(event: BorderPortalWithinBoundsEvent) {
+        val (border, _, pos) = event
+        // Blocks per millisecond
+        val shrinkingSpeed = border.lerpSpeed
+        if (shrinkingSpeed <= 0) {
+            // Border is static or expanding
+            return
+        }
+        var margin = shrinkingSpeed * (this.settings.portalEscapeTime * 1000)
+        margin = margin.coerceAtMost(border.size * 0.5 - 1)
+        event.cancel(
+            pos.x >= border.minX + margin
+                && pos.x + 1 <= border.maxX - margin
+                && pos.z >= border.minZ + margin
+                && pos.z + 1 <= border.maxZ - margin
+        )
+    }
+
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val (player) = event
 
@@ -553,7 +639,7 @@ class UHCMinigame(
             if (!player.hasPermissions(2)) {
                 player.setGameMode(GameType.ADVENTURE)
                 this.event.getLobbyHandler().tryTeleport(player)
-            } else if (Config.booleanOrDefault("dev", true)) {
+            } else if (Config.dev) {
                 player.sendSystemMessage(Component.literal("UHC is in dev mode!").red())
             }
         } else if (player.team == null || !player.flags.has(PlayerFlag.Participating)) {
@@ -627,7 +713,7 @@ class UHCMinigame(
     private fun onPlayerItemRelease(event: PlayerItemReleaseEvent) {
         val (player, stack) = event
         if (stack.`is`(Items.BOW)) {
-            player.cooldowns.addCooldown(Items.BOW, (GameSettings.BOW_COOLDOWN.value * 20).toInt())
+            player.cooldowns.addCooldown(Items.BOW, (this.settings.bowCooldown * 20).toInt())
         }
     }
 
@@ -771,7 +857,7 @@ class UHCMinigame(
         observingPlayer: ServerPlayer,
         packet: ClientboundSetEntityDataPacket
     ): ClientboundSetEntityDataPacket {
-        if (!GameSettings.FRIENDLY_PLAYER_GLOW.value || !this.isActivePhase()) {
+        if (!this.settings.friendlyPlayerGlow || !this.isActivePhase()) {
             return packet
         }
         if (!glowingPlayer.isSurvival || !observingPlayer.flags.has(PlayerFlag.TeamGlow)) {
@@ -816,12 +902,12 @@ class UHCMinigame(
             this.onKilled(killer, player)
         }
 
-        if (GameSettings.PLAYER_DROPS_GAPPLE_ON_DEATH.value) {
+        if (this.settings.playerDropsGapple) {
             player.drop(Items.GOLDEN_APPLE.defaultInstance, true, false)
         }
 
-        if (GameSettings.PLAYER_DROPS_HEAD_ON_DEATH.value) {
-            val head = HeadUtils.createPlayerHead(player)
+        if (this.settings.playerDropsHead) {
+            val head = HeadUtils.createConsumablePlayerHead(player)
             if (killer is ServerPlayer) {
                 if (!killer.inventory.add(head)) {
                     player.drop(head, true, false)
@@ -854,7 +940,7 @@ class UHCMinigame(
         }
 
         val team = killed.team
-        if (team != null && GameSettings.SOLO_BUFF.value && team.hasAlivePlayers() && player.isAliveSolo()) {
+        if (team != null && this.settings.soloBuff && team.hasAlivePlayers() && player.isAliveSolo()) {
             player.addEffect(MobEffectInstance(MobEffects.REGENERATION, 60, 2))
         }
     }
@@ -883,9 +969,9 @@ class UHCMinigame(
 
     private fun initialiseBorderTracker() {
         this.tracker.addListener(this)
-        this.tracker.addLevelBorder(LevelUtils.overworld())
-        this.tracker.addLevelBorder(LevelUtils.nether())
-        this.tracker.addLevelBorder(LevelUtils.end())
+        for (level in this.getLevels()) {
+            this.tracker.addLevelBorder(level)
+        }
 
         BorderUtils.isolateWorldBorders()
     }
@@ -897,7 +983,7 @@ class UHCMinigame(
     }
 
     private fun moveWorldBorder(border: TrackedBorder, newSize: Double, percent: Double = -1.0) {
-        val seconds = (percent * GameSettings.WORLD_BORDER_TIME.value).toLong()
+        val seconds = (percent * this.settings.worldBorderTime).toLong()
         if (seconds > 0) {
             border.lerpSizeBetween(border.size, newSize, seconds * 1000L)
             return
@@ -1057,4 +1143,131 @@ class UHCMinigame(
         val player: ServerPlayer,
         val damage: Double
     )
+
+    inner class Settings() {
+        var worldBorderTime by registerSetting(
+            DisplayableGameSettingBuilder.long()
+                .name("border_completion_time")
+                .display(Items.DIAMOND_BOOTS.literalNamed("Border Completion Time"))
+                .option("ten_minutes", Items.CAKE.literalNamed("10 Minutes"), MINUTES.toSeconds(10))
+                .option("two_hours", Items.GREEN_STAINED_GLASS_PANE.literalNamed("2 Hours"), MINUTES.toSeconds(120))
+                .option("two_and_half_hours", Items.YELLOW_STAINED_GLASS_PANE.literalNamed("2.5 Hours"), MINUTES.toSeconds(150))
+                .option("three_hours", Items.RED_STAINED_GLASS_PANE.literalNamed("3 Hours"), MINUTES.toSeconds(180))
+                .value(MINUTES.toSeconds(150))
+                .build()
+        )
+        var portalEscapeTime by registerSetting(
+            DisplayableGameSettingBuilder.long()
+                .name("portal_escape_time")
+                .display(Items.OBSIDIAN.literalNamed("Portal Escape Time"))
+                .option("none", Items.CLOCK.literalNamed("None"), 0)
+                .option("ten_seconds", Items.CLOCK.literalNamed("10 Seconds"), 10)
+                .option("twenty_seconds", Items.CLOCK.literalNamed("20 Second"), 20)
+                .option("thirty_seconds", Items.CLOCK.literalNamed("30 Seconds"), 30)
+                .option("sixty_seconds", Items.CLOCK.literalNamed("60 Seconds"), 60)
+                .value(30)
+                .build()
+        )
+        var bowCooldown by registerSetting(
+            DisplayableGameSettingBuilder.double()
+                .name("bow_cooldown")
+                .display(Items.BOW.literalNamed("Bow Cooldown"))
+                .option("none", Items.CLOCK.literalNamed("None"), 0.0)
+                .option("half_second", Items.CLOCK.literalNamed("0.5 Seconds"), 0.5)
+                .option("one_second", Items.CLOCK.literalNamed("1 Second"), 1.0)
+                .option("two_seconds", Items.CLOCK.literalNamed("2 Seconds"), 2.0)
+                .option("three_seconds", Items.CLOCK.literalNamed("3 Seconds"), 3.0)
+                .option("five_seconds", Items.CLOCK.literalNamed("5 Seconds"), 5.0)
+                .value(1.0)
+                .build()
+        )
+        var health by registerSetting(
+            DisplayableGameSettingBuilder.double()
+                .name("health")
+                .display(Items.POTION.literalNamed("Health").potion(Potions.HEALING))
+                .option("triple", Items.GREEN_STAINED_GLASS_PANE.literalNamed("Triple"), 2.0)
+                .option("double", Items.YELLOW_STAINED_GLASS_PANE.literalNamed("Double"), 1.0)
+                .option("normal", Items.RED_STAINED_GLASS_PANE.literalNamed("Normal"), 0.0)
+                .value(1.0)
+                .build()
+        )
+        var endGameGlow by registerSetting(
+            DisplayableGameSettingBuilder.boolean()
+                .name("end_game_glow")
+                .display(Items.SPECTRAL_ARROW.literalNamed("End Game Glow"))
+                .defaultOptions()
+                .value(true)
+                .build()
+        )
+        var friendlyPlayerGlow by registerSetting(
+            DisplayableGameSettingBuilder.boolean()
+                .name("friendly_player_glow")
+                .display(Items.GOLDEN_CARROT.literalNamed("Friendly Player Glow"))
+                .defaultOptions()
+                .value(true)
+                .build()
+        )
+        var playerDropsGapple by registerSetting(
+            DisplayableGameSettingBuilder.boolean()
+                .name("player_drops_gapple")
+                .display(Items.GOLDEN_APPLE.literalNamed("Player Drops Gapple"))
+                .defaultOptions()
+                .value(false)
+                .build()
+        )
+        var playerDropsHead by registerSetting(
+            DisplayableGameSettingBuilder.boolean()
+                .name("player_drops_head")
+                .display(Items.PLAYER_HEAD.literalNamed("Player Drops Head"))
+                .defaultOptions()
+                .value(true)
+                .build()
+        )
+        var opPotions by registerSetting(
+            DisplayableGameSettingBuilder.boolean()
+                .name("op_potions")
+                .display(Items.SPLASH_POTION.literalNamed("OP Potions").potion(Potions.STRONG_HARMING))
+                .defaultOptions()
+                .value(false)
+                .build()
+        )
+        var generatePortals by registerSetting(
+            DisplayableGameSettingBuilder.boolean()
+                .name("generate_portals")
+                .display(Items.CRYING_OBSIDIAN.literalNamed("Generate Portals"))
+                .defaultOptions()
+                .value(true)
+                .build()
+        )
+        var announceMinesweeper by registerSetting(
+            DisplayableGameSettingBuilder.boolean()
+                .name("announce_minesweeper")
+                .display(MinesweeperItem.STATES.createStack(MinesweeperItem.MINE).literalNamed("Announce Minesweeper"))
+                .defaultOptions()
+                .value(true)
+                .build()
+        )
+        var soloBuff by registerSetting(
+            DisplayableGameSettingBuilder.boolean()
+                .name("solo_buff")
+                .display(Items.LINGERING_POTION.literalNamed("Solo Buff").potion(Potions.REGENERATION))
+                .defaultOptions()
+                .value(true)
+                .build()
+        )
+        var borderStage by registerSetting(
+            DisplayableGameSettingBuilder.enum<UHCBorderStage>()
+                .name("border_stage")
+                .display(Items.BARRIER.literalNamed("World Border Stage"))
+                .defaultOptions(UHCBorderStage::class.java)
+                .value(UHCBorderStage.FIRST)
+                .listener { _, value ->
+                    if (isActivePhase()) {
+                        moveWorldBorders(value, UHCBorderSize.START, true)
+                        startWorldBorders()
+                    }
+                }
+                .build()
+        )
+    }
 }

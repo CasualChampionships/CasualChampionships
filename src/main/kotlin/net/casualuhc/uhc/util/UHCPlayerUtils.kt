@@ -1,8 +1,10 @@
 package net.casualuhc.uhc.util
 
 import net.casualuhc.arcade.Arcade
+import net.casualuhc.arcade.minigame.Minigame
 import net.casualuhc.arcade.utils.ComponentUtils.bold
 import net.casualuhc.arcade.utils.ComponentUtils.gold
+import net.casualuhc.arcade.utils.MinigameUtils.getMinigame
 import net.casualuhc.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casualuhc.arcade.utils.PlayerUtils.grantAdvancement
 import net.casualuhc.arcade.utils.PlayerUtils.isSurvival
@@ -15,7 +17,7 @@ import net.casualuhc.uhc.extensions.TeamFlag.Eliminated
 import net.casualuhc.uhc.extensions.TeamFlag.Ignored
 import net.casualuhc.uhc.extensions.TeamFlagsExtension.Companion.flags
 import net.casualuhc.uhc.extensions.TeamUHCExtension.Companion.uhc
-import net.casualuhc.uhc.settings.GameSettings
+import net.casualuhc.uhc.minigame.uhc.UHCMinigame
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
@@ -52,6 +54,11 @@ object UHCPlayerUtils {
     }
 
     fun ServerPlayer.resetUHCHealth() {
+        val minigame = this.getMinigame()
+        if (minigame !is UHCMinigame) {
+            return
+        }
+
         val instance = this.attributes.getInstance(Attributes.MAX_HEALTH)
         if (instance != null) {
             instance.removeModifier(HEALTH_BOOST)
@@ -59,7 +66,7 @@ object UHCPlayerUtils {
                 AttributeModifier(
                     HEALTH_BOOST,
                     "Health Boost",
-                    GameSettings.HEALTH.value,
+                    minigame.settings.health,
                     AttributeModifier.Operation.MULTIPLY_BASE
                 )
             )
@@ -68,7 +75,9 @@ object UHCPlayerUtils {
         this.foodData.setSaturation(20.0F)
     }
 
-    fun ServerPlayer.setForUHC(force: Boolean = true) {
+    fun ServerPlayer.setForUHC(minigame: UHCMinigame, force: Boolean = true) {
+        minigame.addPlayer(this)
+
         this.connection.send(ClientboundSetTitleTextPacket(Texts.LOBBY_GOOD_LUCK.copy().gold().bold()))
         this.playNotifySound(SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.MASTER, 1.0F, 1.0F)
 

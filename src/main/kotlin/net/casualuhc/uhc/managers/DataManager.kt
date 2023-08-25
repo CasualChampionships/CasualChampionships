@@ -5,7 +5,7 @@ import net.casualuhc.arcade.events.server.ServerStoppedEvent
 import net.casualuhc.uhc.database.EmptyUHCDataBase
 import net.casualuhc.uhc.database.MongoUHCDataBase
 import net.casualuhc.uhc.database.UHCDataBase
-import net.casualuhc.uhc.events.uhc.UHCConfigLoadedEvent
+import net.casualuhc.uhc.events.uhc.UHCConfigReloadedEvent
 import net.casualuhc.uhc.util.Config
 
 object DataManager {
@@ -19,17 +19,17 @@ object DataManager {
         private set
 
     internal fun registerEvents() {
-        GlobalEventHandler.register<UHCConfigLoadedEvent> { this.onConfigLoaded() }
+        GlobalEventHandler.register<UHCConfigReloadedEvent> { this.onConfigLoaded() }
         GlobalEventHandler.register<ServerStoppedEvent> { this.database.shutdown() }
     }
 
     private fun onConfigLoaded() {
-        val mongo = Config.stringOrNull("mongo")
+        val mongo = Config.getStringOrNull("mongo")
         if (mongo === null) {
             this.database = EmptyUHCDataBase()
             return
         }
-        val type = if (Config.booleanOrDefault("dev", true)) TESTING else PRODUCTION
+        val type = if (Config.dev) TESTING else PRODUCTION
         this.database = MongoUHCDataBase(type, mongo, LAST, COMBINED, TEAMS)
     }
 }

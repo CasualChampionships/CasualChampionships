@@ -1,11 +1,8 @@
 package net.casualuhc.uhc.resources
 
-import eu.pb4.polymer.resourcepack.api.PolymerModelData
 import eu.pb4.polymer.resourcepack.api.ResourcePackCreator
 import net.casualuhc.uhc.UHCMod
 import net.casualuhc.uhc.util.Config
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.item.Item
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
@@ -46,9 +43,5 @@ object UHCResourcePack {
             UHCMod.logger.error("Failed to build pack", e)
             false
         }
-    }
-
-    fun requestModel(item: Item, location: ResourceLocation): PolymerModelData {
-        return this.pack.requestModel(item, location)
     }
 }

@@ -1,5 +1,7 @@
 package net.casualuhc.uhc.uhc
 
+import net.casualuhc.uhc.minigame.uhc.UHCMinigame
+
 abstract class ReloadableUHCEvent: UHCEvent {
     private var loaded = false
 
@@ -7,7 +9,7 @@ abstract class ReloadableUHCEvent: UHCEvent {
 
     abstract fun onReload()
 
-    final override fun initialise() {
+    final override fun initialise(uhc: UHCMinigame) {
         if (this.loaded) {
             this.onReload()
         } else {

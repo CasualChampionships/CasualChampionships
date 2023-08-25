@@ -114,8 +114,8 @@ object TeamManager {
             val operators = scoreboard.addPlayerTeam("Operator")
             operators.color = ChatFormatting.WHITE
             operators.playerPrefix = Component.literal("[OP] ")
-            for (operator in Config.listOrDefault<String>("operators")) {
-                scoreboard.addPlayerToTeam(operator, operators)
+            for (operator in Config.getArrayOrDefault("operators")) {
+                scoreboard.addPlayerToTeam(operator.asString, operators)
             }
             operators.collisionRule = Team.CollisionRule.NEVER
             operators.flags.set(Ignored, true)

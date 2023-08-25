@@ -36,7 +36,7 @@ class UHCMod: ModInitializer {
 
         this.registerEvents()
 
-        Texts.registerEvents()
+        Config.registerEvents()
         UHCAdvancements.registerEvents()
         AntiCheat.registerEvents()
         CommandManager.registerEvents()
@@ -48,10 +48,8 @@ class UHCMod: ModInitializer {
 
         Dimensions.noop()
 
-        Config.registerEvents()
-
         GlobalEventHandler.register<ServerLoadedEvent>(0) {
-            minigame = UHCMinigame()
+            minigame = UHCMinigame(it.server)
         }
     }
 

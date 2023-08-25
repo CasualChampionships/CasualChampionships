@@ -1,6 +1,6 @@
 package net.casualuhc.uhc.items
 
-import eu.pb4.polymer.core.api.item.PolymerItem
+import net.casualuhc.arcade.items.ArcadeModelledItem
 import net.casualuhc.arcade.items.ModelledItemStates
 import net.casualuhc.arcade.scheduler.MinecraftTimeUnit
 import net.casualuhc.uhc.resources.UHCResourcePack
@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.*
 import net.minecraft.world.level.Level
 
-class LightningStaffItem private constructor(): AxeItem(Tiers.DIAMOND, 4.0f, -3.0f, Properties()), PolymerItem {
+class LightningStaffItem private constructor(): AxeItem(Tiers.DIAMOND, 4.0f, -3.0f, Properties()), ArcadeModelledItem {
     override fun getPolymerItem(itemStack: ItemStack, player: ServerPlayer?): Item {
         return Items.DIAMOND_AXE
     }
@@ -41,8 +41,8 @@ class LightningStaffItem private constructor(): AxeItem(Tiers.DIAMOND, 4.0f, -3.
         return InteractionResultHolder.pass(stack)
     }
 
-    override fun getPolymerCustomModelData(itemStack: ItemStack, player: ServerPlayer?): Int {
-        return STATES.getModel(DEFAULT).value()
+    override fun getStates(): ModelledItemStates {
+        return STATES
     }
 
     companion object {

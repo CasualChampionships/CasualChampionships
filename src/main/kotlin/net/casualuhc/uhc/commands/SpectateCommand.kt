@@ -3,7 +3,7 @@ package net.casualuhc.uhc.commands
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
-import net.casualuhc.uhc.screen.SpectatorScreen
+import net.casualuhc.arcade.utils.ScreenUtils
 import net.casualuhc.uhc.util.Texts
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
@@ -23,7 +23,7 @@ object SpectateCommand: Command {
         if (!player.isSpectator) {
             throw NOT_SPECTATOR.create()
         }
-        player.openMenu(SpectatorScreen.createScreenFactory(0, false))
+        player.openMenu(ScreenUtils.createSpectatorScreen())
         return 1
     }
 }

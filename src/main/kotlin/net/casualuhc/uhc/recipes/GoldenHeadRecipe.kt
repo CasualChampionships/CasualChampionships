@@ -16,7 +16,7 @@ class GoldenHeadRecipe: ArcadeCustomRecipe(
     CraftingBookCategory.MISC
 ) {
     override fun assemble(container: CraftingContainer, registryAccess: RegistryAccess): ItemStack {
-        return HeadUtils.createGoldenHead()
+        return HeadUtils.createConsumableGoldenHead()
     }
 
     override fun canCraftInDimensions(width: Int, height: Int): Boolean {

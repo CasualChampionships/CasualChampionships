@@ -1,15 +1,25 @@
 package net.casualuhc.uhc.mixin.feature;
 
-import net.casualuhc.uhc.settings.GameSettings;
+import net.casualuhc.arcade.events.GlobalEventHandler;
+import net.casualuhc.uhc.events.border.BorderPortalWithinBoundsEvent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.PortalForcer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
 @Mixin(PortalForcer.class)
 public class PortalForcerMixin {
+	@Shadow @Final private ServerLevel level;
+
 	@Redirect(
 		method = "createPortal",
 		at = @At(
@@ -18,26 +28,30 @@ public class PortalForcerMixin {
 		)
 	)
 	private boolean isWithinWorldBorder(WorldBorder instance, BlockPos pos) {
-		return isWithinBounds(instance, pos);
+		BorderPortalWithinBoundsEvent event = new BorderPortalWithinBoundsEvent(this.level.getWorldBorder(), this.level, pos);
+		GlobalEventHandler.broadcast(event);
+		if (event.isCancelled()) {
+			return event.result();
+		}
+		return instance.isWithinBounds(pos);
 	}
 
 	@Redirect(
-		method = "method_39663",
+		method = "findPortalAround",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/world/level/border/WorldBorder;isWithinBounds(Lnet/minecraft/core/BlockPos;)Z"
+			target = "Ljava/util/stream/Stream;filter(Ljava/util/function/Predicate;)Ljava/util/stream/Stream;",
+			ordinal = 0
 		)
 	)
-	private static boolean isWithinBounds(WorldBorder instance, BlockPos pos) {
-		// Blocks per millisecond
-		double shrinkingSpeed = instance.getLerpSpeed();
-		if (shrinkingSpeed <= 0) {
-			// Border is static or expanding
-			return instance.isWithinBounds(pos);
-		}
-		double margin = shrinkingSpeed * (GameSettings.PORTAL_ESCAPE_TIME.getValue() * 1000);
-		margin = Math.min(margin, instance.getSize() * 0.5 - 1);
-		return pos.getX() >= instance.getMinX() + margin && pos.getX() + 1 <= instance.getMaxX() - margin
-			&& pos.getZ() >= instance.getMinZ() + margin && pos.getZ() + 1 <= instance.getMaxZ() - margin;
+	private Stream<PoiRecord> newFilter(Stream<PoiRecord> instance, Predicate<PoiRecord> predicate) {
+		return instance.filter(poi -> {
+			BorderPortalWithinBoundsEvent event = new BorderPortalWithinBoundsEvent(this.level.getWorldBorder(), this.level, poi.getPos());
+			GlobalEventHandler.broadcast(event);
+			if (event.isCancelled()) {
+				return event.result();
+			}
+			return predicate.test(poi);
+		});
 	}
 }

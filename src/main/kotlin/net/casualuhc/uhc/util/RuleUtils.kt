@@ -1,9 +1,5 @@
 package net.casualuhc.uhc.util
 
-import net.casualuhc.uhc.UHCMod
-import net.casualuhc.uhc.minigame.uhc.UHCBorderSize
-import net.casualuhc.uhc.minigame.uhc.UHCBorderStage
-import net.casualuhc.uhc.settings.GameSettings
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.Difficulty
 import net.minecraft.world.level.GameRules.*
@@ -30,7 +26,7 @@ object RuleUtils {
             setWeatherParameters(999999, 0, false, false)
         }
 
-        GameSettings.PVP.setValue(false)
+        server.isPvpAllowed = false
     }
 
     fun setActiveGamerules(server: MinecraftServer) {

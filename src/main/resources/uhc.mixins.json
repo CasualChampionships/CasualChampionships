@@ -9,14 +9,8 @@
     "feature.EntityMixin",
     "feature.LevelMixin",
     "feature.PlayerListMixin",
-    "feature.PlayerTeamMixin",
     "feature.PortalForcerMixin",
-    "feature.ScoreboardMixin",
-    "feature.ServerGamePacketListenerImplMixin",
     "feature.ServerLevelMixin",
-    "performance.NaturalSpawnerMixin",
-    "performance.PersistentEntitySectionManagerMixin",
-    "settings.BrewingStandBlockEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

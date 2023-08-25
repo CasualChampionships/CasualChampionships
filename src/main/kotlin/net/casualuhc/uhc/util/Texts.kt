@@ -1,9 +1,7 @@
 package net.casualuhc.uhc.util
 
-import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.utils.ComponentUtils.crimson
 import net.casualuhc.arcade.utils.ComponentUtils.green
-import net.casualuhc.uhc.events.uhc.UHCConfigLoadedEvent
 import net.casualuhc.uhc.util.Texts.ComponentGenerator
 import net.casualuhc.uhc.util.Texts.ToggleComponentGenerators
 import net.minecraft.core.Direction
@@ -277,16 +275,6 @@ object Texts {
 
     fun MutableComponent.shadowless(): MutableComponent {
         return this.withStyle { it.withColor(0x4E5C24) }
-    }
-
-    internal fun registerEvents() {
-        GlobalEventHandler.register<UHCConfigLoadedEvent> {
-            this.loadLang()
-        }
-    }
-
-    private fun loadLang() {
-
     }
 
     fun interface ComponentGenerator {

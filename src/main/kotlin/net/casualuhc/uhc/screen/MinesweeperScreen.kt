@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
 import net.casualuhc.arcade.events.GlobalEventHandler
 import net.casualuhc.arcade.events.server.ServerTickEvent
+import net.casualuhc.arcade.gui.screen.InterfaceScreen
 import net.casualuhc.arcade.utils.ItemUtils.literalNamed
 import net.casualuhc.arcade.utils.PlayerUtils
 import net.casualuhc.arcade.utils.PlayerUtils.grantAdvancement
@@ -14,8 +15,6 @@ import net.casualuhc.uhc.items.MinesweeperItem
 import net.casualuhc.uhc.items.MinesweeperItem.Companion.EMPTY
 import net.casualuhc.uhc.items.MinesweeperItem.Companion.MINE
 import net.casualuhc.uhc.items.MinesweeperItem.Companion.UNKNOWN
-import net.casualuhc.uhc.settings.GameSettings
-import net.casualuhc.uhc.util.ItemModelUtils.addUHCModel
 import net.casualuhc.uhc.util.Texts
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -32,7 +31,7 @@ import kotlin.math.floor
 class MinesweeperScreen(
     player: Player,
     syncId: Int
-): CustomScreen(player, syncId, 6) {
+): InterfaceScreen(player, syncId, 6) {
     private val guessed = IntArraySet()
     private val flags = IntArraySet()
     private val grid = Grid(9, 9)
@@ -64,9 +63,9 @@ class MinesweeperScreen(
         }
     }
 
-    override fun clicked(slotId: Int, button: Int, clickType: ClickType, player: Player) {
+    override fun onClick(slotId: Int, button: Int, type: ClickType, player: ServerPlayer) {
         if (slotId >= 0 && slotId < this.grid.capacity) {
-            if (clickType !== ClickType.PICKUP || this.complete) {
+            if (type !== ClickType.PICKUP || this.complete) {
                 return
             }
             if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !this.flags.contains(slotId)) {
@@ -77,7 +76,7 @@ class MinesweeperScreen(
             }
         }
         if (slotId == 81) {
-            (player as ServerPlayer).closeContainer()
+            player.closeContainer()
         }
         if (slotId == 89) {
             player.openMenu(createScreenFactory())
@@ -148,7 +147,7 @@ class MinesweeperScreen(
         }
         val time = String.format("%.2f", seconds)
         player.sendSystemMessage(Texts.MINESWEEPER_WON.generate(time))
-        if (seconds < record && GameSettings.MINESWEEPER_ANNOUNCEMENT.value) {
+        if (seconds < record) {
             record = seconds
             PlayerUtils.broadcast(Texts.MINESWEEPER_RECORD.generate(player.scoreboardName, time))
         }
@@ -170,9 +169,9 @@ class MinesweeperScreen(
     private fun getTileStack(tile: Int): ItemStack {
         check(!(tile > 8 || tile < -1)) { "Invalid tile: $tile" }
         return when (tile) {
-            -1 -> MinesweeperItem.STATES.createStack(MINE) { s, d -> s.addUHCModel(d).setHoverName(Texts.MINESWEEPER_MINE) }
-            0 -> MinesweeperItem.STATES.createStack(EMPTY) { s, d -> s.addUHCModel(d).literalNamed("") }
-            else -> MinesweeperItem.STATES.createStack(tile) { s, d -> s.addUHCModel(d).literalNamed(tile.toString()) }
+            -1 -> MinesweeperItem.STATES.createStack(MINE).setHoverName(Texts.MINESWEEPER_MINE)
+            0 -> MinesweeperItem.STATES.createStack(EMPTY).literalNamed("")
+            else -> MinesweeperItem.STATES.createStack(tile).literalNamed(tile.toString())
         }
     }
 
@@ -280,7 +279,7 @@ class MinesweeperScreen(
     }
 
     companion object {
-        private val UNKNOWN_TILE = MinesweeperItem.STATES.createStack(UNKNOWN) { s, d -> s.addUHCModel(d).literalNamed("?") }
+        private val UNKNOWN_TILE = MinesweeperItem.STATES.createStack(UNKNOWN).literalNamed("?")
         private val EXIT_TILE = Items.RED_STAINED_GLASS.defaultInstance.setHoverName(Texts.MINESWEEPER_EXIT)
         private val DESC_TILE_1 = Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_1)
         private val DESC_TILE_2 = Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_2)

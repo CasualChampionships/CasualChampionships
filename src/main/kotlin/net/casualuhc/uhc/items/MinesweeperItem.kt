@@ -1,22 +1,21 @@
 package net.casualuhc.uhc.items
 
-import eu.pb4.polymer.core.api.item.PolymerItem
+import net.casualuhc.arcade.items.ArcadeModelledItem
 import net.casualuhc.arcade.items.ModelledItemStates
 import net.casualuhc.uhc.resources.UHCResourcePack
 import net.casualuhc.uhc.util.ItemModelUtils.create
-import net.casualuhc.uhc.util.ItemModelUtils.getUHCModel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 
-class MinesweeperItem private constructor(): Item(Properties()), PolymerItem {
+class MinesweeperItem private constructor(): Item(Properties()), ArcadeModelledItem {
     override fun getPolymerItem(itemStack: ItemStack, player: ServerPlayer?): Item {
         return Items.POPPED_CHORUS_FRUIT
     }
 
-    override fun getPolymerCustomModelData(itemStack: ItemStack, player: ServerPlayer?): Int {
-        return itemStack.getUHCModel()
+    override fun getStates(): ModelledItemStates {
+        return STATES
     }
 
     companion object {

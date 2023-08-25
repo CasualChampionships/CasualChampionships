@@ -1,7 +1,6 @@
 package net.casualuhc.uhc.items
 
 import eu.pb4.polymer.core.api.item.PolymerItem
-import net.casualuhc.uhc.settings.GameSettings
 import net.casualuhc.uhc.util.Texts
 import net.minecraft.ChatFormatting
 import net.minecraft.nbt.Tag
@@ -22,7 +21,7 @@ abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerIte
     abstract fun addEffects(player: ServerPlayer)
 
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack> {
-        if (GameSettings.HEADS_CONSUMABLE.value && player is ServerPlayer) {
+        if (player is ServerPlayer) {
             this.addEffects(player)
             player.swing(usedHand, true)
             player.cooldowns.addCooldown(this, 20)
@@ -37,7 +36,7 @@ abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerIte
 
     override fun useOn(context: UseOnContext): InteractionResult {
         val player = context.player
-        if (GameSettings.HEADS_CONSUMABLE.value && player is ServerPlayer) {
+        if (player is ServerPlayer) {
             this.addEffects(player)
             player.swing(context.hand, true)
             player.cooldowns.addCooldown(this, 20)

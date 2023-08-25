@@ -5,6 +5,7 @@ import net.casualuhc.arcade.map.BoxMap
 import net.casualuhc.arcade.map.PlaceableMap
 import net.casualuhc.arcade.math.Location
 import net.casualuhc.uhc.minigame.Dimensions
+import net.casualuhc.uhc.minigame.uhc.UHCMinigame
 import net.casualuhc.uhc.uhc.handlers.LobbyHandler
 import net.casualuhc.uhc.uhc.handlers.ResourceHandler
 import net.minecraft.core.Vec3i
@@ -36,7 +37,7 @@ enum class DefaultUHC: UHCEvent, LobbyHandler, ResourceHandler {
         return this
     }
 
-    override fun initialise() {
+    override fun initialise(uhc: UHCMinigame) {
         Arcade.server.motd = "            §6፠ §bWelcome to Casual UHC! §6፠\n     §6Yes, it's back! Is your team prepared?"
     }
 }

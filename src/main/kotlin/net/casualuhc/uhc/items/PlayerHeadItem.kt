@@ -1,6 +1,7 @@
 package net.casualuhc.uhc.items
 
 import eu.pb4.polymer.core.api.utils.PolymerUtils
+import net.casualuhc.arcade.utils.HeadTextures
 import net.casualuhc.uhc.util.HeadUtils
 import net.minecraft.nbt.Tag
 import net.minecraft.network.chat.Component
@@ -14,7 +15,7 @@ import net.minecraft.world.item.PlayerHeadItem
 class PlayerHeadItem: HeadItem() {
     override fun getSkullOwner(stack: ItemStack): Tag {
         val owner = stack.tag?.get(PlayerHeadItem.TAG_SKULL_OWNER)
-        return owner ?: PolymerUtils.createSkullOwner(HeadUtils.STEVE)
+        return owner ?: PolymerUtils.createSkullOwner(HeadTextures.STEVE)
     }
 
     override fun addEffects(player: ServerPlayer) {

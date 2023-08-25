@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext
 import net.casualuhc.arcade.commands.EnumArgument
 import net.casualuhc.arcade.commands.TimeArgument
 import net.casualuhc.arcade.commands.TimeZoneArgument
+import net.casualuhc.arcade.gui.screen.SelectionScreenComponents
 import net.casualuhc.arcade.utils.CommandSourceUtils.fail
 import net.casualuhc.arcade.utils.CommandSourceUtils.success
 import net.casualuhc.arcade.utils.PlayerUtils
@@ -23,8 +24,6 @@ import net.casualuhc.uhc.util.UHCPlayerUtils.sendUHCResourcePack
 import net.casualuhc.uhc.managers.TeamManager
 import net.casualuhc.uhc.resources.UHCResourcePack
 import net.casualuhc.uhc.resources.UHCResourcePackHost
-import net.casualuhc.uhc.screen.ItemsScreen
-import net.casualuhc.uhc.screen.RuleScreen
 import net.casualuhc.uhc.util.Config
 import net.casualuhc.uhc.util.Texts
 import net.casualuhc.uhc.util.UHCPlayerUtils.setForUHC
@@ -201,7 +200,7 @@ object UHCCommand: Command {
         server.scoreboard.addPlayerToTeam(target.scoreboardName, team)
         target.sendSystemMessage(Texts.UHC_ADDED_TO_TEAM.generate(team.formattedDisplayName))
 
-        target.setForUHC(!target.flags.has(PlayerFlag.Participating))
+        target.setForUHC(UHCMod.minigame, !target.flags.has(PlayerFlag.Participating))
 
         if (teleport) {
             for (player in PlayerUtils.players()) {
@@ -292,7 +291,7 @@ object UHCCommand: Command {
 
     private fun openSettingsMenu(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
-        player.openMenu(RuleScreen.createScreenFactory(0))
+        UHCMod.minigame.openRulesMenu(player, SelectionScreenComponents.DEFAULT)
         return 1
     }
 
@@ -323,7 +322,7 @@ object UHCCommand: Command {
     }
 
     private fun openItemsMenu(context: CommandContext<CommandSourceStack>): Int {
-        context.source.playerOrException.openMenu(ItemsScreen.createScreenFactory(0))
+        // context.source.playerOrException.openMenu(ItemsScreen.createScreenFactory(0))
         return 1
     }
 }

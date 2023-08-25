@@ -3,11 +3,12 @@ package net.casualuhc.uhc.uhc
 import net.casualuhc.arcade.map.PlaceableMap
 import net.casualuhc.arcade.map.StructureMap
 import net.casualuhc.arcade.math.Location
+import net.casualuhc.arcade.utils.StructureUtils
 import net.casualuhc.uhc.minigame.Dimensions
+import net.casualuhc.uhc.minigame.uhc.UHCMinigame
 import net.casualuhc.uhc.uhc.handlers.LobbyHandler
 import net.casualuhc.uhc.uhc.handlers.ResourceHandler
 import net.casualuhc.uhc.util.Config
-import net.casualuhc.uhc.util.StructureUtils
 import net.minecraft.core.Vec3i
 import net.minecraft.world.phys.Vec2
 import net.minecraft.world.phys.Vec3
@@ -35,7 +36,7 @@ class EasterUHC: UHCEvent, LobbyHandler {
         return ResourceHandler.default()
     }
 
-    override fun initialise() {
+    override fun initialise(uhc: UHCMinigame) {
 
     }
 
