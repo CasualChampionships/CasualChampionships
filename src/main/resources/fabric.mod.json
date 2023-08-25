@@ -17,7 +17,7 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "net.casualuhc.uhc.UHCMod"
+        "value": "net.casual.CasualMod"
       }
     ]
   },
