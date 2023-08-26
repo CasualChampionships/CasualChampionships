@@ -19,7 +19,7 @@ class RegularUHC: UHCEvent, MinigameLobby {
 
     init {
         this.lobby = StructureMap(
-            StructureUtils.read(Config.resolve("lobbies/easter_lobby.nbt")),
+            StructureUtils.read(Config.resolve("lobbies/cherry_lobby.nbt")),
             Vec3i(0, 320, 0),
             Dimensions.getLobbyLevel()
         )
@@ -38,7 +38,7 @@ class RegularUHC: UHCEvent, MinigameLobby {
     }
 
     override fun initialise(uhc: UHCMinigame) {
-
+        Dimensions.getLobbyLevel().dayTime = 16000
     }
 
     override fun getMap(): PlaceableMap {
@@ -46,6 +46,6 @@ class RegularUHC: UHCEvent, MinigameLobby {
     }
 
     override fun getSpawn(): Location {
-        return Location(Dimensions.getLobbyLevel(), Vec3(-0.5, 298.0, -1.5), Vec2(-45.0F, 30.0F))
+        return Location(Dimensions.getLobbyLevel(), Vec3(-0.5, 310.0, 11.5), Vec2(180.0F, 0.0F))
     }
 }

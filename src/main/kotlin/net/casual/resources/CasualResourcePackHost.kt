@@ -18,6 +18,7 @@ object CasualResourcePackHost {
     init {
         host.addPacks(PathPackSupplier(packs))
         packs.createDirectories()
+        host.start()
     }
 
     fun getHostedPack(name: String): ResourcePackHost.HostedPack? {

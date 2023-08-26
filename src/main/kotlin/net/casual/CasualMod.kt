@@ -11,6 +11,7 @@ import net.casual.items.CasualItems
 import net.casual.minigame.CasualMinigame
 import net.casual.minigame.Dimensions
 import net.casual.minigame.uhc.UHCMinigame
+import net.casual.minigame.uhc.events.DefaultUHC
 import net.casual.minigame.uhc.resources.UHCResourcePack
 import net.casual.resources.CasualResourcePackHost
 import net.casual.minigame.uhc.events.RegularUHC
@@ -51,7 +52,7 @@ class CasualMod: ModInitializer {
         Dimensions.noop()
 
         GlobalEventHandler.register<ServerLoadedEvent>(0) {
-            minigame = UHCMinigame(it.server, UHCEvents.getUHC(Config.getString("event"))!!)
+            minigame = UHCMinigame(it.server, UHCEvents.getUHC(Config.getString("event")) ?: DefaultUHC)
         }
         GlobalEventHandler.register<PlayerJoinEvent>(0) {
             minigame.addPlayer(it.player)
