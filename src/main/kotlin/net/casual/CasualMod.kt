@@ -78,6 +78,9 @@ class CasualMod: ModInitializer {
     //   Fix sidebar
     //   Fix worldborder
     //   Fix stats? Again
+    //   Fix server replay
+    //   Implement podium
+    //   Restructure UHC stuff
     //   Duels? - Implement duel command
     //   Testing - Run tests (implement unit tests?)
     //   Minesweeper AI - Make sure all maps are non-luck based
