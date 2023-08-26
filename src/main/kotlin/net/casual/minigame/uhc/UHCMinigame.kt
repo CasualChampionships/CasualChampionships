@@ -1007,6 +1007,9 @@ class UHCMinigame(
     }
 
     private fun moveWorldBorder(border: TrackedBorder, level: Level, stage: UHCBorderStage, size: UHCBorderSize, instant: Boolean = false) {
+        if (level.dimension() == Level.END && stage >= UHCBorderStage.SIX) {
+            return
+        }
         val dest = if (size == UHCBorderSize.END) stage.getEndSizeFor(level) else stage.getStartSizeFor(level)
         val time = if (instant) -1.0 else stage.getRemainingTimeAsPercent(border.size, level)
         moveWorldBorder(border, dest, time)
