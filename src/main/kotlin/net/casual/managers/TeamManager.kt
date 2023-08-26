@@ -74,7 +74,7 @@ object TeamManager {
             player.sendSystemMessage(Texts.LOBBY_READY_ALL_READY.copy().gold())
             if (player.hasPermissions(4)) {
                 player.sendSystemMessage(Component.literal("[Click here to start]").green().withStyle { s ->
-                    s.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/uhc start force"))
+                    s.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/casual uhc start force"))
                 })
             }
         }
@@ -113,7 +113,7 @@ object TeamManager {
 
             val operators = scoreboard.addPlayerTeam("Operator")
             operators.color = ChatFormatting.WHITE
-            operators.playerPrefix = Component.literal("[OP] ")
+            operators.playerPrefix = Component.literal("§c[Admin] §r")
             for (operator in Config.getArrayOrDefault("operators")) {
                 scoreboard.addPlayerToTeam(operator.asString, operators)
             }

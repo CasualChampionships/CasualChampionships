@@ -16,7 +16,6 @@ import net.casual.arcade.events.minigame.MinigameUnpauseEvent
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerRecipeReloadEvent
 import net.casual.arcade.events.server.ServerTickEvent
-import net.casual.arcade.gui.bossbar.CustomBossBar
 import net.casual.arcade.gui.display.ArcadeNameDisplay
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.suppliers.ComponentSupplier
@@ -26,7 +25,6 @@ import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.scheduler.Task
 import net.casual.arcade.settings.DisplayableGameSettingBuilder
-import net.casual.arcade.utils.BorderUtils
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.green
@@ -37,8 +35,6 @@ import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.JsonUtils.array
 import net.casual.arcade.utils.JsonUtils.boolean
 import net.casual.arcade.utils.JsonUtils.int
-import net.casual.arcade.utils.LevelUtils
-import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.directionToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.directionVectorToNearestBorder
@@ -51,11 +47,13 @@ import net.casual.arcade.utils.PlayerUtils.sendSubtitle
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teamMessage
 import net.casual.arcade.utils.SettingsUtils.defaultOptions
-import net.casual.arcade.utils.TeamUtils
 import net.casual.arcade.utils.TeamUtils.getServerPlayers
 import net.casual.CasualMod
 import net.casual.arcade.events.minigame.MinigameAddExistingPlayerEvent
 import net.casual.arcade.events.minigame.MinigameAddNewPlayerEvent
+import net.casual.arcade.gui.tab.ArcadeTabDisplay
+import net.casual.arcade.utils.*
+import net.casual.arcade.utils.ComponentUtils.aqua
 import net.casual.minigame.uhc.advancement.RaceAdvancement
 import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.events.border.BorderEntityPortalEntryPointEvent
@@ -76,16 +74,12 @@ import net.casual.managers.TeamManager.hasAlivePlayers
 import net.casual.minigame.CasualMinigame
 import net.casual.minigame.uhc.UHCPhase.*
 import net.casual.minigame.uhc.events.DefaultUHC
-import net.casual.minigame.uhc.gui.ActiveBossBar
 import net.casual.minigame.uhc.gui.BorderDistanceRow
-import net.casual.minigame.uhc.gui.LobbyBossBar
 import net.casual.minigame.uhc.gui.TeammateRow
-import net.casual.minigame.uhc.task.GlowingTask
-import net.casual.minigame.uhc.task.GracePeriodOverTask
-import net.casual.minigame.uhc.task.NextBorderTask
 import net.casual.recipes.GoldenHeadRecipe
 import net.casual.screen.MinesweeperScreen
 import net.casual.minigame.uhc.events.UHCEvent
+import net.casual.minigame.uhc.task.*
 import net.casual.util.*
 import net.casual.util.DirectionUtils.opposite
 import net.casual.util.Texts.monospaced
@@ -96,6 +90,7 @@ import net.casual.util.UHCPlayerUtils.sendResourcePack
 import net.casual.util.UHCPlayerUtils.setForUHC
 import net.casual.util.UHCPlayerUtils.updateGlowingTag
 import net.casual.util.shapes.ArrowShape
+import net.minecraft.ChatFormatting.*
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.particles.ParticleTypes
@@ -142,13 +137,12 @@ class UHCMinigame(
     private val tracker = MultiLevelBorderTracker()
 
     private val claimed = HashSet<RaceAdvancement>()
-    private val bossbars = ArrayList<CustomBossBar>()
 
+    private val display = this.createTabDisplay()
     private var sidebar: ArcadeSidebar? = null
     private var health: ArcadeNameDisplay? = null
 
     private var glowing = false
-    private var grace = true
 
     val settings = Settings()
 
@@ -250,15 +244,21 @@ class UHCMinigame(
     }
 
     fun onGraceOver() {
-        if (this.grace) {
-            val message = Texts.UHC_GRACE_OVER.red().bold()
-            PlayerUtils.forEveryPlayer { player ->
-                player.sendSystemMessage(message)
-                player.sendSound(SoundEvents.ENDER_DRAGON_AMBIENT)
-            }
-            this.server.isPvpAllowed = true
-            this.grace = false
+        val message = Texts.UHC_GRACE_OVER.red().bold()
+        PlayerUtils.forEveryPlayer { player ->
+            player.sendSystemMessage(message)
+            player.sendSound(SoundEvents.ENDER_DRAGON_AMBIENT)
         }
+        this.server.isPvpAllowed = true
+        this.settings.borderStage = UHCBorderStage.FIRST
+    }
+
+    fun onActiveEnd() {
+        this.sidebar?.clearPlayers()
+        this.sidebar = null
+        this.health?.clearPlayers()
+        this.health = null
+        this.server.isPvpAllowed = false
     }
 
     fun onBorderFinish() {
@@ -295,8 +295,14 @@ class UHCMinigame(
 
     override fun createTask(id: String, data: JsonObject): Task? {
         return when (id) {
-            GlowingTask.ID -> GlowingTask(this, data.int("end"))
-            GracePeriodOverTask.ID -> GracePeriodOverTask(this, data.int("end"))
+            ActiveBossBarTask.ID -> ActiveBossBarTask(this)
+            LobbyBossBarTask.ID -> LobbyBossBarTask(this)
+            NextBorderTask.ID -> NextBorderTask(this)
+            GracePeriodOverTask.ID -> GracePeriodOverTask(this)
+            BorderFinishTask.ID -> BorderFinishTask(this)
+            ActiveEndTask.ID -> ActiveEndTask(this)
+            GlowingBossBarTask.ID -> GlowingBossBarTask(this, data.int("end"))
+            GracePeriodBossBarTask.ID -> GracePeriodBossBarTask(this, data.int("end"))
             else -> null
         }
     }
@@ -315,7 +321,7 @@ class UHCMinigame(
 
     override fun readData(json: JsonObject) {
         this.glowing = json.boolean("glowing")
-        this.grace = json.boolean("grace")
+        this.server.isPvpAllowed = json.boolean("pvp")
 
         if (this.isActivePhase()) {
             this.uptime = json.int("uptime")
@@ -327,7 +333,7 @@ class UHCMinigame(
 
     override fun writeData(json: JsonObject) {
         json.addProperty("glowing", this.glowing)
-        json.addProperty("grace", this.grace)
+        json.addProperty("pvp", this.server.isPvpAllowed)
 
         if (this.isActivePhase()) {
             json.addProperty("uptime", this.uptime)
@@ -375,11 +381,6 @@ class UHCMinigame(
 
     fun onLobby() {
         this.setPhase(Lobby)
-        this.removeBossbars()
-        this.sidebar?.clearPlayers()
-        this.sidebar = null
-        this.health?.clearPlayers()
-        this.health = null
 
         RuleUtils.setLobbyGamerules(Arcade.server)
 
@@ -398,7 +399,7 @@ class UHCMinigame(
             }
         }
 
-        this.addBossbar(LobbyBossBar(this))
+        this.schedulePhaseEndTask(LobbyBossBarTask(this))
 
         TeamManager.setCollisions(false)
         for (team in Arcade.server.scoreboard.playerTeams) {
@@ -410,7 +411,6 @@ class UHCMinigame(
 
     fun onStart() {
         this.setPhase(Start)
-        this.removeBossbars()
         this.setStartTime(Long.MAX_VALUE)
 
         // Countdown
@@ -459,18 +459,20 @@ class UHCMinigame(
         this.resetTrackers()
         RuleUtils.setActiveGamerules(Arcade.server)
 
-        this.createActiveSidebar()
-        this.addBossbar(ActiveBossBar(this))
+        this.schedulePhaseEndTask(ActiveBossBarTask(this))
 
         PlayerUtils.forEveryPlayer { player ->
             player.sendSystemMessage(Texts.UHC_GRACE_FIRST.gold())
             player.sendSound(SoundEvents.NOTE_BLOCK_PLING.value())
         }
         val end = this.uptime + MinecraftTimeUnit.Minutes.toTicks(10)
-        this.schedulePhaseTask(10, MinecraftTimeUnit.Minutes, GracePeriodOverTask(this, end))
 
-        this.health = ArcadeNameDisplay(Texts.ICON_HEART)
-        this.health?.setTitle(Texts.ICON_HEART)
+        this.schedulePhaseTask(10, MinecraftTimeUnit.Minutes, GracePeriodOverTask(this))
+        val barTask = GracePeriodBossBarTask(this, end)
+        this.schedulePhaseTask(10, MinecraftTimeUnit.Minutes, barTask)
+        this.schedulePhaseEndTask(barTask)
+
+        this.schedulePhaseEndTask(ActiveEndTask(this))
 
         TeamManager.setCollisions(true)
         for (team in Arcade.server.scoreboard.playerTeams) {
@@ -538,10 +540,36 @@ class UHCMinigame(
         this.grantFinalAdvancements()
     }
 
+    private fun createTabDisplay(): ArcadeTabDisplay {
+        val display = ArcadeTabDisplay(
+            ComponentSupplier.of(
+                Component.literal("\n")
+                    .append(Texts.ICON_UHC)
+                    .append(Texts.space())
+                    .append(Texts.CASUAL_UHC.gold().bold())
+                    .append(Texts.space())
+                    .append(Texts.ICON_UHC)
+            )
+        ) { _ ->
+            val tps = TickUtils.calculateTPS()
+            val formatting = if (tps >= 20) DARK_GREEN else if (tps > 15) YELLOW else if (tps > 10) RED else DARK_RED
+            Component.literal("\n")
+                .append("TPS: ")
+                .append(Component.literal("%.1f".format(tps)).withStyle(formatting))
+                .append("\n")
+                .append(Texts.TAB_HOSTED.aqua().bold())
+        }
+        return display
+    }
+
     private fun onWorldBorderComplete() {
         CasualMod.logger.info("World Border Completed")
         val end = this.uptime + MinecraftTimeUnit.Minutes.toTicks(5)
-        this.schedulePhaseTask(5, MinecraftTimeUnit.Minutes, GlowingTask(this, end))
+
+        this.schedulePhaseTask(5, MinecraftTimeUnit.Minutes, BorderFinishTask(this))
+        val barTask = GlowingBossBarTask(this, end)
+        this.schedulePhaseTask(5, MinecraftTimeUnit.Minutes, barTask)
+        this.schedulePhaseEndTask(barTask)
     }
 
     private fun onServerTick() {
@@ -729,10 +757,7 @@ class UHCMinigame(
         player.updateGlowingTag()
         player.sendResourcePack(this.event.getResourcePackHandler())
 
-        for (bossbar in this.bossbars) {
-            bossbar.addPlayer(player)
-        }
-
+        this.display.addPlayer(player)
         this.sidebar?.addPlayer(player)
 
         if (this.isActivePhase() && this.glowing && player.isSurvival) {
@@ -959,7 +984,7 @@ class UHCMinigame(
         }
 
         if (TeamManager.isOneTeamRemaining()) {
-            this.setPhase(End)
+            this.onEnd()
         }
     }
 
@@ -975,7 +1000,10 @@ class UHCMinigame(
         }
     }
 
-    private fun createActiveSidebar() {
+    fun createActiveSidebar() {
+        this.health = ArcadeNameDisplay(Texts.ICON_HEART)
+        this.health?.setTitle(Texts.ICON_HEART)
+
         val sidebar = ArcadeSidebar(ComponentSupplier.of(Texts.CASUAL_UHC.gold().bold()))
 
         val buffer = "   "
@@ -1022,31 +1050,6 @@ class UHCMinigame(
             return
         }
         border.size = newSize
-    }
-
-    fun addBossbar(bar: CustomBossBar) {
-        this.bossbars.add(bar)
-        this.reloadBossbars()
-    }
-
-    fun removeBossbar(bar: CustomBossBar) {
-        this.bossbars.remove(bar)
-        bar.clearPlayers()
-    }
-
-    private fun removeBossbars() {
-        for (bossbar in this.bossbars) {
-            bossbar.clearPlayers()
-        }
-        this.bossbars.clear()
-    }
-
-    private fun reloadBossbars() {
-        for (bossbar in this.bossbars) {
-            PlayerUtils.forEveryPlayer {
-                bossbar.addPlayer(it)
-            }
-        }
     }
 
     private fun registerUHCAdvancementEvents() {
@@ -1177,7 +1180,7 @@ class UHCMinigame(
         val damage: Double
     )
 
-    inner class Settings() {
+    inner class Settings {
         var worldBorderTime by registerSetting(
             DisplayableGameSettingBuilder.long()
                 .name("border_completion_time")
@@ -1297,7 +1300,9 @@ class UHCMinigame(
                 .listener { _, value ->
                     if (isActivePhase()) {
                         moveWorldBorders(value, UHCBorderSize.START, true)
-                        startWorldBorders()
+                        schedulePhaseTask(0, MinecraftTimeUnit.Ticks) {
+                            startWorldBorders()
+                        }
                     }
                 }
                 .build()

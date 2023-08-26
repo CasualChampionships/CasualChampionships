@@ -1,8 +1,13 @@
 package net.casual
 
 import net.casual.arcade.events.GlobalEventHandler
+import net.casual.arcade.events.player.PlayerCreatedEvent
 import net.casual.arcade.events.player.PlayerJoinEvent
 import net.casual.arcade.events.server.ServerLoadedEvent
+import net.casual.arcade.utils.PlayerUtils.addExtension
+import net.casual.extensions.PlayerFlagsExtension
+import net.casual.extensions.PlayerStatsExtension
+import net.casual.extensions.PlayerUHCExtension
 import net.casual.managers.CommandManager
 import net.casual.managers.DataManager
 import net.casual.managers.TeamManager
@@ -57,6 +62,11 @@ class CasualMod: ModInitializer {
         GlobalEventHandler.register<PlayerJoinEvent>(0) {
             minigame.addPlayer(it.player)
         }
+        GlobalEventHandler.register<PlayerCreatedEvent> { (player) ->
+            player.addExtension(PlayerFlagsExtension(player))
+            player.addExtension(PlayerUHCExtension(player))
+            player.addExtension(PlayerStatsExtension())
+        }
     }
 
     fun registerEvents() {
@@ -64,6 +74,10 @@ class CasualMod: ModInitializer {
     }
 
     // TODO:
+    //   Fix health being set when forceadding
+    //   Fix sidebar
+    //   Fix worldborder
+    //   Fix stats? Again
     //   Duels? - Implement duel command
     //   Testing - Run tests (implement unit tests?)
     //   Minesweeper AI - Make sure all maps are non-luck based

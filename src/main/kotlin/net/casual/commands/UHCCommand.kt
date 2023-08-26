@@ -33,6 +33,7 @@ import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.player.Player
 import java.util.concurrent.TimeUnit
 
 object UHCCommand: Command {
@@ -264,7 +265,9 @@ object UHCCommand: Command {
     }
 
     private fun deleteLobby(context: CommandContext<CommandSourceStack>): Int {
-        (CasualMod.minigame as UHCMinigame).event.getMinigameLobby().getMap().remove()
+        val map = (CasualMod.minigame as UHCMinigame).event.getMinigameLobby().getMap()
+        map.remove()
+        map.removeEntities { it !is Player }
         context.source.success(Component.literal("Successfully removed the lobby"), false)
         return 1
     }

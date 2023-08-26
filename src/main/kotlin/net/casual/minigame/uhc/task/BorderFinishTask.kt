@@ -3,16 +3,16 @@ package net.casual.minigame.uhc.task
 import net.casual.arcade.scheduler.SavableTask
 import net.casual.minigame.uhc.UHCMinigame
 
-class GracePeriodOverTask(
+class BorderFinishTask(
     private val uhc: UHCMinigame
 ): SavableTask {
     override val id = ID
 
     override fun run() {
-        this.uhc.onGraceOver()
+        this.uhc.onBorderFinish()
     }
 
     companion object {
-        const val ID = "grace_period_over_task"
+        const val ID = "border_finish_task"
     }
 }

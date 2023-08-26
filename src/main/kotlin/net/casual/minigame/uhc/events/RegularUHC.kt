@@ -1,13 +1,18 @@
 package net.casual.minigame.uhc.events
 
+import net.casual.arcade.events.GlobalEventHandler
+import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
 import net.casual.arcade.map.PlaceableMap
 import net.casual.arcade.map.StructureMap
 import net.casual.arcade.math.Location
 import net.casual.arcade.minigame.MinigameLobby
 import net.casual.arcade.minigame.MinigameResources
+import net.casual.arcade.scheduler.GlobalTickedScheduler
+import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.utils.StructureUtils
 import net.casual.minigame.Dimensions
 import net.casual.minigame.uhc.UHCMinigame
+import net.casual.minigame.uhc.UHCPhase
 import net.casual.minigame.uhc.resources.UHCResources
 import net.casual.util.Config
 import net.minecraft.core.Vec3i
@@ -38,7 +43,13 @@ class RegularUHC: UHCEvent, MinigameLobby {
     }
 
     override fun initialise(uhc: UHCMinigame) {
-        Dimensions.getLobbyLevel().dayTime = 16000
+        GlobalEventHandler.register<MinigameSetPhaseEvent> {
+            if (it.minigame === uhc && it.phase == UHCPhase.Lobby) {
+                GlobalTickedScheduler.schedule(1, MinecraftTimeUnit.Ticks) {
+                    Dimensions.getLobbyLevel().dayTime = 16000
+                }
+            }
+        }
     }
 
     override fun getMap(): PlaceableMap {

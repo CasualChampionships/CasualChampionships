@@ -5,7 +5,7 @@ import net.casual.minigame.uhc.UHCMinigame
 
 class NextBorderTask(
     val owner: UHCMinigame
-): SavableTask() {
+): SavableTask {
     override val id = ID
 
     override fun run() {

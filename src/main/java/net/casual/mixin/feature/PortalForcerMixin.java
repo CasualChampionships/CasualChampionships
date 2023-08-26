@@ -36,22 +36,22 @@ public class PortalForcerMixin {
 		return instance.isWithinBounds(pos);
 	}
 
-	@Redirect(
-		method = "findPortalAround",
-		at = @At(
-			value = "INVOKE",
-			target = "Ljava/util/stream/Stream;filter(Ljava/util/function/Predicate;)Ljava/util/stream/Stream;",
-			ordinal = 0
-		)
-	)
-	private Stream<PoiRecord> newFilter(Stream<PoiRecord> instance, Predicate<PoiRecord> predicate) {
-		return instance.filter(poi -> {
-			BorderPortalWithinBoundsEvent event = new BorderPortalWithinBoundsEvent(this.level.getWorldBorder(), this.level, poi.getPos());
-			GlobalEventHandler.broadcast(event);
-			if (event.isCancelled()) {
-				return event.result();
-			}
-			return predicate.test(poi);
-		});
-	}
+	// @Redirect(
+	// 	method = "findPortalAround",
+	// 	at = @At(
+	// 		value = "INVOKE",
+	// 		target = "Ljava/util/stream/Stream;filter(Ljava/util/function/Predicate;)Ljava/util/stream/Stream;",
+	// 		ordinal = 0
+	// 	)
+	// )
+	// private Stream<PoiRecord> newFilter(Stream<PoiRecord> instance, Predicate<PoiRecord> predicate) {
+	// 	return instance.filter(poi -> {
+	// 		BorderPortalWithinBoundsEvent event = new BorderPortalWithinBoundsEvent(this.level.getWorldBorder(), this.level, poi.getPos());
+	// 		GlobalEventHandler.broadcast(event);
+	// 		if (event.isCancelled()) {
+	// 			return event.result();
+	// 		}
+	// 		return predicate.test(poi);
+	// 	});
+	// }
 }

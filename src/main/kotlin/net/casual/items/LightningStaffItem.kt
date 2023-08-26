@@ -45,6 +45,10 @@ class LightningStaffItem private constructor(): AxeItem(Tiers.DIAMOND, 4.0f, -3.
         return STATES
     }
 
+    override fun getPolymerCustomModelData(itemStack: ItemStack, player: ServerPlayer?): Int {
+        return STATES.getModel(DEFAULT).value()
+    }
+
     companion object {
         val STATES = ModelledItemStates(LightningStaffItem(), UHCResourcePack.pack)
         val DEFAULT = STATES.create("weapons/lightning_staff")

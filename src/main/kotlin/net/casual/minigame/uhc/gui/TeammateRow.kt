@@ -23,8 +23,6 @@ class TeammateRow(val index: Int, val buffer: String = ""): ComponentSupplier {
             return Component.literal("${this.buffer} - ").monospaced().append(Texts.ICON_CROSS)
         }
 
-        val length = (players.maxOfOrNull { it.length } ?: 16)
-
         val name: String
         val teammate: ServerPlayer?
         if (this.index == 0) {
@@ -34,6 +32,10 @@ class TeammateRow(val index: Int, val buffer: String = ""): ComponentSupplier {
             name = players.filter { it != player.scoreboardName }[this.index - 1]
             teammate = PlayerUtils.player(name)
         }
+
+        val length = (players.maxOfOrNull { it.length } ?: 16).coerceAtLeast(name.length)
+
+
         val longName = Component.literal(name + " ".repeat(length - name.length)).withStyle(team.color)
         val start = Component.literal("${this.buffer} - ").append(longName).append(" ").monospaced()
         if (teammate !== null) {

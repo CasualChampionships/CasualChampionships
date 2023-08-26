@@ -48,6 +48,13 @@ dependencies {
     include(modImplementation("eu.pb4:polymer-blocks:0.5.8+1.20.1")!!)
     include(modImplementation("eu.pb4:polymer-resource-pack:0.5.8+1.20.1")!!)
 
+    include(modImplementation("com.github.ReplayMod:ReplayStudio:a1e2b83") {
+        exclude(group = "org.slf4j")
+        exclude(group = "com.google.guava", module = "guava-jdk5")
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "com.google.code.gson", module = "gson")
+    })
+
     include(implementation("org.mongodb:mongo-java-driver:3.12.11")!!)
     // include(implementation("org.java-websocket:Java-WebSocket:1.5.3")!!)
 

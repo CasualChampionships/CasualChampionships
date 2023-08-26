@@ -18,7 +18,7 @@ object CasualResourcePackHost {
     init {
         host.addPacks(PathPackSupplier(packs))
         packs.createDirectories()
-        host.start()
+        this.reload()
     }
 
     fun getHostedPack(name: String): ResourcePackHost.HostedPack? {
@@ -26,7 +26,7 @@ object CasualResourcePackHost {
     }
 
     internal fun reload(): CompletableFuture<Void> {
-        return host.start()
+        return host.start(Config.getStringOrNull("pack_host_ip"))
     }
 
     internal fun registerEvents() {
