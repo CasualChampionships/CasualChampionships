@@ -573,7 +573,9 @@ class UHCMinigame(
     }
 
     private fun onServerTick() {
-        this.uptime++
+        if (!this.paused) {
+            this.uptime++
+        }
     }
 
     private fun onPause() {

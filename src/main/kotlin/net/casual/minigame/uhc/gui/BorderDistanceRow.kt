@@ -5,6 +5,7 @@ import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.util.Texts
 import net.casual.util.Texts.monospaced
 import net.minecraft.ChatFormatting
+import net.minecraft.ChatFormatting.*
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 
@@ -15,7 +16,7 @@ class BorderDistanceRow(val buffer: String): ComponentSupplier {
         val distanceToBorder =  multiplier * vectorToBorder.length().toInt()
 
         val percent = distanceToBorder / (player.level().worldBorder.size / 2.0)
-        val colour = if (percent > 0.4) ChatFormatting.DARK_GREEN else if (percent > 0.2) ChatFormatting.YELLOW else if (percent > 0.1) ChatFormatting.RED else ChatFormatting.DARK_RED
+        val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
         return Component.literal(this.buffer).append(Texts.UHC_DISTANCE_TO_WB.generate(Component.literal(distanceToBorder.toString()).withStyle(colour))).monospaced()
     }
 }

@@ -35,7 +35,6 @@ class TeammateRow(val index: Int, val buffer: String = ""): ComponentSupplier {
 
         val length = (players.maxOfOrNull { it.length } ?: 16).coerceAtLeast(name.length)
 
-
         val longName = Component.literal(name + " ".repeat(length - name.length)).withStyle(team.color)
         val start = Component.literal("${this.buffer} - ").append(longName).append(" ").monospaced()
         if (teammate !== null) {

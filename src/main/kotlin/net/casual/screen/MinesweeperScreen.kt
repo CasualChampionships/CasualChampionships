@@ -55,6 +55,7 @@ class MinesweeperScreen(
         this.slots[88].set(BLANK_TILE)
         this.slots[89].set(PLAY_AGAIN_TILE)
 
+        // TODO: Fix memory leak
         GlobalEventHandler.register<ServerTickEvent> { _ ->
             if (this.grid.startTime != 0L && !this.complete) {
                 val seconds = floor((System.nanoTime() - this.grid.startTime) / 1000000000.0).toInt()
