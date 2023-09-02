@@ -8,13 +8,13 @@ import net.casual.arcade.gui.screen.InterfaceScreen
 import net.casual.arcade.utils.ItemUtils.literalNamed
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.extensions.PlayerStat.MinesweeperRecord
 import net.casual.extensions.PlayerStatsExtension.Companion.uhcStats
 import net.casual.items.MinesweeperItem
 import net.casual.items.MinesweeperItem.Companion.EMPTY
 import net.casual.items.MinesweeperItem.Companion.MINE
 import net.casual.items.MinesweeperItem.Companion.UNKNOWN
+import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.util.Texts
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer

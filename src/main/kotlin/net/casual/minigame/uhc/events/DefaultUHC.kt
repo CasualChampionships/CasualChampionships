@@ -1,6 +1,5 @@
 package net.casual.minigame.uhc.events
 
-import net.casual.arcade.Arcade
 import net.casual.arcade.map.BoxMap
 import net.casual.arcade.map.PlaceableMap
 import net.casual.arcade.math.Location
@@ -37,6 +36,6 @@ object DefaultUHC: UHCEvent, MinigameLobby {
     }
 
     override fun initialise(uhc: UHCMinigame) {
-        Arcade.server.motd = "            §6፠ §bWelcome to Casual UHC! §6፠\n     §6Yes, it's back! Is your team prepared?"
+        uhc.server.motd = "            §6፠ §bWelcome to Casual UHC! §6፠\n     §6Yes, it's back! Is your team prepared?"
     }
 }

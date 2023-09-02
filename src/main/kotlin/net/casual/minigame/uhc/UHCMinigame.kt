@@ -4,13 +4,15 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import io.netty.buffer.Unpooled
 import me.senseiwells.replay.player.PlayerRecorders
-import net.casual.arcade.Arcade
+import net.casual.CasualMod
 import net.casual.arcade.border.MultiLevelBorderListener
 import net.casual.arcade.border.MultiLevelBorderTracker
 import net.casual.arcade.border.TrackedBorder
 import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.entity.EntityStartTrackingEvent
 import net.casual.arcade.events.entity.MobCategorySpawnEvent
+import net.casual.arcade.events.minigame.MinigameAddExistingPlayerEvent
+import net.casual.arcade.events.minigame.MinigameAddNewPlayerEvent
 import net.casual.arcade.events.minigame.MinigamePauseEvent
 import net.casual.arcade.events.minigame.MinigameUnpauseEvent
 import net.casual.arcade.events.player.*
@@ -19,12 +21,15 @@ import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.gui.display.ArcadeNameDisplay
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.suppliers.ComponentSupplier
+import net.casual.arcade.gui.tab.ArcadeTabDisplay
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.scheduler.Task
 import net.casual.arcade.settings.DisplayableGameSettingBuilder
+import net.casual.arcade.utils.*
+import net.casual.arcade.utils.ComponentUtils.aqua
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.green
@@ -48,14 +53,6 @@ import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teamMessage
 import net.casual.arcade.utils.SettingsUtils.defaultOptions
 import net.casual.arcade.utils.TeamUtils.getServerPlayers
-import net.casual.CasualMod
-import net.casual.arcade.events.minigame.MinigameAddExistingPlayerEvent
-import net.casual.arcade.events.minigame.MinigameAddNewPlayerEvent
-import net.casual.arcade.gui.tab.ArcadeTabDisplay
-import net.casual.arcade.utils.*
-import net.casual.arcade.utils.ComponentUtils.aqua
-import net.casual.minigame.uhc.advancement.RaceAdvancement
-import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.events.border.BorderEntityPortalEntryPointEvent
 import net.casual.events.border.BorderPortalWithinBoundsEvent
 import net.casual.events.player.PlayerFlagEvent
@@ -73,13 +70,15 @@ import net.casual.managers.TeamManager
 import net.casual.managers.TeamManager.hasAlivePlayers
 import net.casual.minigame.CasualMinigame
 import net.casual.minigame.uhc.UHCPhase.*
+import net.casual.minigame.uhc.advancement.RaceAdvancement
+import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.minigame.uhc.events.DefaultUHC
+import net.casual.minigame.uhc.events.UHCEvent
 import net.casual.minigame.uhc.gui.BorderDistanceRow
 import net.casual.minigame.uhc.gui.TeammateRow
+import net.casual.minigame.uhc.task.*
 import net.casual.recipes.GoldenHeadRecipe
 import net.casual.screen.MinesweeperScreen
-import net.casual.minigame.uhc.events.UHCEvent
-import net.casual.minigame.uhc.task.*
 import net.casual.util.*
 import net.casual.util.DirectionUtils.opposite
 import net.casual.util.Texts.monospaced
@@ -382,7 +381,7 @@ class UHCMinigame(
     fun onLobby() {
         this.setPhase(Lobby)
 
-        RuleUtils.setLobbyGamerules(Arcade.server)
+        RuleUtils.setLobbyGamerules(this.server)
 
         val handler = this.event.getMinigameLobby()
         handler.getMap().place()
@@ -395,14 +394,14 @@ class UHCMinigame(
         }
         TeamUtils.forEachTeam { team ->
             for (player in team.uhc.players) {
-                Arcade.server.scoreboard.addPlayerToTeam(player, team)
+                this.server.scoreboard.addPlayerToTeam(player, team)
             }
         }
 
         this.schedulePhaseEndTask(LobbyBossBarTask(this))
 
         TeamManager.setCollisions(false)
-        for (team in Arcade.server.scoreboard.playerTeams) {
+        for (team in this.server.scoreboard.playerTeams) {
             team.nameTagVisibility = Team.Visibility.ALWAYS
         }
 
@@ -457,7 +456,7 @@ class UHCMinigame(
     fun onActive() {
         this.setPhase(Active)
         this.resetTrackers()
-        RuleUtils.setActiveGamerules(Arcade.server)
+        RuleUtils.setActiveGamerules(this.server)
 
         this.schedulePhaseEndTask(ActiveBossBarTask(this))
 
@@ -475,7 +474,7 @@ class UHCMinigame(
         this.schedulePhaseEndTask(ActiveEndTask(this))
 
         TeamManager.setCollisions(true)
-        for (team in Arcade.server.scoreboard.playerTeams) {
+        for (team in this.server.scoreboard.playerTeams) {
             if (team.flags.has(TeamFlag.Ignored)) {
                 team.nameTagVisibility = Team.Visibility.NEVER
             }
@@ -770,7 +769,7 @@ class UHCMinigame(
             this.health?.addPlayer(player)
         }
 
-        val scoreboard = Arcade.server.scoreboard
+        val scoreboard = this.server.scoreboard
         if (!this.hasUHCStarted()) {
             player.sendSystemMessage(Texts.LOBBY_WELCOME.append(" Casual UHC").gold())
             if (!player.hasPermissions(2)) {
@@ -975,7 +974,7 @@ class UHCMinigame(
         player.uhcStats.increment(PlayerStat.Deaths, 1.0)
 
         val original = player.team
-        Arcade.server.scoreboard.addPlayerToTeam(player.scoreboardName, TeamManager.getSpectatorTeam())
+        this.server.scoreboard.addPlayerToTeam(player.scoreboardName, TeamManager.getSpectatorTeam())
 
         if (original !== null && !original.flags.has(TeamFlag.Eliminated) && !original.hasAlivePlayers()) {
             original.flags.set(TeamFlag.Eliminated, true)

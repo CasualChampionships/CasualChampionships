@@ -1,7 +1,6 @@
 package net.casual.minigame.uhc.resources
 
 import net.casual.arcade.minigame.MinigameResources
-import net.casual.resources.CasualResourcePackHost
 import net.casual.util.Config
 import net.casual.util.Texts
 import net.minecraft.server.MinecraftServer

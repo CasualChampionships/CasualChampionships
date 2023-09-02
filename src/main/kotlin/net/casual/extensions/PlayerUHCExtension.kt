@@ -1,8 +1,8 @@
 package net.casual.extensions
 
+import net.casual.CasualMod
 import net.casual.arcade.extensions.DataExtension
 import net.casual.arcade.utils.PlayerUtils.getExtension
-import net.casual.CasualMod
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
 import net.minecraft.server.level.ServerPlayer

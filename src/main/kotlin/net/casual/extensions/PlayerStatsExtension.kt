@@ -1,9 +1,9 @@
 package net.casual.extensions
 
+import net.casual.CasualMod
 import net.casual.arcade.Arcade
 import net.casual.arcade.extensions.DataExtension
 import net.casual.arcade.utils.PlayerUtils.getExtension
-import net.casual.CasualMod
 import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.minecraft.advancements.Advancement
 import net.minecraft.nbt.CompoundTag
@@ -66,7 +66,7 @@ class PlayerStatsExtension: DataExtension {
                 CasualMod.logger.warn("Failed to load advancement $string, invalid id")
                 continue
             }
-            val advancement = Arcade.server.advancements.getAdvancement(id)
+            val advancement = Arcade.getServer().advancements.getAdvancement(id)
             if (advancement === null) {
                 CasualMod.logger.warn("Failed to get advancement $id, non-existent")
                 continue

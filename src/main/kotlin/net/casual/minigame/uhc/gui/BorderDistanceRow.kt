@@ -4,7 +4,6 @@ import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.util.Texts
 import net.casual.util.Texts.monospaced
-import net.minecraft.ChatFormatting
 import net.minecraft.ChatFormatting.*
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer

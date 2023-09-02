@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.context.CommandContext
+import net.casual.CasualMod
 import net.casual.arcade.commands.EnumArgument
 import net.casual.arcade.commands.TimeArgument
 import net.casual.arcade.commands.TimeZoneArgument
@@ -15,18 +16,17 @@ import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.TimeUtils
-import net.casual.CasualMod
 import net.casual.extensions.PlayerFlag
 import net.casual.extensions.PlayerFlagsExtension.Companion.flags
 import net.casual.extensions.TeamFlag
 import net.casual.extensions.TeamFlagsExtension.Companion.flags
-import net.casual.util.UHCPlayerUtils.sendResourcePack
 import net.casual.managers.TeamManager
 import net.casual.minigame.uhc.UHCMinigame
 import net.casual.minigame.uhc.resources.UHCResourcePack
 import net.casual.resources.CasualResourcePackHost
 import net.casual.util.Config
 import net.casual.util.Texts
+import net.casual.util.UHCPlayerUtils.sendResourcePack
 import net.casual.util.UHCPlayerUtils.setForUHC
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands

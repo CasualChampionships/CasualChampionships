@@ -8,9 +8,9 @@ import net.casual.arcade.events.player.PlayerBlockPlacedEvent
 import net.casual.arcade.utils.LevelUtils.addExtension
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.extensions.WorldBlockTrackerExtension
 import net.casual.extensions.WorldBlockTrackerExtension.Companion.blockTracker
+import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component

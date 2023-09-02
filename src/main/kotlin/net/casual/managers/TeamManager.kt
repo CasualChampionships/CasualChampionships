@@ -1,6 +1,7 @@
 package net.casual.managers
 
 import com.google.gson.JsonObject
+import net.casual.CasualMod
 import net.casual.arcade.Arcade
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.team.TeamCreatedEvent
@@ -9,7 +10,6 @@ import net.casual.arcade.utils.ComponentUtils.green
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.TeamUtils.addExtension
-import net.casual.CasualMod
 import net.casual.extensions.TeamFlag.Ignored
 import net.casual.extensions.TeamFlag.Ready
 import net.casual.extensions.TeamFlagsExtension
@@ -30,13 +30,13 @@ object TeamManager {
     val configPath = Config.resolve("teams.json")
 
     fun getSpectatorTeam(): PlayerTeam {
-        return Arcade.server.scoreboard.getPlayerTeam("Spectator")!!
+        return Arcade.getServer().scoreboard.getPlayerTeam("Spectator")!!
     }
 
     fun Team.hasAlivePlayers(): Boolean {
         val names = this.players
         for (name in names) {
-            val player = Arcade.server.playerList.getPlayerByName(name)
+            val player = PlayerUtils.player(name)
             if (player != null && player.isSurvival) {
                 return true
             }
@@ -82,11 +82,11 @@ object TeamManager {
 
     fun getUnreadyTeams(): List<PlayerTeam> {
         val teams = LinkedList<PlayerTeam>()
-        val scoreboard = Arcade.server.scoreboard
+        val scoreboard = Arcade.getServer().scoreboard
         for (team in scoreboard.playerTeams) {
             var teamHasMember = false
             for (name in team.players) {
-                val player = Arcade.server.playerList.getPlayerByName(name)
+                val player = PlayerUtils.player(name)
                 if (player != null) {
                     teamHasMember = true
                     break
@@ -101,7 +101,7 @@ object TeamManager {
     }
 
     fun createTeams() {
-        val scoreboard = Arcade.server.scoreboard
+        val scoreboard = Arcade.getServer().scoreboard
         for (team in LinkedList(scoreboard.playerTeams)) {
             scoreboard.removePlayerTeam(team)
         }
@@ -130,7 +130,7 @@ object TeamManager {
                     scoreboard.addPlayerToTeam(player.scoreboardName, spectators)
                 }
             }
-        }, Arcade.server).exceptionally {
+        }, Arcade.getServer()).exceptionally {
             CasualMod.logger.error("Failed to download teams from database", it)
             null
         }
@@ -138,7 +138,7 @@ object TeamManager {
 
     fun setCollisions(shouldCollide: Boolean) {
         collisions = if (shouldCollide) Team.CollisionRule.ALWAYS else Team.CollisionRule.NEVER
-        for (team in Arcade.server.scoreboard.playerTeams) {
+        for (team in Arcade.getServer().scoreboard.playerTeams) {
             team.collisionRule = collisions
         }
     }
@@ -158,7 +158,7 @@ object TeamManager {
             val colour = json["colour"].asString
             val prefix = "[${json["prefix"].asString}] "
             val members = json["members"].asJsonArray
-            val scoreboard = Arcade.server.scoreboard
+            val scoreboard = Arcade.getServer().scoreboard
             var team = scoreboard.getPlayerTeam(teamName)
             if (team == null) {
                 team = scoreboard.addPlayerTeam(teamName)!!

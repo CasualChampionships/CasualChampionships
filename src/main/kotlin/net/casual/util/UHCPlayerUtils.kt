@@ -1,15 +1,14 @@
 package net.casual.util
 
-import net.casual.arcade.Arcade
+import net.casual.CasualMod
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.MinigameUtils.getMinigame
+import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.isSurvival
-import net.casual.CasualMod
-import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.extensions.PlayerFlag.*
 import net.casual.extensions.PlayerFlagsExtension.Companion.flags
 import net.casual.extensions.PlayerUHCExtension.Companion.uhc
@@ -18,6 +17,7 @@ import net.casual.extensions.TeamFlag.Ignored
 import net.casual.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.extensions.TeamUHCExtension.Companion.uhc
 import net.casual.minigame.uhc.UHCMinigame
+import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
@@ -45,7 +45,7 @@ object UHCPlayerUtils {
 
         val team = this.team ?: return false
         for (name in team.players) {
-            val player = Arcade.server.playerList.getPlayerByName(name)
+            val player = PlayerUtils.player(name)
             if (player != null && player != this && player.isSurvival) {
                 return false
             }
