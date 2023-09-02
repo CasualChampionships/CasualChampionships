@@ -57,7 +57,7 @@ class CasualMod: ModInitializer {
         Dimensions.noop()
 
         GlobalEventHandler.register<ServerLoadedEvent>(0) {
-            minigame = UHCMinigame(it.server, UHCEvents.getUHC(Config.getString("event")) ?: DefaultUHC)
+            minigame = UHCMinigame(it.server, UHCEvents.getUHC(Config.getStringOrDefault("event", "default")) ?: DefaultUHC)
         }
         GlobalEventHandler.register<PlayerJoinEvent>(0) {
             minigame.addPlayer(it.player)
@@ -81,7 +81,5 @@ class CasualMod: ModInitializer {
     //   Fix server replay
     //   Implement podium
     //   Restructure UHC stuff
-    //   Duels? - Implement duel command
-    //   Testing - Run tests (implement unit tests?)
     //   Minesweeper AI - Make sure all maps are non-luck based
 }
