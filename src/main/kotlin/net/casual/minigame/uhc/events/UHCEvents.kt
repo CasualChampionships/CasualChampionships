@@ -1,10 +1,14 @@
 package net.casual.minigame.uhc.events
 
+import net.casual.util.Config
+
 object UHCEvents {
     private val events = HashMap<String, () -> UHCEvent>()
 
-    fun getUHC(name: String): UHCEvent? {
-        return events[name]?.invoke()
+    private val event by Config.string("event", "default")
+
+    fun getUHC(name: String = event): UHCEvent {
+        return events[name]?.invoke() ?: DefaultUHC
     }
 
     fun register(name: String, factory: () -> UHCEvent) {

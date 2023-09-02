@@ -52,6 +52,7 @@ import net.casual.arcade.utils.PlayerUtils.sendSubtitle
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teamMessage
 import net.casual.arcade.utils.SettingsUtils.defaultOptions
+import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TeamUtils.getServerPlayers
 import net.casual.events.border.BorderEntityPortalEntryPointEvent
 import net.casual.events.border.BorderPortalWithinBoundsEvent
@@ -134,11 +135,8 @@ class UHCMinigame(
     Config.resolve("uhc_minigame.json")
 ), MultiLevelBorderListener {
     private val tracker = MultiLevelBorderTracker()
-
     private val claimed = HashSet<RaceAdvancement>()
 
-    private val display = this.createTabDisplay()
-    private var sidebar: ArcadeSidebar? = null
     private var health: ArcadeNameDisplay? = null
 
     private var glowing = false
@@ -189,6 +187,8 @@ class UHCMinigame(
 
         this.initialise()
         this.event.initialise(this)
+
+        this.setTabDisplay(this.createTabDisplay())
     }
 
     fun hasUHCStarted(): Boolean {
@@ -253,8 +253,7 @@ class UHCMinigame(
     }
 
     fun onActiveEnd() {
-        this.sidebar?.clearPlayers()
-        this.sidebar = null
+        this.removeSidebar()
         this.health?.clearPlayers()
         this.health = null
         this.server.isPvpAllowed = false
@@ -488,7 +487,7 @@ class UHCMinigame(
             CasualMod.logger.error("Last team was null!")
             return
         }
-        val alive = team.getServerPlayers().filter { it.isSurvival }
+        val alive = team.getOnlinePlayers().filter { it.isSurvival }
         if (alive.size == 1) {
             alive[0].grantAdvancement(UHCAdvancements.LAST_MAN_STANDING)
         }
@@ -739,7 +738,7 @@ class UHCMinigame(
         when (event.flag) {
             PlayerFlag.TeamGlow -> {
                 val team = player.team ?: return player.updateGlowingTag()
-                for (member in team.getServerPlayers()) {
+                for (member in team.getOnlinePlayers()) {
                     member.updateGlowingTag()
                 }
             }
@@ -757,9 +756,6 @@ class UHCMinigame(
     private fun onMinigameAddPlayer(player: ServerPlayer) {
         player.updateGlowingTag()
         player.sendResourcePack(this.event.getResourcePackHandler())
-
-        this.display.addPlayer(player)
-        this.sidebar?.addPlayer(player)
 
         if (this.isActivePhase() && this.glowing && player.isSurvival) {
             player.setGlowingTag(true)
@@ -1020,10 +1016,7 @@ class UHCMinigame(
         }
         sidebar.addRow(ComponentSupplier.of(Component.empty()))
 
-        PlayerUtils.forEveryPlayer {
-            sidebar.addPlayer(it)
-        }
-        this.sidebar = sidebar
+        this.setSidebar(sidebar)
     }
 
     private fun initialiseBorderTracker() {

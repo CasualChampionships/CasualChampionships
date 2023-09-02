@@ -15,6 +15,8 @@ object CasualResourcePackHost {
     // you waste 2 hours trying to debug a non-existent issue
     private val host = ResourcePackHost(1)
 
+    private val ip by Config.stringOrNull("pack_host_ip")
+
     init {
         host.addPacks(PathPackSupplier(packs))
         packs.createDirectories()
@@ -26,7 +28,7 @@ object CasualResourcePackHost {
     }
 
     internal fun reload(): CompletableFuture<Void> {
-        return host.start(Config.getStringOrNull("pack_host_ip"))
+        return host.start(ip)
     }
 
     internal fun registerEvents() {

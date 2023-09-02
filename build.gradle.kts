@@ -10,6 +10,7 @@ group = property("maven_group")!!
 version = property("mod_version")!!
 
 repositories {
+    mavenLocal()
     maven {
         url = uri("https://maven.parchmentmc.org/")
     }
@@ -26,7 +27,6 @@ repositories {
         url = uri("https://maven.nucleoid.xyz")
     }
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {

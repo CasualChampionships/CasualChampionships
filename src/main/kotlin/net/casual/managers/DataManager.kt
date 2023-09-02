@@ -15,8 +15,11 @@ object DataManager {
     private const val COMBINED = "combined_player_stats"
     private const val TEAMS = "teams"
 
+    private val mongo by Config.stringOrNull()
+
     lateinit var database: UHCDataBase
         private set
+
 
     internal fun registerEvents() {
         GlobalEventHandler.register<UHCConfigReloadedEvent> { onConfigLoaded() }
@@ -25,7 +28,7 @@ object DataManager {
     }
 
     private fun onConfigLoaded() {
-        val mongo = Config.getStringOrNull("mongo")
+        val mongo = this.mongo
         if (mongo === null) {
             database = EmptyUHCDataBase()
             return

@@ -10,7 +10,7 @@ import java.nio.file.Path
 private val root = FabricLoader.getInstance().configDir.resolve("CasualUHC")
 
 object Config: CustomisableConfig(root.resolve("config.json")) {
-    val dev by this.boolean("dev", false)
+    val dev by this.boolean("dev")
 
     fun resolve(next: String): Path {
         return root.resolve(next)
