@@ -5,9 +5,9 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.context.CommandContext
 import net.casual.CasualMod
-import net.casual.arcade.commands.EnumArgument
-import net.casual.arcade.commands.TimeArgument
-import net.casual.arcade.commands.TimeZoneArgument
+import net.casual.arcade.commands.arguments.EnumArgument
+import net.casual.arcade.commands.arguments.TimeArgument
+import net.casual.arcade.commands.arguments.TimeZoneArgument
 import net.casual.arcade.gui.screen.SelectionScreenComponents
 import net.casual.arcade.utils.CommandSourceUtils.fail
 import net.casual.arcade.utils.CommandSourceUtils.success
@@ -280,7 +280,7 @@ object UHCCommand: Command {
 
     private fun openSettingsMenu(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
-        CasualMod.minigame.openRulesMenu(player, SelectionScreenComponents.DEFAULT)
+       player.openMenu(CasualMod.minigame.createRulesMenu(SelectionScreenComponents.DEFAULT))
         return 1
     }
 

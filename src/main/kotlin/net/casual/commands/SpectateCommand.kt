@@ -23,7 +23,7 @@ object SpectateCommand: Command {
         if (!player.isSpectator) {
             throw NOT_SPECTATOR.create()
         }
-        player.openMenu(ScreenUtils.createSpectatorScreen())
+        player.openMenu(ScreenUtils.createSpectatorMenu())
         return 1
     }
 }

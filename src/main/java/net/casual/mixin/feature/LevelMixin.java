@@ -41,7 +41,7 @@ public class LevelMixin {
 		CallbackInfo ci
 	) {
 		if (dimension == Level.OVERWORLD || dimension == Level.NETHER || dimension == Level.END) {
-			this.worldBorder = new TrackedBorder(UHCBorderStage.FIRST.getStartSizeFor((Level) (Object) this));
+			this.worldBorder = new TrackedBorder(UHCBorderStage.FIRST.getStartSizeFor((Level) (Object) this), 0, 0);
 		}
 	}
 }

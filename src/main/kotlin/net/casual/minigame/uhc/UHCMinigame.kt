@@ -866,12 +866,10 @@ class UHCMinigame(
         val start = player.eyePosition.add(0.0, 4.0, 0.0)
         val end = start.add(vector.normalize())
 
-        val completed = java.util.ArrayList<BlockPos>(10)
         for (i in 1..2) {
             val top = start.lerp(end, 1.5 * i)
             val bottom = top.subtract(0.0, 10.0, 0.0)
             val hit = level.clip(ClipContext(top, bottom, ClipContext.Block.VISUAL, ClipContext.Fluid.SOURCE_ONLY, player))
-            completed.add(hit.blockPos)
 
             if (hit.type != HitResult.Type.MISS) {
                 val position = hit.blockPos
