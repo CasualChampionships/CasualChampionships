@@ -1,10 +1,8 @@
 package net.casual.minigame.uhc.advancement
 
 import net.casual.arcade.advancements.AdvancementBuilder
-import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.server.ServerAdvancementReloadEvent
 import net.casual.arcade.utils.ItemUtils.potion
-import net.casual.util.ResourceUtils.id
+import net.casual.util.CasualUtils.id
 import net.casual.util.Texts
 import net.minecraft.advancements.Advancement
 import net.minecraft.advancements.FrameType
@@ -46,15 +44,15 @@ object UHCAdvancements {
     val LAST_MAN_STANDING: Advancement
 
     init {
-        ROOT = AdvancementBuilder.create {
+        ROOT = register {
             id = id("root")
             display(Items.GOLDEN_APPLE)
             title = Texts.ADVANCEMENT_ROOT
             description = Texts.ADVANCEMENT_ROOT_DESC
             background = ResourceLocation("textures/gui/advancements/backgrounds/adventure.png")
             impossible()
-        }.build()
-        FIRST_BLOOD = AdvancementBuilder.create {
+        }
+        FIRST_BLOOD = register {
             parent = ROOT
             id = id("first_blood")
             display(Items.IRON_SWORD)
@@ -63,8 +61,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        EARLY_EXIT = AdvancementBuilder.create {
+        }
+        EARLY_EXIT = register {
             parent = ROOT
             id = id("early_exit")
             display(Items.POISONOUS_POTATO)
@@ -73,8 +71,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        MOSTLY_HARMLESS = AdvancementBuilder.create {
+        }
+        MOSTLY_HARMLESS = register {
             parent = EARLY_EXIT
             id = id("mostly_harmless")
             display(Items.FEATHER)
@@ -84,8 +82,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        HEAVY_HITTER = AdvancementBuilder.create {
+        }
+        HEAVY_HITTER = register {
             parent = FIRST_BLOOD
             id = id("heavy_hitter")
             display(Items.ANVIL)
@@ -95,8 +93,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        WINNER = AdvancementBuilder.create {
+        }
+        WINNER = register {
             parent = FIRST_BLOOD
             id = id("winner")
             display(Items.TOTEM_OF_UNDYING)
@@ -106,8 +104,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        COMBAT_LOGGER = AdvancementBuilder.create {
+        }
+        COMBAT_LOGGER = register {
             parent = ROOT
             id = id("combat_logger")
             display(Items.WOODEN_SWORD)
@@ -116,8 +114,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        NOT_DUSTLESS = AdvancementBuilder.create {
+        }
+        NOT_DUSTLESS = register {
             parent = ROOT
             id = id("thats_not_dustless")
             display(Items.REDSTONE)
@@ -126,8 +124,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        PARKOUR_MASTER = AdvancementBuilder.create {
+        }
+        PARKOUR_MASTER = register {
             parent = ROOT
             id = id("parkour_master")
             display(Items.NETHERITE_BOOTS)
@@ -137,8 +135,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        WORLD_RECORD_PACE = AdvancementBuilder.create {
+        }
+        WORLD_RECORD_PACE = register {
             parent = ROOT
             id = id("world_record_pace")
             display = Items.SPLASH_POTION.defaultInstance.potion(Potions.SWIFTNESS)
@@ -147,8 +145,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        EMBARRASSING = AdvancementBuilder.create {
+        }
+        EMBARRASSING = register {
             parent = ROOT
             id = id("thats_embarrassing")
             display(Items.SWEET_BERRIES)
@@ -157,8 +155,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        BUSTED = AdvancementBuilder.create {
+        }
+        BUSTED = register {
             parent = ROOT
             id = id("busted")
             display(Items.BARRIER)
@@ -167,8 +165,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        DEMOLITION_EXPERT = AdvancementBuilder.create {
+        }
+        DEMOLITION_EXPERT = register {
             parent = EARLY_EXIT
             id = id("demolition_expert")
             display(Items.TNT)
@@ -177,8 +175,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        OK_WE_BELIEVE_YOU_NOW = AdvancementBuilder.create {
+        }
+        OK_WE_BELIEVE_YOU_NOW = register {
             parent = COMBAT_LOGGER
             id = id("ok_we_believe_you_now")
             display(Items.WOODEN_HOE)
@@ -187,8 +185,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        FALLING_BLOCK = AdvancementBuilder.create {
+        }
+        FALLING_BLOCK = register {
             parent = NOT_DUSTLESS
             id = id("falling_block")
             display(Items.SAND)
@@ -197,8 +195,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        DREAM_LUCK = AdvancementBuilder.create {
+        }
+        DREAM_LUCK = register {
             parent = BUSTED
             id = id("dream_luck")
             display(Items.ENCHANTED_GOLDEN_APPLE)
@@ -207,8 +205,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        BROKEN_ANKLES = AdvancementBuilder.create {
+        }
+        BROKEN_ANKLES = register {
             parent = EMBARRASSING
             id = id("broken_ankles")
             display(Items.LEATHER_BOOTS)
@@ -217,8 +215,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        ON_THE_EDGE = AdvancementBuilder.create {
+        }
+        ON_THE_EDGE = register {
             parent = BROKEN_ANKLES
             id = id("on_the_edge")
             display = Items.SPLASH_POTION.defaultInstance.potion(Potions.STRONG_HARMING)
@@ -227,8 +225,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        SKILL_ISSUE = AdvancementBuilder.create {
+        }
+        SKILL_ISSUE = register {
             parent = EARLY_EXIT
             id = id("skill_issue")
             display(Items.BONE)
@@ -237,8 +235,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        SOLOIST = AdvancementBuilder.create {
+        }
+        SOLOIST = register {
             parent = ROOT
             id = id("soloist")
             display(Items.PLAYER_HEAD)
@@ -247,8 +245,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        NOT_NOW = AdvancementBuilder.create {
+        }
+        NOT_NOW = register {
             parent = ROOT
             id = id("not_now")
             display(Items.NETHERITE_SWORD)
@@ -257,8 +255,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        LDAP = AdvancementBuilder.create {
+        }
+        LDAP = register {
             parent = NOT_NOW
             id = id("ldap")
             display(Items.EMERALD_BLOCK)
@@ -267,8 +265,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        OFFICIALLY_BORED = AdvancementBuilder.create {
+        }
+        OFFICIALLY_BORED = register {
             parent = WORLD_RECORD_PACE
             id = id("officially_bored")
             display(Items.COMMAND_BLOCK)
@@ -277,8 +275,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        DISTRACTED = AdvancementBuilder.create {
+        }
+        DISTRACTED = register {
             parent = OFFICIALLY_BORED
             id = id("distracted")
             display(Items.CHAIN_COMMAND_BLOCK)
@@ -287,8 +285,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        UH_OH = AdvancementBuilder.create {
+        }
+        UH_OH = register {
             parent = LDAP
             id = id("uh_oh")
             display(Items.BARRIER)
@@ -297,8 +295,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        BASICALLY = AdvancementBuilder.create {
+        }
+        BASICALLY = register {
             parent = LDAP
             id = id("basically")
             display(Items.WHITE_WOOL)
@@ -307,8 +305,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        TEAM_PLAYER = AdvancementBuilder.create {
+        }
+        TEAM_PLAYER = register {
             parent = SOLOIST
             id = id("team_player")
             display(Items.LIME_BANNER)
@@ -317,8 +315,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        FIND_THE_BUTTON = AdvancementBuilder.create {
+        }
+        FIND_THE_BUTTON = register {
             parent = OFFICIALLY_BORED
             id = id("find_the_button")
             display(Items.STONE_BUTTON)
@@ -328,8 +326,8 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
-        LAST_MAN_STANDING = AdvancementBuilder.create {
+        }
+        LAST_MAN_STANDING = register {
             parent = SOLOIST
             id = id("soloist")
             display(Items.ARROW)
@@ -338,31 +336,20 @@ object UHCAdvancements {
             toast()
             announce()
             impossible()
-        }.build()
+        }
     }
 
-    fun register(advancement: Advancement) {
+    fun register(builder: AdvancementBuilder.() -> Unit): Advancement {
+        val advancement = AdvancementBuilder.create(builder).build()
         ALL.add(advancement)
+        return advancement
     }
 
     fun isRegistered(advancement: Advancement): Boolean {
         return ALL.contains(advancement)
     }
 
-    internal fun registerEvents() {
-        GlobalEventHandler.register<ServerAdvancementReloadEvent>(0) {
-            ALL.clear()
-            for (field in UHCAdvancements::class.java.declaredFields) {
-                if (Advancement::class.java.isAssignableFrom(field.type)) {
-                    try {
-                        val advancement = field[null] as Advancement
-                        it.add(advancement)
-                        register(advancement)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
+    fun getAllAdvancements(): Collection<Advancement> {
+        return ALL
     }
 }

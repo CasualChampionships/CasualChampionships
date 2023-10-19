@@ -15,8 +15,8 @@ import net.minecraft.util.Mth
 object Texts {
     private val lang = HashMap<String, String>()
 
-    val MOZART_FONT = ResourceUtils.id("mozart")
-    val ICON_FONT = ResourceUtils.id("icons")
+    val MOZART_FONT = CasualUtils.id("mozart")
+    val ICON_FONT = CasualUtils.id("icons")
     val SPACES_FONT = ResourceLocation("space", "spaces")
 
     val CASUAL_UHC: MutableComponent get() = Component.literal("Casual UHC")

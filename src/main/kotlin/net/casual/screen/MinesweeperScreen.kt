@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.server.ServerTickEvent
-import net.casual.arcade.gui.screen.InterfaceScreen
+import net.casual.arcade.gui.screen.ArcadeGenericScreen
 import net.casual.arcade.utils.ItemUtils.literalNamed
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
@@ -17,6 +17,7 @@ import net.casual.items.MinesweeperItem.Companion.UNKNOWN
 import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.util.Texts
 import net.minecraft.network.chat.Component
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
 import net.minecraft.world.SimpleMenuProvider
@@ -31,7 +32,7 @@ import kotlin.math.floor
 class MinesweeperScreen(
     player: Player,
     syncId: Int
-): InterfaceScreen(player, syncId, 6) {
+): ArcadeGenericScreen(player, syncId, 6) {
     private val guessed = IntArraySet()
     private val flags = IntArraySet()
     private val grid = Grid(9, 9)
@@ -54,13 +55,12 @@ class MinesweeperScreen(
         this.slots[87].set(this.clockItem)
         this.slots[88].set(BLANK_TILE)
         this.slots[89].set(PLAY_AGAIN_TILE)
+    }
 
-        // TODO: Fix memory leak
-        GlobalEventHandler.register<ServerTickEvent> { _ ->
-            if (this.grid.startTime != 0L && !this.complete) {
-                val seconds = floor((System.nanoTime() - this.grid.startTime) / 1000000000.0).toInt()
-                this.clockItem.count = Mth.clamp(seconds, 1, 127)
-            }
+    override fun onTick(server: MinecraftServer) {
+        if (this.grid.startTime != 0L && !this.complete) {
+            val seconds = floor((System.nanoTime() - this.grid.startTime) / 1000000000.0).toInt()
+            this.clockItem.count = Mth.clamp(seconds, 1, 127)
         }
     }
 
@@ -170,9 +170,9 @@ class MinesweeperScreen(
     private fun getTileStack(tile: Int): ItemStack {
         check(!(tile > 8 || tile < -1)) { "Invalid tile: $tile" }
         return when (tile) {
-            -1 -> MinesweeperItem.STATES.createStack(MINE).setHoverName(Texts.MINESWEEPER_MINE)
-            0 -> MinesweeperItem.STATES.createStack(EMPTY).literalNamed("")
-            else -> MinesweeperItem.STATES.createStack(tile).literalNamed(tile.toString())
+            -1 -> MINE.setHoverName(Texts.MINESWEEPER_MINE)
+            0 -> EMPTY.literalNamed("")
+            else -> MinesweeperItem.MODELLER.create(tile).literalNamed(tile.toString())
         }
     }
 
@@ -280,7 +280,7 @@ class MinesweeperScreen(
     }
 
     companion object {
-        private val UNKNOWN_TILE = MinesweeperItem.STATES.createStack(UNKNOWN).literalNamed("?")
+        private val UNKNOWN_TILE = UNKNOWN.literalNamed("?")
         private val EXIT_TILE = Items.RED_STAINED_GLASS.defaultInstance.setHoverName(Texts.MINESWEEPER_EXIT)
         private val DESC_TILE_1 = Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_1)
         private val DESC_TILE_2 = Items.OAK_SIGN.defaultInstance.setHoverName(Texts.MINESWEEPER_DESC_2)

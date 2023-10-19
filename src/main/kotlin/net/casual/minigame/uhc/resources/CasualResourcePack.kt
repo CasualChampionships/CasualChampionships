@@ -8,7 +8,7 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.io.path.readBytes
 
-object UHCResourcePack {
+object CasualResourcePack {
     private val path = Config.resolve("packs").resolve("uhc-pack.zip")
     val pack = ResourcePackCreator.create()
 
@@ -27,7 +27,7 @@ object UHCResourcePack {
         val path = CasualMod.uhc.findPath(CasualMod.uhc.metadata.getIconPath(64).get()).get()
         pack.packIcon = path.readBytes()
 
-        if (!UHCResourcePack.path.exists()) {
+        if (!CasualResourcePack.path.exists()) {
             if (generate()) {
                 CasualMod.logger.info("Successfully built the UHC pack")
             } else {

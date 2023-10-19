@@ -1,13 +1,13 @@
 package net.casual.minigame.uhc.events
 
-import net.casual.arcade.minigame.MinigameLobby
 import net.casual.arcade.minigame.MinigameResources
+import net.casual.arcade.minigame.lobby.Lobby
 import net.casual.minigame.uhc.UHCMinigame
 
 interface UHCEvent {
     fun getTeamSize(): Int
 
-    fun getMinigameLobby(): MinigameLobby
+    fun getLobby(): Lobby
 
     fun getResourcePackHandler(): MinigameResources
 

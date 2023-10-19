@@ -2,8 +2,9 @@ package net.casual.resources
 
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.server.ServerStoppedEvent
-import net.casual.arcade.resources.PathPackSupplier
-import net.casual.arcade.resources.ResourcePackHost
+import net.casual.arcade.resources.DirectoryPackSupplier
+import net.casual.arcade.resources.HostedPack
+import net.casual.arcade.resources.PackHost
 import net.casual.events.uhc.UHCConfigReloadedEvent
 import net.casual.util.Config
 import java.util.concurrent.CompletableFuture
@@ -11,24 +12,24 @@ import kotlin.io.path.createDirectories
 
 object CasualResourcePackHost {
     private val packs = Config.resolve("packs")
-    // Note to self: if resource packs don't work press F3 + T before
+    // Note to self: if resource packs don't work, press F3 + T before
     // you waste 2 hours trying to debug a non-existent issue
-    private val host = ResourcePackHost(1)
+    private val host = PackHost(1)
 
     private val ip by Config.stringOrNull("pack_host_ip")
 
     init {
-        host.addPacks(PathPackSupplier(packs))
-        packs.createDirectories()
+        this.host.addPacks(DirectoryPackSupplier(this.packs))
+        this.packs.createDirectories()
         this.reload()
     }
 
-    fun getHostedPack(name: String): ResourcePackHost.HostedPack? {
-        return host.getHostedPack(name)
+    fun getHostedPack(name: String): HostedPack? {
+        return this.host.getHostedPack(name)
     }
 
-    internal fun reload(): CompletableFuture<Void> {
-        return host.start(ip)
+    internal fun reload(): CompletableFuture<Boolean> {
+        return this.host.start(this.ip)
     }
 
     internal fun registerEvents() {

@@ -1,10 +1,11 @@
 package net.casual.items
 
 import net.casual.arcade.items.ArcadeModelledItem
-import net.casual.arcade.items.ModelledItemStates
+import net.casual.arcade.items.ItemModeller
+import net.casual.arcade.items.ResourcePackItemModeller
 import net.casual.arcade.scheduler.MinecraftTimeUnit
-import net.casual.minigame.uhc.resources.UHCResourcePack
-import net.casual.util.ItemModelUtils.create
+import net.casual.minigame.uhc.resources.CasualResourcePack
+import net.casual.util.CasualUtils
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
@@ -41,16 +42,12 @@ class LightningStaffItem private constructor(): AxeItem(Tiers.DIAMOND, 4.0f, -3.
         return InteractionResultHolder.pass(stack)
     }
 
-    override fun getStates(): ModelledItemStates {
-        return STATES
-    }
-
-    override fun getPolymerCustomModelData(itemStack: ItemStack, player: ServerPlayer?): Int {
-        return STATES.getModel(DEFAULT).value()
+    override fun getModeller(): ItemModeller {
+        return MODELLER
     }
 
     companion object {
-        val STATES = ModelledItemStates(LightningStaffItem(), UHCResourcePack.pack)
-        val DEFAULT = STATES.create("weapons/lightning_staff")
+        val MODELLER = ResourcePackItemModeller(LightningStaffItem(), CasualResourcePack.pack)
+        val DEFAULT by MODELLER.model(CasualUtils.id("weapons/lightning_staff"))
     }
 }

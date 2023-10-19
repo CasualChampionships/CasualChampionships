@@ -1,22 +1,30 @@
 package net.casual.minigame.uhc.task
 
 import com.google.gson.JsonObject
-import net.casual.arcade.gui.bossbar.BossBarTask
-import net.casual.arcade.scheduler.SavableTask
-import net.casual.minigame.uhc.UHCMinigame
+import net.casual.arcade.gui.task.BossBarTask
+import net.casual.arcade.minigame.Minigame
+import net.casual.arcade.minigame.task.AnyMinigameTaskFactory
+import net.casual.arcade.task.SavableTask
+import net.casual.arcade.task.Task
+import net.casual.arcade.task.TaskCreationContext
+import net.casual.arcade.task.TaskWriteContext
+import net.casual.arcade.utils.BossbarUtils.readData
 import net.casual.minigame.uhc.gui.GlowingBossBar
 
 class GlowingBossBarTask(
-    uhc: UHCMinigame,
-    private val end: Int
-): BossBarTask(uhc, GlowingBossBar(uhc, end)), SavableTask {
-    override val id = ID
+    minigame: Minigame<*>
+): BossBarTask<GlowingBossBar>(minigame, GlowingBossBar()), SavableTask {
+    override val id = GlowingBossBarTask.id
 
-    override fun writeData(json: JsonObject) {
-        json.addProperty("end", this.end)
+    override fun writeCustomData(context: TaskWriteContext): JsonObject {
+        return this.bar.writeData(context)
     }
 
-    companion object {
-        const val ID = "glowing_boss_bar_task"
+    companion object: AnyMinigameTaskFactory {
+        override val id = "glowing_boss_bar_task"
+
+        override fun create(minigame: Minigame<*>, context: TaskCreationContext): Task {
+            return GlowingBossBarTask(minigame).readData(context)
+        }
     }
 }

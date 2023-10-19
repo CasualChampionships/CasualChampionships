@@ -1,10 +1,11 @@
 package net.casual.minigame.uhc.events
 
-import net.casual.arcade.map.BoxMap
-import net.casual.arcade.map.PlaceableMap
-import net.casual.arcade.math.Location
-import net.casual.arcade.minigame.MinigameLobby
+import net.casual.arcade.area.BoxedArea
+import net.casual.arcade.gui.countdown.Countdown
+import net.casual.arcade.gui.countdown.TitledCountdown
 import net.casual.arcade.minigame.MinigameResources
+import net.casual.arcade.minigame.lobby.Lobby
+import net.casual.arcade.utils.impl.Location
 import net.casual.minigame.Dimensions
 import net.casual.minigame.uhc.UHCMinigame
 import net.casual.minigame.uhc.resources.UHCResources
@@ -12,22 +13,19 @@ import net.minecraft.core.Vec3i
 import net.minecraft.world.phys.Vec2
 import net.minecraft.world.phys.Vec3
 
-object DefaultUHC: UHCEvent, MinigameLobby {
-    private val area by lazy { BoxMap(Vec3i(0, 300, 0), 40, 10, Dimensions.getLobbyLevel()) }
+object DefaultUHC: UHCEvent, Lobby {
+    override val area by lazy { BoxedArea(Vec3i(0, 300, 0), 40, 10, Dimensions.getLobbyLevel()) }
+    override val spawn = Location(this.area.level, Vec3(0.0, 302.0, 0.0), Vec2(0.0F, 0.0F))
+
+    override fun getCountdown(): Countdown {
+        return TitledCountdown.DEFAULT
+    }
 
     override fun getTeamSize(): Int {
         return 5
     }
 
-    override fun getSpawn(): Location {
-        return Location(area.level, Vec3.atCenterOf(area.center.above(2)), Vec2(0.0F, 0.0F))
-    }
-
-    override fun getMap(): PlaceableMap {
-        return area
-    }
-
-    override fun getMinigameLobby(): MinigameLobby {
+    override fun getLobby(): Lobby {
         return this
     }
 

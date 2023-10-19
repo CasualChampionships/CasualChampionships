@@ -14,11 +14,11 @@ import net.minecraft.server.level.ServerPlayer
 
 class TeammateRow(val index: Int, val buffer: String = ""): ComponentSupplier {
     override fun getComponent(player: ServerPlayer): Component {
-        val team = player.uhc.originalTeam ?: player.team
+        val team = player.team
         if (team == null || team.flags.has(TeamFlag.Ignored)) {
             return Component.literal("${this.buffer} - ").monospaced().append(Texts.ICON_CROSS)
         }
-        val players = team.uhc.players
+        val players = team.players
         if (this.index >= players.size) {
             return Component.literal("${this.buffer} - ").monospaced().append(Texts.ICON_CROSS)
         }

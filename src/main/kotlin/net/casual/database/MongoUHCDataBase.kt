@@ -144,9 +144,7 @@ class MongoUHCDataBase(
     }
 
     override fun shutdown() {
-        this.executor.shutdownNow().forEach {
-            it.run()
-        }
+        this.executor.shutdownNow().forEach(Runnable::run)
         this.client.close()
     }
 }

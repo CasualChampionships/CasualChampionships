@@ -36,6 +36,7 @@ class TeamUHCExtension: DataExtension {
     }
 
     companion object {
+        @Deprecated("")
         val Team.uhc
             get() = this.getExtension(TeamUHCExtension::class.java)
     }

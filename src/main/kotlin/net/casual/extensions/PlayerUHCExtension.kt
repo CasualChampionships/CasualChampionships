@@ -14,7 +14,6 @@ class PlayerUHCExtension(
 ): DataExtension {
     val border = WorldBorder()
 
-    var originalTeam: Team? = null
     var halfHealthTicks = 0
 
     override fun getName(): String {
@@ -23,22 +22,11 @@ class PlayerUHCExtension(
 
     override fun deserialize(element: Tag) {
         element as CompoundTag
-        val teamName = element.getString("originalTeam")
-        if (teamName.isNotEmpty()) {
-            this.originalTeam = this.owner.server.scoreboard.getPlayerTeam(teamName)
-            if (this.originalTeam === null) {
-                CasualMod.logger.warn("Failed to retrieve original team for ${this.owner.scoreboardName}")
-            }
-        }
         this.halfHealthTicks = element.getInt("halfHealthTicks")
     }
 
     override fun serialize(): Tag {
         val tag = CompoundTag()
-        val team = this.originalTeam
-        if (team !== null) {
-            tag.putString("originalTeam", team.name)
-        }
         tag.putInt("halfHealthTicks", this.halfHealthTicks)
         return tag
     }

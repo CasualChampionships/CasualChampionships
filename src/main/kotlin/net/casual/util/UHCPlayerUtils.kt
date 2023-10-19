@@ -1,6 +1,5 @@
 package net.casual.util
 
-import net.casual.CasualMod
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
@@ -9,13 +8,12 @@ import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.isSurvival
+import net.casual.arcade.utils.ResourcePackUtils.sendResourcePack
 import net.casual.extensions.PlayerFlag.*
 import net.casual.extensions.PlayerFlagsExtension.Companion.flags
-import net.casual.extensions.PlayerUHCExtension.Companion.uhc
 import net.casual.extensions.TeamFlag.Eliminated
 import net.casual.extensions.TeamFlag.Ignored
 import net.casual.extensions.TeamFlagsExtension.Companion.flags
-import net.casual.extensions.TeamUHCExtension.Companion.uhc
 import net.casual.minigame.uhc.UHCMinigame
 import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
@@ -105,9 +103,6 @@ object UHCPlayerUtils {
             flags.set(Participating, true)
             flags.set(TeamGlow, true)
 
-            this.uhc.originalTeam = team
-            team.uhc.add(this.scoreboardName)
-
             this.addEffect(MobEffectInstance(DAMAGE_RESISTANCE, 200, 4, true, false))
             this.setGameMode(GameType.SURVIVAL)
             return
@@ -124,7 +119,7 @@ object UHCPlayerUtils {
     fun ServerPlayer.sendResourcePack(handler: MinigameResources) {
         val info = handler.getInfo(this)
         if (info !== null) {
-            this.sendTexturePack(info.url, info.hash, info.isRequired, info.prompt)
+            this.sendResourcePack(info)
         }
     }
 
@@ -132,21 +127,21 @@ object UHCPlayerUtils {
         if (this.team === team) {
             return true
         }
-        val original = this.uhc.originalTeam
-        val players = team.uhc.players
-        if (original == team) {
-            if (!players.contains(this.scoreboardName)) {
-                CasualMod.logger.warn(
-                    "Player ${this.scoreboardName} had team ${team.name} registered, but team didn't recognise player??!"
-                )
-            }
-            return true
-        } else if (players.contains(this.scoreboardName)) {
-            CasualMod.logger.warn(
-                "Team ${team.name} had player ${this.scoreboardName} registered, but player didn't recognise team??!"
-            )
-            return true
-        }
+        // val original = this.uhc.originalTeam
+        // val players = team.uhc.players
+        // if (original == team) {
+        //     if (!players.contains(this.scoreboardName)) {
+        //         CasualMod.logger.warn(
+        //             "Player ${this.scoreboardName} had team ${team.name} registered, but team didn't recognise player??!"
+        //         )
+        //     }
+        //     return true
+        // } else if (players.contains(this.scoreboardName)) {
+        //     CasualMod.logger.warn(
+        //         "Team ${team.name} had player ${this.scoreboardName} registered, but player didn't recognise team??!"
+        //     )
+        //     return true
+        // }
         return false
     }
 }

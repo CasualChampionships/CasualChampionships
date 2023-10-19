@@ -5,10 +5,14 @@ import net.casual.CasualMod
 import net.casual.arcade.Arcade
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.team.TeamCreatedEvent
+import net.casual.arcade.minigame.Minigame
+import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.green
+import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
+import net.casual.arcade.utils.TeamUtils
 import net.casual.arcade.utils.TeamUtils.addExtension
 import net.casual.extensions.TeamFlag.Ignored
 import net.casual.extensions.TeamFlag.Ready
@@ -20,6 +24,9 @@ import net.casual.util.Texts
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import java.util.*
@@ -44,9 +51,9 @@ object TeamManager {
         return false
     }
 
-    fun isOneTeamRemaining(): Boolean {
+    fun isOneTeamRemaining(players: Collection<ServerPlayer>): Boolean {
         var team: Team? = null
-        for (player in PlayerUtils.players()) {
+        for (player in players) {
             if (player.isSurvival) {
                 team = if (team === null || team.flags.has(Ignored)) player.team else team
                 if (team != null && !team.flags.has(Ignored) && team !== player.team) {
@@ -57,13 +64,44 @@ object TeamManager {
         return true
     }
 
-    fun getAnyAliveTeam(): Team? {
-        for (player in PlayerUtils.players()) {
+    fun getAnyAliveTeam(players: Collection<ServerPlayer>): Team? {
+        for (player in players) {
             if (player.isSurvival) {
                 return player.team
             }
         }
         return null
+    }
+
+    fun announceReady(minigame: Minigame<*>) {
+        for (team in minigame.getPlayerTeams()) {
+            team.flags.set(Ready, false)
+        }
+
+        val bar = Component.literal("══════════════════").gold()
+        val yes = Component.literal("[").append(Texts.LOBBY_YES).append("]").bold().green().withStyle {
+            it.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready yes"))
+        }
+        val no = Component.literal("[").append(Texts.LOBBY_NO).append("]").bold().red().withStyle {
+            it.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ready no"))
+        }
+        val readyMessage = bar.copy()
+            .append("\n      ")
+            .append(Texts.LOBBY_READY_QUESTION)
+            .append("\n\n\n       ")
+            .append(yes)
+            .append("        ")
+            .append(no)
+            .append("\n\n\n")
+            .append(bar)
+
+        for (player in minigame.getPlayers()) {
+            val team = player.team
+            if (team != null && !team.flags.has(Ignored)) {
+                player.playNotifySound(SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.MASTER, 1.0F, 1.0F)
+                player.sendSystemMessage(readyMessage)
+            }
+        }
     }
 
     fun checkAllTeamsReady() {

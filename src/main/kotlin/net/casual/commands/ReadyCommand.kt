@@ -3,7 +3,7 @@ package net.casual.commands
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
-import net.casual.arcade.utils.CommandSourceUtils.success
+import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.TeamUtils.asPlayerTeam
@@ -11,12 +11,12 @@ import net.casual.extensions.TeamFlag.Ignored
 import net.casual.extensions.TeamFlag.Ready
 import net.casual.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.managers.TeamManager
-import net.casual.minigame.CasualMinigame
 import net.casual.util.Texts
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.network.chat.Component
 
+// TODO: redo ready logic
 object ReadyCommand: Command {
     private val NOT_NOW = SimpleCommandExceptionType(Texts.LOBBY_READY_NOT_NOW)
     private val NO_TEAM = SimpleCommandExceptionType(Texts.LOBBY_READY_NO_TEAM)
@@ -47,9 +47,6 @@ object ReadyCommand: Command {
     private fun ready(context: CommandContext<CommandSourceStack>, ready: Boolean): Int {
         val player = context.source.playerOrException
         val minigame = player.getMinigame()
-        if (minigame !is CasualMinigame || !minigame.canReadyUp()) {
-            throw NOT_NOW.create()
-        }
         val team = player.team
         if (team === null || team.flags.has(Ignored)) {
             throw NO_TEAM.create()

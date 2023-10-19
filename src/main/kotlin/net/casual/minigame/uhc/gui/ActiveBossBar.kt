@@ -5,6 +5,7 @@ import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.TimeUtils
+import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.extensions.PlayerStat
 import net.casual.extensions.PlayerStatsExtension.Companion.uhcStats
 import net.casual.minigame.uhc.UHCMinigame
@@ -33,7 +34,7 @@ class ActiveBossBar(
             .append(Texts.space(-27))
             .append(Texts.literal("%02d".format(player.uhcStats[PlayerStat.Kills].toInt())).monospaced())
             .append(Texts.ICON_KILLS)
-        val middle = Texts.BOSSBAR_ELAPSED.generate(TimeUtils.formatHHMMSS(this.owner.uptime, MinecraftTimeUnit.Ticks))
+        val middle = Texts.BOSSBAR_ELAPSED.generate(TimeUtils.formatHHMMSS(this.owner.uptime.Ticks))
         return start.append(middle).append(end)
     }
 

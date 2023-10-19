@@ -1,7 +1,7 @@
 package net.casual.util
 
 import net.casual.arcade.utils.ComponentUtils.gold
-import net.casual.arcade.utils.ComponentUtils.unItalicise
+import net.casual.arcade.utils.ComponentUtils.unitalicise
 import net.casual.items.CasualItems
 import net.minecraft.nbt.StringTag
 import net.minecraft.server.level.ServerPlayer
@@ -10,7 +10,7 @@ import net.minecraft.world.item.PlayerHeadItem
 
 object HeadUtils {
     fun createConsumableGoldenHead(): ItemStack {
-        return ItemStack(CasualItems.GOLDEN_HEAD).setHoverName(Texts.UHC_GOLDEN_HEAD.copy().gold().unItalicise())
+        return ItemStack(CasualItems.GOLDEN_HEAD).setHoverName(Texts.UHC_GOLDEN_HEAD.copy().gold().unitalicise())
     }
 
     fun createConsumablePlayerHead(player: ServerPlayer): ItemStack {

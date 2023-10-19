@@ -1,35 +1,28 @@
 package net.casual.recipes
 
-import net.casual.arcade.recipes.ArcadeCustomRecipe
+import net.casual.arcade.recipes.CraftingRecipeBuilder
 import net.casual.items.CasualItems
 import net.casual.util.HeadUtils
-import net.casual.util.ResourceUtils.id
-import net.minecraft.core.RegistryAccess
-import net.minecraft.world.inventory.CraftingContainer
-import net.minecraft.world.item.ItemStack
+import net.casual.util.CasualUtils.id
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.crafting.CraftingBookCategory
-import net.minecraft.world.level.Level
+import net.minecraft.world.item.crafting.ShapedRecipe
 
-class GoldenHeadRecipe: ArcadeCustomRecipe(
-    id("golden_head_recipe"),
-    CraftingBookCategory.MISC
-) {
-    override fun assemble(container: CraftingContainer, registryAccess: RegistryAccess): ItemStack {
-        return HeadUtils.createConsumableGoldenHead()
-    }
-
-    override fun canCraftInDimensions(width: Int, height: Int): Boolean {
-        return width == 3 && height == 3
-    }
-
-    override fun matches(container: CraftingContainer, level: Level): Boolean {
-        for (i in 0 until container.width * container.height) {
-            val stack = container.getItem(i)
-            if (if (i == 4) !stack.`is`(CasualItems.PLAYER_HEAD) else !stack.`is`(Items.GOLD_INGOT)) {
-                return false
-            }
-        }
-        return true
+object GoldenHeadRecipe {
+    fun create(): ShapedRecipe {
+        return CraftingRecipeBuilder.shaped {
+            id = id("golden_head_recipe")
+            category = CraftingBookCategory.MISC
+            height = 3
+            width = 3
+            result = HeadUtils.createConsumableGoldenHead()
+            val x = Items.GOLD_INGOT
+            val o = CasualItems.PLAYER_HEAD
+            ingredients(
+                x, x, x,
+                x, o, x,
+                x, x, x
+            )
+        }.build()
     }
 }
