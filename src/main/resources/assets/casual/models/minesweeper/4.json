@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "uhc:item/minesweeper/1"
+    "layer0": "casual:item/minesweeper/4"
   }
 }

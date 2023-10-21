@@ -5,7 +5,7 @@ import net.casual.arcade.events.server.ServerStoppedEvent
 import net.casual.arcade.resources.DirectoryPackSupplier
 import net.casual.arcade.resources.HostedPack
 import net.casual.arcade.resources.PackHost
-import net.casual.events.uhc.UHCConfigReloadedEvent
+import net.casual.events.uhc.CasualConfigReloaded
 import net.casual.util.Config
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.createDirectories
@@ -34,6 +34,6 @@ object CasualResourcePackHost {
 
     internal fun registerEvents() {
         GlobalEventHandler.register<ServerStoppedEvent> { host.shutdown() }
-        GlobalEventHandler.register<UHCConfigReloadedEvent> { reload() }
+        GlobalEventHandler.register<CasualConfigReloaded> { reload() }
     }
 }

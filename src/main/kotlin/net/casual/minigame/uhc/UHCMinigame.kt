@@ -67,6 +67,7 @@ import net.casual.minigame.uhc.advancement.RaceAdvancement
 import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.minigame.uhc.events.DefaultUHC
 import net.casual.minigame.uhc.events.UHCEvent
+import net.casual.minigame.uhc.gui.ActiveBossBar
 import net.casual.minigame.uhc.gui.BorderDistanceRow
 import net.casual.minigame.uhc.gui.TeammateRow
 import net.casual.minigame.uhc.task.*
@@ -75,11 +76,11 @@ import net.casual.screen.MinesweeperScreen
 import net.casual.util.*
 import net.casual.util.DirectionUtils.opposite
 import net.casual.util.Texts.monospaced
-import net.casual.util.UHCPlayerUtils.isAliveSolo
-import net.casual.util.UHCPlayerUtils.isMessageGlobal
-import net.casual.util.UHCPlayerUtils.sendResourcePack
-import net.casual.util.UHCPlayerUtils.setForUHC
-import net.casual.util.UHCPlayerUtils.updateGlowingTag
+import net.casual.util.CasualPlayerUtils.isAliveSolo
+import net.casual.util.CasualPlayerUtils.isMessageGlobal
+import net.casual.util.CasualPlayerUtils.sendResourcePack
+import net.casual.util.CasualPlayerUtils.setForUHC
+import net.casual.util.CasualPlayerUtils.updateGlowingTag
 import net.casual.util.shapes.ArrowShape
 import net.minecraft.ChatFormatting.*
 import net.minecraft.core.BlockPos
@@ -115,10 +116,12 @@ import kotlin.math.atan2
 
 class UHCMinigame(
     server: MinecraftServer,
-    event: UHCEvent = DefaultUHC
+    event: UHCEvent = DefaultUHC,
+    val overworld: ServerLevel = LevelUtils.overworld(),
+    val nether: ServerLevel = LevelUtils.nether(),
+    val end: ServerLevel = LevelUtils.end()
 ): SavableMinigame<UHCMinigame>(
     server,
-    Config.resolve("uhc_minigame.json")
 ), MultiLevelBorderListener {
     private val tracker = MultiLevelBorderTracker()
     private val claimed = HashSet<RaceAdvancement>()
@@ -137,10 +140,15 @@ class UHCMinigame(
 
     init {
         this.initialise()
+
+        if (!Config.dev) {
+            this.path = Config.resolve("uhc_minigame.json")
+        }
     }
 
     override fun initialise() {
         super.initialise()
+        this.read()
 
         this.events.register<ServerTickEvent> { this.onServerTick() }
         this.events.register<ServerRecipeReloadEvent> { this.onRecipeReload(it) }
@@ -162,6 +170,7 @@ class UHCMinigame(
         this.events.register<PlayerClientboundPacketEvent> { this.onPlayerClientboundPacket(it) }
         this.events.register<PlayerDamageEvent> { this.onPlayerDamage(it) }
         this.events.register<PlayerDeathEvent> { this.onPlayerDeath(it) }
+        this.events.register<PlayerRespawnEvent> { this.onPlayerRespawn(it) }
         this.events.register<PlayerItemReleaseEvent> { this.onPlayerItemRelease(it) }
         this.events.register<PlayerLeaveEvent> { this.onPlayerLeave(it) }
         this.events.register<PlayerTickEvent> { this.onPlayerTick(it) }
@@ -178,6 +187,8 @@ class UHCMinigame(
         this.event.initialise(this)
 
         this.setTabDisplay(this.createTabDisplay())
+        this.addBossbar(ActiveBossBar(this))
+        this.createActiveSidebar()
     }
 
     fun isRunning(): Boolean {
@@ -238,8 +249,7 @@ class UHCMinigame(
 
     fun onBorderFinish() {
         if (this.settings.endGameGlow) {
-            this.glowing = true
-
+            this.setGlowing(true)
         }
         if (this.settings.generatePortals) {
             LevelUtils.overworld().portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
@@ -262,11 +272,7 @@ class UHCMinigame(
     }
 
     override fun getLevels(): Collection<ServerLevel> {
-        return listOf(
-            LevelUtils.overworld(),
-            LevelUtils.nether(),
-            LevelUtils.end()
-        )
+        return listOf(this.overworld, this.nether, this.end)
     }
 
     override fun getPhases(): Collection<UHCPhase> {
@@ -442,11 +448,15 @@ class UHCMinigame(
             PlayerRecorders.get(player)?.stop()
         }
 
-        player.setRespawnPosition(player.level().dimension(), player.blockPosition(), player.xRot, true, false)
-        player.setGameMode(GameType.SPECTATOR)
         if (this.isRunning()) {
             this.onEliminated(player, source.entity)
         }
+    }
+
+    private fun onPlayerRespawn(event: PlayerRespawnEvent) {
+        val player = event.player
+
+        player.setGameMode(GameType.SPECTATOR)
     }
 
     private fun onPlayerLeave(event: PlayerLeaveEvent) {
@@ -686,6 +696,8 @@ class UHCMinigame(
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
+        player.setRespawnPosition(player.level().dimension(), player.blockPosition(), player.xRot, true, false)
+
         if (this.isUnclaimed(RaceAdvancement.Death)) {
             player.grantAdvancement(UHCAdvancements.EARLY_EXIT)
         }
@@ -709,14 +721,12 @@ class UHCMinigame(
 
         player.uhcStats.increment(PlayerStat.Deaths, 1.0)
 
-        val original = player.team
-        this.server.scoreboard.addPlayerToTeam(player.scoreboardName, TeamManager.getSpectatorTeam())
-
-        if (original !== null && !original.flags.has(TeamFlag.Eliminated) && !original.hasAlivePlayers()) {
-            original.flags.set(TeamFlag.Eliminated, true)
-            PlayerUtils.forEveryPlayer {
-                it.sendSound(SoundEvents.LIGHTNING_BOLT_THUNDER, volume = 0.5F)
-                it.sendSystemMessage(Texts.UHC_ELIMINATED.generate(original.name).withStyle(original.color).bold())
+        val team = player.team
+        if (team !== null && !team.flags.has(TeamFlag.Eliminated) && !team.hasAlivePlayers()) {
+            team.flags.set(TeamFlag.Eliminated, true)
+            for (playing in this.getPlayers()) {
+                playing.sendSound(SoundEvents.LIGHTNING_BOLT_THUNDER, volume = 0.5F)
+                playing.sendSystemMessage(Texts.UHC_ELIMINATED.generate(team.name).withStyle(team.color).bold())
             }
         }
 
@@ -884,7 +894,7 @@ class UHCMinigame(
     internal fun grantFinalAdvancements() {
         var lowest: PlayerAttacker? = null
         var highest: PlayerAttacker? = null
-        for (player in PlayerUtils.players()) {
+        for (player in this.getPlayers()) {
             if (player.flags.has(PlayerFlag.Participating)) {
                 val current = player.uhcStats[PlayerStat.DamageDealt]
                 if (lowest === null) {

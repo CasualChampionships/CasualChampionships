@@ -11,10 +11,9 @@ object CommandManager {
             LookCommand.register(dispatcher)
             MinesweeperCommand.register(dispatcher)
             PosCommand.register(dispatcher)
-            ReadyCommand.register(dispatcher)
             SpectateCommand.register(dispatcher)
             TeamGlowCommand.register(dispatcher)
-            UHCCommand.register(dispatcher)
+            CasualCommand.register(dispatcher)
         }
     }
 }

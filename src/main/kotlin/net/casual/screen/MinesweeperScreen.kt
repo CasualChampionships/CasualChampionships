@@ -237,7 +237,7 @@ class MinesweeperScreen(
             val isTop = index - this.width < 0
             val isBottom = index + this.width > this.capacity
             val surrounding: IntSet = IntArraySet()
-            // Could probably improve this but eh.
+            // Could probably improve this, but eh.
             if (!isLeft) {
                 surrounding.add(index - 1)
                 if (!isTop) {

@@ -13,10 +13,9 @@ import net.casual.managers.DataManager
 import net.casual.managers.TeamManager
 import net.casual.minigame.CasualMinigame
 import net.casual.minigame.Dimensions
-import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.minigame.uhc.events.RegularUHC
 import net.casual.minigame.uhc.events.UHCEvents
-import net.casual.minigame.uhc.resources.CasualResourcePack
+import net.casual.resources.CasualResourcePack
 import net.casual.resources.CasualResourcePackHost
 import net.casual.util.AntiCheat
 import net.casual.util.Config
@@ -28,12 +27,10 @@ import org.slf4j.LoggerFactory
 
 class CasualMod: ModInitializer {
     companion object {
-        const val ID = "uhc"
+        const val ID = "casual"
 
-        val logger: Logger = LoggerFactory.getLogger("UHC")
-        val uhc: ModContainer = FabricLoader.getInstance().getModContainer(ID).get()
-
-        lateinit var minigame: Minigame<*>
+        val logger: Logger = LoggerFactory.getLogger("Casual")
+        val casual: ModContainer = FabricLoader.getInstance().getModContainer(ID).get()
     }
 
     override fun onInitialize() {

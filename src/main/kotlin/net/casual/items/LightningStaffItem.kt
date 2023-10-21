@@ -4,7 +4,7 @@ import net.casual.arcade.items.ArcadeModelledItem
 import net.casual.arcade.items.ItemModeller
 import net.casual.arcade.items.ResourcePackItemModeller
 import net.casual.arcade.scheduler.MinecraftTimeUnit
-import net.casual.minigame.uhc.resources.CasualResourcePack
+import net.casual.resources.CasualResourcePack
 import net.casual.util.CasualUtils
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer

@@ -28,7 +28,7 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.scores.Team
 import java.util.*
 
-object UHCPlayerUtils {
+object CasualPlayerUtils {
     private val HEALTH_BOOST = UUID.fromString("a61b8a4f-a4f5-4b7f-b787-d10ba4ad3d57")
 
     fun ServerPlayer.isMessageGlobal(message: String): Boolean {
@@ -121,27 +121,5 @@ object UHCPlayerUtils {
         if (info !== null) {
             this.sendResourcePack(info)
         }
-    }
-
-    fun ServerPlayer.belongsToTeam(team: Team): Boolean {
-        if (this.team === team) {
-            return true
-        }
-        // val original = this.uhc.originalTeam
-        // val players = team.uhc.players
-        // if (original == team) {
-        //     if (!players.contains(this.scoreboardName)) {
-        //         CasualMod.logger.warn(
-        //             "Player ${this.scoreboardName} had team ${team.name} registered, but team didn't recognise player??!"
-        //         )
-        //     }
-        //     return true
-        // } else if (players.contains(this.scoreboardName)) {
-        //     CasualMod.logger.warn(
-        //         "Team ${team.name} had player ${this.scoreboardName} registered, but player didn't recognise team??!"
-        //     )
-        //     return true
-        // }
-        return false
     }
 }

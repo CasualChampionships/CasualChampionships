@@ -2,7 +2,7 @@
   "providers": [
     {
       "type": "ttf",
-      "file": "uhc:mozart.ttf",
+      "file": "casual:mozart.ttf",
       "size": 12.5,
       "shift": [
         0.0,

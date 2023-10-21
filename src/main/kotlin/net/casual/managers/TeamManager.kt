@@ -73,6 +73,7 @@ object TeamManager {
         return null
     }
 
+    // TODO: ReadyChecker
     fun announceReady(minigame: Minigame<*>) {
         for (team in minigame.getPlayerTeams()) {
             team.flags.set(Ready, false)
@@ -102,40 +103,6 @@ object TeamManager {
                 player.sendSystemMessage(readyMessage)
             }
         }
-    }
-
-    fun checkAllTeamsReady() {
-        if (getUnreadyTeams().isNotEmpty()) {
-            return
-        }
-        PlayerUtils.forEveryPlayer { player ->
-            player.sendSystemMessage(Texts.LOBBY_READY_ALL_READY.copy().gold())
-            if (player.hasPermissions(4)) {
-                player.sendSystemMessage(Component.literal("[Click here to start]").green().withStyle { s ->
-                    s.withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/casual uhc start force"))
-                })
-            }
-        }
-    }
-
-    fun getUnreadyTeams(): List<PlayerTeam> {
-        val teams = LinkedList<PlayerTeam>()
-        val scoreboard = Arcade.getServer().scoreboard
-        for (team in scoreboard.playerTeams) {
-            var teamHasMember = false
-            for (name in team.players) {
-                val player = PlayerUtils.player(name)
-                if (player != null) {
-                    teamHasMember = true
-                    break
-                }
-            }
-
-            if (teamHasMember && !team.flags.has(Ready) && !team.flags.has(Ignored)) {
-                teams.add(team)
-            }
-        }
-        return teams
     }
 
     fun createTeams() {

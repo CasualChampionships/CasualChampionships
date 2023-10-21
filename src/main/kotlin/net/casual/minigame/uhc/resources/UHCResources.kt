@@ -9,13 +9,13 @@ import net.minecraft.server.MinecraftServer
 
 object UHCResources: MinigameResources {
     override fun getInfo(): PackInfo? {
-        // return CasualResourcePackHost.getHostedPack("uhc-pack")?.toPackInfo(true, Texts.PACK_MESSAGE)
+        return CasualResourcePackHost.getHostedPack("casual-pack")?.toPackInfo(true, Texts.PACK_MESSAGE)
         // TODO: Fix CasualResourcePackHost
-        return PackInfo(
-            "https://download.mc-packs.net/pack/99c112b0749ace0a6fd82bc91140eb75784b2e77.zip",
-            "99c112b0749ace0a6fd82bc91140eb75784b2e77",
-            !Config.dev,
-            Texts.PACK_MESSAGE
-        )
+        // return PackInfo(
+        //     "https://download.mc-packs.net/pack/99c112b0749ace0a6fd82bc91140eb75784b2e77.zip",
+        //     "99c112b0749ace0a6fd82bc91140eb75784b2e77",
+        //     !Config.dev,
+        //     Texts.PACK_MESSAGE
+        // )
     }
 }

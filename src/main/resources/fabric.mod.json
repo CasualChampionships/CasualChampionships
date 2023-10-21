@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "uhc",
+  "id": "casual",
   "version": "${version}",
-  "name": "Casual UHC Mod",
-  "description": "UHC mod for Casual UHC",
+  "name": "Casual Championships Mod",
+  "description": "Minigames for Casual Championships",
   "authors": [
     "Sensei"
   ],

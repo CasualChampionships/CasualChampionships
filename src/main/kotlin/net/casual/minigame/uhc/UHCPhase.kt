@@ -4,13 +4,13 @@ import me.senseiwells.replay.player.PlayerRecorders
 import net.casual.CasualMod
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.scheduler.MinecraftTimeUnit
-import net.casual.arcade.task.CancellableTask
 import net.casual.arcade.utils.BossbarUtils.then
 import net.casual.arcade.utils.BossbarUtils.withDuration
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.red
-import net.casual.arcade.utils.PlayerUtils
+import net.casual.arcade.utils.GameRuleUtils.resetToDefault
+import net.casual.arcade.utils.GameRuleUtils.set
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.isSurvival
@@ -24,21 +24,29 @@ import net.casual.managers.DataManager
 import net.casual.managers.TeamManager
 import net.casual.minigame.CasualMinigame
 import net.casual.minigame.uhc.advancement.UHCAdvancements
-import net.casual.minigame.uhc.gui.ActiveBossBar
 import net.casual.minigame.uhc.task.BorderFinishTask
 import net.casual.minigame.uhc.task.GlowingBossBarTask
 import net.casual.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.util.RuleUtils
 import net.casual.util.Texts
 import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.Difficulty
+import net.minecraft.world.level.GameRules
 
 enum class UHCPhase: MinigamePhase<UHCMinigame> {
     Grace {
-        override fun initialise(minigame: UHCMinigame) {
+        override fun start(minigame: UHCMinigame) {
+            minigame.setGameRules {
+                resetToDefault()
+                set(GameRules.RULE_NATURAL_REGENERATION, false)
+                set(GameRules.RULE_DOINSOMNIA, false)
+            }
+            minigame.pvp = false
+            minigame.overworld.dayTime = 0
             minigame.resetTrackers()
-            RuleUtils.setActiveGamerules(minigame.server)
+            minigame.moveWorldBorders(UHCBorderStage.FIRST, UHCBorderSize.START, true)
 
-            PlayerUtils.forEveryPlayer { player ->
+            for (player in minigame.getPlayers()) {
                 player.sendSystemMessage(Texts.UHC_GRACE_FIRST.gold())
                 player.sendSound(SoundEvents.NOTE_BLOCK_PLING.value())
             }
@@ -48,9 +56,6 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
                 // TODO: Make serializable
                 .then { minigame.setPhase(BorderMoving) }
             minigame.scheduler.schedulePhasedCancellable(10.Minutes, task).runOnCancel()
-
-            minigame.addBossbar(ActiveBossBar(minigame))
-            minigame.createActiveSidebar()
         }
 
         override fun end(minigame: UHCMinigame) {
@@ -59,17 +64,13 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
                 player.sendSystemMessage(message)
                 player.sendSound(SoundEvents.ENDER_DRAGON_GROWL)
             }
-            minigame.server.isPvpAllowed = true
+            minigame.pvp = true
             minigame.settings.borderStage = UHCBorderStage.FIRST
         }
     },
     BorderMoving {
-        override fun start(minigame: UHCMinigame) {
-
-        }
-
         override fun initialise(minigame: UHCMinigame) {
-
+            minigame.startWorldBorders()
         }
     },
     BorderFinished {

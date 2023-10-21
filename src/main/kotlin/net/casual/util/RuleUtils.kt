@@ -25,8 +25,6 @@ object RuleUtils {
             dayTime = 6000
             setWeatherParameters(999999, 0, false, false)
         }
-
-        server.isPvpAllowed = false
     }
 
     fun setActiveGamerules(server: MinecraftServer) {

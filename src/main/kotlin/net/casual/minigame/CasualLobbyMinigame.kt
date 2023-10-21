@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.arguments.EnumArgument
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
+import net.casual.arcade.minigame.MinigameResources.Companion.sendTo
 import net.casual.arcade.minigame.lobby.Lobby
 import net.casual.arcade.minigame.lobby.LobbyMinigame
 import net.casual.arcade.scheduler.MinecraftTimeUnit
@@ -14,7 +15,10 @@ import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.red
+import net.casual.arcade.utils.GameRuleUtils.resetToDefault
+import net.casual.arcade.utils.GameRuleUtils.set
 import net.casual.minigame.uhc.gui.LobbyBossBar
+import net.casual.minigame.uhc.resources.UHCResources
 import net.casual.util.Config
 import net.casual.util.CasualUtils
 import net.casual.util.Texts
@@ -22,6 +26,8 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
+import net.minecraft.world.Difficulty
+import net.minecraft.world.level.GameRules
 import net.minecraft.world.level.GameType
 import net.minecraft.world.scores.Team
 
@@ -39,6 +45,21 @@ class CasualLobbyMinigame(
     }
 
     override fun onStart() {
+        this.setGameRules {
+            resetToDefault()
+            set(GameRules.RULE_DOINSOMNIA, false)
+            set(GameRules.RULE_DOFIRETICK, false)
+            set(GameRules.RULE_DAYLIGHT, false)
+            set(GameRules.RULE_FALL_DAMAGE, false)
+            set(GameRules.RULE_DROWNING_DAMAGE, false)
+            set(GameRules.RULE_DOENTITYDROPS, false)
+            set(GameRules.RULE_WEATHER_CYCLE, false)
+            set(GameRules.RULE_DO_TRADER_SPAWNING, false)
+            set(GameRules.RULE_DOBLOCKDROPS, false)
+            set(GameRules.RULE_SNOW_ACCUMULATION_HEIGHT, 0)
+            set(GameRules.RULE_RANDOMTICKING, 0)
+        }
+
         this.addBossbar(this.bossbar)
         for (player in this.getPlayers()) {
             if (!player.hasPermissions(4)) {
@@ -61,6 +82,8 @@ class CasualLobbyMinigame(
 
     override fun moveToNextMinigame() {
         CasualMinigame.setNewMinigameAndStart(this.getNextMinigame()!!)
+        
+        this.close()
     }
 
     override fun createLobbyCommand(): LiteralArgumentBuilder<CommandSourceStack> {
@@ -85,8 +108,9 @@ class CasualLobbyMinigame(
 
     private fun completeBossBar() {
         val message = "Lobby waiting period has finished. ".literal()
-        val command = "[Click to start countdown]".literal().lime().command("/lobby countdown")
-        val component = message.append(command)
+        val teams = "[Click to ready teams]".literal().lime().command("/lobby ready teams")
+        val players = "[Click to ready players]".literal().lime().command("/lobby ready players")
+        val component = message.append(teams).append(" or ").append(players)
         for (player in this.getPlayers()) {
             if (player.hasPermissions(4)) {
                 player.sendSystemMessage(component)
@@ -96,6 +120,9 @@ class CasualLobbyMinigame(
 
     private fun onPlayerAdded(event: MinigameAddPlayerEvent) {
         val player = event.player
+
+        UHCResources.sendTo(player)
+
         player.sendSystemMessage(Texts.LOBBY_WELCOME.append(" Casual Championships").gold())
         if (!player.hasPermissions(2)) {
             player.setGameMode(GameType.ADVENTURE)

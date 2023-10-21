@@ -17,19 +17,20 @@ import net.casual.extensions.PlayerFlagsExtension.Companion.flags
 import net.casual.extensions.TeamFlag
 import net.casual.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.managers.TeamManager
+import net.casual.minigame.CasualMinigame
 import net.casual.minigame.uhc.UHCMinigame
-import net.casual.minigame.uhc.resources.CasualResourcePack
+import net.casual.resources.CasualResourcePack
 import net.casual.resources.CasualResourcePackHost
 import net.casual.util.Config
 import net.casual.util.Texts
-import net.casual.util.UHCPlayerUtils.sendResourcePack
-import net.casual.util.UHCPlayerUtils.setForUHC
+import net.casual.util.CasualPlayerUtils.sendResourcePack
+import net.casual.util.CasualPlayerUtils.setForUHC
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 
-object UHCCommand: Command {
+object CasualCommand: Command {
     override fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         dispatcher.register(
             Commands.literal("casual").requires {
@@ -96,6 +97,8 @@ object UHCCommand: Command {
                 )
             ).then(
                 Commands.literal("items").executes(this::openItemsMenu)
+            ).then(
+                Commands.literal("lobby").executes(this::returnToLobby)
             )
         )
     }
@@ -120,6 +123,7 @@ object UHCCommand: Command {
         return context.source.success(message)
     }
 
+    // TODO: remove from here
     private fun setPlayerTeam(context: CommandContext<CommandSourceStack>, bool: Boolean): Int {
         val target = EntityArgument.getPlayer(context, "player")
         val team = TeamArgument.getTeam(context, "team")
@@ -129,10 +133,10 @@ object UHCCommand: Command {
         server.scoreboard.addPlayerToTeam(target.scoreboardName, team)
         target.sendSystemMessage(Texts.UHC_ADDED_TO_TEAM.generate(team.formattedDisplayName))
 
-        target.setForUHC(CasualMod.minigame as UHCMinigame, !target.flags.has(PlayerFlag.Participating))
+        target.setForUHC(CasualMinigame.getCurrent() as UHCMinigame, !target.flags.has(PlayerFlag.Participating))
 
         if (teleport) {
-            for (player in PlayerUtils.players()) {
+            for (player in CasualMinigame.getCurrent().getPlayers()) {
                 if (team.players.contains(player.scoreboardName) && player.isSurvival && target != player) {
                     target.teleportTo(player.location)
                     break
@@ -177,8 +181,8 @@ object UHCCommand: Command {
         CasualResourcePackHost.reload().thenAcceptAsync({
             if (it) {
                 context.source.success("Successfully reloaded resources, resending pack...")
-                for (player in CasualMod.minigame.getPlayers()) {
-                    player.sendResourcePack(CasualMod.minigame.getResources())
+                for (player in CasualMinigame.getCurrent().getPlayers()) {
+                    player.sendResourcePack(CasualMinigame.getCurrent().getResources())
                 }
             } else {
                 context.source.fail("Failed to reload resources...")
@@ -190,5 +194,10 @@ object UHCCommand: Command {
     private fun openItemsMenu(context: CommandContext<CommandSourceStack>): Int {
         // context.source.playerOrException.openMenu(ItemsScreen.createScreenFactory(0))
         return 1
+    }
+
+    private fun returnToLobby(context: CommandContext<CommandSourceStack>): Int {
+        CasualMinigame.setLobby(context.source.server)
+        return context.source.success("Returning to lobby...")
     }
 }

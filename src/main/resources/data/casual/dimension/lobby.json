@@ -1,5 +1,5 @@
 {
-  "type": "uhc:default",
+  "type": "casual:default",
   "generator": {
     "type": "minecraft:flat",
     "settings": {

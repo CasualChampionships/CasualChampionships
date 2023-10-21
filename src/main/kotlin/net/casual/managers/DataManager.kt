@@ -5,7 +5,7 @@ import net.casual.arcade.events.server.ServerStoppedEvent
 import net.casual.database.EmptyUHCDataBase
 import net.casual.database.MongoUHCDataBase
 import net.casual.database.UHCDataBase
-import net.casual.events.uhc.UHCConfigReloadedEvent
+import net.casual.events.uhc.CasualConfigReloaded
 import net.casual.util.Config
 
 object DataManager {
@@ -22,7 +22,7 @@ object DataManager {
 
 
     internal fun registerEvents() {
-        GlobalEventHandler.register<UHCConfigReloadedEvent> { onConfigLoaded() }
+        GlobalEventHandler.register<CasualConfigReloaded> { onConfigLoaded() }
         GlobalEventHandler.register<ServerStoppedEvent> { database.shutdown() }
         onConfigLoaded()
     }

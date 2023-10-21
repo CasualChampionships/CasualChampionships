@@ -3,7 +3,7 @@ package net.casual.items
 import net.casual.arcade.items.ArcadeModelledItem
 import net.casual.arcade.items.ItemModeller
 import net.casual.arcade.items.ResourcePackItemModeller
-import net.casual.minigame.uhc.resources.CasualResourcePack
+import net.casual.resources.CasualResourcePack
 import net.casual.util.CasualUtils
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
