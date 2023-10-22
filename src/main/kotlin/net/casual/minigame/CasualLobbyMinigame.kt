@@ -49,6 +49,7 @@ class CasualLobbyMinigame(
             resetToDefault()
             set(GameRules.RULE_DOINSOMNIA, false)
             set(GameRules.RULE_DOFIRETICK, false)
+            set(GameRules.RULE_DOMOBSPAWNING, false)
             set(GameRules.RULE_DAYLIGHT, false)
             set(GameRules.RULE_FALL_DAMAGE, false)
             set(GameRules.RULE_DROWNING_DAMAGE, false)

@@ -27,10 +27,8 @@ import net.casual.minigame.uhc.advancement.UHCAdvancements
 import net.casual.minigame.uhc.task.BorderFinishTask
 import net.casual.minigame.uhc.task.GlowingBossBarTask
 import net.casual.minigame.uhc.task.GracePeriodBossBarTask
-import net.casual.util.RuleUtils
 import net.casual.util.Texts
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.world.Difficulty
 import net.minecraft.world.level.GameRules
 
 enum class UHCPhase: MinigamePhase<UHCMinigame> {
