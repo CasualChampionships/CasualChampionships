@@ -11,7 +11,7 @@ import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
 object UHCAdvancements {
-    private val ALL = HashSet<Advancement>()
+    private val ALL = LinkedHashSet<Advancement>()
 
     val ROOT: Advancement
     val FIRST_BLOOD: Advancement
