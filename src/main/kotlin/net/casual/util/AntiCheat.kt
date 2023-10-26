@@ -30,7 +30,7 @@ object AntiCheat {
     }
 
     private fun onBlockChanged(event: LevelBlockChangedEvent) {
-        if (event.level.server.isSameThread && event.old != event.new)  {
+        if (event.old != event.new)  {
             event.level.blockTracker.track(event.pos, event.old)
         }
     }
@@ -88,7 +88,7 @@ object AntiCheat {
 
         for (placedPos in possible) {
             for (direction in Direction.values()) {
-                val neighbor: BlockState = level.getBlockState(placedPos.relative(direction))
+                val neighbor = level.getBlockState(placedPos.relative(direction))
                 if (isSolidForPlacement(context, neighbor)) {
                     return false
                 }

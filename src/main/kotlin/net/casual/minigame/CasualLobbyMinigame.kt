@@ -17,6 +17,8 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
+import net.casual.extensions.TeamFlag
+import net.casual.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.minigame.uhc.gui.LobbyBossBar
 import net.casual.minigame.uhc.resources.UHCResources
 import net.casual.util.Config
@@ -26,9 +28,11 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.Difficulty
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.level.GameType
+import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 
 class CasualLobbyMinigame(
@@ -85,6 +89,10 @@ class CasualLobbyMinigame(
         CasualMinigame.setNewMinigameAndStart(this.getNextMinigame()!!)
         
         this.close()
+    }
+
+    override fun getTeamsToReady(): Collection<PlayerTeam> {
+        return this.getPlayerTeams().filter { !it.flags.has(TeamFlag.Ignored) }
     }
 
     override fun createLobbyCommand(): LiteralArgumentBuilder<CommandSourceStack> {

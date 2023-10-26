@@ -4,6 +4,7 @@ import net.casual.arcade.gui.bossbar.CustomBossBar
 import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.PlayerUtils
+import net.casual.arcade.utils.PlayerUtils.gamemode
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.TimeUtils
 import net.casual.arcade.utils.TimeUtils.Ticks
@@ -16,6 +17,8 @@ import net.casual.util.Texts.shadowless
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.BossEvent
+import net.minecraft.world.level.GameType
+import net.minecraft.world.level.GameType.SURVIVAL
 
 class ActiveBossBar(
     val owner: UHCMinigame
@@ -25,7 +28,7 @@ class ActiveBossBar(
             .append(Texts.space(-2))
             .append(Texts.ICON_SHORT_BACKGROUND.shadowless())
             .append(Texts.space(-27))
-            .append("%02d".format(this.owner.getPlayers().filter { it.isSurvival }.size).literal().monospaced())
+            .append("%02d".format(this.owner.getPlayers().gamemode(SURVIVAL).size).literal().monospaced())
             .append(Texts.ICON_PLAYERS)
             .append(Texts.space(42))
             .append(Texts.space(1, 2))
