@@ -1,13 +1,11 @@
 package net.casual.extensions
 
-import net.casual.CasualMod
 import net.casual.arcade.extensions.DataExtension
 import net.casual.arcade.utils.PlayerUtils.getExtension
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.border.WorldBorder
-import net.minecraft.world.scores.Team
 
 class PlayerUHCExtension(
     private val owner: ServerPlayer

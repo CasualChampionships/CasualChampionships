@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import net.casual.CasualMod
 import net.casual.arcade.commands.arguments.EnumArgument
+import net.casual.arcade.minigame.MinigameResources.Companion.sendTo
 import net.casual.arcade.utils.CommandUtils.fail
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.ComponentUtils.literal
@@ -181,9 +182,7 @@ object CasualCommand: Command {
         CasualResourcePackHost.reload().thenAcceptAsync({
             if (it) {
                 context.source.success("Successfully reloaded resources, resending pack...")
-                for (player in CasualMinigame.getCurrent().getPlayers()) {
-                    player.sendResourcePack(CasualMinigame.getCurrent().getResources())
-                }
+                CasualMinigame.getCurrent().getResources().sendTo(CasualMinigame.getCurrent().getPlayers())
             } else {
                 context.source.fail("Failed to reload resources...")
             }

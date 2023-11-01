@@ -18,10 +18,12 @@ import net.casual.arcade.events.minigame.MinigameUnpauseEvent
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerRecipeReloadEvent
 import net.casual.arcade.events.server.ServerTickEvent
+import net.casual.arcade.gui.nametag.ArcadeNameTag
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.gui.tab.ArcadeTabDisplay
 import net.casual.arcade.minigame.MinigameResources
+import net.casual.arcade.minigame.MinigameResources.Companion.sendTo
 import net.casual.arcade.minigame.SavableMinigame
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.MinecraftTimeUnit
@@ -31,6 +33,7 @@ import net.casual.arcade.utils.ComponentUtils.aqua
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
+import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ItemUtils.literalNamed
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.JsonUtils.array
@@ -109,8 +112,10 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.FallingBlock
+import net.minecraft.world.level.border.WorldBorder
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec2
+import net.minecraft.world.scores.Team
 import java.util.concurrent.TimeUnit.MINUTES
 import kotlin.math.atan2
 
@@ -301,8 +306,10 @@ class UHCMinigame(
     override fun start() {
         this.setPhase(Grace)
 
-        for (player in this.getPlayers()) {
-            player.sendResourcePack(this.event.getResourcePackHandler())
+        this.getResources().sendTo(this.getPlayers())
+
+        for (team in this.getAllPlayerTeams()) {
+            team.nameTagVisibility = Team.Visibility.NEVER
         }
 
         val players = this.getPlayers().filter { player ->
@@ -519,7 +526,6 @@ class UHCMinigame(
 
     private fun onMinigameAddPlayer(player: ServerPlayer) {
         player.updateGlowingTag()
-        player.sendResourcePack(this.event.getResourcePackHandler())
 
         if (this.isRunning() && this.glowing && player.isSurvival) {
             player.setGlowingTag(true)
@@ -641,9 +647,13 @@ class UHCMinigame(
         val fakeCenterX = border.centerX + fakeDirection.stepX * border.size
         val fakeCenterZ = border.centerZ + fakeDirection.stepZ * border.size
 
+        val scale = level.dimensionType().coordinateScale
+
         val fakeBorder = player.uhc.border
-        fakeBorder.setCenter(fakeCenterX, fakeCenterZ)
         fakeBorder.size = border.size + 0.5
+        // Foolish Minecraft uses scale for the centre, even on the client,
+        // so we need to reproduce.
+        fakeBorder.setCenter(fakeCenterX * scale, fakeCenterZ * scale)
         player.connection.send(ClientboundInitializeBorderPacket(fakeBorder))
 
         if (this.uptime % 200 == 0) {
@@ -748,7 +758,16 @@ class UHCMinigame(
     }
 
     fun createActiveSidebar() {
-        // TODO: Custom name tags
+        val name = ArcadeNameTag(
+            Entity::getDisplayName
+        ) { a, _ -> !a.isInvisible }
+        val health = ArcadeNameTag(
+            { "${it.health} ".literal().append(Texts.ICON_HEART) },
+            { a, b -> !a.isInvisible && (b.isSpectator || b.team == a.team) }
+        )
+
+        this.addNameTag(health)
+        this.addNameTag(name)
 
         val sidebar = ArcadeSidebar(ComponentSupplier.of(Texts.CASUAL_UHC.gold().bold()))
 
