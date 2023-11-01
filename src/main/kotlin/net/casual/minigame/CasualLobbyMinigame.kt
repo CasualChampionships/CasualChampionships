@@ -43,6 +43,10 @@ class CasualLobbyMinigame(
 
     private val bossbar = LobbyBossBar().apply { then(::completeBossBar) }
 
+    init {
+        this.initialise()
+    }
+
     override fun initialise() {
         super.initialise()
         this.events.register<MinigameAddPlayerEvent> { this.onPlayerAdded(it) }

@@ -28,7 +28,7 @@ import net.casual.arcade.minigame.SavableMinigame
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.settings.DisplayableGameSettingBuilder
-import net.casual.arcade.utils.*
+import net.casual.arcade.utils.BorderUtils
 import net.casual.arcade.utils.ComponentUtils.aqua
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
@@ -39,6 +39,8 @@ import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.JsonUtils.array
 import net.casual.arcade.utils.JsonUtils.boolean
 import net.casual.arcade.utils.JsonUtils.int
+import net.casual.arcade.utils.LevelUtils
+import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.directionToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.directionVectorToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
@@ -51,6 +53,7 @@ import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teamMessage
 import net.casual.arcade.utils.SettingsUtils.defaultOptions
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.arcade.utils.TickUtils
 import net.casual.events.border.BorderEntityPortalEntryPointEvent
 import net.casual.events.border.BorderPortalWithinBoundsEvent
 import net.casual.events.player.PlayerFlagEvent
@@ -73,17 +76,16 @@ import net.casual.minigame.uhc.events.UHCEvent
 import net.casual.minigame.uhc.gui.ActiveBossBar
 import net.casual.minigame.uhc.gui.BorderDistanceRow
 import net.casual.minigame.uhc.gui.TeammateRow
-import net.casual.minigame.uhc.task.*
+import net.casual.minigame.uhc.task.NextBorderTask
 import net.casual.recipes.GoldenHeadRecipe
 import net.casual.screen.MinesweeperScreen
 import net.casual.util.*
-import net.casual.util.DirectionUtils.opposite
-import net.casual.util.Texts.monospaced
 import net.casual.util.CasualPlayerUtils.isAliveSolo
 import net.casual.util.CasualPlayerUtils.isMessageGlobal
-import net.casual.util.CasualPlayerUtils.sendResourcePack
 import net.casual.util.CasualPlayerUtils.setForUHC
 import net.casual.util.CasualPlayerUtils.updateGlowingTag
+import net.casual.util.DirectionUtils.opposite
+import net.casual.util.Texts.monospaced
 import net.casual.util.shapes.ArrowShape
 import net.minecraft.ChatFormatting.*
 import net.minecraft.core.BlockPos
@@ -112,7 +114,6 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.FallingBlock
-import net.minecraft.world.level.border.WorldBorder
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec2
 import net.minecraft.world.scores.Team
@@ -380,7 +381,7 @@ class UHCMinigame(
     private fun onEntityStartTracking(event: EntityStartTrackingEvent) {
         val entity = event.entity
         if (entity is Mob && PerformanceUtils.isEntityAIDisabled(entity)) {
-            entity.isNoAi = true;
+            entity.isNoAi = true
         }
     }
 
@@ -732,7 +733,7 @@ class UHCMinigame(
         player.uhcStats.increment(PlayerStat.Deaths, 1.0)
 
         val team = player.team
-        if (team !== null && !team.flags.has(TeamFlag.Eliminated) && !team.hasAlivePlayers()) {
+        if (team !== null && !team.flags.has(TeamFlag.Eliminated) && !team.hasAlivePlayers(player)) {
             team.flags.set(TeamFlag.Eliminated, true)
             for (playing in this.getPlayers()) {
                 playing.sendSound(SoundEvents.LIGHTNING_BOLT_THUNDER, volume = 0.5F)
@@ -762,7 +763,7 @@ class UHCMinigame(
             Entity::getDisplayName
         ) { a, _ -> !a.isInvisible }
         val health = ArcadeNameTag(
-            { "${it.health} ".literal().append(Texts.ICON_HEART) },
+            { "${it.health / 2} ".literal().append(Texts.ICON_HEART) },
             { a, b -> !a.isInvisible && (b.isSpectator || b.team == a.team) }
         )
 

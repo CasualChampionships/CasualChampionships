@@ -40,11 +40,14 @@ object TeamManager {
         return Arcade.getServer().scoreboard.getPlayerTeam("Spectator")!!
     }
 
-    fun Team.hasAlivePlayers(): Boolean {
+    fun Team.hasAlivePlayers(ignore: ServerPlayer? = null): Boolean {
         val names = this.players
         for (name in names) {
+            if (ignore != null && ignore.scoreboardName == name) {
+                continue
+            }
             val player = PlayerUtils.player(name)
-            if (player != null && player.isSurvival) {
+            if (player != null && player.isSurvival && !player.isDeadOrDying) {
                 return true
             }
         }

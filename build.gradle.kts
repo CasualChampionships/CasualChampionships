@@ -42,8 +42,10 @@ dependencies {
     include(modImplementation("xyz.nucleoid:server-translations-api:${property("server_translations_api_version")}")!!)
     include(modImplementation("xyz.nucleoid:fantasy:${property("fantasy_version")}")!!)
     include(modImplementation("com.github.Senseiwells:ServerReplay:${property("server_replay_version")}")!!)
-    include(modImplementation("com.github.CasualUHC:Arcade:${property("arcade_version")}")!!)
+    // include(modImplementation("com.github.CasualUHC:Arcade:${property("arcade_version")}")!!)
     include(modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")!!)
+
+    implementation(project(":Arcade"))
 
     include(modImplementation("eu.pb4:polymer-core:0.5.8+1.20.1")!!)
     include(modImplementation("eu.pb4:polymer-blocks:0.5.8+1.20.1")!!)

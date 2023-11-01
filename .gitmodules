@@ -1,0 +1,3 @@
+[submodule "Arcade"]
+	path = Arcade
+	url = https://github.com/CasualUHC/Arcade.git
