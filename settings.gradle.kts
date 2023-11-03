@@ -1,6 +1,6 @@
 rootProject.name = "UHC-Mod"
 
-include("Arcade")
+include("arcade")
 
 pluginManagement {
     repositories {

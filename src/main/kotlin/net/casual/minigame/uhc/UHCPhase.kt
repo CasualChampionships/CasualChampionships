@@ -30,6 +30,7 @@ import net.casual.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.util.Texts
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
+import net.minecraft.world.scores.Team
 
 enum class UHCPhase: MinigamePhase<UHCMinigame> {
     Grace {
@@ -47,6 +48,10 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
             for (player in minigame.getPlayers()) {
                 player.sendSystemMessage(Texts.UHC_GRACE_FIRST.gold())
                 player.sendSound(SoundEvents.NOTE_BLOCK_PLING.value())
+            }
+
+            for (team in minigame.getAllPlayerTeams()) {
+                team.nameTagVisibility = Team.Visibility.NEVER
             }
 
             val task = GracePeriodBossBarTask(minigame)
@@ -96,6 +101,11 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
                 CasualMod.logger.error("Last team was null!")
                 return
             }
+
+            for (players in minigame.getAllPlayerTeams()) {
+                players.nameTagVisibility = Team.Visibility.ALWAYS
+            }
+
             val teammates = team.getOnlinePlayers()
             val alive = teammates.filter { it.isSurvival }
             if (alive.size == 1) {

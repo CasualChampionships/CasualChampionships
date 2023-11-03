@@ -36,16 +36,15 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${property("parchment_version")}@zip")
     })
 
+    include(implementation(project(":arcade"))!!)
+
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 
     include(modImplementation("xyz.nucleoid:server-translations-api:${property("server_translations_api_version")}")!!)
     include(modImplementation("xyz.nucleoid:fantasy:${property("fantasy_version")}")!!)
     include(modImplementation("com.github.Senseiwells:ServerReplay:${property("server_replay_version")}")!!)
-    // include(modImplementation("com.github.CasualUHC:Arcade:${property("arcade_version")}")!!)
     include(modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")!!)
-
-    implementation(project(":Arcade"))
 
     include(modImplementation("eu.pb4:polymer-core:0.5.8+1.20.1")!!)
     include(modImplementation("eu.pb4:polymer-blocks:0.5.8+1.20.1")!!)

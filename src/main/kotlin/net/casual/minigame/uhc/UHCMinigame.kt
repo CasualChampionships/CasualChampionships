@@ -11,10 +11,7 @@ import net.casual.arcade.border.TrackedBorder
 import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.entity.EntityStartTrackingEvent
 import net.casual.arcade.events.entity.MobCategorySpawnEvent
-import net.casual.arcade.events.minigame.MinigameAddExistingPlayerEvent
-import net.casual.arcade.events.minigame.MinigameAddNewPlayerEvent
-import net.casual.arcade.events.minigame.MinigamePauseEvent
-import net.casual.arcade.events.minigame.MinigameUnpauseEvent
+import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerRecipeReloadEvent
 import net.casual.arcade.events.server.ServerTickEvent
@@ -183,8 +180,7 @@ class UHCMinigame(
         this.events.register<PlayerVoidDamageEvent> { this.onPlayerVoidDamage(it) }
         this.events.register<PlayerFlagEvent> { this.onPlayerFlag(it) }
 
-        this.events.register<MinigameAddNewPlayerEvent> { this.onMinigameAddPlayer(it.player) }
-        this.events.register<MinigameAddExistingPlayerEvent> { this.onMinigameAddPlayer(it.player) }
+        this.events.register<MinigameAddPlayerEvent>(0) { this.onMinigameAddPlayer(it.player) }
 
         this.registerAdvancements()
         this.recipes.add(listOf(GoldenHeadRecipe.create()))
@@ -308,10 +304,6 @@ class UHCMinigame(
         this.setPhase(Grace)
 
         this.getResources().sendTo(this.getPlayers())
-
-        for (team in this.getAllPlayerTeams()) {
-            team.nameTagVisibility = Team.Visibility.NEVER
-        }
 
         val players = this.getPlayers().filter { player ->
             val team = player.team
@@ -470,8 +462,6 @@ class UHCMinigame(
     private fun onPlayerLeave(event: PlayerLeaveEvent) {
         val (player) = event
         DataManager.database.updateStats(player)
-
-        PlayerRecorders.get(player)?.stop(false)
     }
 
     private fun onRecipeReload(event: ServerRecipeReloadEvent) {
@@ -526,6 +516,10 @@ class UHCMinigame(
     }
 
     private fun onMinigameAddPlayer(player: ServerPlayer) {
+        if (!PlayerRecorders.has(player)) {
+            PlayerRecorders.create(player).start()
+        }
+
         player.updateGlowingTag()
 
         if (this.isRunning() && this.glowing && player.isSurvival) {
