@@ -36,7 +36,7 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${property("parchment_version")}@zip")
     })
 
-    include(implementation(project(":arcade"))!!)
+    include(modImplementation(project(":arcade"))!!)
 
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
@@ -46,9 +46,9 @@ dependencies {
     include(modImplementation("com.github.Senseiwells:ServerReplay:${property("server_replay_version")}")!!)
     include(modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")!!)
 
-    include(modImplementation("eu.pb4:polymer-core:0.5.8+1.20.1")!!)
-    include(modImplementation("eu.pb4:polymer-blocks:0.5.8+1.20.1")!!)
-    include(modImplementation("eu.pb4:polymer-resource-pack:0.5.8+1.20.1")!!)
+    include(modImplementation("eu.pb4:polymer-core:0.5.18+1.20.1")!!)
+    include(modImplementation("eu.pb4:polymer-blocks:0.5.18+1.20.1")!!)
+    include(modImplementation("eu.pb4:polymer-resource-pack:0.5.18+1.20.1")!!)
 
     include(modImplementation("com.github.ReplayMod:ReplayStudio:a1e2b83") {
         exclude(group = "org.slf4j")
@@ -60,7 +60,7 @@ dependencies {
     include(implementation("org.mongodb:mongo-java-driver:3.12.11")!!)
     // include(implementation("org.java-websocket:Java-WebSocket:1.5.3")!!)
 
-    include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:0.2.0-beta.6")!!)!!)
+    include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${property("mixin_extras_version")}")!!)!!)
 
     implementation(kotlin("stdlib-jdk8"))
 }

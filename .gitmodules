@@ -1,0 +1,3 @@
+[submodule "arcade"]
+	path = arcade
+	url = https://github.com/CasualChampionships/arcade
