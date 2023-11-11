@@ -16,7 +16,7 @@ import net.minecraft.world.item.*
 import net.minecraft.world.level.Level
 
 class LightningStaffItem private constructor(): AxeItem(Tiers.DIAMOND, 4.0f, -3.0f, Properties()), ArcadeModelledItem {
-    override fun getPolymerItem(itemStack: ItemStack, player: ServerPlayer?): Item {
+    override fun getPolymerItem(stack: ItemStack, player: ServerPlayer?): Item {
         return Items.DIAMOND_AXE
     }
 

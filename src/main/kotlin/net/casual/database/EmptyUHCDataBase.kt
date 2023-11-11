@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.util.concurrent.CompletableFuture
 
-class EmptyUHCDataBase: UHCDataBase {
+object EmptyUHCDataBase: UHCDataBase {
     private val logger = LoggerFactory.getLogger("EmptyUHCDataBase")
 
     override fun clearLastStats() {

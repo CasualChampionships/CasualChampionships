@@ -12,10 +12,8 @@ object SpectateCommand: Command {
     private val NOT_SPECTATOR = SimpleCommandExceptionType(Texts.SPECTATOR_NOT_SPECTATING)
 
     override fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
-        val spectate = dispatcher.register(
-            Commands.literal("spectate").executes(this::execute)
-        )
-        dispatcher.register(Commands.literal("s").redirect(spectate))
+        dispatcher.register(Commands.literal("spectate").executes(this::execute))
+        dispatcher.register(Commands.literal("s").executes(this::execute))
     }
 
     private fun execute(context: CommandContext<CommandSourceStack>): Int {

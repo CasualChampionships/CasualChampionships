@@ -34,6 +34,8 @@ class CasualMod: ModInitializer {
     }
 
     override fun onInitialize() {
+        logger.info("Starting CasualChampionships... Version: ${casual.metadata.version}")
+
         CasualItems.noop()
 
         this.registerEvents()
@@ -62,11 +64,9 @@ class CasualMod: ModInitializer {
     }
 
     // TODO:
-    //   Fix health being set when forceadding
-    //   Fix sidebar
+    //   Fix forceadding
     //   Fix worldborder
     //   Fix stats? Again
-    //   Fix server replay
     //   Implement podium
     //   Restructure UHC stuff
     //   Minesweeper AI - Make sure all maps are non-luck based

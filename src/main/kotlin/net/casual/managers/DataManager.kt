@@ -2,7 +2,7 @@ package net.casual.managers
 
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.server.ServerStoppedEvent
-import net.casual.database.EmptyUHCDataBase
+import net.casual.database.JsonUHCDatabase
 import net.casual.database.MongoUHCDataBase
 import net.casual.database.UHCDataBase
 import net.casual.events.uhc.CasualConfigReloaded
@@ -30,7 +30,9 @@ object DataManager {
     private fun onConfigLoaded() {
         val mongo = this.mongo
         if (mongo === null) {
-            database = EmptyUHCDataBase()
+            if (!::database.isInitialized) {
+                database = JsonUHCDatabase()
+            }
             return
         }
         val type = if (Config.dev) TESTING else PRODUCTION

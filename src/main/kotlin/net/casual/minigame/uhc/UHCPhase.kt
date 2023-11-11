@@ -43,7 +43,7 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
             minigame.pvp = false
             minigame.overworld.dayTime = 0
             minigame.resetTrackers()
-            minigame.moveWorldBorders(UHCBorderStage.FIRST, UHCBorderSize.START, true)
+            minigame.resetWorldBorders()
 
             for (player in minigame.getPlayers()) {
                 player.sendSystemMessage(Texts.UHC_GRACE_FIRST.gold())
@@ -68,7 +68,6 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
                 player.sendSound(SoundEvents.ENDER_DRAGON_GROWL)
             }
             minigame.pvp = true
-            minigame.settings.borderStage = UHCBorderStage.FIRST
         }
     },
     BorderMoving {
