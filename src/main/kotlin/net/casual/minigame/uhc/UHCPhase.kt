@@ -3,6 +3,8 @@ package net.casual.minigame.uhc
 import me.senseiwells.replay.player.PlayerRecorders
 import net.casual.CasualMod
 import net.casual.arcade.minigame.MinigamePhase
+import net.casual.arcade.minigame.task.impl.MinigameTask
+import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.utils.BossbarUtils.then
 import net.casual.arcade.utils.BossbarUtils.withDuration
@@ -24,7 +26,6 @@ import net.casual.managers.DataManager
 import net.casual.managers.TeamManager
 import net.casual.minigame.CasualMinigame
 import net.casual.minigame.uhc.advancement.UHCAdvancements
-import net.casual.minigame.uhc.task.BorderFinishTask
 import net.casual.minigame.uhc.task.GlowingBossBarTask
 import net.casual.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.util.Texts
@@ -56,8 +57,7 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
 
             val task = GracePeriodBossBarTask(minigame)
                 .withDuration(10.Minutes)
-                // TODO: Make serializable
-                .then { minigame.setPhase(BorderMoving) }
+                .then(PhaseChangeTask(minigame, BorderMoving))
             minigame.scheduler.schedulePhasedCancellable(10.Minutes, task).runOnCancel()
         }
 
@@ -71,7 +71,7 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
         }
     },
     BorderMoving {
-        override fun initialise(minigame: UHCMinigame) {
+        override fun start(minigame: UHCMinigame) {
             minigame.startWorldBorders()
         }
     },
@@ -79,17 +79,13 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
         override fun start(minigame: UHCMinigame) {
             val task = GlowingBossBarTask(minigame)
                 .withDuration(2.Minutes)
-                .then(BorderFinishTask(minigame))
+                .then(MinigameTask(minigame, UHCMinigame::onBorderFinish))
             minigame.scheduler.schedulePhasedCancellable(2.Minutes, task).runOnCancel()
         }
 
-        override fun initialise(minigame: UHCMinigame) {
-
-        }
-
         override fun end(minigame: UHCMinigame) {
-            minigame.removeAllBossbars()
-            minigame.removeSidebar()
+            minigame.ui.removeAllBossbars()
+            minigame.ui.removeSidebar()
             minigame.server.isPvpAllowed = false
         }
     },

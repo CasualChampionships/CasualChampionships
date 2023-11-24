@@ -24,6 +24,8 @@ import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.ModContainer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import xyz.nucleoid.fantasy.Fantasy
+import xyz.nucleoid.fantasy.RuntimeWorldConfig
 
 class CasualMod: ModInitializer {
     companion object {
@@ -57,6 +59,11 @@ class CasualMod: ModInitializer {
             player.addExtension(PlayerUHCExtension(player))
             player.addExtension(PlayerStatsExtension())
         }
+
+        Fantasy.get(null).getOrOpenPersistentWorld(
+            null,
+            RuntimeWorldConfig()
+        )
     }
 
     fun registerEvents() {

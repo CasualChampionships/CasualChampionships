@@ -8,7 +8,7 @@ import net.minecraft.ChatFormatting.*
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 
-class BorderDistanceRow(val buffer: String): ComponentSupplier {
+class BorderDistanceRow(private val buffer: String): ComponentSupplier {
     override fun getComponent(player: ServerPlayer): Component {
         val vectorToBorder = player.distanceToNearestBorder()
         val multiplier = if (vectorToBorder.x < 0 || vectorToBorder.z < 0) -1 else 1

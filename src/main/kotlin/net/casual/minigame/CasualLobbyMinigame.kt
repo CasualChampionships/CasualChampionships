@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.arguments.EnumArgument
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
+import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.MinigameResources.Companion.sendTo
 import net.casual.arcade.minigame.lobby.Lobby
 import net.casual.arcade.minigame.lobby.LobbyMinigame
@@ -44,11 +45,15 @@ class CasualLobbyMinigame(
     private val bossbar = LobbyBossBar().apply { then(::completeBossBar) }
 
     init {
-        this.initialise()
+        this.initialize()
     }
 
-    override fun initialise() {
-        super.initialise()
+    override fun getResources(): MinigameResources {
+        return UHCResources
+    }
+
+    override fun initialize() {
+        super.initialize()
         this.events.register<MinigameAddPlayerEvent> { this.onPlayerAdded(it) }
     }
 
@@ -69,7 +74,7 @@ class CasualLobbyMinigame(
             set(GameRules.RULE_RANDOMTICKING, 0)
         }
 
-        this.addBossbar(this.bossbar)
+        this.ui.addBossbar(this.bossbar)
         for (player in this.getPlayers()) {
             if (!player.hasPermissions(4)) {
                 player.setGameMode(GameType.ADVENTURE)
@@ -82,7 +87,7 @@ class CasualLobbyMinigame(
     }
 
     override fun onStartCountdown() {
-        this.removeBossbar(this.bossbar)
+        this.ui.removeBossbar(this.bossbar)
 
         for (team in this.getPlayerTeams()) {
             team.collisionRule = Team.CollisionRule.ALWAYS
@@ -133,8 +138,6 @@ class CasualLobbyMinigame(
 
     private fun onPlayerAdded(event: MinigameAddPlayerEvent) {
         val player = event.player
-
-        UHCResources.sendTo(player)
 
         player.sendSystemMessage(Texts.LOBBY_WELCOME.append(" Casual Championships").gold())
         if (!player.hasPermissions(2)) {

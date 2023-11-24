@@ -10,16 +10,20 @@ import net.casual.arcade.minigame.Minigames
 import net.casual.arcade.utils.ComponentUtils.aqua
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
+import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.TickUtils
-import net.casual.managers.TeamManager
 import net.casual.minigame.uhc.UHCMinigame
 import net.casual.minigame.uhc.events.UHCEvents
+import net.casual.util.CasualUtils
+import net.casual.util.Config
 import net.casual.util.Texts
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
+import java.util.*
 
 object CasualMinigame {
+    private var uuid: String? by Config.stringOrNull("current_minigame_uuid")
     private var minigame: Minigame<*>? = null
 
     fun getCurrent(): Minigame<*> {
@@ -38,6 +42,7 @@ object CasualMinigame {
     fun setNewMinigameAndStart(minigame: Minigame<*>) {
         val current = this.minigame
         this.minigame = minigame
+        this.uuid = minigame.uuid.toString()
         if (current != null) {
             for (player in current.getPlayers()) {
                 minigame.addPlayer(player)
@@ -45,17 +50,29 @@ object CasualMinigame {
             current.close()
         }
         minigame.start()
-        minigame.setTabDisplay(this.createTabDisplay())
+        minigame.ui.setTabDisplay(this.createTabDisplay())
     }
 
     internal fun registerEvents() {
-        Minigames.registerFactory("casual_uhc") { UHCMinigame(it) }
+        Minigames.registerFactory(CasualUtils.id("uhc_minigame")) { UHCMinigame(it) }
 
-        GlobalEventHandler.register<ServerLoadedEvent>(0) {
-            this.setLobby(it.server, UHCMinigame(it.server))
+        GlobalEventHandler.register<ServerLoadedEvent>(Int.MAX_VALUE) {
+            val uuid = this.uuid
+            if (uuid != null) {
+                val current = Minigames.get(UUID.fromString(uuid))
+                this.minigame = current
+                if (current != null) {
+                    return@register
+                }
+            }
+
+            this.setLobby(it.server)
         }
-        GlobalEventHandler.register<PlayerJoinEvent>(0) {
-            this.getCurrent().addPlayer(it.player)
+        GlobalEventHandler.register<PlayerJoinEvent> {
+            val player = it.player
+            if (player.getMinigame() == null) {
+                this.getCurrent().addPlayer(it.player)
+            }
         }
     }
 

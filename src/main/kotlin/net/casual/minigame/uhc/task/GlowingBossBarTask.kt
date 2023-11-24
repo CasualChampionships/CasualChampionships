@@ -1,9 +1,9 @@
 package net.casual.minigame.uhc.task
 
 import com.google.gson.JsonObject
-import net.casual.arcade.gui.task.BossBarTask
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.task.AnyMinigameTaskFactory
+import net.casual.arcade.minigame.task.impl.BossBarTask
 import net.casual.arcade.task.SavableTask
 import net.casual.arcade.task.Task
 import net.casual.arcade.task.TaskCreationContext

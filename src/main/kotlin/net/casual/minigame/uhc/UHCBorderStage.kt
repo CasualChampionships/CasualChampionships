@@ -39,25 +39,8 @@ enum class UHCBorderStage(
     companion object {
         val TOTAL_WEIGHT = UHCBorderStage.values().sumOf { it.weight }
 
-        fun getStage(size: Double, level: Level): UHCBorderStage? {
-            val adjusted = reverseAdjustSize(size, level)
-            if (adjusted <= FINAL.endSize) {
-                return END
-            }
-            for (stage in UHCBorderStage.values()) {
-                if (adjusted <= stage.startSize && adjusted > stage.endSize) {
-                    return stage
-                }
-            }
-            return null
-        }
-
         fun adjustSize(size: Double, level: Level): Double {
             return size / level.dimensionType().coordinateScale
-        }
-
-        fun reverseAdjustSize(size: Double, level: Level): Double {
-            return size * level.dimensionType().coordinateScale
         }
     }
 }

@@ -21,7 +21,7 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.level.GameType.SURVIVAL
 
 class ActiveBossBar(
-    val owner: UHCMinigame
+    private val owner: UHCMinigame
 ): CustomBossBar() {
     override fun getTitle(player: ServerPlayer): Component {
         val start = Component.empty()

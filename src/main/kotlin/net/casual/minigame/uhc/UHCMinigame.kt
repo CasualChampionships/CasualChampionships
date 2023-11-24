@@ -23,6 +23,7 @@ import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.MinigameResources.Companion.sendTo
 import net.casual.arcade.minigame.SavableMinigame
+import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.settings.DisplayableGameSettingBuilder
@@ -34,7 +35,6 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ItemUtils.literalNamed
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.JsonUtils.array
-import net.casual.arcade.utils.JsonUtils.boolean
 import net.casual.arcade.utils.JsonUtils.int
 import net.casual.arcade.utils.LevelUtils
 import net.casual.arcade.utils.PlayerUtils
@@ -50,6 +50,7 @@ import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teamMessage
 import net.casual.arcade.utils.SettingsUtils.defaultOptions
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.events.border.BorderEntityPortalEntryPointEvent
 import net.casual.events.border.BorderPortalWithinBoundsEvent
 import net.casual.events.player.PlayerFlagEvent
@@ -72,15 +73,19 @@ import net.casual.minigame.uhc.events.UHCEvent
 import net.casual.minigame.uhc.gui.ActiveBossBar
 import net.casual.minigame.uhc.gui.BorderDistanceRow
 import net.casual.minigame.uhc.gui.TeammateRow
-import net.casual.minigame.uhc.task.NextBorderTask
+import net.casual.minigame.uhc.task.GlowingBossBarTask
+import net.casual.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.recipes.GoldenHeadRecipe
 import net.casual.screen.MinesweeperScreen
-import net.casual.util.*
 import net.casual.util.CasualPlayerUtils.isAliveSolo
 import net.casual.util.CasualPlayerUtils.isMessageGlobal
 import net.casual.util.CasualPlayerUtils.setForUHC
 import net.casual.util.CasualPlayerUtils.updateGlowingTag
+import net.casual.util.CasualUtils
 import net.casual.util.DirectionUtils.opposite
+import net.casual.util.HeadUtils
+import net.casual.util.PerformanceUtils
+import net.casual.util.Texts
 import net.casual.util.Texts.monospaced
 import net.casual.util.shapes.ArrowShape
 import net.minecraft.core.BlockPos
@@ -137,16 +142,14 @@ class UHCMinigame(
         private set
 
     init {
-        this.initialise()
+        this.initialize()
 
-        if (!Config.dev) {
-            this.path = Config.resolve("uhc_minigame.json")
-        }
+        this.addTaskFactory(GlowingBossBarTask.cast())
+        this.addTaskFactory(GracePeriodBossBarTask.cast())
     }
 
-    override fun initialise() {
-        super.initialise()
-        this.read()
+    override fun initialize() {
+        super.initialize()
 
         this.events.register<ServerTickEvent> { this.onServerTick() }
         this.events.register<ServerRecipeReloadEvent> { this.onRecipeReload(it) }
@@ -183,7 +186,7 @@ class UHCMinigame(
 
         this.event.initialise(this)
 
-        this.addBossbar(ActiveBossBar(this))
+        this.ui.addBossbar(ActiveBossBar(this))
         this.createActiveSidebar()
     }
 
@@ -219,13 +222,18 @@ class UHCMinigame(
             this.setPhase(BorderFinished)
             return
         }
-        this.scheduler.schedulePhased(10, MinecraftTimeUnit.Seconds, NextBorderTask(this))
+
+        this.scheduler.schedulePhased(10.Seconds, MinigameTask(this, UHCMinigame::startNextBorders))
     }
 
-    fun pauseWorldBorders() {
+    private fun pauseWorldBorders() {
         for ((border, _) in tracker.getAllTracking()) {
             this.moveWorldBorder(border, border.size)
         }
+    }
+
+    private fun startNextBorders() {
+        this.moveWorldBorders(this.settings.borderStage.getNextStage())
     }
 
     fun onBorderFinish() {
@@ -233,8 +241,8 @@ class UHCMinigame(
             this.settings.glowing = true
         }
         if (this.settings.generatePortals) {
-            LevelUtils.overworld().portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
-            LevelUtils.nether().portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
+            this.overworld.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
+            this.nether.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
         }
     }
 
@@ -713,8 +721,8 @@ class UHCMinigame(
             { a, b -> !a.isInvisible && (b.isSpectator || b.team == a.team) }
         )
 
-        this.addNameTag(health)
-        this.addNameTag(name)
+        this.ui.addNameTag(health)
+        this.ui.addNameTag(name)
 
         val sidebar = ArcadeSidebar(ComponentSupplier.of(Texts.CASUAL_UHC.gold().bold()))
 
@@ -731,7 +739,7 @@ class UHCMinigame(
         }
         sidebar.addRow(ComponentSupplier.of(Component.empty()))
 
-        this.setSidebar(sidebar)
+        this.ui.setSidebar(sidebar)
     }
 
     private fun initialiseBorderTracker() {
