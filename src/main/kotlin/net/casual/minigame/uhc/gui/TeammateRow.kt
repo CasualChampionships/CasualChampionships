@@ -3,16 +3,14 @@ package net.casual.minigame.uhc.gui
 import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
-import net.casual.extensions.PlayerUHCExtension.Companion.uhc
 import net.casual.extensions.TeamFlag
 import net.casual.extensions.TeamFlagsExtension.Companion.flags
-import net.casual.extensions.TeamUHCExtension.Companion.uhc
 import net.casual.util.Texts
 import net.casual.util.Texts.monospaced
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 
-class TeammateRow(val index: Int, val buffer: String = ""): ComponentSupplier {
+class TeammateRow(private val index: Int, private val buffer: String = ""): ComponentSupplier {
     override fun getComponent(player: ServerPlayer): Component {
         val team = player.team
         if (team == null || team.flags.has(TeamFlag.Ignored)) {

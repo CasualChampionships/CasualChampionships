@@ -50,7 +50,6 @@ object CasualMinigame {
             current.close()
         }
         minigame.start()
-        minigame.ui.setTabDisplay(this.createTabDisplay())
     }
 
     internal fun registerEvents() {
@@ -76,7 +75,7 @@ object CasualMinigame {
         }
     }
 
-    private fun createTabDisplay(): ArcadeTabDisplay {
+    fun createTabDisplay(): ArcadeTabDisplay {
         val display = ArcadeTabDisplay(
             ComponentSupplier.of(
                 Component.literal("\n")

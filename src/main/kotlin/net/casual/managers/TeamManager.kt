@@ -12,13 +12,11 @@ import net.casual.arcade.utils.ComponentUtils.green
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
-import net.casual.arcade.utils.TeamUtils
 import net.casual.arcade.utils.TeamUtils.addExtension
 import net.casual.extensions.TeamFlag.Ignored
 import net.casual.extensions.TeamFlag.Ready
 import net.casual.extensions.TeamFlagsExtension
 import net.casual.extensions.TeamFlagsExtension.Companion.flags
-import net.casual.extensions.TeamUHCExtension
 import net.casual.util.Config
 import net.casual.util.Texts
 import net.minecraft.ChatFormatting
@@ -157,7 +155,6 @@ object TeamManager {
 
     private fun onTeamCreated(event: TeamCreatedEvent) {
         event.team.addExtension(TeamFlagsExtension())
-        event.team.addExtension(TeamUHCExtension())
     }
 
     private fun createTeamFromJson(json: JsonObject) {

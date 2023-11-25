@@ -1,6 +1,5 @@
 package net.casual.util
 
-import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.MinigameUtils.getMinigame
@@ -8,7 +7,7 @@ import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.isSurvival
-import net.casual.arcade.utils.ResourcePackUtils.sendResourcePack
+import net.casual.arcade.utils.PlayerUtils.resetHunger
 import net.casual.extensions.PlayerFlag.*
 import net.casual.extensions.PlayerFlagsExtension.Companion.flags
 import net.casual.extensions.TeamFlag.Eliminated
@@ -25,11 +24,10 @@ import net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.level.GameType
-import net.minecraft.world.scores.Team
 import java.util.*
 
 object CasualPlayerUtils {
-    private val HEALTH_BOOST = UUID.fromString("a61b8a4f-a4f5-4b7f-b787-d10ba4ad3d57")
+    val HEALTH_BOOST: UUID = UUID.fromString("a61b8a4f-a4f5-4b7f-b787-d10ba4ad3d57")
 
     fun ServerPlayer.isMessageGlobal(message: String): Boolean {
         val team = this.team
@@ -70,7 +68,7 @@ object CasualPlayerUtils {
             )
         }
         this.health = this.maxHealth
-        this.foodData.setSaturation(20.0F)
+        this.resetHunger()
     }
 
     fun ServerPlayer.setForUHC(minigame: UHCMinigame, force: Boolean = true) {
@@ -114,12 +112,5 @@ object CasualPlayerUtils {
     fun ServerPlayer.updateGlowingTag() {
         this.setGlowingTag(!this.hasGlowingTag())
         this.setGlowingTag(!this.hasGlowingTag())
-    }
-
-    fun ServerPlayer.sendResourcePack(handler: MinigameResources) {
-        val info = handler.getInfo(this)
-        if (info !== null) {
-            this.sendResourcePack(info)
-        }
     }
 }

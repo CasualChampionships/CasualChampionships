@@ -55,6 +55,7 @@ class CasualLobbyMinigame(
     override fun initialize() {
         super.initialize()
         this.events.register<MinigameAddPlayerEvent> { this.onPlayerAdded(it) }
+        this.ui.setTabDisplay(CasualMinigame.createTabDisplay())
     }
 
     override fun onStart() {

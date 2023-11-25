@@ -10,7 +10,7 @@
     "feature.LevelMixin",
     "feature.PlayerListMixin",
     "feature.PortalForcerMixin",
-    "feature.ServerLevelMixin",
+    "feature.ServerLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

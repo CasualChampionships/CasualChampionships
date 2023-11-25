@@ -17,6 +17,7 @@ object CasualResourcePackHost {
     private val host = PackHost(1)
 
     private val ip by Config.stringOrNull("pack_host_ip")
+    private val port by Config.int("pack_host_port", 24464)
 
     init {
         this.host.addPacks(DirectoryPackSupplier(this.packs))
@@ -29,7 +30,7 @@ object CasualResourcePackHost {
     }
 
     internal fun reload(): CompletableFuture<Boolean> {
-        return this.host.start(this.ip)
+        return this.host.start(this.ip, this.port)
     }
 
     internal fun registerEvents() {

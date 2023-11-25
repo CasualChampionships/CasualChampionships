@@ -2,6 +2,9 @@ package net.casual.minigame.uhc
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.mojang.brigadier.arguments.BoolArgumentType
+import com.mojang.brigadier.builder.LiteralArgumentBuilder
+import com.mojang.brigadier.context.CommandContext
 import io.netty.buffer.Unpooled
 import me.senseiwells.replay.player.PlayerRecorders
 import net.casual.CasualMod
@@ -13,21 +16,25 @@ import net.casual.arcade.events.entity.EntityStartTrackingEvent
 import net.casual.arcade.events.entity.MobCategorySpawnEvent
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.minigame.MinigamePauseEvent
+import net.casual.arcade.events.minigame.MinigameRemovePlayerEvent
 import net.casual.arcade.events.minigame.MinigameUnpauseEvent
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerRecipeReloadEvent
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.gui.nametag.ArcadeNameTag
+import net.casual.arcade.gui.shapes.ArrowShape
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.MinigameResources.Companion.sendTo
 import net.casual.arcade.minigame.SavableMinigame
+import net.casual.arcade.minigame.annotation.MinigameEvent
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.settings.DisplayableGameSettingBuilder
 import net.casual.arcade.utils.BorderUtils
+import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
@@ -38,16 +45,21 @@ import net.casual.arcade.utils.JsonUtils.array
 import net.casual.arcade.utils.JsonUtils.int
 import net.casual.arcade.utils.LevelUtils
 import net.casual.arcade.utils.PlayerUtils
+import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.directionToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.directionVectorToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.isSurvival
+import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.message
+import net.casual.arcade.utils.PlayerUtils.resetExperience
+import net.casual.arcade.utils.PlayerUtils.resetHunger
 import net.casual.arcade.utils.PlayerUtils.sendParticles
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendSubtitle
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teamMessage
+import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.SettingsUtils.defaultOptions
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
@@ -65,6 +77,7 @@ import net.casual.items.MinesweeperItem
 import net.casual.managers.DataManager
 import net.casual.managers.TeamManager
 import net.casual.managers.TeamManager.hasAlivePlayers
+import net.casual.minigame.CasualMinigame
 import net.casual.minigame.uhc.UHCPhase.*
 import net.casual.minigame.uhc.advancement.RaceAdvancement
 import net.casual.minigame.uhc.advancement.UHCAdvancements
@@ -77,17 +90,17 @@ import net.casual.minigame.uhc.task.GlowingBossBarTask
 import net.casual.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.recipes.GoldenHeadRecipe
 import net.casual.screen.MinesweeperScreen
+import net.casual.util.*
 import net.casual.util.CasualPlayerUtils.isAliveSolo
 import net.casual.util.CasualPlayerUtils.isMessageGlobal
 import net.casual.util.CasualPlayerUtils.setForUHC
 import net.casual.util.CasualPlayerUtils.updateGlowingTag
-import net.casual.util.CasualUtils
 import net.casual.util.DirectionUtils.opposite
-import net.casual.util.HeadUtils
-import net.casual.util.PerformanceUtils
-import net.casual.util.Texts
 import net.casual.util.Texts.monospaced
-import net.casual.util.shapes.ArrowShape
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.commands.Commands
+import net.minecraft.commands.arguments.EntityArgument
+import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.particles.ParticleTypes
@@ -107,6 +120,7 @@ import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.effect.MobEffects.NIGHT_VISION
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.level.ClipContext
@@ -151,35 +165,6 @@ class UHCMinigame(
     override fun initialize() {
         super.initialize()
 
-        this.events.register<ServerTickEvent> { this.onServerTick() }
-        this.events.register<ServerRecipeReloadEvent> { this.onRecipeReload(it) }
-
-        this.events.register<MinigamePauseEvent> { this.onPause() }
-        this.events.register<MinigameUnpauseEvent> { this.onUnpause() }
-
-        this.events.register<MobCategorySpawnEvent> { this.onMobCategorySpawn(it) }
-        this.events.register<EntityStartTrackingEvent> { this.onEntityStartTracking(it) }
-
-        this.events.register<BrewingStandBrewEvent> { this.onBrewingStandBrew(it) }
-
-        this.events.register<BorderEntityPortalEntryPointEvent> { this.onBorderEntityPortalEntryPointEvent(it) }
-        this.events.register<BorderPortalWithinBoundsEvent> { this.onBorderWithinBoundsEvent(it) }
-
-        this.events.register<PlayerAdvancementEvent> { this.onPlayerAdvancement(it) }
-        this.events.register<PlayerAttackEvent> { this.onPlayerAttack(it) }
-        this.events.register<PlayerChatEvent> { this.onPlayerChat(it) }
-        this.events.register<PlayerClientboundPacketEvent> { this.onPlayerClientboundPacket(it) }
-        this.events.register<PlayerDamageEvent> { this.onPlayerDamage(it) }
-        this.events.register<PlayerDeathEvent> { this.onPlayerDeath(it) }
-        this.events.register<PlayerRespawnEvent> { this.onPlayerRespawn(it) }
-        this.events.register<PlayerItemReleaseEvent> { this.onPlayerItemRelease(it) }
-        this.events.register<PlayerLeaveEvent> { this.onPlayerLeave(it) }
-        this.events.register<PlayerTickEvent> { this.onPlayerTick(it) }
-        this.events.register<PlayerVoidDamageEvent> { this.onPlayerVoidDamage(it) }
-        this.events.register<PlayerFlagEvent> { this.onPlayerFlag(it) }
-
-        this.events.register<MinigameAddPlayerEvent>(0) { this.onMinigameAddPlayer(it.player) }
-
         this.registerAdvancements()
         this.recipes.add(listOf(GoldenHeadRecipe.create()))
         this.initialiseBorderTracker()
@@ -187,10 +172,13 @@ class UHCMinigame(
         this.event.initialise(this)
 
         this.ui.addBossbar(ActiveBossBar(this))
+        this.ui.setTabDisplay(CasualMinigame.createTabDisplay())
         this.createActiveSidebar()
+
+        this.commands.register(this.createUHCCommand())
     }
 
-    fun isRunning(): Boolean {
+    private fun isRunning(): Boolean {
         return this.isPhase(Grace) || this.isPhase(BorderMoving) || this.isPhase(BorderFinished)
     }
 
@@ -199,8 +187,9 @@ class UHCMinigame(
     }
 
     fun resetWorldBorders() {
+        val multiplier = this.settings.borderSizeMultiplier
         for ((border, level) in this.tracker.getAllTracking()) {
-            border.setSizeUntracked(UHCBorderStage.FIRST.getStartSizeFor(level))
+            border.setSizeUntracked(UHCBorderStage.FIRST.getStartSizeFor(level, multiplier))
         }
     }
 
@@ -233,7 +222,8 @@ class UHCMinigame(
     }
 
     private fun startNextBorders() {
-        this.moveWorldBorders(this.settings.borderStage.getNextStage())
+        this.settings.borderStageSetting.setQuietly(this.settings.borderStage.getNextStage())
+        this.moveWorldBorders(this.settings.borderStage)
     }
 
     fun onBorderFinish() {
@@ -291,7 +281,15 @@ class UHCMinigame(
             team !== null && !team.flags.has(TeamFlag.Ignored)
         }
         val overworld = LevelUtils.overworld()
-        PlayerUtils.spread(overworld, Vec2(0.0F, 0.0F), 500.0, 2900.0, true, players)
+        val range = this.settings.borderStage.getStartSizeFor(overworld, this.settings.borderSizeMultiplier) * 0.45
+        PlayerUtils.spread(
+            overworld,
+            Vec2(0.0F, 0.0F),
+            500.0,
+            range,
+            true,
+            players
+        )
 
         for (player in this.getPlayers()) {
             player.setForUHC(this, true)
@@ -303,24 +301,77 @@ class UHCMinigame(
         }
     }
 
-    private fun onServerTick() {
+    private fun createUHCCommand(): LiteralArgumentBuilder<CommandSourceStack> {
+        return Commands.literal("uhc").requires {
+            it.hasPermission(4)
+        }.then(
+            Commands.literal("player").then(
+                Commands.argument("player", EntityArgument.player()).then(
+                    Commands.literal("add").then(
+                        Commands.argument("team", TeamArgument.team()).then(
+                            Commands.argument("teleport", BoolArgumentType.bool()).executes(this::addPlayerToTeam)
+                        ).executes { this.addPlayerToTeam(it, false) }
+                    )
+                )
+            )
+        ).then(
+            Commands.literal("border").then(
+                Commands.literal("start").executes(this::startWorldBorders)
+            )
+        )
+    }
+
+    private fun addPlayerToTeam(
+        context: CommandContext<CommandSourceStack>,
+        teleport: Boolean = BoolArgumentType.getBool(context, "teleport")
+    ): Int {
+        val target = EntityArgument.getPlayer(context, "player")
+        val team = TeamArgument.getTeam(context, "team")
+
+        val server = context.source.server
+        server.scoreboard.addPlayerToTeam(target.scoreboardName, team)
+        target.sendSystemMessage(Texts.UHC_ADDED_TO_TEAM.generate(team.formattedDisplayName))
+
+        target.setForUHC(this, !target.flags.has(PlayerFlag.Participating))
+
+        if (teleport) {
+            for (player in this.getPlayers()) {
+                if (team.players.contains(player.scoreboardName) && player.isSurvival && target != player) {
+                    target.teleportTo(player.location)
+                    break
+                }
+            }
+        }
+
+        val message = "${target.scoreboardName} has joined team ".literal()
+            .append(team.formattedDisplayName)
+            .append(" and has ${if (teleport) "been teleported to a random teammate" else "not been teleported"}")
+        return context.source.success(message, true)
+    }
+
+    private fun startWorldBorders(context: CommandContext<CommandSourceStack>): Int {
+        this.startWorldBorders()
+        return context.source.success("Successfully started world borders")
+    }
+
+    @MinigameEvent
+    private fun onServerTick(event: ServerTickEvent) {
         if (!this.paused) {
             this.uptime++
         }
     }
 
-    private fun onPause() {
-        if (this.isRunning()) {
-            this.pauseWorldBorders()
-        }
+    @MinigameEvent(start = GRACE_ID, end = BORDER_FINISHED_ID)
+    private fun onPause(event: MinigamePauseEvent) {
+        this.pauseWorldBorders()
     }
 
-    private fun onUnpause() {
-        if (this.isRunning()) {
-            this.startWorldBorders()
-        }
+    @MinigameEvent(start = GRACE_ID, end = BORDER_FINISHED_ID)
+    private fun onUnpause(event: MinigameUnpauseEvent) {
+        this.startWorldBorders()
     }
 
+    @MinigameEvent
     private fun onMobCategorySpawn(event: MobCategorySpawnEvent) {
         val (_, category, _, state) = event
         val i = category.maxInstancesPerChunk * state.spawnableChunkCount / 289
@@ -329,6 +380,7 @@ class UHCMinigame(
         }
     }
 
+    @MinigameEvent
     private fun onEntityStartTracking(event: EntityStartTrackingEvent) {
         val entity = event.entity
         if (entity is Mob && PerformanceUtils.isEntityAIDisabled(entity)) {
@@ -336,6 +388,7 @@ class UHCMinigame(
         }
     }
 
+    @MinigameEvent
     private fun onBrewingStandBrew(event: BrewingStandBrewEvent) {
         if (!this.settings.opPotions) {
             val ingredient = event.entity.getItem(3)
@@ -345,6 +398,7 @@ class UHCMinigame(
         }
     }
 
+    @MinigameEvent
     private fun onBorderEntityPortalEntryPointEvent(event: BorderEntityPortalEntryPointEvent) {
         val (border, _, _, pos) = event
 
@@ -368,6 +422,7 @@ class UHCMinigame(
         ))
     }
 
+    @MinigameEvent
     private fun onBorderWithinBoundsEvent(event: BorderPortalWithinBoundsEvent) {
         val (border, _, pos) = event
         // Blocks per millisecond
@@ -386,6 +441,7 @@ class UHCMinigame(
         )
     }
 
+    @MinigameEvent(start = GRACE_ID, end = BORDER_FINISHED_ID)
     private fun onPlayerTick(event: PlayerTickEvent) {
         val (player) = event
 
@@ -396,6 +452,7 @@ class UHCMinigame(
         }
     }
 
+    @MinigameEvent
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         event.invoke() // Post event
         val (player, source) = event
@@ -412,21 +469,36 @@ class UHCMinigame(
         }
     }
 
+    @MinigameEvent
     private fun onPlayerRespawn(event: PlayerRespawnEvent) {
         val player = event.player
 
         player.setGameMode(GameType.SPECTATOR)
     }
 
+    @MinigameEvent
+    private fun onMinigamePlayerRemoved(event: MinigameRemovePlayerEvent) {
+        val player = event.player
+        val instance = player.attributes.getInstance(Attributes.MAX_HEALTH)
+        instance?.removeModifier(CasualPlayerUtils.HEALTH_BOOST)
+        player.resetHunger()
+        player.resetExperience()
+        player.clearPlayerInventory()
+        PlayerRecorders.get(player)?.stop()
+    }
+
+    @MinigameEvent(start = GRACE_ID, end = BORDER_FINISHED_ID)
     private fun onPlayerLeave(event: PlayerLeaveEvent) {
         val (player) = event
         DataManager.database.updateStats(player)
     }
 
+    @MinigameEvent
     private fun onRecipeReload(event: ServerRecipeReloadEvent) {
         event.add(GoldenHeadRecipe.create())
     }
 
+    @MinigameEvent
     private fun onPlayerItemRelease(event: PlayerItemReleaseEvent) {
         val (player, stack) = event
         if (stack.`is`(Items.BOW)) {
@@ -434,19 +506,22 @@ class UHCMinigame(
         }
     }
 
+    @MinigameEvent(start = GRACE_ID, end = BORDER_FINISHED_ID)
     private fun onPlayerAttack(event: PlayerAttackEvent) {
-        if (this.isRunning() && event.target is ServerPlayer) {
+        if (event.target is ServerPlayer) {
             event.player.uhcStats.increment(PlayerStat.DamageDealt, event.damage.toDouble())
         }
     }
 
+    @MinigameEvent(start = GRACE_ID, end = BORDER_FINISHED_ID)
     private fun onPlayerDamage(event: PlayerDamageEvent) {
         val (player, amount) = event
-        if (this.isRunning() && player.isSurvival) {
+        if (player.isSurvival) {
             player.uhcStats.increment(PlayerStat.DamageTaken, amount.toDouble())
         }
     }
 
+    @MinigameEvent
     private fun onPlayerVoidDamage(event: PlayerVoidDamageEvent) {
         val (player) = event
         if (player.isSpectator) {
@@ -454,6 +529,7 @@ class UHCMinigame(
         }
     }
 
+    @MinigameEvent
     private fun onPlayerFlag(event: PlayerFlagEvent) {
         val player = event.player
         when (event.flag) {
@@ -474,7 +550,9 @@ class UHCMinigame(
         }
     }
 
-    private fun onMinigameAddPlayer(player: ServerPlayer) {
+    @MinigameEvent(priority = 0)
+    private fun onMinigameAddPlayer(event: MinigameAddPlayerEvent) {
+        val (_, player) = event
         player.updateGlowingTag()
 
         if (this.isRunning() && this.settings.glowing && player.isSurvival) {
@@ -501,6 +579,7 @@ class UHCMinigame(
         GlobalTickedScheduler.schedule(1, MinecraftTimeUnit.Seconds, player::resetSentInfo)
     }
 
+    @MinigameEvent
     private fun onPlayerChat(event: PlayerChatEvent) {
         val (player, message) = event
         val content = message.signedContent()
@@ -513,10 +592,12 @@ class UHCMinigame(
         event.cancel()
     }
 
+    @MinigameEvent
     private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
         event.player.uhcStats.add(event.advancement)
     }
 
+    @MinigameEvent
     private fun onPlayerClientboundPacket(event: PlayerClientboundPacketEvent) {
         val (player, packet) = event
 
@@ -755,13 +836,20 @@ class UHCMinigame(
         if (level == this.end && stage >= UHCBorderStage.SIX) {
             return
         }
-        val dest = if (size == UHCBorderSize.END) stage.getEndSizeFor(level) else stage.getStartSizeFor(level)
-        val time = if (instant) -1.0 else stage.getRemainingTimeAsPercent(border.size, level)
+        val multiplier = this.settings.borderSizeMultiplier
+        val dest = if (size == UHCBorderSize.END) {
+            stage.getEndSizeFor(level, multiplier)
+        } else {
+            stage.getStartSizeFor(level, multiplier)
+        }
+        val time = if (instant) -1.0 else stage.getRemainingTimeAsPercent(border.size, level, multiplier)
+
+        CasualMod.logger.info("Level $level moving to $dest")
         moveWorldBorder(border, dest, time)
     }
 
     private fun moveWorldBorder(border: TrackedBorder, newSize: Double, percent: Double = -1.0) {
-        val seconds = (percent * this.settings.worldBorderTime).toLong()
+        val seconds = (percent * this.settings.borderTime).toLong()
         if (seconds > 0) {
             border.lerpSizeBetween(border.size, newSize, seconds * 1000L)
             return
@@ -919,11 +1007,25 @@ class UHCMinigame(
                 }
                 .build()
         )
-        var worldBorderTime by registerSetting(
+        var borderSizeMultiplier by registerSetting(
+            DisplayableGameSettingBuilder.double()
+                .name("border_size_multiplier")
+                .display(Items.BEACON.literalNamed("Border Size Multiplier"))
+                .option("one_third", Items.SCAFFOLDING.literalNamed("0.33x Size"), 1.0 / 3.0)
+                .option("half", Items.ANVIL.literalNamed("0.5x Size"), 0.5)
+                .option("two_thirds", Items.GREEN_STAINED_GLASS_PANE.literalNamed("0.66x Size"), 2.0 / 3.0)
+                .option("normal", Items.LIME_STAINED_GLASS_PANE.literalNamed("1x Size"), 1.0)
+                .option("three_halves", Items.RED_STAINED_GLASS_PANE.literalNamed("1.5x Size"), 1.5)
+                .option("double", Items.RED_STAINED_GLASS_PANE.literalNamed("2x Size"), 2.0)
+                .value(1.0)
+                .build()
+        )
+        var borderTime by registerSetting(
             DisplayableGameSettingBuilder.long()
                 .name("border_completion_time")
                 .display(Items.DIAMOND_BOOTS.literalNamed("Border Completion Time"))
                 .option("ten_minutes", Items.CAKE.literalNamed("10 Minutes"), MINUTES.toSeconds(10))
+                .option("thirty_minutes", Items.SCULK_SENSOR.literalNamed("30 Minutes"), MINUTES.toSeconds(30))
                 .option("two_hours", Items.GREEN_STAINED_GLASS_PANE.literalNamed("2 Hours"), MINUTES.toSeconds(120))
                 .option("two_and_half_hours", Items.YELLOW_STAINED_GLASS_PANE.literalNamed("2.5 Hours"), MINUTES.toSeconds(150))
                 .option("three_hours", Items.RED_STAINED_GLASS_PANE.literalNamed("3 Hours"), MINUTES.toSeconds(180))
@@ -1037,7 +1139,7 @@ class UHCMinigame(
                 .value(UHCBorderSize.START)
                 .build()
         )
-        var borderStage by registerSetting(
+        var borderStageSetting = registerSetting(
             DisplayableGameSettingBuilder.enum<UHCBorderStage>()
                 .name("border_stage")
                 .display(Items.BARRIER.literalNamed("World Border Stage"))
@@ -1048,5 +1150,6 @@ class UHCMinigame(
                 }
                 .build()
         )
+        var borderStage by this.borderStageSetting
     }
 }

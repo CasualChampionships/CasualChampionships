@@ -2,8 +2,6 @@ package net.casual.screen
 
 import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
-import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.gui.screen.ArcadeGenericScreen
 import net.casual.arcade.utils.ItemUtils.literalNamed
 import net.casual.arcade.utils.PlayerUtils
@@ -41,7 +39,7 @@ class MinesweeperScreen(
     private var complete = false
 
     init {
-        this.flagItem.count = Grid.mineCount
+        this.flagItem.count = Grid.MINE_COUNT
         for (i in 0..80) {
             this.slots[i].set(UNKNOWN_TILE)
         }
@@ -133,7 +131,7 @@ class MinesweeperScreen(
     }
 
     private fun checkWin(player: Player) {
-        val possibleGuesses: Int = grid.capacity - Grid.mineCount
+        val possibleGuesses: Int = grid.capacity - Grid.MINE_COUNT
         if (this.guessed.size == possibleGuesses) {
             this.onWin(player)
         }
@@ -198,7 +196,7 @@ class MinesweeperScreen(
         }
 
         private fun generate(first: Int) {
-            var count = mineCount
+            var count = MINE_COUNT
             while (count > 0) {
                 val index = RANDOM.nextInt(this.capacity)
                 if (index != first && !isMine(index)) {
@@ -217,7 +215,7 @@ class MinesweeperScreen(
         }
 
         private fun countMines(index: Int): Int {
-            // If it's a mine we don't count the mines.
+            // If it's a mine we ignore; we don't count the mines.
             if (isMine(index)) {
                 return -1
             }
@@ -275,7 +273,7 @@ class MinesweeperScreen(
 
         companion object {
             private val RANDOM = Random()
-            const val mineCount = 12
+            const val MINE_COUNT = 12
         }
     }
 

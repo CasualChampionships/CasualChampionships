@@ -1,6 +1,5 @@
 package net.casual.minigame.uhc
 
-import me.senseiwells.replay.player.PlayerRecorders
 import net.casual.CasualMod
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.minigame.task.impl.MinigameTask
@@ -13,7 +12,6 @@ import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
-import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.PlayerUtils.sendSound
@@ -33,8 +31,15 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.scores.Team
 
-enum class UHCPhase: MinigamePhase<UHCMinigame> {
-    Grace {
+const val GRACE_ID = "grace"
+const val BORDER_MOVING_ID = "border_moving"
+const val BORDER_FINISHED_ID = "border_finished"
+const val GAME_OVER_ID = "game_over"
+
+enum class UHCPhase(
+    override val id: String
+): MinigamePhase<UHCMinigame> {
+    Grace(GRACE_ID) {
         override fun start(minigame: UHCMinigame) {
             minigame.setGameRules {
                 resetToDefault()
@@ -70,12 +75,12 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
             minigame.pvp = true
         }
     },
-    BorderMoving {
+    BorderMoving(BORDER_MOVING_ID) {
         override fun start(minigame: UHCMinigame) {
             minigame.startWorldBorders()
         }
     },
-    BorderFinished {
+    BorderFinished(BORDER_FINISHED_ID) {
         override fun start(minigame: UHCMinigame) {
             val task = GlowingBossBarTask(minigame)
                 .withDuration(2.Minutes)
@@ -89,7 +94,7 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
             minigame.server.isPvpAllowed = false
         }
     },
-    GameOver {
+    GameOver(GAME_OVER_ID) {
         override fun start(minigame: UHCMinigame) {
             val team = TeamManager.getAnyAliveTeam(minigame.getPlayers())
             if (team == null) {
@@ -144,16 +149,10 @@ enum class UHCPhase: MinigamePhase<UHCMinigame> {
             }
 
             minigame.scheduler.schedulePhased(20, MinecraftTimeUnit.Seconds) {
-                for (player in minigame.getPlayers()) {
-                    player.clearPlayerInventory()
-                    PlayerRecorders.get(player)?.stop()
-                }
                 CasualMinigame.setLobby(minigame.server)
             }
 
             minigame.grantFinalAdvancements()
         }
-    };
-
-    override val id: String = name.lowercase()
+    }
 }

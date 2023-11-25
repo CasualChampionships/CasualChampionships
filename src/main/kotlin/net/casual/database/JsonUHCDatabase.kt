@@ -10,10 +10,12 @@ import net.casual.arcade.utils.JsonUtils.objects
 import net.casual.arcade.utils.JsonUtils.set
 import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.JsonUtils.toJsonArray
+import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.extensions.PlayerFlag
 import net.casual.extensions.PlayerFlagsExtension.Companion.flags
 import net.casual.extensions.PlayerStat
 import net.casual.extensions.PlayerStatsExtension.Companion.uhcStats
+import net.casual.minigame.uhc.UHCMinigame
 import net.casual.util.Config
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.Team

@@ -59,11 +59,6 @@ class CasualMod: ModInitializer {
             player.addExtension(PlayerUHCExtension(player))
             player.addExtension(PlayerStatsExtension())
         }
-
-        Fantasy.get(null).getOrOpenPersistentWorld(
-            null,
-            RuntimeWorldConfig()
-        )
     }
 
     fun registerEvents() {

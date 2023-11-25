@@ -16,9 +16,9 @@ enum class UHCBorderStage(
     FINAL(SIX.endSize, 20.0, 2.0),
     END(FINAL.endSize, 0.0, 0.0);
 
-    fun getRemainingTimeAsPercent(size: Double, level: Level): Double {
-        val remainingSize = size - this.getEndSizeFor(level)
-        val totalSize = this.getStartSizeFor(level) - this.getEndSizeFor(level)
+    fun getRemainingTimeAsPercent(size: Double, level: Level, multiplier: Double): Double {
+        val remainingSize = size - this.getEndSizeFor(level, multiplier)
+        val totalSize = this.getStartSizeFor(level, multiplier) - this.getEndSizeFor(level, multiplier)
         return (remainingSize / totalSize) * (this.weight / TOTAL_WEIGHT)
     }
 
@@ -28,12 +28,12 @@ enum class UHCBorderStage(
         return if (next < values.size) values[next] else END
     }
 
-    fun getStartSizeFor(level: Level): Double {
-        return adjustSize(this.startSize, level)
+    fun getStartSizeFor(level: Level, multiplier: Double): Double {
+        return adjustSize(this.startSize, level) * multiplier
     }
 
-    fun getEndSizeFor(level: Level): Double {
-        return adjustSize(this.endSize, level)
+    fun getEndSizeFor(level: Level, multiplier: Double): Double {
+        return adjustSize(this.endSize, level) * multiplier
     }
 
     companion object {

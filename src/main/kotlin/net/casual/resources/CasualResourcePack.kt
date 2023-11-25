@@ -10,7 +10,7 @@ import kotlin.io.path.readBytes
 
 object CasualResourcePack {
     private val path = Config.resolve("packs").resolve("casual-pack.zip")
-    val pack = ResourcePackCreator.create()
+    val pack: ResourcePackCreator = ResourcePackCreator.create()
 
     fun initialise() {
         pack.addAssetSource(CasualMod.ID)
