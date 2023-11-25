@@ -99,6 +99,7 @@ class PlayerStatsExtension: DataExtension {
     }
 
     companion object {
+        @Deprecated("Use the built-in stats Arcade provides")
         val ServerPlayer.uhcStats
             get() = this.getExtension(PlayerStatsExtension::class.java)
     }

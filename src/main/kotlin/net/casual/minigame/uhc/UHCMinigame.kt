@@ -33,6 +33,7 @@ import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.settings.DisplayableGameSettingBuilder
+import net.casual.arcade.stats.ArcadeStats
 import net.casual.arcade.utils.BorderUtils
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.ComponentUtils.bold
@@ -61,6 +62,7 @@ import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teamMessage
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.SettingsUtils.defaultOptions
+import net.casual.arcade.utils.StatUtils.increment
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.events.border.BorderEntityPortalEntryPointEvent
@@ -506,21 +508,6 @@ class UHCMinigame(
         }
     }
 
-    @MinigameEvent(start = GRACE_ID, end = BORDER_FINISHED_ID)
-    private fun onPlayerAttack(event: PlayerAttackEvent) {
-        if (event.target is ServerPlayer) {
-            event.player.uhcStats.increment(PlayerStat.DamageDealt, event.damage.toDouble())
-        }
-    }
-
-    @MinigameEvent(start = GRACE_ID, end = BORDER_FINISHED_ID)
-    private fun onPlayerDamage(event: PlayerDamageEvent) {
-        val (player, amount) = event
-        if (player.isSurvival) {
-            player.uhcStats.increment(PlayerStat.DamageTaken, amount.toDouble())
-        }
-    }
-
     @MinigameEvent
     private fun onPlayerVoidDamage(event: PlayerVoidDamageEvent) {
         val (player) = event
@@ -587,14 +574,11 @@ class UHCMinigame(
             player.teamMessage(message)
         } else {
             val decorated = if (content.startsWith('!')) content.substring(1) else content
-            player.message(Component.literal(decorated))
+            if (decorated.isNotBlank()) {
+                player.message(Component.literal(decorated.trim()))
+            }
         }
         event.cancel()
-    }
-
-    @MinigameEvent
-    private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
-        event.player.uhcStats.add(event.advancement)
     }
 
     @MinigameEvent
@@ -626,7 +610,7 @@ class UHCMinigame(
             }
         }
         if (packet is ClientboundBundlePacket) {
-            val updated = java.util.ArrayList<Packet<ClientGamePacketListener>>()
+            val updated = ArrayList<Packet<ClientGamePacketListener>>()
             for (sub in packet.subPackets()) {
                 updated.add(this.updatePacket(player, sub))
             }
@@ -765,8 +749,6 @@ class UHCMinigame(
             }
         }
 
-        player.uhcStats.increment(PlayerStat.Deaths, 1.0)
-
         val team = player.team
         if (team !== null && !team.flags.has(TeamFlag.Eliminated) && !team.hasAlivePlayers(player)) {
             team.flags.set(TeamFlag.Eliminated, true)
@@ -782,7 +764,6 @@ class UHCMinigame(
     }
 
     private fun onKilled(player: ServerPlayer, killed: ServerPlayer) {
-        player.uhcStats.increment(PlayerStat.Kills, 1.0)
         if (this.isUnclaimed(RaceAdvancement.Kill)) {
             player.grantAdvancement(UHCAdvancements.FIRST_BLOOD)
         }
@@ -864,13 +845,12 @@ class UHCMinigame(
 
         this.events.register<PlayerJoinEvent>(2000) { event ->
             if (this.isRunning() && event.player.isSurvival) {
-                val stats = event.player.uhcStats
-                stats.increment(PlayerStat.Relogs, 1.0)
+                val relogs = this.stats.getOrCreateStat(event.player, ArcadeStats.RELOGS)
 
                 // Wait for player to load in
-                GlobalTickedScheduler.schedule(5, MinecraftTimeUnit.Seconds) {
+                GlobalTickedScheduler.schedule(1.Seconds) {
                     event.player.grantAdvancement(UHCAdvancements.COMBAT_LOGGER)
-                    if (stats[PlayerStat.Relogs] == 10.0) {
+                    if (relogs.value == 10) {
                         event.player.grantAdvancement(UHCAdvancements.OK_WE_BELIEVE_YOU_NOW)
                     }
                 }
@@ -958,7 +938,7 @@ class UHCMinigame(
         var highest: PlayerAttacker? = null
         for (player in this.getPlayers()) {
             if (player.flags.has(PlayerFlag.Participating)) {
-                val current = player.uhcStats[PlayerStat.DamageDealt]
+                val current = this.stats.getOrCreateStat(player, ArcadeStats.DAMAGE_DEALT).value
                 if (lowest === null) {
                     val first = PlayerAttacker(player, current)
                     lowest = first
@@ -979,7 +959,7 @@ class UHCMinigame(
 
     private class PlayerAttacker(
         val player: ServerPlayer,
-        val damage: Double
+        val damage: Float
     )
 
     inner class Settings {
