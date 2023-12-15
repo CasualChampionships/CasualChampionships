@@ -49,9 +49,10 @@ dependencies {
     include(modImplementation("com.github.Senseiwells:ServerReplay:${property("server_replay_version")}")!!)
     include(modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")!!)
 
-    include(modImplementation("eu.pb4:polymer-core:0.5.18+1.20.1")!!)
-    include(modImplementation("eu.pb4:polymer-blocks:0.5.18+1.20.1")!!)
-    include(modImplementation("eu.pb4:polymer-resource-pack:0.5.18+1.20.1")!!)
+    include(modImplementation("eu.pb4:polymer-core:${property("polymer_version")}")!!)
+    include(modImplementation("eu.pb4:polymer-blocks:${property("polymer_version")}")!!)
+    include(modImplementation("eu.pb4:polymer-resource-pack:${property("polymer_version")}")!!)
+    include(modImplementation("eu.pb4:polymer-virtual-entity:${property("polymer_version")}")!!)
 
     include(modImplementation("com.github.ReplayMod:ReplayStudio:a1e2b83") {
         exclude(group = "org.slf4j")

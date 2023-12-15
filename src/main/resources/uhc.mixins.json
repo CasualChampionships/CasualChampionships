@@ -4,13 +4,13 @@
   "package": "net.casual.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "commands.SpectateCommandMixin",
-    "feature.DedicatedServerMixin",
-    "feature.EntityMixin",
-    "feature.LevelMixin",
-    "feature.PlayerListMixin",
-    "feature.PortalForcerMixin",
-    "feature.ServerLevelMixin"
+    "net.casual.championships.mixin.commands.SpectateCommandMixin",
+    "net.casual.championships.mixin.feature.DedicatedServerMixin",
+    "net.casual.championships.mixin.feature.EntityMixin",
+    "net.casual.championships.mixin.feature.LevelMixin",
+    "net.casual.championships.mixin.feature.PlayerListMixin",
+    "net.casual.championships.mixin.feature.PortalForcerMixin",
+    "net.casual.championships.mixin.feature.ServerLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1
