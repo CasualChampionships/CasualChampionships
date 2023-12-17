@@ -13,10 +13,7 @@ import net.casual.arcade.border.TrackedBorder
 import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.entity.EntityStartTrackingEvent
 import net.casual.arcade.events.entity.MobCategorySpawnEvent
-import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
-import net.casual.arcade.events.minigame.MinigamePauseEvent
-import net.casual.arcade.events.minigame.MinigameRemovePlayerEvent
-import net.casual.arcade.events.minigame.MinigameUnpauseEvent
+import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerRecipeReloadEvent
 import net.casual.arcade.gui.nametag.ArcadeNameTag
@@ -156,6 +153,7 @@ class UHCMinigame(
 
         this.addEventListener(this.uhcAdvancements)
         this.recipes.add(listOf(GoldenHeadRecipe.create()))
+        UHCAdvancements.getAllAdvancements().forEach(this.advancements::add)
         this.initialiseBorderTracker()
 
         this.event.initialise(this)
@@ -422,12 +420,6 @@ class UHCMinigame(
         PlayerRecorders.get(player)?.stop()
     }
 
-    @Listener(before = BORDER_FINISHED_ID)
-    private fun onPlayerLeave(event: PlayerLeaveEvent) {
-        val (player) = event
-        DataManager.database.updateStats(player)
-    }
-
     @Listener
     private fun onRecipeReload(event: ServerRecipeReloadEvent) {
         event.add(GoldenHeadRecipe.create())
@@ -463,7 +455,7 @@ class UHCMinigame(
         } else {
             GlobalTickedScheduler.later {
                 if (!PlayerRecorders.has(player) && this.isPlaying(player)) {
-                    PlayerRecorders.create(player).start()
+                    // PlayerRecorders.create(player).start()
                 }
             }
         }
@@ -510,6 +502,12 @@ class UHCMinigame(
         } else {
             this.onPacket(player, packet)
         }
+    }
+
+    @Listener
+    private fun onMinigameClose(event: MinigameCloseEvent) {
+        // TODO:
+        DataManager.database.update(this)
     }
 
     private fun updatePacket(player: ServerPlayer, packet: Packet<ClientGamePacketListener>): Packet<ClientGamePacketListener> {
@@ -745,6 +743,8 @@ class UHCMinigame(
         player.sendSound(SoundEvents.NOTE_BLOCK_BELL.value())
 
         player.grantAllRecipes()
+
+        player.grantAdvancement(UHCAdvancements.ROOT)
 
         this.resetPlayerHealth(player)
         player.resetHunger()

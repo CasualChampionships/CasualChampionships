@@ -155,7 +155,7 @@ class MinesweeperScreen(
         val minigame = player.getMinigame() ?: return
         val stat = minigame.stats.getOrCreateStat(player, CasualStats.MINESWEEPER_RECORD)
         if (stat.value.isNaN() || stat.value > seconds) {
-            stat.value = seconds
+            stat.modify { seconds }
         }
     }
 

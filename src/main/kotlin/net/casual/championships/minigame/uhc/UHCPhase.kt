@@ -1,7 +1,5 @@
 package net.casual.championships.minigame.uhc
 
-import net.casual.arcade.events.GlobalEventHandler
-import net.casual.championships.CasualMod
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.task.impl.PhaseChangeTask
@@ -15,13 +13,13 @@ import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
-import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.championships.CasualMod
 import net.casual.championships.managers.DataManager
 import net.casual.championships.managers.TeamManager
 import net.casual.championships.minigame.CasualMinigames
@@ -126,6 +124,8 @@ enum class UHCPhase(
     },
     GameOver(GAME_OVER_ID) {
         override fun start(minigame: UHCMinigame) {
+            minigame.stats.freeze()
+
             val team = TeamManager.getAnyAliveTeam(minigame.getPlayingPlayers())
             if (team == null) {
                 CasualMod.logger.error("Last team was null!")
@@ -141,15 +141,10 @@ enum class UHCPhase(
             for (player in minigame.getAllPlayers()) {
                 player.setGlowingTag(false)
                 player.sendTitle(Texts.UHC_WON.generate(team.name).withStyle(team.color))
-
-                DataManager.database.updateStats(player)
             }
 
-            // TODO: make this goto database
-            CasualMod.logger.info(JsonUtils.GSON.toJson(minigame.stats.serialize()))
-
+            // TODO:
             DataManager.database.incrementTeamWin(team)
-            DataManager.database.combineStats()
 
             // TODO: Better winning screen
             val winTask = MinigameTask(minigame) {

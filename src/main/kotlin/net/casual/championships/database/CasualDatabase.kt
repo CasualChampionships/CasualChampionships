@@ -1,4 +1,4 @@
-package net.casual.championships.database.updated
+package net.casual.championships.database
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
@@ -31,7 +31,7 @@ class CasualDatabase {
         this.toJson().writeForDatabase(writer)
     }
 
-    fun toJson(): JsonElement {
+    fun toJson(): JsonObject {
         return this.event.deepCopy()
     }
 }
