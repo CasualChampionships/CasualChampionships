@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "casual-test",
+  "version": "1.0.0",
+  "name": "Testing Casual Championships Mod",
+  "description": "",
+  "authors": [
+    "Sensei"
+  ],
+  "contact": {
+    "repo": "https://github.com/CasualUHC/uhc-mod.git"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.casual.championships.ClientCasualMod"
+    ]
+  },
+  "depends": {
+
+  }
+}

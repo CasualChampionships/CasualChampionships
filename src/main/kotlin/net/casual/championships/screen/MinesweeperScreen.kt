@@ -7,8 +7,6 @@ import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.championships.extensions.PlayerStat.MinesweeperRecord
-import net.casual.championships.extensions.PlayerStatsExtension.Companion.uhcStats
 import net.casual.championships.items.MinesweeperItem
 import net.casual.championships.items.MinesweeperItem.Companion.EMPTY
 import net.casual.championships.items.MinesweeperItem.Companion.MINE

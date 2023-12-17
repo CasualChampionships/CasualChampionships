@@ -6,10 +6,11 @@ import net.casual.championships.util.HeadUtils
 import net.casual.championships.util.CasualUtils.id
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.crafting.CraftingBookCategory
+import net.minecraft.world.item.crafting.RecipeHolder
 import net.minecraft.world.item.crafting.ShapedRecipe
 
 object GoldenHeadRecipe {
-    fun create(): ShapedRecipe {
+    fun create(): RecipeHolder<ShapedRecipe> {
         return CraftingRecipeBuilder.shaped {
             id = id("golden_head_recipe")
             category = CraftingBookCategory.MISC

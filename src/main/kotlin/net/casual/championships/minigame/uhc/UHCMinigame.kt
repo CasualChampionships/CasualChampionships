@@ -6,7 +6,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import io.netty.buffer.Unpooled
 import me.senseiwells.replay.player.PlayerRecorders
-import net.casual.championships.CasualMod
 import net.casual.arcade.border.MultiLevelBorderListener
 import net.casual.arcade.border.MultiLevelBorderTracker
 import net.casual.arcade.border.TrackedBorder
@@ -18,8 +17,6 @@ import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerRecipeReloadEvent
 import net.casual.arcade.gui.nametag.ArcadeNameTag
 import net.casual.arcade.gui.shapes.ArrowShape
-import net.casual.arcade.gui.sidebar.ArcadeSidebar
-import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.annotation.IS_PLAYING
 import net.casual.arcade.minigame.annotation.Listener
@@ -36,7 +33,6 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.MinigameUtils.addEventListener
 import net.casual.arcade.utils.MinigameUtils.requiresAdminOrPermission
-import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.directionToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.directionVectorToNearestBorder
@@ -54,6 +50,7 @@ import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teamMessage
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.championships.CasualMod
 import net.casual.championships.events.border.BorderEntityPortalEntryPointEvent
 import net.casual.championships.events.border.BorderPortalWithinBoundsEvent
 import net.casual.championships.extensions.PlayerFlag
@@ -72,8 +69,6 @@ import net.casual.championships.minigame.uhc.advancement.UHCAdvancements
 import net.casual.championships.minigame.uhc.events.DefaultUHC
 import net.casual.championships.minigame.uhc.events.UHCEvent
 import net.casual.championships.minigame.uhc.gui.ActiveBossBar
-import net.casual.championships.minigame.uhc.gui.BorderDistanceRow
-import net.casual.championships.minigame.uhc.gui.TeammateRow
 import net.casual.championships.minigame.uhc.task.GlowingBossBarTask
 import net.casual.championships.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.championships.recipes.GoldenHeadRecipe
@@ -82,7 +77,6 @@ import net.casual.championships.util.CasualPlayerUtils.isAliveSolo
 import net.casual.championships.util.CasualPlayerUtils.isMessageGlobal
 import net.casual.championships.util.CasualPlayerUtils.updateGlowingTag
 import net.casual.championships.util.DirectionUtils.opposite
-import net.casual.championships.util.Texts.monospaced
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
@@ -103,6 +97,7 @@ import net.minecraft.util.Mth
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
@@ -111,8 +106,6 @@ import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.HitResult
-import net.minecraft.world.phys.Vec2
-import net.minecraft.world.scores.Team
 import xyz.nucleoid.fantasy.RuntimeWorldHandle
 import kotlin.math.atan2
 
@@ -451,17 +444,17 @@ class UHCMinigame(
         }
 
         if (player.team == null || !player.flags.has(PlayerFlag.Participating)) {
-            this.setAsSpectator(player)
+            this.makeSpectator(player)
         } else {
             GlobalTickedScheduler.later {
                 if (!PlayerRecorders.has(player) && this.isPlaying(player)) {
-                    // PlayerRecorders.create(player).start()
+                    PlayerRecorders.create(player).start()
                 }
             }
         }
 
         if (player.team == null) {
-            this.setAsSpectator(player)
+            this.makeSpectator(player)
         }
 
         // Needed for updating the player's health
@@ -510,6 +503,22 @@ class UHCMinigame(
         DataManager.database.update(this)
     }
 
+    @Listener
+    private fun onMinigameAddSpectator(event: MinigameAddSpectatorEvent) {
+        val (_, player) = event
+        player.setGameMode(GameType.SPECTATOR)
+        player.setGlowingTag(false)
+
+        if (player.team == null) {
+            val scoreboard = player.server.scoreboard
+            scoreboard.addPlayerToTeam(player.scoreboardName, scoreboard.getOrCreateSpectatorTeam())
+        }
+
+        val flags = player.flags
+        flags.set(PlayerFlag.TeamGlow, false)
+        flags.set(PlayerFlag.FullBright, true)
+    }
+
     private fun updatePacket(player: ServerPlayer, packet: Packet<ClientGamePacketListener>): Packet<ClientGamePacketListener> {
         if (packet is ClientboundSetEntityDataPacket) {
             val glowing = player.serverLevel().getEntity(packet.id())
@@ -528,8 +537,8 @@ class UHCMinigame(
     }
 
     private fun onPacket(player: ServerPlayer, packet: Packet<*>) {
-        if (packet is ClientboundAddPlayerPacket) {
-            val newPlayer = player.server.playerList.getPlayer(packet.playerId)
+        if (packet is ClientboundAddEntityPacket && packet.type == EntityType.PLAYER) {
+            val newPlayer = player.server.playerList.getPlayer(packet.uuid)
             newPlayer?.updateGlowingTag()
         }
     }
@@ -634,7 +643,7 @@ class UHCMinigame(
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
         player.setRespawnPosition(player.level().dimension(), player.blockPosition(), player.xRot, true, false)
-        this.setAsSpectator(player)
+        this.makeSpectator(player)
 
         if (killer is ServerPlayer) {
             this.onKilled(killer, player)
@@ -674,9 +683,10 @@ class UHCMinigame(
         }
     }
 
+    // TODO:
     fun createActiveSidebar() {
         val name = ArcadeNameTag(
-            Entity::getDisplayName
+            { it.displayName!! }
         ) { a, _ -> !a.isInvisible }
         val health = ArcadeNameTag(
             { String.format("%.1f ", it.health / 2).literal().append(Texts.ICON_HEART) },
@@ -686,22 +696,7 @@ class UHCMinigame(
         this.ui.addNameTag(health)
         this.ui.addNameTag(name)
 
-        val sidebar = ArcadeSidebar(ComponentSupplier.of(Texts.CASUAL_UHC.gold().bold()))
-
-        val buffer = "   "
-
-        sidebar.addRow(ComponentSupplier.of(Component.empty().append(buffer).append(Texts.SIDEBAR_TEAMMATES.monospaced())))
-        for (i in 0 until this.event.getTeamSize()) {
-            sidebar.addRow(TeammateRow(i, buffer))
-        }
-        sidebar.addRow(ComponentSupplier.of(Component.empty()))
-        sidebar.addRow(BorderDistanceRow(buffer))
-        sidebar.addRow { player ->
-            Component.literal(buffer).append(Texts.UHC_WB_RADIUS.generate((player.level().worldBorder.size / 2.0).toInt())).monospaced()
-        }
-        sidebar.addRow(ComponentSupplier.of(Component.empty()))
-
-        this.ui.setSidebar(sidebar)
+        this.ui.setSidebar(UHCUtils.createSidebar(this.event.getTeamSize()))
     }
 
     private fun initialiseBorderTracker() {
@@ -725,7 +720,7 @@ class UHCMinigame(
         }
         val time = if (instant) -1.0 else stage.getRemainingTimeAsPercent(border.size, level, multiplier)
 
-        CasualMod.logger.info("Level $level moving to $dest")
+        CasualMod.logger.info("Level ${level.dimension().location()} moving to $dest")
         moveWorldBorder(border, dest, time)
     }
 
@@ -774,20 +769,6 @@ class UHCMinigame(
                 player.grantAdvancement(UHCAdvancements.SOLOIST)
             }
         }
-    }
-
-    fun setAsSpectator(player: ServerPlayer) {
-        player.setGameMode(GameType.SPECTATOR)
-        player.setGlowingTag(false)
-
-        if (player.team == null) {
-            val scoreboard = player.server.scoreboard
-            scoreboard.addPlayerToTeam(player.scoreboardName, scoreboard.getOrCreateSpectatorTeam())
-        }
-
-        val flags = player.flags
-        flags.set(PlayerFlag.TeamGlow, false)
-        flags.set(PlayerFlag.FullBright, true)
     }
 
     private fun resetPlayerHealth(player: ServerPlayer) {

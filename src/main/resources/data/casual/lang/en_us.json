@@ -106,9 +106,9 @@
   "uhc.minesweeper.lost": "You lost :(",
   "uhc.minesweeper.record": "%s now holds the record beating Minesweeper in %s seconds",
 
-  "uhc.game.direction": "Direction: %s",
-  "uhc.game.distance": "Distance to WB: %s",
-  "uhc.game.radius": "WB Radius: %s",
+  "uhc.game.direction": "Direction",
+  "uhc.game.distance": "Border Distance",
+  "uhc.game.radius": "Border Radius",
   "uhc.game.grace.first": "The grace period will last 10 minutes. Once it is over PVP will be enabled and the World Border will start moving",
   "uhc.game.grace.generic": "The grace period will end in %s minutes",
   "uhc.game.grace.over": "The grace period is now over. PVP is enabled and the World Border has started moving! Good Luck!",

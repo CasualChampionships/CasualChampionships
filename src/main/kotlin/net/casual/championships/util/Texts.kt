@@ -4,6 +4,7 @@ import net.casual.arcade.utils.ComponentUtils.crimson
 import net.casual.arcade.utils.ComponentUtils.green
 import net.casual.championships.util.Texts.ComponentGenerator
 import net.casual.championships.util.Texts.ToggleComponentGenerators
+import net.minecraft.client.Minecraft
 import net.minecraft.core.Direction
 import net.minecraft.core.Direction8
 import net.minecraft.network.chat.Component
@@ -126,9 +127,9 @@ object Texts {
     val MINESWEEPER_LOST by constant("uhc.minesweeper.lost")
     val MINESWEEPER_RECORD = generate("uhc.minesweeper.record")
 
-    val UHC_DIRECTION = generate("uhc.game.direction")
-    val UHC_DISTANCE_TO_WB = generate("uhc.game.distance")
-    val UHC_WB_RADIUS = generate("uhc.game.radius")
+    val UHC_DIRECTION by constant("uhc.game.direction")
+    val UHC_DISTANCE_TO_WB by constant("uhc.game.distance")
+    val UHC_WB_RADIUS by constant("uhc.game.radius")
     val UHC_GRACE_FIRST by constant("uhc.game.grace.first")
     val UHC_GRACE_GENERIC = generate("uhc.game.grace.generic")
     val UHC_GRACE_OVER by constant("uhc.game.grace.over")

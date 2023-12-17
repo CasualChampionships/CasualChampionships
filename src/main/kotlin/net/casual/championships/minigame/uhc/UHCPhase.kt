@@ -74,7 +74,6 @@ enum class UHCPhase(
                 minigame.setAsPlaying(player)
             }
             for (player in minigame.getSpectatingPlayers()) {
-                minigame.setAsSpectator(player)
                 if (player.level() != minigame.overworld) {
                     player.teleportTo(minigame.overworld, 0.0, 200.0, 0.0, 0.0F, 0.0F)
                 }

@@ -1,6 +1,8 @@
 package net.casual.championships.minigame.uhc.gui
 
-import net.casual.arcade.gui.suppliers.ComponentSupplier
+import net.casual.arcade.gui.sidebar.SidebarComponent
+import net.casual.arcade.gui.sidebar.SidebarSupplier
+import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.championships.extensions.TeamFlag
@@ -8,17 +10,20 @@ import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.championships.util.Texts
 import net.casual.championships.util.Texts.monospaced
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer
 
-class TeammateRow(private val index: Int, private val buffer: String = ""): ComponentSupplier {
-    override fun getComponent(player: ServerPlayer): Component {
+class TeammateRow(private val index: Int, private val buffer: Component): SidebarSupplier {
+    private val none = SidebarComponent.withCustomScore(this.createTeammate(), Texts.ICON_CROSS.append(this.buffer))
+
+    override fun getComponent(player: ServerPlayer): SidebarComponent {
         val team = player.team
         if (team == null || team.flags.has(TeamFlag.Ignored)) {
-            return Component.literal("${this.buffer} - ").monospaced().append(Texts.ICON_CROSS)
+            return this.none
         }
         val players = team.players
         if (this.index >= players.size) {
-            return Component.literal("${this.buffer} - ").monospaced().append(Texts.ICON_CROSS)
+            return this.none
         }
 
         val name: String
@@ -31,17 +36,21 @@ class TeammateRow(private val index: Int, private val buffer: String = ""): Comp
             teammate = PlayerUtils.player(name)
         }
 
-        val length = (players.maxOfOrNull { it.length } ?: 16).coerceAtLeast(name.length)
-
-        val longName = Component.literal(name + " ".repeat(length - name.length)).withStyle(team.color)
-        val start = Component.literal("${this.buffer} - ").append(longName).append(" ").monospaced()
-        if (teammate !== null) {
+        val formatted = this.createTeammate(name.literal().withStyle(team.color))
+        val score = if (teammate != null) {
             if (teammate.isSurvival && teammate.isAlive) {
                 val health = " %04.1f".format(teammate.health / 2.0)
-                return start.append(health).append(Texts.space(1)).append(Texts.ICON_HEART)
+                health.literal().append(Texts.space(1)).append(Texts.ICON_HEART)
+            } else {
+                Texts.ICON_CROSS
             }
-            return start.append("     ").append(Texts.ICON_CROSS)
+        } else {
+            Texts.ICON_NO_CONNECTION
         }
-        return start.append("     ").append(Texts.ICON_NO_CONNECTION)
+        return SidebarComponent.withCustomScore(formatted, score.append(this.buffer))
+    }
+
+    private fun createTeammate(name: Component = Component.empty()): MutableComponent {
+        return Component.empty().append(this.buffer).append(" - ").append(name)
     }
 }

@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.arguments.EnumArgument
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
+import net.casual.arcade.events.minigame.MinigameAddSpectatorEvent
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.lobby.Lobby
@@ -18,6 +19,7 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.championships.extensions.TeamFlag
 import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
+import net.casual.championships.managers.TeamManager.getOrCreateSpectatorTeam
 import net.casual.championships.minigame.uhc.gui.LobbyBossBar
 import net.casual.championships.minigame.uhc.resources.UHCResources
 import net.casual.championships.util.Config
@@ -123,12 +125,18 @@ class CasualLobbyMinigame(
             player.sendSystemMessage(Component.literal("Minigames are in dev mode!").red())
         }
 
-        val scoreboard = this.server.scoreboard
+        val team = player.team
+        if (team == null || team.flags.has(TeamFlag.Ignored)) {
+            this.makeSpectator(player)
+        }
+    }
+
+    @Listener
+    private fun onMakeSpectator(event: MinigameAddSpectatorEvent) {
+        val player = event.player
         if (player.team == null) {
-            val spectator = scoreboard.getPlayerTeam("Spectator")
-            if (spectator != null) {
-                scoreboard.addPlayerToTeam(player.scoreboardName, spectator)
-            }
+            val scoreboard = this.server.scoreboard
+            scoreboard.addPlayerToTeam(event.player.scoreboardName, scoreboard.getOrCreateSpectatorTeam())
         }
     }
 }

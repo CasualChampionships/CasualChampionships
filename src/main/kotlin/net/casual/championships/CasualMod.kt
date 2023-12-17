@@ -4,7 +4,6 @@ import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.player.PlayerCreatedEvent
 import net.casual.arcade.utils.PlayerUtils.addExtension
 import net.casual.championships.extensions.PlayerFlagsExtension
-import net.casual.championships.extensions.PlayerStatsExtension
 import net.casual.championships.extensions.PlayerUHCExtension
 import net.casual.championships.items.CasualItems
 import net.casual.championships.managers.CommandManager
@@ -54,7 +53,6 @@ class CasualMod: ModInitializer {
         GlobalEventHandler.register<PlayerCreatedEvent> { (player) ->
             player.addExtension(PlayerFlagsExtension(player.connection))
             player.addExtension(PlayerUHCExtension())
-            player.addExtension(PlayerStatsExtension())
         }
     }
 
@@ -63,7 +61,6 @@ class CasualMod: ModInitializer {
     }
 
     // TODO:
-    //   Fix stats? Again
     //   Implement podium
     //   Restructure UHC stuff
     //   Minesweeper AI - Make sure all maps are non-luck based

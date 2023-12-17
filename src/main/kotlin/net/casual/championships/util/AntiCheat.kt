@@ -38,7 +38,7 @@ object AntiCheat {
     private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
         if (detectFlexibleBlockPlacement(event.player, event.context)) {
             event.player.grantAdvancement(UHCAdvancements.BUSTED)
-            val message = Component.literal("Player ").append(event.player.displayName).append(" used fbp")
+            val message = Component.literal("Player ").append(event.player.displayName!!).append(" used fbp")
             PlayerUtils.broadcastToOps(message)
             // Might create ghost blocks?
             event.cancel()

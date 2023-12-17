@@ -109,13 +109,13 @@ object CasualCommand: Command {
         val flag = EnumArgument.getEnumeration<PlayerFlag>(context, "flag")
         val value = BoolArgumentType.getBool(context, "value")
         player.flags.set(flag, value)
-        val message = "${flag.name} has been set to $value for ".literal().append(player.displayName)
+        val message = "${flag.name} has been set to $value for ".literal().append(player.displayName!!)
         return context.source.success(message, true)
     }
 
     private fun getPlayerFlags(context: CommandContext<CommandSourceStack>): Int {
         val player = EntityArgument.getPlayer(context, "player")
-        val message = player.displayName.copy().append(" has the following flags enabled: ${player.flags.get().joinToString()}")
+        val message = player.displayName!!.copy().append(" has the following flags enabled: ${player.flags.get().joinToString()}")
         return context.source.success(message)
     }
 

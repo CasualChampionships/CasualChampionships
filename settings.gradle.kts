@@ -14,7 +14,6 @@ pluginManagement {
     val loom_version: String by settings
     val fabric_kotlin_version: String by settings
     plugins {
-        id("io.github.juuxel.loom-quiltflower") version "1.7.3"
         id("com.github.johnrengelman.shadow") version "7.1.2"
         id("fabric-loom") version loom_version
         id("org.jetbrains.kotlin.jvm") version

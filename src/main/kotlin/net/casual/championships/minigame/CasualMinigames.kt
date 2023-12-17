@@ -54,10 +54,13 @@ object CasualMinigames {
         uuid = minigame.uuid.toString()
         if (current != null) {
             for (player in current.getAllPlayers()) {
+                minigame.addPlayer(player)
                 if (current.isAdmin(player)) {
                     minigame.makeAdmin(player)
                 }
-                minigame.addPlayer(player)
+                if (current.isSpectating(player)) {
+                    minigame.makeSpectator(player)
+                }
             }
             current.close()
         }
