@@ -150,16 +150,30 @@
 
   "uhc.tooltips.head": "Eat me!",
 
+  "uhc.icons.heart": "\uE000",
+  "uhc.icons.noConnection": "\uE001",
+  "uhc.icons.cross": "\uE002",
+  "uhc.icons.uhc": "\uE003",
+  "uhc.icons.wideBackground": "\uE004",
+  "uhc.icons.background": "\uE005",
+  "uhc.icons.shortBackground": "\uE008",
+  "uhc.icons.kills": "\uE009",
+  "uhc.icons.players": "\uE00A",
+
   "uhc.bossbar.starting": "Starting in: %s",
-  "uhc.bossbar.starting.space.1": "\uDAFF\uDFE3", // -29
-  "uhc.bossbar.starting.space.2": "\uDAFF\uDF69", // -151
   "uhc.bossbar.elapsed": "Time Elapsed: %s",
-  "uhc.bossbar.elapsed.space.1": "\uDAFF\uDFE6", // -26
-  "uhc.bossbar.elapsed.space.2": "\uDAFF\uDF66", // -154
   "uhc.bossbar.grace": "Grace: %s",
-  "uhc.bossbar.grace.space.1": "\uDAFF\uDFDF", // -33
-  "uhc.bossbar.grace.space.2": "\uDAFF\uDF99", // -103
   "uhc.bossbar.glowing": "Glowing: %s",
-  "uhc.bossbar.glowing.space.1": "\uDAFF\uDFE4", // -28
-  "uhc.bossbar.glowing.space.2": "\uDAFF\uDF94" // -108
+  "uhc.bossbar.startingSoon": "Starting Soon",
+
+  "uhc.bossbar.starting.space.1": "\uDAFF\uDFD7",
+  "uhc.bossbar.starting.space.2": "\uDAFF\uDF75",
+  "uhc.bossbar.elapsed.space.1": "\uDAFF\uDFDC",
+  "uhc.bossbar.elapsed.space.2": "\uDAFF\uDF6F",
+  "uhc.bossbar.grace.space.1": "\uDAFF\uDFDB",
+  "uhc.bossbar.grace.space.2": "\uDAFF\uDF9D",
+  "uhc.bossbar.glowing.space.1": "\uDAFF\uDFDE",
+  "uhc.bossbar.glowing.space.2": "\uDAFF\uDF9B",
+  "uhc.bossbar.startingSoon.space.1": "\uDAFF\uDFC8",
+  "uhc.bossbar.startingSoon.space.2": "\uDAFF\uDF84"
 }

@@ -14,7 +14,7 @@
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-    "main": [
+    "server": [
       {
         "adapter": "kotlin",
         "value": "net.casual.championships.CasualMod"

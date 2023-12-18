@@ -4,6 +4,7 @@ import net.casual.arcade.utils.ComponentUtils.crimson
 import net.casual.arcade.utils.ComponentUtils.green
 import net.casual.championships.util.Texts.ComponentGenerator
 import net.casual.championships.util.Texts.ToggleComponentGenerators
+import net.casual.championships.util.Texts.iconed
 import net.minecraft.client.Minecraft
 import net.minecraft.core.Direction
 import net.minecraft.core.Direction8
@@ -170,20 +171,21 @@ object Texts {
 
     val TOOLTIP_HEAD by constant("uhc.tooltips.head")
 
+    val ICON_HEART by constant("uhc.icons.heart") { iconed() }
+    val ICON_NO_CONNECTION by constant("uhc.icons.noConnection") { iconed() }
+    val ICON_CROSS by constant("uhc.icons.cross") { iconed() }
+    val ICON_UHC by constant("uhc.icons.uhc") { iconed() }
+    val ICON_WIDE_BACKGROUND by constant("uhc.icons.wideBackground") { iconed() }
+    val ICON_BACKGROUND by constant("uhc.icons.background") { iconed() }
+    val ICON_SHORT_BACKGROUND by constant("uhc.icons.shortBackground") { iconed() }
+    val ICON_KILLS by constant("uhc.icons.kills") { iconed() }
+    val ICON_PLAYERS by constant("uhc.icons.players") { iconed() }
+
     val BOSSBAR_STARTING = generateBossbar("uhc.bossbar.starting", ICON_WIDE_BACKGROUND)
+    val BOSSBAR_STARTING_SOON = generateBossbar("uhc.bossbar.startingSoon", ICON_WIDE_BACKGROUND)
     val BOSSBAR_ELAPSED = generateBossbar("uhc.bossbar.elapsed", ICON_WIDE_BACKGROUND)
     val BOSSBAR_GRACE = generateBossbar("uhc.bossbar.grace", ICON_BACKGROUND)
     val BOSSBAR_GLOWING = generateBossbar("uhc.bossbar.glowing", ICON_BACKGROUND)
-
-    val ICON_HEART get() = literal("\uE000").iconed()
-    val ICON_NO_CONNECTION get() = literal("\uE001").iconed()
-    val ICON_CROSS get() = literal("\uE002").iconed()
-    val ICON_UHC get() = literal("\uE003").iconed()
-    val ICON_WIDE_BACKGROUND get() = literal("\uE004").iconed()
-    val ICON_BACKGROUND get() = literal("\uE005").iconed()
-    val ICON_SHORT_BACKGROUND get() = literal("\uE008").iconed()
-    val ICON_KILLS get() = literal("\uE009").iconed()
-    val ICON_PLAYERS get() = literal("\uE00A").iconed()
 
     fun literal(literal: String): MutableComponent {
         return Component.literal(literal)
@@ -227,7 +229,7 @@ object Texts {
                 .append(translatable("$key.space.1").spaced())
                 .append(background.shadowless())
                 .append(translatable("$key.space.2").spaced())
-                .append(translatable(key, *args).monospaced())
+                .append(translatable(key, *args))
         }
     }
 

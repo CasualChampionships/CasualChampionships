@@ -71,7 +71,7 @@ dependencies {
 
 tasks {
     sourceSets {
-        create("testmod") {
+        create("datagen") {
             compileClasspath += main.get().compileClasspath
             runtimeClasspath += main.get().runtimeClasspath
             compileClasspath += main.get().output
@@ -82,17 +82,17 @@ tasks {
 
     loom {
         mods {
-            create("testmod") {
-                sourceSet(sourceSets["testmod"])
+            create("datagen") {
+                sourceSet(sourceSets["datagen"])
             }
         }
 
         runs {
-            create("testmodClient") {
+            create("datagenClient") {
                 client()
                 name = "Test Mod Client"
-                runDir = "run-test"
-                setSource(sourceSets["testmod"])
+                runDir = "run-datagen"
+                setSource(sourceSets["datagen"])
             }
         }
 

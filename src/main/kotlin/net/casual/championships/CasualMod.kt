@@ -17,13 +17,14 @@ import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.util.AntiCheat
 import net.casual.championships.util.Config
+import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.ModContainer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class CasualMod: ModInitializer {
+class CasualMod: DedicatedServerModInitializer {
     companion object {
         const val ID = "casual"
 
@@ -31,7 +32,7 @@ class CasualMod: ModInitializer {
         val casual: ModContainer = FabricLoader.getInstance().getModContainer(ID).get()
     }
 
-    override fun onInitialize() {
+    override fun onInitializeServer() {
         logger.info("Starting CasualChampionships... Version: ${casual.metadata.version}")
 
         CasualItems.noop()

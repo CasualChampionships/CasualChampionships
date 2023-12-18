@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "casual-test",
+  "id": "casual-datagen",
   "version": "1.0.0",
-  "name": "Testing Casual Championships Mod",
+  "name": "Datagen Casual Championships Mod",
   "description": "",
   "authors": [
     "Sensei"
@@ -14,7 +14,7 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "net.casual.championships.ClientCasualMod"
+      "net.casual.championships.CasualDatagen"
     ]
   },
   "depends": {

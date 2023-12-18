@@ -3,6 +3,7 @@ package net.casual.championships.resources
 import eu.pb4.polymer.resourcepack.api.ResourcePackCreator
 import net.casual.championships.CasualMod
 import net.casual.championships.util.Config
+import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
@@ -36,7 +37,7 @@ object CasualResourcePack {
         }
     }
 
-    fun generate(): Boolean {
+    fun generate(path: Path = this.path): Boolean {
         return try {
             pack.build(path) { }
         } catch (e: Exception) {

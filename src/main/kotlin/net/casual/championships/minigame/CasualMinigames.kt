@@ -98,7 +98,7 @@ object CasualMinigames {
     fun createTabDisplay(): ArcadeTabDisplay {
         val display = ArcadeTabDisplay(
             ComponentSupplier.of(
-                Component.literal("\n")
+                Component.literal("\n\n\n")
                     .append(Texts.ICON_UHC)
                     .append(Texts.space())
                     .append(Texts.CASUAL_UHC.gold().bold())

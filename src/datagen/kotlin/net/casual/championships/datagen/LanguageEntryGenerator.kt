@@ -1,0 +1,20 @@
+package net.casual.championships.datagen
+
+import net.casual.championships.utils.SpacingUtils
+import net.minecraft.client.gui.Font
+import net.minecraft.network.chat.Component
+
+interface LanguageEntryGenerator {
+    fun run(font: Font, collection: MutableCollection<LanguageEntry>)
+}
+
+class CentredSpacingGenerator(
+    private val foreground: Component,
+    private val background: Component
+): LanguageEntryGenerator {
+    override fun run(font: Font, collection: MutableCollection<LanguageEntry>) {
+        val (first, second) = SpacingUtils.getTranslatableCentreSpacing(font, this.foreground, this.background)
+        collection.add(first)
+        collection.add(second)
+    }
+}

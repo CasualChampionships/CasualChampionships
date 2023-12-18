@@ -9,10 +9,10 @@ import net.minecraft.world.BossEvent
 
 class LobbyBossBar: TimerBossBar() {
     override fun getTitle(player: ServerPlayer): Component {
-        if (this.complete) {
-            // TODO: return Texts.BOSSBAR_STARTING_SOON
+        if (this.complete || !this.hasDuration) {
+            return Texts.BOSSBAR_STARTING_SOON.generate()
         }
-        val time = if (!this.hasDuration) "99:99:99" else TimeUtils.formatHHMMSS(this.getRemainingDuration())
+        val time = TimeUtils.formatHHMMSS(this.getRemainingDuration())
         return Texts.BOSSBAR_STARTING.generate(time)
     }
 
