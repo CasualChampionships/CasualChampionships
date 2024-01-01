@@ -186,5 +186,12 @@ class UHCSettings(private val uhc: UHCMinigame): MinigameSettings(uhc) {
         }
     })
 
+    var replay by this.register(bool {
+        name = "replay"
+        display = Items.END_PORTAL_FRAME.named("Server Replay")
+        value = true
+        defaultOptions()
+    })
+
     var borderStage by this.borderStageSetting
 }

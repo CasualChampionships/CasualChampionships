@@ -434,6 +434,11 @@ class UHCMinigame(
         }
     }
 
+    @Listener
+    private fun onMinigameAddNewPlayer(event: MinigameAddNewPlayerEvent) {
+        event.player.setRespawnPosition(this.overworld.dimension(), null, 0.0F, true, false)
+    }
+
     @Listener(priority = 0)
     private fun onMinigameAddPlayer(event: MinigameAddPlayerEvent) {
         val (_, player) = event
@@ -443,18 +448,14 @@ class UHCMinigame(
             player.setGlowingTag(true)
         }
 
-        if (player.team == null || !player.flags.has(PlayerFlag.Participating)) {
+        if (player.team == null || (this.phase > Initializing && !player.flags.has(PlayerFlag.Participating))) {
             this.makeSpectator(player)
         } else {
             GlobalTickedScheduler.later {
-                if (!PlayerRecorders.has(player) && this.isPlaying(player)) {
+                if (!PlayerRecorders.has(player) && this.isPlaying(player) && this.settings.replay) {
                     PlayerRecorders.create(player).start()
                 }
             }
-        }
-
-        if (player.team == null) {
-            this.makeSpectator(player)
         }
 
         // Needed for updating the player's health

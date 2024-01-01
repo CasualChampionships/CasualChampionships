@@ -54,11 +54,13 @@ object CasualMinigames {
         uuid = minigame.uuid.toString()
         if (current != null) {
             for (player in current.getAllPlayers()) {
+                val wasAdmin = current.isAdmin(player)
+                val wasSpectating = current.isSpectating(player)
                 minigame.addPlayer(player)
-                if (current.isAdmin(player)) {
+                if (wasAdmin) {
                     minigame.makeAdmin(player)
                 }
-                if (current.isSpectating(player)) {
+                if (wasSpectating) {
                     minigame.makeSpectator(player)
                 }
             }
@@ -98,7 +100,7 @@ object CasualMinigames {
     fun createTabDisplay(): ArcadeTabDisplay {
         val display = ArcadeTabDisplay(
             ComponentSupplier.of(
-                Component.literal("\n\n\n")
+                Component.literal("\n")
                     .append(Texts.ICON_UHC)
                     .append(Texts.space())
                     .append(Texts.CASUAL_UHC.gold().bold())

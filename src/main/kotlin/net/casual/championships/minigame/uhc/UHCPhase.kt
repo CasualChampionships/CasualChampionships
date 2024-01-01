@@ -1,5 +1,6 @@
 package net.casual.championships.minigame.uhc
 
+import net.casual.arcade.level.VanillaDimension
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.task.impl.PhaseChangeTask
@@ -52,7 +53,7 @@ enum class UHCPhase(
                 set(GameRules.RULE_DOINSOMNIA, false)
             }
             minigame.settings.canPvp.set(false)
-            minigame.overworld.dayTime = 0
+            minigame.getLevels().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
             for (player in minigame.getAllPlayers()) {
                 player.sendSystemMessage(Texts.UHC_GRACE_FIRST.gold())
@@ -60,9 +61,15 @@ enum class UHCPhase(
             }
 
             val stage = minigame.settings.borderStage
-            val range = stage.getStartSizeFor(minigame.overworld, minigame.settings.borderSizeMultiplier) * 0.45
+
+            val level = when (minigame.settings.startingDimension) {
+                VanillaDimension.Overworld -> minigame.overworld
+                VanillaDimension.Nether -> minigame.nether
+                VanillaDimension.End -> minigame.end
+            }
+            val range = stage.getStartSizeFor(level, minigame.settings.borderSizeMultiplier) * 0.45
             PlayerUtils.spread(
-                minigame.overworld,
+                level,
                 Vec2(0.0F, 0.0F),
                 500.0,
                 range,
@@ -74,8 +81,8 @@ enum class UHCPhase(
                 minigame.setAsPlaying(player)
             }
             for (player in minigame.getSpectatingPlayers()) {
-                if (player.level() != minigame.overworld) {
-                    player.teleportTo(minigame.overworld, 0.0, 200.0, 0.0, 0.0F, 0.0F)
+                if (player.level() != level) {
+                    player.teleportTo(level, 0.0, 200.0, 0.0, 0.0F, 0.0F)
                 }
             }
 

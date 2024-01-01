@@ -1,6 +1,5 @@
 package net.casual.championships
 
-
 import net.casual.championships.datagen.CentredSpacingGenerator
 import net.casual.championships.datagen.LanguageGenerator
 import net.casual.championships.resources.CasualResourcePack
@@ -11,9 +10,11 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import java.util.concurrent.CompletableFuture
+import kotlin.io.path.Path
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
 class CasualDatagen: ClientModInitializer {
-
     override fun onInitializeClient() {
         ClientLifecycleEvents.CLIENT_STARTED.register { client ->
             this.loadPack(client).thenAcceptAsync({
@@ -49,9 +50,20 @@ class CasualDatagen: ClientModInitializer {
             ))
         }
 
-        generator.generate(client) { lang, json ->
-            println(lang)
-            println(json)
+        val dir = Path("../src/main/resources/data/casual/lang/")
+        generator.generate(client) { lang, entries ->
+            val json = dir.resolve("${lang}.json")
+            var original = json.readText()
+            for (entry in entries) {
+                val regex = Regex("""\Q"${entry.key}"\E\s*:\s*"(\\.|[^"\\])*"""")
+                original = if (original.contains(regex)) {
+                    original.replace(regex, entry.toString().replace("\\", "\\\\"))
+                } else {
+                    val index = original.lastIndexOf('"')
+                    StringBuilder(original).insert(index + 1, ",\n  $entry").toString()
+                }
+            }
+            json.writeText(original)
         }
     }
 

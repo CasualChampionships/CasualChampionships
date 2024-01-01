@@ -166,8 +166,6 @@
   "uhc.bossbar.glowing": "Glowing: %s",
   "uhc.bossbar.startingSoon": "Starting Soon",
 
-  "uhc.bossbar.starting.space.1": "\uDAFF\uDFD7",
-  "uhc.bossbar.starting.space.2": "\uDAFF\uDF75",
   "uhc.bossbar.elapsed.space.1": "\uDAFF\uDFDC",
   "uhc.bossbar.elapsed.space.2": "\uDAFF\uDF6F",
   "uhc.bossbar.grace.space.1": "\uDAFF\uDFDB",
@@ -175,5 +173,7 @@
   "uhc.bossbar.glowing.space.1": "\uDAFF\uDFDE",
   "uhc.bossbar.glowing.space.2": "\uDAFF\uDF9B",
   "uhc.bossbar.startingSoon.space.1": "\uDAFF\uDFC8",
-  "uhc.bossbar.startingSoon.space.2": "\uDAFF\uDF84"
+  "uhc.bossbar.startingSoon.space.2": "\uDAFF\uDF84",
+  "uhc.bossbar.starting.space.1": "\uDAFF\uDFD7",
+  "uhc.bossbar.starting.space.2": "\uDAFF\uDF75"
 }

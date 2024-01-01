@@ -13,13 +13,13 @@ class LanguageGenerator(
         return this
     }
 
-    fun generate(client: Minecraft, consumer: (lang: String, json: String) -> Unit) {
+    fun generate(client: Minecraft, consumer: (lang: String, entries: List<LanguageEntry>) -> Unit) {
         LanguageUtils.setForeachLanguage(client, this.languages) { lang ->
             val entries = ArrayList<LanguageEntry>()
             for (entry in this.generators) {
                 entry.run(client.font, entries)
             }
-            consumer(lang, LanguageEntry.toJson(entries))
+            consumer(lang, entries)
         }
     }
 }

@@ -4,12 +4,15 @@ import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.arguments.EnumArgument
+import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.minigame.MinigameAddSpectatorEvent
+import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.lobby.Lobby
 import net.casual.arcade.minigame.lobby.LobbyMinigame
+import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.ComponentUtils.command
@@ -127,6 +130,22 @@ class CasualLobbyMinigame(
 
         val team = player.team
         if (team == null || team.flags.has(TeamFlag.Ignored)) {
+            GlobalTickedScheduler.later {
+                this.makeSpectator(player)
+            }
+        } else {
+            GlobalTickedScheduler.later {
+                this.removeSpectator(player)
+            }
+        }
+    }
+
+    @Listener
+    private fun onPlayerTeamJoin(event: PlayerTeamJoinEvent) {
+        val (player, team) = event
+        if (!team.flags.has(TeamFlag.Ignored)) {
+            this.removeSpectator(player)
+        } else if (this.isSpectating(player)) {
             this.makeSpectator(player)
         }
     }
