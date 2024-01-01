@@ -106,6 +106,7 @@ import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.HitResult
+import net.minecraft.world.phys.Vec3
 import xyz.nucleoid.fantasy.RuntimeWorldHandle
 import kotlin.math.atan2
 
@@ -436,7 +437,7 @@ class UHCMinigame(
 
     @Listener
     private fun onMinigameAddNewPlayer(event: MinigameAddNewPlayerEvent) {
-        event.player.setRespawnPosition(this.overworld.dimension(), null, 0.0F, true, false)
+        event.player.setRespawnPosition(this.overworld.dimension(), BlockPos(0, 100, 0), 0.0F, true, false)
     }
 
     @Listener(priority = 0)

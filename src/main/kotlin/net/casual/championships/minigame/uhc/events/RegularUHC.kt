@@ -21,7 +21,7 @@ class RegularUHC: UHCEvent, Lobby {
         Vec3i(0, 320, 0),
         Dimensions.getLobbyLevel()
     )
-    override val spawn = Location(Dimensions.getLobbyLevel(), Vec3(-0.5, 310.0, 11.5), Vec2(180.0F, 0.0F))
+    override val spawn = Location(Dimensions.getLobbyLevel(), Vec3(-0.5, 310.0, 11.5), Vec2(0.0F, 180.0F))
 
     override fun getTeamSize(): Int {
         return 5
