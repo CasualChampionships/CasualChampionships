@@ -139,9 +139,9 @@ object CasualMinigames {
             netherId = ResourceLocation(dimensions.string("nether"))
             endId = ResourceLocation(dimensions.string("end"))
         } else {
-            overworldId = ResourceUtils.random()
-            netherId = ResourceUtils.random()
-            endId = ResourceUtils.random()
+            overworldId = ResourceUtils.random { "overworld_$it" }
+            netherId = ResourceUtils.random { "nether_$it" }
+            endId = ResourceUtils.random { "end_$it" }
         }
 
         val (overworld, nether, end) = FantasyUtils.createPersistentVanillaLikeLevels(

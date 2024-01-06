@@ -15,6 +15,7 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
 import net.casual.arcade.utils.PlayerUtils
+import net.casual.arcade.utils.PlayerUtils.revokeAdvancement
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
@@ -58,6 +59,11 @@ enum class UHCPhase(
             for (player in minigame.getAllPlayers()) {
                 player.sendSystemMessage(Texts.UHC_GRACE_FIRST.gold())
                 player.sendSound(SoundEvents.NOTE_BLOCK_PLING.value())
+
+                // TODO: maybe better?
+                for (advancement in minigame.server.advancements.allAdvancements) {
+                    player.revokeAdvancement(advancement)
+                }
             }
 
             val stage = minigame.settings.borderStage

@@ -31,11 +31,13 @@ import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.JsonUtils.obj
+import net.casual.arcade.utils.JsonUtils.set
 import net.casual.arcade.utils.MinigameUtils.addEventListener
 import net.casual.arcade.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.directionToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.directionVectorToNearestBorder
+import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.grantAllRecipes
 import net.casual.arcade.utils.PlayerUtils.location
@@ -106,7 +108,6 @@ import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.HitResult
-import net.minecraft.world.phys.Vec3
 import xyz.nucleoid.fantasy.RuntimeWorldHandle
 import kotlin.math.atan2
 
@@ -147,7 +148,7 @@ class UHCMinigame(
 
         this.addEventListener(this.uhcAdvancements)
         this.recipes.add(listOf(GoldenHeadRecipe.create()))
-        UHCAdvancements.getAllAdvancements().forEach(this.advancements::add)
+        this.advancements.addAll(UHCAdvancements.getAllAdvancements())
         this.initialiseBorderTracker()
 
         this.event.initialise(this)
@@ -231,6 +232,11 @@ class UHCMinigame(
 
     override fun writeData(json: JsonObject) {
         json.add("advancements", this.uhcAdvancements.serialize())
+        val dimensions = JsonObject()
+        dimensions["overworld"] = this.overworld.dimension().location().toString()
+        dimensions["nether"] = this.nether.dimension().location().toString()
+        dimensions["end"] = this.end.dimension().location().toString()
+        json.add("dimensions", dimensions)
     }
 
     private fun createUHCCommand(): LiteralArgumentBuilder<CommandSourceStack> {
@@ -392,7 +398,7 @@ class UHCMinigame(
         }
 
         if (this.isRunning()) {
-            this.onEliminated(player, source.entity)
+            this.onEliminated(player, player.getKillCreditWith(source))
         }
     }
 

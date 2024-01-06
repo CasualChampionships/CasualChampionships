@@ -11,6 +11,7 @@ import net.casual.arcade.utils.TeamUtils.addExtension
 import net.casual.championships.extensions.TeamFlag.Ignored
 import net.casual.championships.extensions.TeamFlagsExtension
 import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
+import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.util.Config
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
@@ -77,7 +78,13 @@ object TeamManager {
             val operators = scoreboard.addPlayerTeam("Operator")
             operators.color = ChatFormatting.WHITE
             operators.playerPrefix = Component.literal("§c[Admin] §r")
+            val minigame = CasualMinigames.getCurrent()
             for (operator in Config.operators) {
+                val player = PlayerUtils.player(operator)
+                if (player != null) {
+                    minigame.makeAdmin(player)
+                    minigame.makeSpectator(player)
+                }
                 scoreboard.addPlayerToTeam(operator, operators)
             }
             operators.collisionRule = Team.CollisionRule.NEVER
@@ -88,6 +95,7 @@ object TeamManager {
             PlayerUtils.forEveryPlayer { player ->
                 if (player.team == null) {
                     scoreboard.addPlayerToTeam(player.scoreboardName, spectators)
+                    minigame.makeSpectator(player)
                 }
             }
         }, Arcade.getServer()).exceptionally {

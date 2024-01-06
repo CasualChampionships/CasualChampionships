@@ -2,7 +2,7 @@ package net.casual.championships.minigame.uhc.advancement
 
 import com.google.gson.JsonObject
 import net.casual.arcade.events.player.*
-import net.casual.arcade.minigame.annotation.IS_PLAYING
+import net.casual.arcade.minigame.annotation.HAS_PLAYER_PLAYING
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.scheduler.GlobalTickedScheduler
@@ -14,6 +14,7 @@ import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.championships.CasualMod
 import net.casual.championships.extensions.PlayerFlag
 import net.casual.championships.extensions.PlayerFlagsExtension.Companion.flags
 import net.casual.championships.extensions.PlayerUHCExtension.Companion.uhc
@@ -81,7 +82,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(before = BORDER_FINISHED_ID, flags = IS_PLAYING, priority = 2000)
+    @Listener(before = BORDER_FINISHED_ID, flags = HAS_PLAYER_PLAYING, priority = 2000)
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val relogs = this.uhc.stats.getOrCreateStat(event.player, ArcadeStats.RELOGS)
 
@@ -100,7 +101,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(before = BORDER_FINISHED_ID, flags = IS_PLAYING)
+    @Listener(before = BORDER_FINISHED_ID, flags = HAS_PLAYER_PLAYING)
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         if (this.claimed.add(RaceAdvancement.Death)) {
             event.player.grantAdvancement(UHCAdvancements.EARLY_EXIT)
@@ -122,7 +123,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(before = BORDER_FINISHED_ID, flags = IS_PLAYING)
+    @Listener(before = BORDER_FINISHED_ID, flags = HAS_PLAYER_PLAYING)
     private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
         val state = event.state
         val block = state.block
@@ -138,21 +139,21 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(before = BORDER_FINISHED_ID, flags = IS_PLAYING)
+    @Listener(before = BORDER_FINISHED_ID, flags = HAS_PLAYER_PLAYING)
     private fun onPlayerCraft(event: PlayerCraftEvent) {
         if (event.stack.`is`(Items.CRAFTING_TABLE) && this.claimed.add(RaceAdvancement.Craft)) {
             event.player.grantAdvancement(UHCAdvancements.WORLD_RECORD_PACE)
         }
     }
 
-    @Listener(before = BORDER_FINISHED_ID, flags = IS_PLAYING)
+    @Listener(before = BORDER_FINISHED_ID, flags = HAS_PLAYER_PLAYING)
     private fun onPlayerLoot(event: PlayerLootEvent) {
         if (event.items.any { it.`is`(Items.ENCHANTED_GOLDEN_APPLE) }) {
             event.player.grantAdvancement(UHCAdvancements.DREAM_LUCK)
         }
     }
 
-    @Listener(before = BORDER_FINISHED_ID, flags = IS_PLAYING)
+    @Listener(before = BORDER_FINISHED_ID, flags = HAS_PLAYER_PLAYING)
     private fun onPlayerTick(event: PlayerTickEvent) {
         val player = event.player
         if (player.gameMode.isSurvival && player.health <= 1.0F) {
@@ -164,7 +165,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(phases = [GRACE_ID], flags = IS_PLAYING)
+    @Listener(phases = [GRACE_ID], flags = HAS_PLAYER_PLAYING)
     private fun onPlayerDamage(event: PlayerDamageEvent) {
         if (this.uhc.uptime < 1200 && event.source.`is`(DamageTypes.FALL) && event.amount > 0.0F) {
             event.player.grantAdvancement(UHCAdvancements.BROKEN_ANKLES)
@@ -184,7 +185,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(before = BORDER_FINISHED_ID, flags = IS_PLAYING)
+    @Listener(before = BORDER_FINISHED_ID, flags = HAS_PLAYER_PLAYING)
     private fun onPlayerBlockCollision(event: PlayerBlockCollisionEvent) {
         if (event.state.`is`(Blocks.SWEET_BERRY_BUSH)) {
             event.player.grantAdvancement(UHCAdvancements.EMBARRASSING)
@@ -194,6 +195,11 @@ class UHCAdvancementManager(
     @Listener
     private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
         event.announce = event.announce && UHCAdvancements.isRegistered(event.advancement) && this.uhc.isPlaying(event.player)
+        if (event.announce) {
+            CasualMod.logger.info("Going to announce advancement ${event.advancement.id} for ${event.player.scoreboardName}")
+        } else {
+            CasualMod.logger.info("Going to suppress advancement ${event.advancement.id} for ${event.player.scoreboardName}")
+        }
     }
 
     private class PlayerAttacker(
