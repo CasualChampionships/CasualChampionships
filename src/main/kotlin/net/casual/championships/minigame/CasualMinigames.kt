@@ -120,13 +120,17 @@ object CasualMinigames {
     }
 
     private fun createUHCMinigame(context: MinigameCreationContext): UHCMinigame {
+        val seed = context.server.worldData.worldGenOptions().seed()
         val overworldConfig = RuntimeWorldConfig()
+            .setSeed(seed)
             .setDimensionType(BuiltinDimensionTypes.OVERWORLD)
             .setGenerator(LevelUtils.overworld().chunkSource.generator)
         val netherConfig = RuntimeWorldConfig()
+            .setSeed(seed)
             .setDimensionType(BuiltinDimensionTypes.NETHER)
             .setGenerator(LevelUtils.nether().chunkSource.generator)
         val endConfig = RuntimeWorldConfig()
+            .setSeed(seed)
             .setDimensionType(BuiltinDimensionTypes.END)
             .setGenerator(LevelUtils.end().chunkSource.generator)
 
