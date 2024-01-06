@@ -18,7 +18,7 @@ import net.casual.arcade.events.server.ServerRecipeReloadEvent
 import net.casual.arcade.gui.nametag.ArcadeNameTag
 import net.casual.arcade.gui.shapes.ArrowShape
 import net.casual.arcade.minigame.MinigameResources
-import net.casual.arcade.minigame.annotation.IS_PLAYING
+import net.casual.arcade.minigame.annotation.HAS_PLAYER_PLAYING
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.serialization.SavableMinigame
 import net.casual.arcade.minigame.task.impl.MinigameTask
@@ -108,6 +108,7 @@ import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.HitResult
+import net.minecraft.world.scores.Team
 import xyz.nucleoid.fantasy.RuntimeWorldHandle
 import kotlin.math.atan2
 
@@ -387,7 +388,7 @@ class UHCMinigame(
         }
     }
 
-    @Listener(flags = IS_PLAYING)
+    @Listener(flags = HAS_PLAYER_PLAYING)
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         event.invoke() // Post event
         val (player, source) = event
@@ -398,7 +399,13 @@ class UHCMinigame(
         }
 
         if (this.isRunning()) {
-            this.onEliminated(player, player.getKillCreditWith(source))
+            val killer = player.getKillCreditWith(source)
+            // TODO: Remove loggers
+            CasualMod.logger.info("KILLER: $killer")
+            if (killer is ServerPlayer) {
+                CasualMod.logger.info("KILLER: ${killer.scoreboardName}")
+            }
+            this.onEliminated(player, killer)
         }
     }
 
@@ -509,6 +516,10 @@ class UHCMinigame(
     private fun onMinigameClose(event: MinigameCloseEvent) {
         // TODO:
         DataManager.database.update(this)
+
+        for (players in this.getAllPlayerTeams()) {
+            players.nameTagVisibility = Team.Visibility.ALWAYS
+        }
     }
 
     @Listener
@@ -742,6 +753,8 @@ class UHCMinigame(
     }
 
     fun setAsPlaying(player: ServerPlayer) {
+        this.removeSpectator(player)
+
         player.sendTitle(Texts.LOBBY_GOOD_LUCK.gold().bold())
         player.sendSound(SoundEvents.NOTE_BLOCK_BELL.value())
 

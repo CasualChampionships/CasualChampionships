@@ -62,6 +62,7 @@ class CasualMod: DedicatedServerModInitializer {
     }
 
     // TODO:
+    //   Add new team and world border invis
     //   Implement podium
     //   Restructure UHC stuff
     //   Minesweeper AI - Make sure all maps are non-luck based

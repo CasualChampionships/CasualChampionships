@@ -80,7 +80,8 @@ enum class UHCPhase(
                 500.0,
                 range,
                 true,
-                minigame.getPlayingPlayers()
+                minigame.getPlayingPlayers(),
+                120
             )
 
             for (player in minigame.getPlayingPlayers()) {
