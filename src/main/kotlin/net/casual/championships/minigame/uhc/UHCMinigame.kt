@@ -154,10 +154,6 @@ class UHCMinigame(
 
         this.event.initialise(this)
 
-        this.ui.addBossbar(ActiveBossBar(this))
-        this.ui.setTabDisplay(CasualMinigames.createTabDisplay())
-        this.createActiveSidebar()
-
         this.commands.register(this.createUHCCommand())
     }
 
@@ -399,13 +395,7 @@ class UHCMinigame(
         }
 
         if (this.isRunning()) {
-            val killer = player.getKillCreditWith(source)
-            // TODO: Remove loggers
-            CasualMod.logger.info("KILLER: $killer")
-            if (killer is ServerPlayer) {
-                CasualMod.logger.info("KILLER: ${killer.scoreboardName}")
-            }
-            this.onEliminated(player, killer)
+            this.onEliminated(player, player.getKillCreditWith(source))
         }
     }
 
@@ -606,6 +596,7 @@ class UHCMinigame(
 
         val fakeBorder = player.uhc.border
         fakeBorder.size = border.size + 0.5
+        fakeBorder.lerpSizeBetween(fakeBorder.size, fakeBorder.size + 0.5, Long.MAX_VALUE)
         // Foolish Minecraft uses scale for the centre, even on the client,
         // so we need to reproduce.
         fakeBorder.setCenter(fakeCenterX * scale, fakeCenterZ * scale)
@@ -690,7 +681,8 @@ class UHCMinigame(
             }
         }
 
-        if (TeamManager.isOneTeamRemaining(this.getPlayingPlayers().filter { it != player })) {
+        // TODO: Test this
+        if (this.getPlayingPlayerTeams().size <= 1) {
             this.setPhase(GameOver)
         }
     }
@@ -700,22 +692,6 @@ class UHCMinigame(
         if (team != null && this.settings.soloBuff && team.hasAlivePlayers() && player.isAliveSolo()) {
             player.addEffect(MobEffectInstance(MobEffects.REGENERATION, 60, 2))
         }
-    }
-
-    // TODO:
-    fun createActiveSidebar() {
-        val name = ArcadeNameTag(
-            { it.displayName!! }
-        ) { a, _ -> !a.isInvisible }
-        val health = ArcadeNameTag(
-            { String.format("%.1f ", it.health / 2).literal().append(Texts.ICON_HEART) },
-            { a, b -> !a.isInvisible && (b.isSpectator || b.team == a.team) }
-        )
-
-        this.ui.addNameTag(health)
-        this.ui.addNameTag(name)
-
-        this.ui.setSidebar(UHCUtils.createSidebar(this.event.getTeamSize()))
     }
 
     private fun initialiseBorderTracker() {
@@ -774,6 +750,7 @@ class UHCMinigame(
         flags.set(PlayerFlag.FullBright, true)
 
         val team = player.team
+        team?.nameTagVisibility = Team.Visibility.NEVER
 
         flags.set(PlayerFlag.Participating, true)
         flags.set(PlayerFlag.TeamGlow, true)

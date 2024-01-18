@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.arguments.EnumArgument
-import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.minigame.MinigameAddSpectatorEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
@@ -25,8 +24,8 @@ import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.championships.managers.TeamManager.getOrCreateSpectatorTeam
 import net.casual.championships.minigame.uhc.gui.LobbyBossBar
 import net.casual.championships.minigame.uhc.resources.UHCResources
-import net.casual.championships.util.Config
 import net.casual.championships.util.CasualUtils
+import net.casual.championships.util.Config
 import net.casual.championships.util.Texts
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands

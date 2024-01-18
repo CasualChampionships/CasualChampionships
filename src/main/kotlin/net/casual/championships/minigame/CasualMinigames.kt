@@ -27,6 +27,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.dedicated.DedicatedServer
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import xyz.nucleoid.fantasy.RuntimeWorldConfig
 import java.util.*
@@ -120,9 +121,15 @@ object CasualMinigames {
     }
 
     private fun createUHCMinigame(context: MinigameCreationContext): UHCMinigame {
-        val seed = context.server.worldData.worldGenOptions().seed()
+        val server = context.server
+        val seed = if (server is DedicatedServer) {
+            server.properties.worldOptions.seed()
+        } else {
+            server.worldData.worldGenOptions().seed()
+        }
         val overworldConfig = RuntimeWorldConfig()
             .setSeed(seed)
+            .setShouldTickTime(true)
             .setDimensionType(BuiltinDimensionTypes.OVERWORLD)
             .setGenerator(LevelUtils.overworld().chunkSource.generator)
         val netherConfig = RuntimeWorldConfig()
@@ -154,7 +161,7 @@ object CasualMinigames {
             endConfig = FantasyUtils.PersistentConfig(endId, endConfig)
         )
         return UHCMinigame(
-            server = context.server,
+            server = server,
             overworld = overworld,
             nether = nether,
             end = end

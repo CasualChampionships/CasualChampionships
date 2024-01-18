@@ -192,7 +192,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener
+    @Listener(flags = HAS_PLAYER_PLAYING)
     private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
         event.announce = event.announce && UHCAdvancements.isRegistered(event.advancement) && this.uhc.isPlaying(event.player)
         if (event.announce) {

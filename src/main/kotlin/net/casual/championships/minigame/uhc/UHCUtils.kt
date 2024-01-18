@@ -1,5 +1,6 @@
 package net.casual.championships.minigame.uhc
 
+import net.casual.arcade.gui.nametag.ArcadeNameTag
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.sidebar.SidebarSupplier
@@ -13,6 +14,18 @@ import net.casual.championships.util.Texts
 import net.minecraft.network.chat.Component
 
 object UHCUtils {
+    fun createNameTags(): List<ArcadeNameTag> {
+        val name = ArcadeNameTag(
+            { it.displayName!! },
+            { a, _ -> !a.isInvisible }
+        )
+        val health = ArcadeNameTag(
+            { String.format("%.1f ", it.health / 2).literal().append(Texts.ICON_HEART) },
+            { a, b -> !a.isInvisible && (b.isSpectator || b.team == a.team) }
+        )
+        return listOf(health, name)
+    }
+
     fun createSidebar(teamSize: Int): ArcadeSidebar {
         val sidebar = ArcadeSidebar(ComponentSupplier.of(Texts.CASUAL_UHC.gold().bold()))
 

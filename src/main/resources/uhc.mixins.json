@@ -10,6 +10,7 @@
     "feature.LevelMixin",
     "feature.PlayerListMixin",
     "feature.PortalForcerMixin",
+    "feature.ServerGamePacketListenerImplMixin",
     "feature.ServerLevelMixin"
   ],
   "injectors": {

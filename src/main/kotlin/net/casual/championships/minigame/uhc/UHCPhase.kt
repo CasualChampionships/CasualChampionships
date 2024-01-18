@@ -25,6 +25,7 @@ import net.casual.championships.CasualMod
 import net.casual.championships.managers.DataManager
 import net.casual.championships.managers.TeamManager
 import net.casual.championships.minigame.CasualMinigames
+import net.casual.championships.minigame.uhc.gui.ActiveBossBar
 import net.casual.championships.minigame.uhc.task.GlowingBossBarTask
 import net.casual.championships.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.championships.util.Texts
@@ -44,15 +45,12 @@ enum class UHCPhase(
 ): MinigamePhase<UHCMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: UHCMinigame) {
-            for (team in minigame.getAllPlayerTeams()) {
-                team.nameTagVisibility = Team.Visibility.NEVER
-            }
-
             minigame.setGameRules {
                 resetToDefault()
                 set(GameRules.RULE_NATURAL_REGENERATION, false)
                 set(GameRules.RULE_DOINSOMNIA, false)
             }
+
             minigame.settings.canPvp.set(false)
             minigame.getLevels().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
@@ -97,6 +95,21 @@ enum class UHCPhase(
                 minigame.setPhase(Grace)
             }
         }
+
+        override fun initialize(minigame: UHCMinigame) {
+            for (team in minigame.getAllPlayerTeams()) {
+                team.nameTagVisibility = Team.Visibility.NEVER
+            }
+
+            minigame.ui.addBossbar(ActiveBossBar(minigame))
+            minigame.ui.setTabDisplay(CasualMinigames.createTabDisplay())
+
+            for (tag in UHCUtils.createNameTags()) {
+                minigame.ui.addNameTag(tag)
+            }
+
+            minigame.ui.setSidebar(UHCUtils.createSidebar(minigame.event.getTeamSize()))
+        }
     },
     Grace(GRACE_ID) {
         override fun start(minigame: UHCMinigame) {
@@ -138,6 +151,8 @@ enum class UHCPhase(
     GameOver(GAME_OVER_ID) {
         override fun start(minigame: UHCMinigame) {
             minigame.stats.freeze()
+
+            minigame.settings.canTakeDamage.set(false)
 
             val team = TeamManager.getAnyAliveTeam(minigame.getPlayingPlayers())
             if (team == null) {
