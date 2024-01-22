@@ -3,12 +3,10 @@ package net.casual.championships.minigame.uhc.gui
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.sidebar.SidebarSupplier
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
-import net.casual.championships.extensions.TeamFlag
-import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.championships.util.Texts
-import net.casual.championships.util.Texts.monospaced
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer
@@ -18,7 +16,8 @@ class TeammateRow(private val index: Int, private val buffer: Component): Sideba
 
     override fun getComponent(player: ServerPlayer): SidebarComponent {
         val team = player.team
-        if (team == null || team.flags.has(TeamFlag.Ignored)) {
+        val minigame = player.getMinigame()
+        if (team == null || (minigame != null && minigame.teams.isTeamIgnored(team))) {
             return this.none
         }
         val players = team.players

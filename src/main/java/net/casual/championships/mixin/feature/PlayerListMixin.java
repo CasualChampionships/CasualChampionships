@@ -1,6 +1,7 @@
 package net.casual.championships.mixin.feature;
 
 import com.mojang.authlib.GameProfile;
+import net.casual.championships.minigame.CasualMinigames;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.storage.LevelData;
@@ -34,9 +35,8 @@ public abstract class PlayerListMixin {
 		cancellable = true
 	)
 	private void canPlayerJoin(SocketAddress socketAddress, GameProfile gameProfile, CallbackInfoReturnable<Component> cir) {
-		// TODO:
-		// if (!UHCMod.minigame.isReadyForPlayers() && !this.isOp(gameProfile)) {
-		// 	cir.setReturnValue(Component.literal("UHC isn't quite ready yet..."));
-		// }
+		if (CasualMinigames.floodgates && !this.isOp(gameProfile)) {
+			cir.setReturnValue(Component.literal("CasualChampionships isn't quite ready yet..."));
+		}
 	}
 }

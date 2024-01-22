@@ -14,7 +14,7 @@ object DataManager {
     private const val UHC = "uhcs"
     private const val TEAMS = "teams"
 
-    private val mongo by Config.stringOrNull()
+    private val mongo get() = Config.getObject("database").get("uri").asString
 
     lateinit var database: UHCDatabase
         private set

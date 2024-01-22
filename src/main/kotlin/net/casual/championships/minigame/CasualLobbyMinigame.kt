@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.arguments.EnumArgument
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
-import net.casual.arcade.events.minigame.MinigameAddSpectatorEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.annotation.Listener
@@ -19,9 +18,6 @@ import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.red
-import net.casual.championships.extensions.TeamFlag
-import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
-import net.casual.championships.managers.TeamManager.getOrCreateSpectatorTeam
 import net.casual.championships.minigame.uhc.gui.LobbyBossBar
 import net.casual.championships.minigame.uhc.resources.UHCResources
 import net.casual.championships.util.CasualUtils
@@ -32,7 +28,6 @@ import net.minecraft.commands.Commands
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.GameType
-import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 
 class CasualLobbyMinigame(
@@ -62,7 +57,7 @@ class CasualLobbyMinigame(
             player.setGameMode(GameType.ADVENTURE)
         }
 
-        for (team in this.getPlayerTeams()) {
+        for (team in this.teams.getAllTeams()) {
             team.collisionRule = Team.CollisionRule.NEVER
         }
     }
@@ -70,7 +65,7 @@ class CasualLobbyMinigame(
     override fun onStartCountdown() {
         this.ui.removeBossbar(this.bossbar)
 
-        for (team in this.getPlayerTeams()) {
+        for (team in this.teams.getAllTeams()) {
             team.collisionRule = Team.CollisionRule.ALWAYS
         }
     }
@@ -79,10 +74,6 @@ class CasualLobbyMinigame(
         CasualMinigames.setNewMinigameAndStart(this.getNextMinigame()!!)
         
         this.close()
-    }
-
-    override fun getTeamsToReady(): Collection<PlayerTeam> {
-        return this.getPlayerTeams().filter { !it.flags.has(TeamFlag.Ignored) }
     }
 
     override fun createLobbyCommand(): LiteralArgumentBuilder<CommandSourceStack> {
@@ -128,7 +119,7 @@ class CasualLobbyMinigame(
         }
 
         val team = player.team
-        if (team == null || team.flags.has(TeamFlag.Ignored)) {
+        if (team == null || this.teams.isTeamIgnored(team)) {
             GlobalTickedScheduler.later {
                 this.makeSpectator(player)
             }
@@ -142,19 +133,10 @@ class CasualLobbyMinigame(
     @Listener
     private fun onPlayerTeamJoin(event: PlayerTeamJoinEvent) {
         val (player, team) = event
-        if (!team.flags.has(TeamFlag.Ignored)) {
+        if (!this.teams.isTeamIgnored(team)) {
             this.removeSpectator(player)
         } else if (this.isSpectating(player)) {
             this.makeSpectator(player)
-        }
-    }
-
-    @Listener
-    private fun onMakeSpectator(event: MinigameAddSpectatorEvent) {
-        val player = event.player
-        if (player.team == null) {
-            val scoreboard = this.server.scoreboard
-            scoreboard.addPlayerToTeam(event.player.scoreboardName, scoreboard.getOrCreateSpectatorTeam())
         }
     }
 }

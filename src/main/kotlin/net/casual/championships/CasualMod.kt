@@ -8,17 +8,13 @@ import net.casual.championships.extensions.PlayerUHCExtension
 import net.casual.championships.items.CasualItems
 import net.casual.championships.managers.CommandManager
 import net.casual.championships.managers.DataManager
-import net.casual.championships.managers.TeamManager
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.minigame.Dimensions
-import net.casual.championships.minigame.uhc.events.RegularUHC
-import net.casual.championships.minigame.uhc.events.UHCEvents
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.util.AntiCheat
 import net.casual.championships.util.Config
 import net.fabricmc.api.DedicatedServerModInitializer
-import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.ModContainer
 import org.slf4j.Logger
@@ -37,12 +33,9 @@ class CasualMod: DedicatedServerModInitializer {
 
         CasualItems.noop()
 
-        this.registerEvents()
-
         Config.registerEvents()
         AntiCheat.registerEvents()
         CommandManager.registerEvents()
-        TeamManager.registerEvents()
         DataManager.registerEvents()
         CasualResourcePackHost.registerEvents()
         CasualMinigames.registerEvents()
@@ -55,10 +48,6 @@ class CasualMod: DedicatedServerModInitializer {
             player.addExtension(PlayerFlagsExtension(player.connection))
             player.addExtension(PlayerUHCExtension())
         }
-    }
-
-    fun registerEvents() {
-        UHCEvents.register("regular", ::RegularUHC)
     }
 
     // TODO:

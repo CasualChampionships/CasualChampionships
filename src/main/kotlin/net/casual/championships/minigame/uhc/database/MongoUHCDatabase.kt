@@ -49,9 +49,6 @@ class MongoUHCDatabase(
                 for (document in this.teams.find()) {
                     teams.add(gson.fromJson(document.toJson(), JsonObject::class.java))
                 }
-                Files.newBufferedWriter(TeamManager.configPath).use {
-                    gson.toJson(teams, it)
-                }
                 this.logger.info("Successfully downloaded Teams.json")
             } catch (e: Exception) {
                 this.logger.error("Could not download Teams.json", e)

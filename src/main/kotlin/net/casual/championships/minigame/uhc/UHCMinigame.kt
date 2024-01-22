@@ -15,7 +15,6 @@ import net.casual.arcade.events.entity.MobCategorySpawnEvent
 import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerRecipeReloadEvent
-import net.casual.arcade.gui.nametag.ArcadeNameTag
 import net.casual.arcade.gui.shapes.ArrowShape
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.annotation.HAS_PLAYER_PLAYING
@@ -41,7 +40,6 @@ import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.grantAllRecipes
 import net.casual.arcade.utils.PlayerUtils.location
-import net.casual.arcade.utils.PlayerUtils.message
 import net.casual.arcade.utils.PlayerUtils.resetExperience
 import net.casual.arcade.utils.PlayerUtils.resetHealth
 import net.casual.arcade.utils.PlayerUtils.resetHunger
@@ -49,8 +47,8 @@ import net.casual.arcade.utils.PlayerUtils.sendParticles
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendSubtitle
 import net.casual.arcade.utils.PlayerUtils.sendTitle
-import net.casual.arcade.utils.PlayerUtils.teamMessage
 import net.casual.arcade.utils.PlayerUtils.teleportTo
+import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.CasualMod
 import net.casual.championships.events.border.BorderEntityPortalEntryPointEvent
@@ -58,25 +56,18 @@ import net.casual.championships.events.border.BorderPortalWithinBoundsEvent
 import net.casual.championships.extensions.PlayerFlag
 import net.casual.championships.extensions.PlayerFlagsExtension.Companion.flags
 import net.casual.championships.extensions.PlayerUHCExtension.Companion.uhc
-import net.casual.championships.extensions.TeamFlag
-import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.championships.managers.DataManager
-import net.casual.championships.managers.TeamManager
-import net.casual.championships.managers.TeamManager.getOrCreateSpectatorTeam
 import net.casual.championships.managers.TeamManager.hasAlivePlayers
-import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.minigame.uhc.UHCPhase.*
 import net.casual.championships.minigame.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.minigame.uhc.advancement.UHCAdvancements
-import net.casual.championships.minigame.uhc.events.DefaultUHC
-import net.casual.championships.minigame.uhc.events.UHCEvent
 import net.casual.championships.minigame.uhc.gui.ActiveBossBar
+import net.casual.championships.minigame.uhc.resources.UHCResources
 import net.casual.championships.minigame.uhc.task.GlowingBossBarTask
 import net.casual.championships.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.championships.recipes.GoldenHeadRecipe
 import net.casual.championships.util.*
 import net.casual.championships.util.CasualPlayerUtils.isAliveSolo
-import net.casual.championships.util.CasualPlayerUtils.isMessageGlobal
 import net.casual.championships.util.CasualPlayerUtils.updateGlowingTag
 import net.casual.championships.util.DirectionUtils.opposite
 import net.minecraft.commands.CommandSourceStack
@@ -107,6 +98,7 @@ import net.minecraft.world.item.Items
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.scores.Team
 import xyz.nucleoid.fantasy.RuntimeWorldHandle
@@ -114,7 +106,6 @@ import kotlin.math.atan2
 
 class UHCMinigame(
     server: MinecraftServer,
-    event: UHCEvent = DefaultUHC,
     overworld: RuntimeWorldHandle,
     nether: RuntimeWorldHandle,
     end: RuntimeWorldHandle
@@ -122,6 +113,9 @@ class UHCMinigame(
     server,
 ), MultiLevelBorderListener {
     private val tracker = MultiLevelBorderTracker()
+    private val spawn by lazy {
+        this.overworld.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.ZERO)
+    }
     override val id = CasualUtils.id("uhc_minigame")
 
     val uhcAdvancements = UHCAdvancementManager(this)
@@ -129,9 +123,6 @@ class UHCMinigame(
     val overworld: ServerLevel = overworld.asWorld()
     val nether: ServerLevel = nether.asWorld()
     val end: ServerLevel = end.asWorld()
-
-    var event: UHCEvent = event
-        private set
 
     override val settings = UHCSettings(this)
 
@@ -142,6 +133,8 @@ class UHCMinigame(
 
         this.addTaskFactory(GlowingBossBarTask.cast())
         this.addTaskFactory(GracePeriodBossBarTask.cast())
+
+        this.ui.addBossbar(ActiveBossBar(this))
     }
 
     override fun initialize() {
@@ -151,8 +144,6 @@ class UHCMinigame(
         this.recipes.add(listOf(GoldenHeadRecipe.create()))
         this.advancements.addAll(UHCAdvancements.getAllAdvancements())
         this.initialiseBorderTracker()
-
-        this.event.initialise(this)
 
         this.commands.register(this.createUHCCommand())
     }
@@ -216,7 +207,7 @@ class UHCMinigame(
     }
 
     override fun getResources(): MinigameResources {
-        return this.event.getResourcePackHandler()
+        return UHCResources
     }
 
     override fun getPhases(): Collection<UHCPhase> {
@@ -440,7 +431,13 @@ class UHCMinigame(
 
     @Listener
     private fun onMinigameAddNewPlayer(event: MinigameAddNewPlayerEvent) {
-        event.player.setRespawnPosition(this.overworld.dimension(), BlockPos(0, 100, 0), 0.0F, true, false)
+        event.player.setRespawnPosition(
+            this.overworld.dimension(),
+            this.spawn,
+            0.0F,
+            true,
+            false
+        )
     }
 
     @Listener(priority = 0)
@@ -464,21 +461,6 @@ class UHCMinigame(
 
         // Needed for updating the player's health
         GlobalTickedScheduler.schedule(1, MinecraftTimeUnit.Seconds, player::resetSentInfo)
-    }
-
-    @Listener
-    private fun onPlayerChat(event: PlayerChatEvent) {
-        val (player, message) = event
-        val content = message.signedContent()
-        if (this.isRunning() && !player.isMessageGlobal(content)) {
-            player.teamMessage(message)
-        } else {
-            val decorated = if (content.startsWith('!')) content.substring(1) else content
-            if (decorated.isNotBlank()) {
-                player.message(Component.literal(decorated.trim()))
-            }
-        }
-        event.cancel()
     }
 
     @Listener
@@ -507,9 +489,7 @@ class UHCMinigame(
         // TODO:
         DataManager.database.update(this)
 
-        for (players in this.getAllPlayerTeams()) {
-            players.nameTagVisibility = Team.Visibility.ALWAYS
-        }
+        this.teams.showNameTags()
     }
 
     @Listener
@@ -517,11 +497,6 @@ class UHCMinigame(
         val (_, player) = event
         player.setGameMode(GameType.SPECTATOR)
         player.setGlowingTag(false)
-
-        if (player.team == null) {
-            val scoreboard = player.server.scoreboard
-            scoreboard.addPlayerToTeam(player.scoreboardName, scoreboard.getOrCreateSpectatorTeam())
-        }
 
         val flags = player.flags
         flags.set(PlayerFlag.TeamGlow, false)
@@ -595,7 +570,7 @@ class UHCMinigame(
         val scale = level.dimensionType().coordinateScale
 
         val fakeBorder = player.uhc.border
-        fakeBorder.size = border.size + 0.5
+        fakeBorder.size = border.size - 0.5
         fakeBorder.lerpSizeBetween(fakeBorder.size, fakeBorder.size + 0.5, Long.MAX_VALUE)
         // Foolish Minecraft uses scale for the centre, even on the client,
         // so we need to reproduce.
@@ -673,8 +648,8 @@ class UHCMinigame(
         }
 
         val team = player.team
-        if (team !== null && !team.flags.has(TeamFlag.Eliminated) && !team.hasAlivePlayers(player)) {
-            team.flags.set(TeamFlag.Eliminated, true)
+        if (team !== null && !this.teams.isTeamEliminated(team) && !team.hasAlivePlayers(player)) {
+            this.teams.addEliminatedTeam(team)
             for (playing in this.getAllPlayers()) {
                 playing.sendSound(SoundEvents.LIGHTNING_BOLT_THUNDER, volume = 0.5F)
                 playing.sendSystemMessage(Texts.UHC_ELIMINATED.generate(team.name).withStyle(team.color).bold())
@@ -682,7 +657,7 @@ class UHCMinigame(
         }
 
         // TODO: Test this
-        if (this.getPlayingPlayerTeams().size <= 1) {
+        if (this.teams.getPlayingTeams().size <= 1) {
             this.setPhase(GameOver)
         }
     }
@@ -760,12 +735,8 @@ class UHCMinigame(
         )
         player.setGameMode(GameType.SURVIVAL)
 
-        if (team != null && !team.flags.has(TeamFlag.Ignored)) {
-            team.flags.set(TeamFlag.Eliminated, false)
-
-            if (team.players.size == 1) {
-                player.grantAdvancement(UHCAdvancements.SOLOIST)
-            }
+        if (team != null && team.getOnlineCount() == 1) {
+            player.grantAdvancement(UHCAdvancements.SOLOIST)
         }
     }
 

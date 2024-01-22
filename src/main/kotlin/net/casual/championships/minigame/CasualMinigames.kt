@@ -19,7 +19,6 @@ import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.TickUtils
 import net.casual.championships.minigame.uhc.UHCMinigame
-import net.casual.championships.minigame.uhc.events.UHCEvents
 import net.casual.championships.util.CasualUtils
 import net.casual.championships.util.Config
 import net.casual.championships.util.Texts
@@ -31,17 +30,21 @@ import net.minecraft.server.dedicated.DedicatedServer
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import xyz.nucleoid.fantasy.RuntimeWorldConfig
 import java.util.*
+import kotlin.collections.ArrayList
 
 object CasualMinigames {
     private var uuid: String? by Config.stringOrNull("current_minigame_uuid")
     private var minigame: Minigame<*>? = null
+
+    @JvmField
+    var floodgates = false
 
     fun getCurrent(): Minigame<*> {
         return minigame!!
     }
 
     fun setLobby(server: MinecraftServer, next: Minigame<*>? = null): CasualLobbyMinigame {
-        val lobby = CasualLobbyMinigame(server, UHCEvents.getUHC().getLobby())
+        val lobby = CasualLobbyMinigame(server, Config.event.lobby)
         setNewMinigameAndStart(lobby)
         if (next != null) {
             lobby.setNextMinigame(next)
@@ -54,18 +57,30 @@ object CasualMinigames {
         CasualMinigames.minigame = minigame
         uuid = minigame.uuid.toString()
         if (current != null) {
-            for (player in current.getAllPlayers()) {
+            if (current.teams.hasSpectatorTeam()) {
+                minigame.teams.setSpectatorTeam(current.teams.getSpectatorTeam())
+            }
+            if (current.teams.hasAdminTeam()) {
+                minigame.teams.setAdminTeam(current.teams.getAdminTeam())
+            }
+
+            val players = current.getAllPlayers()
+            val delayed = ArrayList<() -> Unit>()
+            for (player in players) {
                 val wasAdmin = current.isAdmin(player)
                 val wasSpectating = current.isSpectating(player)
-                minigame.addPlayer(player)
-                if (wasAdmin) {
-                    minigame.makeAdmin(player)
-                }
-                if (wasSpectating) {
-                    minigame.makeSpectator(player)
+                delayed.add {
+                    minigame.addPlayer(player)
+                    if (wasAdmin) {
+                        minigame.makeAdmin(player)
+                    }
+                    if (wasSpectating) {
+                        minigame.makeSpectator(player)
+                    }
                 }
             }
             current.close()
+            delayed.forEach { it() }
         }
         minigame.start()
     }
@@ -91,7 +106,7 @@ object CasualMinigames {
             if (player.getMinigame() == null) {
                 val current = getCurrent()
                 current.addPlayer(player)
-                if (Config.operators.contains(player.scoreboardName)) {
+                if (Config.event.operators.contains(player.scoreboardName)) {
                     current.makeAdmin(player)
                 }
             }

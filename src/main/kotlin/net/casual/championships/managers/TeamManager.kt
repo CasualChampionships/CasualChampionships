@@ -1,16 +1,10 @@
 package net.casual.championships.managers
 
 import com.google.gson.JsonObject
-import net.casual.championships.CasualMod
 import net.casual.arcade.Arcade
-import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.team.TeamCreatedEvent
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
-import net.casual.arcade.utils.TeamUtils.addExtension
-import net.casual.championships.extensions.TeamFlag.Ignored
-import net.casual.championships.extensions.TeamFlagsExtension
-import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
+import net.casual.championships.CasualMod
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.util.Config
 import net.minecraft.ChatFormatting
@@ -23,10 +17,9 @@ import java.util.*
 
 object TeamManager {
     private const val SPECTATOR = "Spectator"
+    private const val ADMIN = "Admin"
 
     private var collisions = Team.CollisionRule.ALWAYS
-
-    val configPath = Config.resolve("teams.json")
 
     fun Team.hasAlivePlayers(ignore: ServerPlayer? = null): Boolean {
         val names = this.players
@@ -42,28 +35,6 @@ object TeamManager {
         return false
     }
 
-    fun isOneTeamRemaining(players: Collection<ServerPlayer>): Boolean {
-        var team: Team? = null
-        for (player in players) {
-            if (player.isSurvival) {
-                team = if (team === null || team.flags.has(Ignored)) player.team else team
-                if (team != null && !team.flags.has(Ignored) && team !== player.team) {
-                    return false
-                }
-            }
-        }
-        return true
-    }
-
-    fun getAnyAliveTeam(players: Collection<ServerPlayer>): Team? {
-        for (player in players) {
-            if (player.isSurvival) {
-                return player.team
-            }
-        }
-        return null
-    }
-
     fun createTeams() {
         val scoreboard = Arcade.getServer().scoreboard
         for (team in LinkedList(scoreboard.playerTeams)) {
@@ -75,26 +46,19 @@ object TeamManager {
                 createTeamFromJson(team)
             }
 
-            val operators = scoreboard.addPlayerTeam("Operator")
-            operators.color = ChatFormatting.WHITE
-            operators.playerPrefix = Component.literal("§c[Admin] §r")
             val minigame = CasualMinigames.getCurrent()
-            for (operator in Config.operators) {
+            minigame.teams.setAdminTeam(scoreboard.getOrCreateAdminTeam())
+            minigame.teams.setSpectatorTeam(scoreboard.getOrCreateSpectatorTeam())
+            for (operator in Config.event.operators) {
                 val player = PlayerUtils.player(operator)
                 if (player != null) {
                     minigame.makeAdmin(player)
                     minigame.makeSpectator(player)
                 }
-                scoreboard.addPlayerToTeam(operator, operators)
             }
-            operators.collisionRule = Team.CollisionRule.NEVER
-            operators.flags.set(Ignored, true)
 
-            val spectators = scoreboard.getOrCreateSpectatorTeam()
-
-            PlayerUtils.forEveryPlayer { player ->
+            for (player in minigame.getAllPlayers()) {
                 if (player.team == null) {
-                    scoreboard.addPlayerToTeam(player.scoreboardName, spectators)
                     minigame.makeSpectator(player)
                 }
             }
@@ -111,24 +75,19 @@ object TeamManager {
             spectators.color = ChatFormatting.DARK_GRAY
             spectators.collisionRule = Team.CollisionRule.NEVER
             spectators.nameTagVisibility = Team.Visibility.NEVER
-            spectators.flags.set(Ignored, true)
         }
         return spectators!!
     }
 
-    fun setCollisions(shouldCollide: Boolean) {
-        collisions = if (shouldCollide) Team.CollisionRule.ALWAYS else Team.CollisionRule.NEVER
-        for (team in Arcade.getServer().scoreboard.playerTeams) {
-            team.collisionRule = collisions
+    fun ServerScoreboard.getOrCreateAdminTeam(): PlayerTeam {
+        var admins = this.getPlayerTeam(ADMIN)
+        if (admins == null) {
+            admins = this.addPlayerTeam(ADMIN)
+            admins.color = ChatFormatting.WHITE
+            admins.playerPrefix = Component.literal("§c[Admin] §r")
+            admins.collisionRule = Team.CollisionRule.NEVER
         }
-    }
-
-    internal fun registerEvents() {
-        GlobalEventHandler.register<TeamCreatedEvent> { onTeamCreated(it) }
-    }
-
-    private fun onTeamCreated(event: TeamCreatedEvent) {
-        event.team.addExtension(TeamFlagsExtension())
+        return admins!!
     }
 
     private fun createTeamFromJson(json: JsonObject) {

@@ -11,8 +11,6 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.championships.extensions.PlayerFlag
 import net.casual.championships.extensions.PlayerFlagsExtension.Companion.flags
-import net.casual.championships.extensions.TeamFlag
-import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.championships.managers.TeamManager
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePack
@@ -31,22 +29,6 @@ object CasualCommand: Command {
                     Commands.literal("reload").executes {
                         reloadTeams()
                     }
-                ).then(
-                    Commands.literal("modify").then(
-                        Commands.argument("team", TeamArgument.team()).then(
-                            Commands.literal("flags").then(
-                                Commands.argument("flag", EnumArgument.enumeration<TeamFlag>()).then(
-                                    Commands.argument("value", BoolArgumentType.bool()).executes(this::setTeamFlag)
-                                )
-                            )
-                        )
-                    )
-                ).then(
-                    Commands.literal("get").then(
-                        Commands.argument("team", TeamArgument.team()).then(
-                            Commands.literal("flags").executes(this::getTeamFlags)
-                        )
-                    )
                 )
             ).then(
                 Commands.literal("player").then(
@@ -80,6 +62,12 @@ object CasualCommand: Command {
                 Commands.literal("items").executes(this::openItemsMenu)
             ).then(
                 Commands.literal("lobby").executes(this::returnToLobby)
+            ).then(
+                Commands.literal("floodgates").then(
+                    Commands.literal("open").executes { this.floodgates(it, true) }
+                ).then(
+                    Commands.literal("close").executes { this.floodgates(it, false) }
+                )
             )
         )
     }
@@ -87,21 +75,6 @@ object CasualCommand: Command {
     private fun reloadTeams(): Int {
         TeamManager.createTeams()
         return 1
-    }
-
-    private fun setTeamFlag(context: CommandContext<CommandSourceStack>): Int {
-        val team = TeamArgument.getTeam(context, "team")
-        val flag = EnumArgument.getEnumeration<TeamFlag>(context, "flag")
-        val value = BoolArgumentType.getBool(context, "value")
-        team.flags.set(flag, value)
-        val message = "${flag.name} has been set to $value for ".literal().append(team.formattedDisplayName)
-        return context.source.success(message, true)
-    }
-
-    private fun getTeamFlags(context: CommandContext<CommandSourceStack>): Int {
-        val team = TeamArgument.getTeam(context, "team")
-        val message = team.formattedDisplayName.append(" has the following flags enabled: ${team.flags.get().joinToString()}")
-        return context.source.success(message)
     }
 
     private fun setPlayerFlag(context: CommandContext<CommandSourceStack>): Int {
@@ -151,5 +124,10 @@ object CasualCommand: Command {
     private fun returnToLobby(context: CommandContext<CommandSourceStack>): Int {
         CasualMinigames.setLobby(context.source.server)
         return context.source.success("Returning to lobby...")
+    }
+
+    private fun floodgates(context: CommandContext<CommandSourceStack>, open: Boolean): Int {
+        CasualMinigames.floodgates = open
+        return context.source.success("Successfully ${if (open) "opened" else "closed"} the floodgates")
     }
 }

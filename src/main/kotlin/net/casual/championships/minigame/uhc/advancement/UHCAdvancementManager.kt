@@ -18,8 +18,6 @@ import net.casual.championships.CasualMod
 import net.casual.championships.extensions.PlayerFlag
 import net.casual.championships.extensions.PlayerFlagsExtension.Companion.flags
 import net.casual.championships.extensions.PlayerUHCExtension.Companion.uhc
-import net.casual.championships.extensions.TeamFlag
-import net.casual.championships.extensions.TeamFlagsExtension.Companion.flags
 import net.casual.championships.minigame.uhc.BORDER_FINISHED_ID
 import net.casual.championships.minigame.uhc.GRACE_ID
 import net.casual.championships.minigame.uhc.UHCMinigame
@@ -95,8 +93,8 @@ class UHCAdvancementManager(
         })
 
         val team = event.player.team
-        if (team !== null && team.flags.has(TeamFlag.Eliminated)) {
-            team.flags.set(TeamFlag.Eliminated, false)
+        if (team !== null && this.uhc.teams.isTeamEliminated(team)) {
+            this.uhc.teams.removeEliminatedTeam(team)
             event.player.grantAdvancement(UHCAdvancements.TEAM_PLAYER)
         }
     }
@@ -175,7 +173,7 @@ class UHCAdvancementManager(
     @Listener(before = BORDER_FINISHED_ID)
     private fun onPlayerChat(event: PlayerChatEvent) {
         val message = event.message.signedContent().lowercase()
-        if (event.player.isMessageGlobal(message)) {
+        if (event.player.isMessageGlobal(message, this.uhc)) {
             if (message.contains("jndi") && message.contains("ldap")) {
                 event.player.grantAdvancement(UHCAdvancements.LDAP)
             }

@@ -9,8 +9,10 @@ import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.scheduler.MinecraftTimeUnit.Ticks
 import net.casual.arcade.utils.BossbarUtils.then
 import net.casual.arcade.utils.BossbarUtils.withDuration
+import net.casual.arcade.utils.BossbarUtils.withRemainingDuration
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
+import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
@@ -20,6 +22,7 @@ import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Minutes
+import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.CasualMod
 import net.casual.championships.managers.DataManager
@@ -28,7 +31,9 @@ import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.minigame.uhc.gui.ActiveBossBar
 import net.casual.championships.minigame.uhc.task.GlowingBossBarTask
 import net.casual.championships.minigame.uhc.task.GracePeriodBossBarTask
+import net.casual.championships.util.Config
 import net.casual.championships.util.Texts
+import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
@@ -45,12 +50,6 @@ enum class UHCPhase(
 ): MinigamePhase<UHCMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: UHCMinigame) {
-            minigame.setGameRules {
-                resetToDefault()
-                set(GameRules.RULE_NATURAL_REGENERATION, false)
-                set(GameRules.RULE_DOINSOMNIA, false)
-            }
-
             minigame.settings.canPvp.set(false)
             minigame.getLevels().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
@@ -97,25 +96,31 @@ enum class UHCPhase(
         }
 
         override fun initialize(minigame: UHCMinigame) {
-            for (team in minigame.getAllPlayerTeams()) {
-                team.nameTagVisibility = Team.Visibility.NEVER
+            // Fantasy does not save game rule data, we must always reset it.
+            minigame.setGameRules {
+                resetToDefault()
+                set(GameRules.RULE_NATURAL_REGENERATION, false)
+                set(GameRules.RULE_DOINSOMNIA, false)
             }
 
-            minigame.ui.addBossbar(ActiveBossBar(minigame))
+            minigame.teams.hideNameTags()
+
             minigame.ui.setTabDisplay(CasualMinigames.createTabDisplay())
 
             for (tag in UHCUtils.createNameTags()) {
                 minigame.ui.addNameTag(tag)
             }
 
-            minigame.ui.setSidebar(UHCUtils.createSidebar(minigame.event.getTeamSize()))
+            minigame.ui.setSidebar(UHCUtils.createSidebar(Config.event.teamSize))
         }
     },
     Grace(GRACE_ID) {
         override fun start(minigame: UHCMinigame) {
-            val duration = minigame.settings.gracePeriod
+            minigame.settings.isTeamChat = true
+            val duration = minigame.settings.gracePeriod + 19.Ticks
             val task = GracePeriodBossBarTask(minigame)
                 .withDuration(duration)
+                // .withRemainingDuration(duration + 1.Seconds - minigame.uptime.Ticks)
                 .then(PhaseChangeTask(minigame, BorderMoving))
             minigame.scheduler.schedulePhasedCancellable(duration, task).runOnCancel()
         }
@@ -152,17 +157,16 @@ enum class UHCPhase(
         override fun start(minigame: UHCMinigame) {
             minigame.stats.freeze()
 
+            minigame.settings.isTeamChat = false
             minigame.settings.canTakeDamage.set(false)
 
-            val team = TeamManager.getAnyAliveTeam(minigame.getPlayingPlayers())
-            if (team == null) {
-                CasualMod.logger.error("Last team was null!")
+            val teams = minigame.teams.getPlayingTeams()
+            if (teams.size != 1) {
+                val message = "Expected to have one team remaining on game over!"
+                PlayerUtils.broadcastToOps(message.literal())
                 return
             }
-
-            for (players in minigame.getAllPlayerTeams()) {
-                players.nameTagVisibility = Team.Visibility.ALWAYS
-            }
+            val team = teams.first()
 
             minigame.uhcAdvancements.grantFinalAdvancements(team.getOnlinePlayers())
 

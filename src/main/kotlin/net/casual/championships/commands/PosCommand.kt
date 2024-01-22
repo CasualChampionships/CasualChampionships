@@ -5,7 +5,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import net.casual.arcade.utils.ComponentUtils.command
 import net.casual.arcade.utils.ComponentUtils.lime
-import net.casual.arcade.utils.PlayerUtils.teamMessage
+import net.casual.arcade.utils.PlayerUtils.broadcastUnsignedTeamMessage
 import net.casual.championships.util.Texts
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
@@ -33,7 +33,8 @@ object PosCommand: Command {
             .lime()
             .command("/look towards ${pos.x} ${pos.y} ${pos.z}")
 
-        player.teamMessage(Texts.COMMAND_POS.generate(position))
+        // TODO:
+        player.broadcastUnsignedTeamMessage(Texts.COMMAND_POS.generate(position))
         return 1
     }
 }
