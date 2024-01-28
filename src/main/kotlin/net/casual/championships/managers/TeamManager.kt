@@ -46,10 +46,10 @@ object TeamManager {
                 createTeamFromJson(team)
             }
 
-            val minigame = CasualMinigames.getCurrent()
+            val minigame = CasualMinigames.minigame
             minigame.teams.setAdminTeam(scoreboard.getOrCreateAdminTeam())
             minigame.teams.setSpectatorTeam(scoreboard.getOrCreateSpectatorTeam())
-            for (operator in Config.event.operators) {
+            for (operator in CasualMinigames.event.config.operators) {
                 val player = PlayerUtils.player(operator)
                 if (player != null) {
                     minigame.makeAdmin(player)

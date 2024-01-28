@@ -8,8 +8,8 @@ import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.literal
-import net.casual.championships.minigame.uhc.gui.BorderDistanceRow
-import net.casual.championships.minigame.uhc.gui.TeammateRow
+import net.casual.championships.minigame.uhc.ui.BorderDistanceRow
+import net.casual.championships.minigame.uhc.ui.TeammateRow
 import net.casual.championships.util.Texts
 import net.minecraft.network.chat.Component
 

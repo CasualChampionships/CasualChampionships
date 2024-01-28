@@ -14,6 +14,7 @@ object CommandManager {
             SpectateCommand.register(dispatcher)
             TeamGlowCommand.register(dispatcher)
             CasualCommand.register(dispatcher)
+            DuelCommand.register(dispatcher)
         }
     }
 }

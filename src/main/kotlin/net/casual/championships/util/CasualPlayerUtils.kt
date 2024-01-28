@@ -3,7 +3,10 @@ package net.casual.championships.util
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
+import net.casual.arcade.utils.PlayerUtils.resetHealth
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.ai.attributes.AttributeModifier
+import net.minecraft.world.entity.ai.attributes.Attributes
 import java.util.*
 
 object CasualPlayerUtils {
@@ -32,5 +35,20 @@ object CasualPlayerUtils {
     fun ServerPlayer.updateGlowingTag() {
         this.setGlowingTag(!this.hasGlowingTag())
         this.setGlowingTag(!this.hasGlowingTag())
+    }
+
+    fun ServerPlayer.boostHealth(multiply: Double) {
+        val instance = this.attributes.getInstance(Attributes.MAX_HEALTH)
+        if (instance != null) {
+            instance.removeModifier(HEALTH_BOOST)
+            instance.addPermanentModifier(
+                AttributeModifier(
+                    HEALTH_BOOST,
+                    "Health Boost",
+                    multiply,
+                    AttributeModifier.Operation.MULTIPLY_BASE
+                )
+            )
+        }
     }
 }

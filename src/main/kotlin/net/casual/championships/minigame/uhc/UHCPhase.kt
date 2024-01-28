@@ -9,7 +9,6 @@ import net.casual.arcade.scheduler.MinecraftTimeUnit
 import net.casual.arcade.scheduler.MinecraftTimeUnit.Ticks
 import net.casual.arcade.utils.BossbarUtils.then
 import net.casual.arcade.utils.BossbarUtils.withDuration
-import net.casual.arcade.utils.BossbarUtils.withRemainingDuration
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.literal
@@ -22,22 +21,16 @@ import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Minutes
-import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.championships.CasualMod
 import net.casual.championships.managers.DataManager
-import net.casual.championships.managers.TeamManager
 import net.casual.championships.minigame.CasualMinigames
-import net.casual.championships.minigame.uhc.gui.ActiveBossBar
 import net.casual.championships.minigame.uhc.task.GlowingBossBarTask
 import net.casual.championships.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.championships.util.Config
 import net.casual.championships.util.Texts
-import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
-import net.minecraft.world.scores.Team
 
 const val INITIALIZING_ID = "initializing"
 const val GRACE_ID = "grace"
@@ -111,7 +104,7 @@ enum class UHCPhase(
                 minigame.ui.addNameTag(tag)
             }
 
-            minigame.ui.setSidebar(UHCUtils.createSidebar(Config.event.teamSize))
+            minigame.ui.setSidebar(UHCUtils.createSidebar(CasualMinigames.event.config.teamSize))
         }
     },
     Grace(GRACE_ID) {
@@ -196,7 +189,7 @@ enum class UHCPhase(
             minigame.scheduler.schedulePhasedInLoop(0, 4, 100, Ticks, winTask)
 
             minigame.scheduler.schedulePhased(20, MinecraftTimeUnit.Seconds, MinigameTask(minigame) {
-                CasualMinigames.setLobby(it.server)
+                CasualMinigames.event.returnToLobby(it.server)
             })
         }
     }

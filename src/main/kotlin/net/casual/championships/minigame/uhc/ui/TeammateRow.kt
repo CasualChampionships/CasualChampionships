@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.uhc.gui
+package net.casual.championships.minigame.uhc.ui
 
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.sidebar.SidebarSupplier

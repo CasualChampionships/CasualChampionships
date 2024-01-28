@@ -9,7 +9,7 @@ import net.casual.arcade.task.Task
 import net.casual.arcade.task.serialization.TaskCreationContext
 import net.casual.arcade.task.serialization.TaskWriteContext
 import net.casual.arcade.utils.BossbarUtils.readData
-import net.casual.championships.minigame.uhc.gui.GraceBossBar
+import net.casual.championships.minigame.uhc.ui.GraceBossBar
 
 class GracePeriodBossBarTask(
     minigame: Minigame<*>

@@ -1,13 +1,10 @@
-package net.casual.championships.minigame.uhc.gui
+package net.casual.championships.minigame.uhc.ui
 
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.sidebar.SidebarSupplier
-import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.championships.util.Texts
-import net.casual.championships.util.Texts.monospaced
-import net.casual.championships.util.Texts.regular
 import net.minecraft.ChatFormatting.*
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer

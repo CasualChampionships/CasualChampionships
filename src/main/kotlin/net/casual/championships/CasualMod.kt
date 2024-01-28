@@ -9,7 +9,6 @@ import net.casual.championships.items.CasualItems
 import net.casual.championships.managers.CommandManager
 import net.casual.championships.managers.DataManager
 import net.casual.championships.minigame.CasualMinigames
-import net.casual.championships.minigame.Dimensions
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.util.AntiCheat
@@ -41,8 +40,6 @@ class CasualMod: DedicatedServerModInitializer {
         CasualMinigames.registerEvents()
 
         CasualResourcePack.initialise()
-
-        Dimensions.noop()
 
         GlobalEventHandler.register<PlayerCreatedEvent> { (player) ->
             player.addExtension(PlayerFlagsExtension(player.connection))

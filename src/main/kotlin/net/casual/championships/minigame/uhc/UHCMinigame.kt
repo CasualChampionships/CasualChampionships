@@ -61,12 +61,13 @@ import net.casual.championships.managers.TeamManager.hasAlivePlayers
 import net.casual.championships.minigame.uhc.UHCPhase.*
 import net.casual.championships.minigame.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.minigame.uhc.advancement.UHCAdvancements
-import net.casual.championships.minigame.uhc.gui.ActiveBossBar
+import net.casual.championships.minigame.uhc.ui.ActiveBossBar
 import net.casual.championships.minigame.uhc.resources.UHCResources
 import net.casual.championships.minigame.uhc.task.GlowingBossBarTask
 import net.casual.championships.minigame.uhc.task.GracePeriodBossBarTask
 import net.casual.championships.recipes.GoldenHeadRecipe
 import net.casual.championships.util.*
+import net.casual.championships.util.CasualPlayerUtils.boostHealth
 import net.casual.championships.util.CasualPlayerUtils.isAliveSolo
 import net.casual.championships.util.CasualPlayerUtils.updateGlowingTag
 import net.casual.championships.util.DirectionUtils.opposite
@@ -92,7 +93,6 @@ import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.Mob
-import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.ClipContext
@@ -135,6 +135,7 @@ class UHCMinigame(
         this.addTaskFactory(GracePeriodBossBarTask.cast())
 
         this.ui.addBossbar(ActiveBossBar(this))
+        this.addResources(UHCResources)
     }
 
     override fun initialize() {
@@ -204,10 +205,6 @@ class UHCMinigame(
             this.overworld.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
             this.nether.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
         }
-    }
-
-    override fun getResources(): MinigameResources {
-        return UHCResources
     }
 
     override fun getPhases(): Collection<UHCPhase> {
@@ -644,6 +641,8 @@ class UHCMinigame(
                 if (!killer.inventory.add(head)) {
                     player.drop(head, true, false)
                 }
+            } else {
+                player.drop(head, true, false)
             }
         }
 
@@ -741,18 +740,7 @@ class UHCMinigame(
     }
 
     private fun resetPlayerHealth(player: ServerPlayer) {
-        val instance = player.attributes.getInstance(Attributes.MAX_HEALTH)
-        if (instance != null) {
-            instance.removeModifier(CasualPlayerUtils.HEALTH_BOOST)
-            instance.addPermanentModifier(
-                AttributeModifier(
-                    CasualPlayerUtils.HEALTH_BOOST,
-                    "Health Boost",
-                    this.settings.health,
-                    AttributeModifier.Operation.MULTIPLY_BASE
-                )
-            )
-        }
+        player.boostHealth(this.settings.health)
         player.resetHealth()
     }
 }

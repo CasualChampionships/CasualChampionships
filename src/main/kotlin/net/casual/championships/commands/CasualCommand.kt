@@ -108,7 +108,7 @@ object CasualCommand: Command {
         CasualResourcePackHost.reload().thenAcceptAsync({
             if (it) {
                 context.source.success("Successfully reloaded resources, resending pack...")
-                CasualMinigames.getCurrent().getResources().sendTo(CasualMinigames.getCurrent().getAllPlayers())
+                CasualMinigames.minigame.getResources().sendTo(CasualMinigames.minigame.getAllPlayers())
             } else {
                 context.source.fail("Failed to reload resources...")
             }
@@ -122,7 +122,7 @@ object CasualCommand: Command {
     }
 
     private fun returnToLobby(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.setLobby(context.source.server)
+        CasualMinigames.event.returnToLobby(context.source.server)
         return context.source.success("Returning to lobby...")
     }
 
