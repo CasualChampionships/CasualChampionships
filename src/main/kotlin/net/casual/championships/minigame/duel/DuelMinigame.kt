@@ -4,7 +4,6 @@ import net.casual.arcade.events.minigame.MinigameCloseEvent
 import net.casual.arcade.events.player.PlayerDeathEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigamePhase
-import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.utils.LevelUtils
@@ -48,9 +47,6 @@ class DuelMinigame(
 
     val level = this.createRandomOverworld()
 
-    /**
-     * This handles all the settings for a minigame.
-     */
     override val settings = object: MinigameSettings(this@DuelMinigame) {
         override fun menu(): MenuProvider {
             return duelSettings.menu()

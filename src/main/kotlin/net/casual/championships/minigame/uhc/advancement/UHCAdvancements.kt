@@ -42,6 +42,7 @@ object UHCAdvancements {
     val BASICALLY: AdvancementHolder
     val TEAM_PLAYER: AdvancementHolder
     val LAST_MAN_STANDING: AdvancementHolder
+    val BEAR_CARED: AdvancementHolder
 
     init {
         ROOT = register {
@@ -305,6 +306,15 @@ object UHCAdvancements {
             display(Items.ARROW)
             title = Texts.ADVANCEMENT_LAST_MAN
             description = Texts.ADVANCEMENT_LAST_MAN_DESC
+            toast()
+            announce()
+        }
+        BEAR_CARED = register {
+            parent(EMBARRASSING)
+            id = id("bear_cared")
+            display(Items.SCULK_SENSOR)
+            title = Texts.ADVANCEMENT_BEAR_CARED
+            description = Texts.ADVANCEMENT_BEAR_CARED_DESC
             toast()
             announce()
         }

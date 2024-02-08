@@ -8,7 +8,7 @@ import net.casual.arcade.events.player.PlayerJoinEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.ServerLoadedEvent
 import net.casual.arcade.events.server.ServerSaveEvent
-import net.casual.arcade.events.server.ServerStoppedEvent
+import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.gui.tab.ArcadeTabDisplay
 import net.casual.arcade.minigame.Minigame
@@ -47,6 +47,7 @@ import xyz.nucleoid.fantasy.RuntimeWorldConfig
 import java.nio.file.Path
 import kotlin.io.path.bufferedReader
 import kotlin.io.path.bufferedWriter
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 
 @Suppress("JoinDeclarationAndAssignment")
@@ -95,7 +96,7 @@ object CasualMinigames {
         GlobalEventHandler.register<ServerSaveEvent> {
             this.writeMinigameEventData()
         }
-        GlobalEventHandler.register<ServerStoppedEvent> {
+        GlobalEventHandler.register<ServerStoppingEvent> {
             this.writeMinigameEvent()
         }
     }
@@ -223,6 +224,7 @@ object CasualMinigames {
 
     private fun writeMinigameEvent() {
         val path = this.path.resolve("event.json")
+        path.parent.createDirectories()
         path.bufferedWriter().use {
             JsonUtils.GSON.toJson(this.config.serialize(this.event.config), it)
         }
@@ -242,6 +244,7 @@ object CasualMinigames {
 
     private fun writeMinigameEventData() {
         val eventData = this.path.resolve("event_data.json")
+        eventData.parent.createDirectories()
         eventData.bufferedWriter().use {
             JsonUtils.GSON.toJson(this.event.serialize(), it)
         }

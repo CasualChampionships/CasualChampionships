@@ -1,7 +1,7 @@
 package net.casual.championships.managers
 
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.server.ServerStoppedEvent
+import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.championships.minigame.uhc.database.MongoUHCDatabase
 import net.casual.championships.events.uhc.CasualConfigReloaded
 import net.casual.championships.minigame.uhc.database.UHCDatabase
@@ -22,7 +22,7 @@ object DataManager {
 
     internal fun registerEvents() {
         GlobalEventHandler.register<CasualConfigReloaded> { onConfigLoaded() }
-        GlobalEventHandler.register<ServerStoppedEvent> { database.shutdown() }
+        GlobalEventHandler.register<ServerStoppingEvent> { database.shutdown() }
         onConfigLoaded()
     }
 

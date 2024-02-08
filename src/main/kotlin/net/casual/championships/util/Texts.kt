@@ -20,6 +20,9 @@ object Texts {
     val MOZART_FONT = CasualUtils.id("mozart")
     val ICON_FONT = CasualUtils.id("icons")
     val SPACES_FONT = ResourceLocation("space", "spaces")
+    val DEFAULT_SHIFTED_DOWN_1 = CasualUtils.id("default_shifted_down_1")
+    val DEFAULT_SHIFTED_DOWN_2 = CasualUtils.id("default_shifted_down_2")
+    val DEFAULT_SHIFTED_DOWN_3 = CasualUtils.id("default_shifted_down_3")
 
     val CASUAL_UHC get() = Component.literal("Casual UHC")
 
@@ -100,13 +103,15 @@ object Texts {
     val ADVANCEMENT_TEAM_PLAYER_DESC by constant("uhc.advancements.teamPlayer.desc")
     val ADVANCEMENT_LAST_MAN by constant("uhc.advancements.lastManStanding")
     val ADVANCEMENT_LAST_MAN_DESC by constant("uhc.advancements.lastManStanding.desc")
+    val ADVANCEMENT_BEAR_CARED by constant("uhc.advancements.bearCared")
+    val ADVANCEMENT_BEAR_CARED_DESC by constant("uhc.advancements.bearCared.desc")
 
     val BROADCAST_HOSTED_BY by constant("uhc.broadcast.hostedBy")
     val BROADCAST_BORDER_WARNING by constant("uhc.broadcast.borderWarning")
     val BROADCAST_SPECTATING by constant("uhc.broadcast.spectator")
     val BROADCAST_NO_POTIONS by constant("uhc.broadcast.noPotions")
     val BROADCAST_GLOBAL_CHAT by constant("uhc.broadcast.globalChat")
-    val BROADCAST_NIGHT_VISION by constant("uhc.broadcast.nighVision")
+    val BROADCAST_NIGHT_VISION by constant("uhc.broadcast.nightVision")
     val BROADCAST_TEAM_GLOW by constant("uhc.broadcast.teamGlow")
     val BROADCAST_MINESWEEPER by constant("uhc.broadcast.minesweeper")
     val BROADCAST_RULES by constant("uhc.broadcast.rules")
@@ -270,6 +275,18 @@ object Texts {
 
     fun MutableComponent.regular(): MutableComponent {
         return this.withStyle { it.withFont(Style.DEFAULT_FONT) }
+    }
+
+    fun MutableComponent.regularShiftedDown1(): MutableComponent {
+        return this.withStyle { it.withFont(DEFAULT_SHIFTED_DOWN_1) }
+    }
+
+    fun MutableComponent.regularShiftedDown2(): MutableComponent {
+        return this.withStyle { it.withFont(DEFAULT_SHIFTED_DOWN_2) }
+    }
+
+    fun MutableComponent.regularShiftedDown3(): MutableComponent {
+        return this.withStyle { it.withFont(DEFAULT_SHIFTED_DOWN_3) }
     }
 
     fun MutableComponent.shadowless(): MutableComponent {

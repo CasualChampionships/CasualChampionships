@@ -1,7 +1,7 @@
 package net.casual.championships.resources
 
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.server.ServerStoppedEvent
+import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.arcade.resources.DirectoryPackSupplier
 import net.casual.arcade.resources.HostedPack
 import net.casual.arcade.resources.PackHost
@@ -37,7 +37,7 @@ object CasualResourcePackHost {
     }
 
     internal fun registerEvents() {
-        GlobalEventHandler.register<ServerStoppedEvent> { host.shutdown() }
+        GlobalEventHandler.register<ServerStoppingEvent> { host.shutdown() }
         GlobalEventHandler.register<CasualConfigReloaded> { reload() }
     }
 }

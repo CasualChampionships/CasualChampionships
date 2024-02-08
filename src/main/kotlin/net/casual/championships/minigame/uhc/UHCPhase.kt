@@ -44,6 +44,7 @@ enum class UHCPhase(
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: UHCMinigame) {
             minigame.settings.canPvp.set(false)
+            minigame.settings.tickFreezeOnPause.set(true)
             minigame.getLevels().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
             for (player in minigame.getAllPlayers()) {
@@ -110,6 +111,7 @@ enum class UHCPhase(
     Grace(GRACE_ID) {
         override fun start(minigame: UHCMinigame) {
             minigame.settings.isTeamChat = true
+            minigame.settings.mobsWithNoAIAreFlammable = true
             val duration = minigame.settings.gracePeriod + 19.Ticks
             val task = GracePeriodBossBarTask(minigame)
                 .withDuration(duration)

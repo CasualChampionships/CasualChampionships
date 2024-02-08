@@ -190,16 +190,6 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING)
-    private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
-        event.announce = event.announce && UHCAdvancements.isRegistered(event.advancement) && this.uhc.isPlaying(event.player)
-        if (event.announce) {
-            CasualMod.logger.info("Going to announce advancement ${event.advancement.id} for ${event.player.scoreboardName}")
-        } else {
-            CasualMod.logger.info("Going to suppress advancement ${event.advancement.id} for ${event.player.scoreboardName}")
-        }
-    }
-
     private class PlayerAttacker(
         val player: ServerPlayer,
         val damage: Float
