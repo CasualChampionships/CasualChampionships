@@ -2,6 +2,7 @@ package net.casual.championships
 
 import net.casual.championships.datagen.CentredSpacingGenerator
 import net.casual.championships.datagen.LanguageGenerator
+import net.casual.championships.datagen.NegativeWidthGenerator
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.util.Texts
 import net.casual.championships.util.Texts.monospaced
@@ -48,6 +49,15 @@ class CasualDatagen: ClientModInitializer {
                 Component.translatable("uhc.bossbar.startingSoon"),
                 Texts.ICON_WIDE_BACKGROUND
             ))
+
+            add(NegativeWidthGenerator(Texts.UHC_NORTH))
+            add(NegativeWidthGenerator(Texts.UHC_NORTH_EAST))
+            add(NegativeWidthGenerator(Texts.UHC_EAST))
+            add(NegativeWidthGenerator(Texts.UHC_SOUTH_EAST))
+            add(NegativeWidthGenerator(Texts.UHC_SOUTH))
+            add(NegativeWidthGenerator(Texts.UHC_SOUTH_WEST))
+            add(NegativeWidthGenerator(Texts.UHC_WEST))
+            add(NegativeWidthGenerator(Texts.UHC_NORTH_WEST))
         }
 
         val dir = Path("../src/main/resources/data/casual/lang/")

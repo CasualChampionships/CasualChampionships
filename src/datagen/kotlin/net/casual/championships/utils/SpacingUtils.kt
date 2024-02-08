@@ -13,10 +13,19 @@ object SpacingUtils {
         font: Font,
         foreground: Component,
         background: Component,
-        key: String = extractTranslationKey(foreground)
+        key: String = Texts.getTranslationKeyOf(foreground)
     ): Pair<LanguageEntry, LanguageEntry> {
         val (first, second) = getCentreSpacingUnicode(font, foreground, background)
         return LanguageEntry("${key}.space.1", first) to LanguageEntry("${key}.space.2", second)
+    }
+
+    fun getTranslatableNegativeWidth(
+        font: Font,
+        component: Component,
+        key: String = Texts.getTranslationKeyOf(component)
+    ): LanguageEntry {
+        val unicode = this.getNegativeWidthUnicode(font, component)
+        return LanguageEntry("${key}.negativeWidth", unicode)
     }
 
     fun getCentreSpacingUnicode(
@@ -29,6 +38,12 @@ object SpacingUtils {
         val second = Texts.space(secondSpace)
 
         return StringEscapeUtils.escapeJava(first.string) to StringEscapeUtils.escapeJava(second.string)
+    }
+
+    fun getNegativeWidthUnicode(font: Font, component: Component): String {
+        val width = this.getWidth(font, component)
+        val unicode = Texts.space(-width)
+        return StringEscapeUtils.escapeJava(unicode.string)
     }
 
     fun getCentreSpacing(
@@ -48,11 +63,7 @@ object SpacingUtils {
         return firstSpace to secondSpace
     }
 
-    private fun extractTranslationKey(component: Component): String {
-        val contents = component.contents
-        if (contents !is TranslatableContents) {
-            throw IllegalStateException()
-        }
-        return contents.key
+    fun getWidth(font: Font, component: Component): Int {
+        return font.width(component)
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Component.translatable
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.contents.TranslatableContents
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.Mth
 import kotlin.reflect.KProperty
@@ -23,6 +24,8 @@ object Texts {
     val DEFAULT_SHIFTED_DOWN_1 = CasualUtils.id("default_shifted_down_1")
     val DEFAULT_SHIFTED_DOWN_2 = CasualUtils.id("default_shifted_down_2")
     val DEFAULT_SHIFTED_DOWN_3 = CasualUtils.id("default_shifted_down_3")
+    val DEFAULT_SHIFTED_DOWN_4 = CasualUtils.id("default_shifted_down_4")
+    val DEFAULT_SHIFTED_DOWN_5 = CasualUtils.id("default_shifted_down_5")
 
     val CASUAL_UHC get() = Component.literal("Casual UHC")
 
@@ -261,6 +264,19 @@ object Texts {
         }
     }
 
+    fun negativeWidthOf(component: Component): MutableComponent {
+        val key = getTranslationKeyOf(component)
+        return translatable("$key.negativeWidth").spaced()
+    }
+
+    fun getTranslationKeyOf(component: Component): String {
+        val contents = component.contents
+        if (contents !is TranslatableContents) {
+            throw IllegalStateException()
+        }
+        return contents.key
+    }
+
     fun MutableComponent.monospaced(): MutableComponent {
         return this.withStyle { it.withFont(MOZART_FONT) }
     }
@@ -287,6 +303,14 @@ object Texts {
 
     fun MutableComponent.regularShiftedDown3(): MutableComponent {
         return this.withStyle { it.withFont(DEFAULT_SHIFTED_DOWN_3) }
+    }
+
+    fun MutableComponent.regularShiftedDown4(): MutableComponent {
+        return this.withStyle { it.withFont(DEFAULT_SHIFTED_DOWN_4) }
+    }
+
+    fun MutableComponent.regularShiftedDown5(): MutableComponent {
+        return this.withStyle { it.withFont(DEFAULT_SHIFTED_DOWN_5) }
     }
 
     fun MutableComponent.shadowless(): MutableComponent {

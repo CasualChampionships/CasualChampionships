@@ -99,6 +99,7 @@ object CasualCommand: Command {
 
     private fun regenerateResources(context: CommandContext<CommandSourceStack>): Int {
         if (CasualResourcePack.generate()) {
+            CasualMinigames.minigame.getResources().sendTo(CasualMinigames.minigame.getAllPlayers())
             return context.source.success("Successfully regenerated resources, reload resources to refresh clients")
         }
         return context.source.fail("Failed to regenerate resources...")

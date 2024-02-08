@@ -18,3 +18,11 @@ class CentredSpacingGenerator(
         collection.add(second)
     }
 }
+
+class NegativeWidthGenerator(
+    private val component: Component
+): LanguageEntryGenerator {
+    override fun run(font: Font, collection: MutableCollection<LanguageEntry>) {
+        collection.add(SpacingUtils.getTranslatableNegativeWidth(font, this.component))
+    }
+}

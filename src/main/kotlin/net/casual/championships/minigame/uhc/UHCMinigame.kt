@@ -16,7 +16,6 @@ import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerRecipeReloadEvent
 import net.casual.arcade.gui.shapes.ArrowShape
-import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.annotation.HAS_PLAYER_PLAYING
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.serialization.SavableMinigame
@@ -29,6 +28,7 @@ import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.JsonUtils.booleanOrDefault
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.set
 import net.casual.arcade.utils.MinigameUtils.addEventListener
@@ -61,22 +61,28 @@ import net.casual.championships.managers.TeamManager.hasAlivePlayers
 import net.casual.championships.minigame.uhc.UHCPhase.*
 import net.casual.championships.minigame.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.minigame.uhc.advancement.UHCAdvancements
-import net.casual.championships.minigame.uhc.ui.ActiveBossBar
 import net.casual.championships.minigame.uhc.resources.UHCResources
 import net.casual.championships.minigame.uhc.task.GlowingBossBarTask
 import net.casual.championships.minigame.uhc.task.GracePeriodBossBarTask
+import net.casual.championships.minigame.uhc.ui.ActiveBossBar
 import net.casual.championships.recipes.GoldenHeadRecipe
 import net.casual.championships.util.*
 import net.casual.championships.util.CasualPlayerUtils.boostHealth
 import net.casual.championships.util.CasualPlayerUtils.isAliveSolo
 import net.casual.championships.util.CasualPlayerUtils.updateGlowingTag
 import net.casual.championships.util.DirectionUtils.opposite
+import net.casual.championships.util.Texts.regularShiftedDown1
+import net.casual.championships.util.Texts.regularShiftedDown2
+import net.casual.championships.util.Texts.regularShiftedDown3
+import net.casual.championships.util.Texts.regularShiftedDown4
+import net.casual.championships.util.Texts.regularShiftedDown5
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.Direction8
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
@@ -86,8 +92,10 @@ import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.level.TicketType
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.Mth
+import net.minecraft.util.Unit
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
@@ -95,6 +103,7 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.Items
+import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
@@ -114,8 +123,10 @@ class UHCMinigame(
 ), MultiLevelBorderListener {
     private val tracker = MultiLevelBorderTracker()
     private val spawn by lazy {
-        this.overworld.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.ZERO)
+        this.overworld.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, BlockPos.ZERO)
     }
+    private var bordersMoving = false
+
     override val id = CasualUtils.id("uhc_minigame")
 
     val uhcAdvancements = UHCAdvancementManager(this)
@@ -136,6 +147,11 @@ class UHCMinigame(
 
         this.ui.addBossbar(ActiveBossBar(this))
         this.addResources(UHCResources)
+
+        this.settings.replay = !Config.dev
+
+        // Spawn chunks
+        this.overworld.chunkSource.addRegionTicket(TicketType.START, ChunkPos(BlockPos.ZERO), 3, Unit.INSTANCE)
     }
 
     override fun initialize() {
@@ -158,6 +174,7 @@ class UHCMinigame(
     }
 
     fun resetWorldBorders() {
+        this.bordersMoving = false
         val multiplier = this.settings.borderSizeMultiplier
         for ((border, level) in this.tracker.getAllTracking()) {
             border.setSizeUntracked(UHCBorderStage.FIRST.getStartSizeFor(level, multiplier))
@@ -165,6 +182,7 @@ class UHCMinigame(
     }
 
     fun moveWorldBorders(stage: UHCBorderStage, size: UHCBorderSize = UHCBorderSize.END, instant: Boolean = false) {
+        this.bordersMoving = true
         for ((border, level) in this.tracker.getAllTracking()) {
             this.moveWorldBorder(border, level, stage, size, instant)
         }
@@ -172,6 +190,13 @@ class UHCMinigame(
 
     override fun onAllBordersComplete(borders: Map<TrackedBorder, ServerLevel>) {
         val stage = this.settings.borderStage
+        val size = stage.getEndSizeFor(this.overworld, this.settings.borderSizeMultiplier)
+        if (this.overworld.worldBorder.size != size) {
+            CasualMod.logger.info("Border paused at stage $stage")
+            return
+        }
+        this.bordersMoving = false
+
         CasualMod.logger.info("Finished world border stage: $stage")
         if (!this.isRunning()) {
             return
@@ -213,10 +238,12 @@ class UHCMinigame(
 
     override fun readData(json: JsonObject) {
         this.uhcAdvancements.deserialize(json.obj("advancements"))
+        this.bordersMoving = json.booleanOrDefault("borders_moving")
     }
 
     override fun writeData(json: JsonObject) {
         json.add("advancements", this.uhcAdvancements.serialize())
+        json.addProperty("borders_moving", this.bordersMoving)
         val dimensions = JsonObject()
         dimensions["overworld"] = this.overworld.dimension().location().toString()
         dimensions["nether"] = this.nether.dimension().location().toString()
@@ -285,12 +312,16 @@ class UHCMinigame(
 
     @Listener(before = BORDER_FINISHED_ID)
     private fun onPause(event: MinigamePauseEvent) {
-        this.pauseWorldBorders()
+        if (this.bordersMoving) {
+            this.pauseWorldBorders()
+        }
     }
 
     @Listener(before = BORDER_FINISHED_ID)
     private fun onUnpause(event: MinigameUnpauseEvent) {
-        this.startWorldBorders()
+        if (this.bordersMoving) {
+            this.startWorldBorders()
+        }
     }
 
     @Listener
@@ -370,6 +401,8 @@ class UHCMinigame(
         if (!this.isSpectating(player)) {
             this.updateWorldBorder(player)
         }
+
+        this.updateHUD(player)
     }
 
     @Listener(flags = HAS_PLAYER_PLAYING)
@@ -451,7 +484,7 @@ class UHCMinigame(
         } else {
             GlobalTickedScheduler.later {
                 if (!PlayerRecorders.has(player) && this.isPlaying(player) && this.settings.replay) {
-                    PlayerRecorders.create(player).start()
+                    PlayerRecorders.create(player).tryStart()
                 }
             }
         }
@@ -580,6 +613,21 @@ class UHCMinigame(
         }
 
         player.flags.set(PlayerFlag.WasInBorder, true)
+    }
+
+    private fun updateHUD(player: ServerPlayer) {
+        val direction = Texts.direction(Direction.orderedByNearest(player).filter { it.axis != Direction.Axis.Y }[0])
+        val back = Texts.negativeWidthOf(direction)
+        val position = "(${player.blockX}, ${player.blockY}, ${player.blockZ})"
+        val shift = position.length - 7
+
+        player.connection.send(ClientboundSetActionBarTextPacket(
+            Component.empty()
+                .append(Texts.space(-485 + shift * 6))
+                .append(direction.regularShiftedDown4())
+                .append(back)
+                .append(position.literal().regularShiftedDown5())
+        ))
     }
 
     private fun handleTrackerUpdatePacketForTeamGlowing(
@@ -721,6 +769,7 @@ class UHCMinigame(
         player.setGlowingTag(false)
 
         val flags = player.flags
+        flags.set(PlayerFlag.FullBright, false)
         flags.set(PlayerFlag.FullBright, true)
 
         val team = player.team
