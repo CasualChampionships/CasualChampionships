@@ -2,7 +2,7 @@
   "providers": [
     {
       "type": "bitmap",
-      "file": "casual:font/hardcore_heart.png",
+      "file": "casual:font/hud/hardcore_heart.png",
       "ascent": 7,
       "height": 7,
       "chars": [
@@ -11,7 +11,7 @@
     },
     {
       "type": "bitmap",
-      "file": "casual:font/no_connection.png",
+      "file": "casual:font/hud/no_connection.png",
       "ascent": 7,
       "height": 7,
       "chars": [
@@ -20,7 +20,7 @@
     },
     {
       "type": "bitmap",
-      "file": "casual:font/cross.png",
+      "file": "casual:font/hud/cross.png",
       "ascent": 7,
       "height": 7,
       "chars": [
@@ -38,7 +38,7 @@
     },
     {
       "type": "bitmap",
-      "file": "casual:font/background240.png",
+      "file": "casual:font/bossbar/background240.png",
       "ascent": 10,
       "height": 12,
       "chars": [
@@ -47,7 +47,7 @@
     },
     {
       "type": "bitmap",
-      "file": "casual:font/background180.png",
+      "file": "casual:font/bossbar/background180.png",
       "ascent": 10,
       "height": 12,
       "chars": [
@@ -56,7 +56,7 @@
     },
     {
       "type": "bitmap",
-      "file": "casual:font/background120.png",
+      "file": "casual:font/bossbar/background120.png",
       "ascent": 10,
       "height": 12,
       "chars": [
@@ -65,7 +65,7 @@
     },
     {
       "type": "bitmap",
-      "file": "casual:font/background40.png",
+      "file": "casual:font/bossbar/background40.png",
       "ascent": 10,
       "height": 12,
       "chars": [
@@ -74,7 +74,7 @@
     },
     {
       "type": "bitmap",
-      "file": "casual:font/kills.png",
+      "file": "casual:font/hud/kills.png",
       "ascent": 10,
       "height": 12,
       "chars": [
@@ -83,7 +83,7 @@
     },
     {
       "type": "bitmap",
-      "file": "casual:font/players.png",
+      "file": "casual:font/hud/players.png",
       "ascent": 10,
       "height": 11,
       "chars": [

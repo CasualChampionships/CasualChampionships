@@ -188,6 +188,8 @@ object Texts {
     val ICON_SHORT_BACKGROUND by constant("uhc.icons.shortBackground") { iconed() }
     val ICON_KILLS by constant("uhc.icons.kills") { iconed() }
     val ICON_PLAYERS by constant("uhc.icons.players") { iconed() }
+    val ICON_YES by constant("uhc.icons.yes") { iconed() }
+    val ICON_NO by constant("uhc.icons.no") { iconed() }
 
     val BOSSBAR_STARTING = generateBossbar("uhc.bossbar.starting", ICON_WIDE_BACKGROUND)
     val BOSSBAR_STARTING_SOON = generateBossbar("uhc.bossbar.startingSoon", ICON_WIDE_BACKGROUND)

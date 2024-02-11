@@ -3,7 +3,7 @@ package net.casual.championships.util
 import net.casual.arcade.config.CustomisableConfig
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.server.ServerSaveEvent
-import net.casual.championships.events.uhc.CasualConfigReloaded
+import net.casual.championships.events.CasualConfigReloaded
 import net.fabricmc.loader.api.FabricLoader
 import java.nio.file.Path
 

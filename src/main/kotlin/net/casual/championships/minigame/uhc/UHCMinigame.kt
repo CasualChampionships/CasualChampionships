@@ -623,7 +623,7 @@ class UHCMinigame(
 
         player.connection.send(ClientboundSetActionBarTextPacket(
             Component.empty()
-                .append(Texts.space(-485 + shift * 6))
+                .append(Texts.space(210 + shift * 6))
                 .append(direction.regularShiftedDown4())
                 .append(back)
                 .append(position.literal().regularShiftedDown5())

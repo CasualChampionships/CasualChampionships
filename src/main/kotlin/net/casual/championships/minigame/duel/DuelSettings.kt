@@ -1,6 +1,7 @@
 package net.casual.championships.minigame.duel
 
 import net.casual.arcade.gui.screen.SelectionScreenStyle
+import net.casual.arcade.settings.display.DisplayableGameSettingBuilder
 import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.bool
 import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.float64
 import net.casual.arcade.settings.display.DisplayableSettings
@@ -8,8 +9,9 @@ import net.casual.arcade.utils.ItemUtils.hideTooltips
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.ScreenUtils
-import net.casual.arcade.utils.SettingsUtils.defaultOptions
+import net.casual.championships.items.MenuItem
 import net.minecraft.world.MenuProvider
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
@@ -27,7 +29,7 @@ class DuelSettings: DisplayableSettings() {
         name = "natural_regeneration"
         display = Items.GOLDEN_APPLE.named("Natural Regeneration")
         value = false
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     val borderRadius by this.register(float64 {
@@ -43,14 +45,14 @@ class DuelSettings: DisplayableSettings() {
         name = "glowing"
         display = Items.SPECTRAL_ARROW.named("Glowing")
         value = false
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var playerDropsHead by this.register(bool {
         name = "player_drops_head"
         display = Items.PLAYER_HEAD.named("Player Drops Head")
         value = true
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     override fun menu(): MenuProvider {
@@ -58,5 +60,13 @@ class DuelSettings: DisplayableSettings() {
             this,
             style = SelectionScreenStyle.centered(5, 3)
         )
+    }
+
+    override fun defaultOptionsFor(
+        builder: DisplayableGameSettingBuilder<Boolean>,
+        enabled: ItemStack,
+        disabled: ItemStack
+    ) {
+        super.defaultOptionsFor(builder, MenuItem.YES.named("Enabled"), MenuItem.NO.named("Disabled"))
     }
 }

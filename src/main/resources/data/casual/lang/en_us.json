@@ -161,6 +161,8 @@
   "uhc.icons.shortBackground": "\uE008",
   "uhc.icons.kills": "\uE009",
   "uhc.icons.players": "\uE00A",
+  "uhc.icons.yes": "\uE00B",
+  "uhc.icons.no": "\uE00C",
 
   "uhc.bossbar.starting": "Starting in: %s",
   "uhc.bossbar.elapsed": "Time Elapsed: %s",

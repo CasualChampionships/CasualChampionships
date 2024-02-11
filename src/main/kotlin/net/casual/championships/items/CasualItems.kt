@@ -11,6 +11,8 @@ object CasualItems {
     val MINESWEEPER = register("minesweeper", MinesweeperItem.MODELLER.item())
     val LIGHTNING_STAFF = register("lightning_staff", LightningStaffItem.MODELLER.item())
 
+    val MENU = register("menu", MenuItem.MODELLER.item())
+
     fun noop() {
 
     }

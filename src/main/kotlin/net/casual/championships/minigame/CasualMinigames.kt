@@ -12,6 +12,7 @@ import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.gui.tab.ArcadeTabDisplay
 import net.casual.arcade.minigame.Minigame
+import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.Minigames
 import net.casual.arcade.minigame.events.MinigamesEvent
 import net.casual.arcade.minigame.events.MinigamesEventConfig
@@ -28,6 +29,7 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.MinigameUtils.getMinigame
+import net.casual.championships.minigame.core.CasualSettings
 import net.casual.championships.minigame.duel.DuelMinigame
 import net.casual.championships.minigame.duel.DuelSettings
 import net.casual.championships.minigame.lobby.ui.LobbyBossBarConfig
@@ -172,7 +174,9 @@ object CasualMinigames {
     }
 
     private fun createLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame {
-        val lobbyMinigame = LobbyMinigame(server, lobby)
+        val lobbyMinigame = object: LobbyMinigame(server, lobby) {
+            override val settings: MinigameSettings = CasualSettings(this)
+        }
 
         lobbyMinigame.events.register<MinigameAddPlayerEvent> { event ->
             val (minigame, player) = event

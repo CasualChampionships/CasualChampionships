@@ -7,7 +7,6 @@
     "commands.SpectateCommandMixin",
     "feature.DedicatedServerMixin",
     "feature.EntityMixin",
-    "feature.LevelMixin",
     "feature.PlayerListMixin",
     "feature.PortalForcerMixin",
     "feature.ServerGamePacketListenerImplMixin",

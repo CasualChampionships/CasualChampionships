@@ -6,7 +6,7 @@ import net.casual.arcade.resources.DirectoryPackSupplier
 import net.casual.arcade.resources.HostedPack
 import net.casual.arcade.resources.PackHost
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.championships.events.uhc.CasualConfigReloaded
+import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.util.Config
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.createDirectories

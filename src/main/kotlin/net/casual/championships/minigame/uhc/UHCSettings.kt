@@ -3,6 +3,7 @@ package net.casual.championships.minigame.uhc
 import net.casual.championships.CasualMod
 import net.casual.arcade.level.VanillaDimension
 import net.casual.arcade.minigame.MinigameSettings
+import net.casual.arcade.settings.display.DisplayableGameSettingBuilder
 import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.bool
 import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.enumeration
 import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.float64
@@ -10,20 +11,22 @@ import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companio
 import net.casual.arcade.utils.ItemUtils.hideTooltips
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
-import net.casual.arcade.utils.SettingsUtils.defaultOptions
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.championships.items.MenuItem
 import net.casual.championships.items.MinesweeperItem
+import net.casual.championships.minigame.core.CasualSettings
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
-class UHCSettings(private val uhc: UHCMinigame): MinigameSettings(uhc) {
+class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
     var glowing by this.register(bool {
         name = "glowing"
         display = Items.GLOWSTONE_DUST.named("Glowing")
         value = false
-        defaultOptions()
+        defaultOptionsFor(this)
         listener { _, value ->
             if (value) {
                 var count = 0
@@ -67,7 +70,7 @@ class UHCSettings(private val uhc: UHCMinigame): MinigameSettings(uhc) {
         name = "starting_dimension"
         display = Items.GRASS_BLOCK.named("Starting Dimension")
         value = VanillaDimension.Overworld
-        defaultOptions(VanillaDimension::class.java)
+        defaultOptionsFor(this, VanillaDimension::class.java)
     })
 
     var gracePeriod by this.register(time {
@@ -117,71 +120,71 @@ class UHCSettings(private val uhc: UHCMinigame): MinigameSettings(uhc) {
         name = "end_game_glow"
         display = Items.SPECTRAL_ARROW.named("End Game Glow")
         value = true
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var friendlyPlayerGlow by this.register(bool {
         name = "friendly_player_glow"
         display = Items.GOLDEN_CARROT.named("Friendly Player Glow")
         value = true
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var playerDropsGapple by this.register(bool {
         name = "player_drops_gapple"
         display = Items.GOLDEN_APPLE.named("Player Drops Gapple")
         value = false
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var playerDropsHead by this.register(bool {
         name = "player_drops_head"
         display = Items.PLAYER_HEAD.named("Player Drops Head")
         value = true
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var opPotions by this.register(bool {
         name = "op_potions"
         display = Items.SPLASH_POTION.named("OP Potions").potion(Potions.STRONG_HARMING).hideTooltips()
         value = false
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var generatePortals by this.register(bool {
         name = "generate_portals"
         display = Items.CRYING_OBSIDIAN.named("Generate Portals")
         value = true
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var announceMinesweeper by this.register(bool {
         name = "announce_minesweeper"
         display = MinesweeperItem.MINE.named("Announce Minesweeper")
         value = true
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var soloBuff by this.register(bool {
         name = "solo_buff"
         display = Items.LINGERING_POTION.named("Solo Buff").potion(Potions.REGENERATION).hideTooltips()
         value = true
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var borderSize by this.register(enumeration<UHCBorderSize> {
         name = "border_size"
         display = Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.named("World Border Size").hideTooltips()
         value = UHCBorderSize.START
-        defaultOptions(UHCBorderSize::class.java)
+        defaultOptionsFor(this, UHCBorderSize::class.java)
     })
 
     var borderStageSetting = this.register(enumeration<UHCBorderStage> {
         name = "border_stage"
         display = Items.BARRIER.named("World Border Stage")
         value = UHCBorderStage.FIRST
-        defaultOptions(UHCBorderStage::class.java)
-        .listener { _, value ->
+        defaultOptionsFor(this, UHCBorderStage::class.java)
+        listener { _, value ->
             uhc.moveWorldBorders(value, borderSize, true)
         }
     })
@@ -190,7 +193,7 @@ class UHCSettings(private val uhc: UHCMinigame): MinigameSettings(uhc) {
         name = "replay"
         display = Items.END_PORTAL_FRAME.named("Server Replay")
         value = true
-        defaultOptions()
+        defaultOptionsFor(this)
     })
 
     var borderStage by this.borderStageSetting

@@ -1,4 +1,4 @@
-package net.casual.championships.events.uhc
+package net.casual.championships.events
 
 import net.casual.arcade.events.core.Event
 
