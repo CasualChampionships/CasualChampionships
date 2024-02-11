@@ -37,10 +37,6 @@ object TeamManager {
 
     fun createTeams() {
         val scoreboard = Arcade.getServer().scoreboard
-        for (team in LinkedList(scoreboard.playerTeams)) {
-            scoreboard.removePlayerTeam(team)
-        }
-
         DataManager.database.downloadTeams().thenAcceptAsync({
             for (team in it) {
                 createTeamFromJson(team)

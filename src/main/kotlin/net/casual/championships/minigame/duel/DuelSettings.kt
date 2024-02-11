@@ -16,6 +16,13 @@ import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
 class DuelSettings: DisplayableSettings() {
+    var teams by this.register(bool {
+        name = "teams"
+        display = Items.GREEN_BANNER.named("Teams")
+        value = false
+        defaultOptionsFor(this)
+    })
+
     var health by this.register(float64 {
         name = "health"
         display = Items.POTION.named("Health").potion(Potions.HEALING).hideTooltips()
@@ -55,9 +62,10 @@ class DuelSettings: DisplayableSettings() {
         defaultOptionsFor(this)
     })
 
-    override fun menu(): MenuProvider {
+    override fun menu(parent: MenuProvider?): MenuProvider {
         return ScreenUtils.createSettingsMenu(
             this,
+            parent = parent,
             style = SelectionScreenStyle.centered(5, 3)
         )
     }

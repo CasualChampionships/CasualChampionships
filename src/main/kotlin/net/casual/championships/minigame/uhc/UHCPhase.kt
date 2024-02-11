@@ -99,7 +99,7 @@ enum class UHCPhase(
 
             minigame.teams.hideNameTags()
 
-            minigame.ui.setTabDisplay(CasualMinigames.createTabDisplay())
+            minigame.ui.setTabDisplay(CasualMinigames.event.createTabDisplay())
 
             for (tag in UHCUtils.createNameTags()) {
                 minigame.ui.addNameTag(tag)

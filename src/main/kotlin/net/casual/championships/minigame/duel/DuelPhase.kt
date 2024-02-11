@@ -2,9 +2,12 @@ package net.casual.championships.minigame.duel
 
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.scheduler.GlobalTickedScheduler
+import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
+import net.casual.arcade.utils.MinigameUtils.countdown
 import net.casual.arcade.utils.PlayerUtils
+import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.minigame.uhc.ui.ActiveBossBar
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
@@ -19,6 +22,15 @@ enum class DuelPhase(
 ): MinigamePhase<DuelMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: DuelMinigame) {
+            minigame.setGameRules {
+                resetToDefault()
+                if (!minigame.duelSettings.naturalRegen) {
+                    set(GameRules.RULE_NATURAL_REGENERATION, false)
+                }
+            }
+
+            minigame.ui.addBossbar(ActiveBossBar(minigame))
+
             val borderRadius = minigame.duelSettings.borderRadius
             minigame.level.worldBorder.size = borderRadius * 2
 
@@ -28,7 +40,7 @@ enum class DuelPhase(
                 Vec2(0.0F, 0.0F),
                 borderRadius / playing.size,
                 borderRadius,
-                true,
+                minigame.duelSettings.teams,
                 playing
             )
             for (player in playing) {
@@ -39,31 +51,26 @@ enum class DuelPhase(
                 minigame.setPhase(Countdown)
             }
         }
-
-        override fun initialize(minigame: DuelMinigame) {
-            minigame.setGameRules {
-                resetToDefault()
-                if (!minigame.duelSettings.naturalRegen) {
-                    set(GameRules.RULE_NATURAL_REGENERATION, false)
-                }
-            }
-
-            minigame.ui.addBossbar(ActiveBossBar(minigame))
-        }
     },
     Countdown(COUNTDOWN_ID) {
         override fun start(minigame: DuelMinigame) {
-            super.start(minigame)
+            minigame.settings.freezeEntities.set(true)
+            minigame.ui.countdown.countdown(minigame).then {
+                minigame.setPhase(Dueling)
+            }
         }
     },
     Dueling(DUELING_ID) {
         override fun start(minigame: DuelMinigame) {
-            super.start(minigame)
+            minigame.settings.freezeEntities.set(false)
         }
     },
     Complete(COMPLETE_ID) {
         override fun start(minigame: DuelMinigame) {
-            minigame.complete()
+            minigame.chat.broadcast("DUEL OVER!".literal())
+            minigame.scheduler.schedule(20.Seconds) {
+                minigame.close()
+            }
         }
     }
 }

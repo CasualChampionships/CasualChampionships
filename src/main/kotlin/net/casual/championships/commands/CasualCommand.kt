@@ -19,7 +19,6 @@ import net.casual.championships.util.Config
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
-import net.minecraft.commands.arguments.TeamArgument
 
 object CasualCommand: Command {
     override fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
@@ -117,7 +116,6 @@ object CasualCommand: Command {
     }
 
     private fun openItemsMenu(context: CommandContext<CommandSourceStack>): Int {
-        // context.source.playerOrException.openMenu(ItemsScreen.createScreenFactory(0))
         return 1
     }
 

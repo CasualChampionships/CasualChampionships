@@ -40,18 +40,13 @@ import kotlin.random.Random
 
 class DuelMinigame(
     server: MinecraftServer,
-    val duelSettings: DuelSettings,
-    val complete: () -> Unit
+    val duelSettings: DuelSettings
 ): Minigame<DuelMinigame>(server) {
     override val id: ResourceLocation = CasualUtils.id("duel_minigame")
 
     val level = this.createRandomOverworld()
 
-    override val settings = object: MinigameSettings(this@DuelMinigame) {
-        override fun menu(): MenuProvider {
-            return duelSettings.menu()
-        }
-    }
+    override val settings = MinigameSettings(this@DuelMinigame)
 
     init {
         this.settings.copyFrom(this.duelSettings)
@@ -98,7 +93,7 @@ class DuelMinigame(
         return handle.asWorld()
     }
 
-    @Listener
+    @Listener(phases = [DUELING_ID])
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         val player = event.player
         val killer = player.killCredit
@@ -114,6 +109,11 @@ class DuelMinigame(
             } else {
                 player.drop(head, true, false)
             }
+        }
+
+        val remaining = if (!this.duelSettings.teams) this.getPlayingPlayers() else this.teams.getPlayingTeams()
+        if (remaining.size <= 1) {
+            this.setPhase(DuelPhase.Complete)
         }
     }
 

@@ -71,9 +71,6 @@ import net.casual.championships.util.CasualPlayerUtils.boostHealth
 import net.casual.championships.util.CasualPlayerUtils.isAliveSolo
 import net.casual.championships.util.CasualPlayerUtils.updateGlowingTag
 import net.casual.championships.util.DirectionUtils.opposite
-import net.casual.championships.util.Texts.regularShiftedDown1
-import net.casual.championships.util.Texts.regularShiftedDown2
-import net.casual.championships.util.Texts.regularShiftedDown3
 import net.casual.championships.util.Texts.regularShiftedDown4
 import net.casual.championships.util.Texts.regularShiftedDown5
 import net.minecraft.commands.CommandSourceStack
@@ -82,7 +79,6 @@ import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.core.Direction8
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.chat.Component
@@ -115,9 +111,9 @@ import kotlin.math.atan2
 
 class UHCMinigame(
     server: MinecraftServer,
-    overworld: RuntimeWorldHandle,
-    nether: RuntimeWorldHandle,
-    end: RuntimeWorldHandle
+    val overworld: ServerLevel,
+    val nether: ServerLevel,
+    val end: ServerLevel
 ): SavableMinigame<UHCMinigame>(
     server,
 ), MultiLevelBorderListener {
@@ -130,10 +126,6 @@ class UHCMinigame(
     override val id = CasualUtils.id("uhc_minigame")
 
     val uhcAdvancements = UHCAdvancementManager(this)
-
-    val overworld: ServerLevel = overworld.asWorld()
-    val nether: ServerLevel = nether.asWorld()
-    val end: ServerLevel = end.asWorld()
 
     override val settings = UHCSettings(this)
 
@@ -791,5 +783,20 @@ class UHCMinigame(
     private fun resetPlayerHealth(player: ServerPlayer) {
         player.boostHealth(this.settings.health)
         player.resetHealth()
+    }
+
+    companion object {
+        fun of(
+            server: MinecraftServer,
+            overworld: RuntimeWorldHandle,
+            nether: RuntimeWorldHandle,
+            end: RuntimeWorldHandle
+        ): UHCMinigame {
+            return UHCMinigame(server, overworld.asWorld(), nether.asWorld(), end.asWorld()).apply {
+                addLevel(overworld)
+                addLevel(nether)
+                addLevel(end)
+            }
+        }
     }
 }
