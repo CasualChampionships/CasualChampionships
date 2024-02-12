@@ -132,7 +132,7 @@ class CasualMinigamesEvent(config: MinigamesEventConfig): MinigamesEvent(config)
     fun createDuelMinigame(server: MinecraftServer, settings: DuelSettings): DuelMinigame {
         val minigame = DuelMinigame(server, settings)
         minigame.events.register<MinigameCloseEvent> {
-            minigame.transferTo(this.current)
+            minigame.transferTo(this.current, false)
         }
         return minigame
     }

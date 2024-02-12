@@ -1,5 +1,6 @@
 package net.casual.championships.minigame.duel
 
+import net.casual.arcade.Arcade
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.literal
@@ -7,8 +8,12 @@ import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
 import net.casual.arcade.utils.MinigameUtils.countdown
 import net.casual.arcade.utils.PlayerUtils
+import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.championships.CasualMod
 import net.casual.championships.minigame.uhc.ui.ActiveBossBar
+import net.casual.championships.util.Texts
+import net.minecraft.ChatFormatting
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
 
@@ -67,7 +72,21 @@ enum class DuelPhase(
     },
     Complete(COMPLETE_ID) {
         override fun start(minigame: DuelMinigame) {
-            minigame.chat.broadcast("DUEL OVER!".literal())
+            var winner = if (minigame.duelSettings.teams) {
+                minigame.teams.getPlayingTeams().firstOrNull()?.formattedDisplayName
+            } else {
+                minigame.getPlayingPlayers().firstOrNull()?.displayName
+            }
+            if (winner == null) {
+                CasualMod.logger.warn("Couldn't find winner for duel!")
+                winner = "Unknown".literal().withStyle(ChatFormatting.OBFUSCATED)
+            }
+
+            val title = Texts.UHC_WON.generate(winner)
+            for (player in minigame.getAllPlayers()) {
+                player.sendTitle(title)
+            }
+
             minigame.scheduler.schedule(20.Seconds) {
                 minigame.close()
             }

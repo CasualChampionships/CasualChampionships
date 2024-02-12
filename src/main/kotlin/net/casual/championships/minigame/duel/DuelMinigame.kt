@@ -44,7 +44,7 @@ class DuelMinigame(
 ): Minigame<DuelMinigame>(server) {
     override val id: ResourceLocation = CasualUtils.id("duel_minigame")
 
-    val level = this.createRandomOverworld()
+    val level by lazy { this.createRandomOverworld() }
 
     override val settings = MinigameSettings(this@DuelMinigame)
 
