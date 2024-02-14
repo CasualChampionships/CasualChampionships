@@ -1,6 +1,6 @@
-[submodule "uhc"]
-	path = minigames/uhc
-	url = https://github.com/CasualChampionships/CasualUHC.git
 [submodule "minigames/common"]
 	path = minigames/common
 	url = https://github.com/CasualChampionships/CasualMinigamesCommon.git
+[submodule "minigames/uhc"]
+	path = minigames/uhc
+	url = https://github.com/CasualChampionships/CasualUHC.git
