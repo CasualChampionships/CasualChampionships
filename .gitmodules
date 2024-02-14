@@ -1,0 +1,3 @@
+[submodule "uhc"]
+	path = uhc
+	url = https://github.com/CasualChampionships/UHC.git
