@@ -11,6 +11,8 @@ plugins {
 group = property("maven_group")!!
 version = this.getGitHash().substring(0, 6)
 
+
+
 repositories {
     mavenLocal()
     maven {

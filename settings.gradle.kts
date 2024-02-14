@@ -1,6 +1,7 @@
-rootProject.name = "UHC-Mod"
+rootProject.name = "CasualChampionships"
 
-include("arcade")
+include("minigames:uhc")
+include("minigames:common")
 
 pluginManagement {
     repositories {
