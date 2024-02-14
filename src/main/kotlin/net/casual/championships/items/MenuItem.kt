@@ -21,7 +21,15 @@ class MenuItem private constructor(): Item(Properties()), ArcadeModelledItem {
 
     companion object {
         val MODELLER = ResourcePackItemModeller(MenuItem(), CasualResourcePack.pack)
-        val YES by MODELLER.model(CasualUtils.id("gui/yes"))
-        val NO by MODELLER.model(CasualUtils.id("gui/no"))
+        val TICK by MODELLER.model(CasualUtils.id("gui/green_tick"))
+        val CROSS by MODELLER.model(CasualUtils.id("gui/red_cross"))
+        val NEXT by MODELLER.model(CasualUtils.id("gui/green_right_arrow"))
+        val PREVIOUS by MODELLER.model(CasualUtils.id("gui/red_left_arrow"))
+        val LONG_NEXT by MODELLER.model(CasualUtils.id("gui/green_long_right_arrow"))
+        val LONG_PREVIOUS by MODELLER.model(CasualUtils.id("gui/red_long_left_arrow"))
+        val UNAVAILABLE_NEXT by MODELLER.model(CasualUtils.id("gui/greyed_green_right_arrow"))
+        val UNAVAILABLE_PREVIOUS by MODELLER.model(CasualUtils.id("gui/greyed_red_left_arrow"))
+        val UNAVAILABLE_LONG_NEXT by MODELLER.model(CasualUtils.id("gui/greyed_green_long_right_arrow"))
+        val UNAVAILABLE_LONG_PREVIOUS by MODELLER.model(CasualUtils.id("gui/greyed_red_long_left_arrow"))
     }
 }

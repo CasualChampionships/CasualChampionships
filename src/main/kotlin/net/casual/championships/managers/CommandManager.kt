@@ -6,15 +6,15 @@ import net.casual.championships.commands.*
 
 object CommandManager {
     internal fun registerEvents() {
-        GlobalEventHandler.register<ServerRegisterCommandEvent> { (dispatcher, _) ->
-            FullbrightCommand.register(dispatcher)
-            LookCommand.register(dispatcher)
-            MinesweeperCommand.register(dispatcher)
-            PosCommand.register(dispatcher)
-            SpectateCommand.register(dispatcher)
-            TeamGlowCommand.register(dispatcher)
-            CasualCommand.register(dispatcher)
-            DuelCommand.register(dispatcher)
+        GlobalEventHandler.register<ServerRegisterCommandEvent> { (dispatcher, context) ->
+            FullbrightCommand.register(dispatcher, context)
+            LookCommand.register(dispatcher, context)
+            MinesweeperCommand.register(dispatcher, context)
+            PosCommand.register(dispatcher, context)
+            SpectateCommand.register(dispatcher, context)
+            TeamGlowCommand.register(dispatcher, context)
+            CasualCommand.register(dispatcher, context)
+            DuelCommand.register(dispatcher, context)
         }
     }
 }

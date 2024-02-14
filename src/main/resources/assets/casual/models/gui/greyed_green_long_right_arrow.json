@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "casual:item/gui/greyed_green_long_right_arrow"
+  }
+}

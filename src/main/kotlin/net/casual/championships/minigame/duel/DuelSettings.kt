@@ -5,11 +5,14 @@ import net.casual.arcade.settings.display.DisplayableGameSettingBuilder
 import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.bool
 import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.float64
 import net.casual.arcade.settings.display.DisplayableSettings
+import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ItemUtils.hideTooltips
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.ScreenUtils
 import net.casual.championships.items.MenuItem
+import net.casual.championships.util.CasualScreenUtils
+import net.casual.championships.util.CasualUtils
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
@@ -65,6 +68,7 @@ class DuelSettings: DisplayableSettings() {
     override fun menu(parent: MenuProvider?): MenuProvider {
         return ScreenUtils.createSettingsMenu(
             this,
+            components = CasualScreenUtils.named("Duel Settings".literal()),
             parent = parent,
             style = SelectionScreenStyle.centered(5, 3)
         )
@@ -75,6 +79,6 @@ class DuelSettings: DisplayableSettings() {
         enabled: ItemStack,
         disabled: ItemStack
     ) {
-        super.defaultOptionsFor(builder, MenuItem.YES.named("Enabled"), MenuItem.NO.named("Disabled"))
+        super.defaultOptionsFor(builder, MenuItem.TICK.named("Enabled"), MenuItem.CROSS.named("Disabled"))
     }
 }
