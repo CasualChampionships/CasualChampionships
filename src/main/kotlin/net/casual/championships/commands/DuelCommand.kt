@@ -9,7 +9,7 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.singleUseFunction
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.championships.items.MenuItem
+import net.casual.championships.common.item.MenuItem
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.minigame.duel.DuelRequester
 import net.casual.championships.minigame.duel.DuelSettings

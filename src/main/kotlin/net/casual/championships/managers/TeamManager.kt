@@ -21,20 +21,6 @@ object TeamManager {
 
     private var collisions = Team.CollisionRule.ALWAYS
 
-    fun Team.hasAlivePlayers(ignore: ServerPlayer? = null): Boolean {
-        val names = this.players
-        for (name in names) {
-            if (ignore != null && ignore.scoreboardName == name) {
-                continue
-            }
-            val player = PlayerUtils.player(name)
-            if (player != null && player.isSurvival && !player.isDeadOrDying) {
-                return true
-            }
-        }
-        return false
-    }
-
     fun createTeams() {
         val scoreboard = Arcade.getServer().scoreboard
         DataManager.database.downloadTeams().thenAcceptAsync({

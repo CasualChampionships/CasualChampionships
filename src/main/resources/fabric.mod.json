@@ -24,7 +24,6 @@
   "mixins": [
     "uhc.mixins.json"
   ],
-  "accessWidener": "uhc.accesswidener",
   "depends": {
     "fabricloader": ">=0.14.12",
     "minecraft": "1.20.x",

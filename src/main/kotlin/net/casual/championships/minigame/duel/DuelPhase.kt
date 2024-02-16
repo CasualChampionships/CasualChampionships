@@ -11,8 +11,8 @@ import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.CasualMod
-import net.casual.championships.minigame.uhc.ui.ActiveBossBar
-import net.casual.championships.util.Texts
+import net.casual.championships.common.ui.ActiveBossBar
+import net.casual.championships.common.util.CommonComponents
 import net.minecraft.ChatFormatting
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
@@ -82,7 +82,7 @@ enum class DuelPhase(
                 winner = "Unknown".literal().withStyle(ChatFormatting.OBFUSCATED)
             }
 
-            val title = Texts.UHC_WON.generate(winner)
+            val title = CommonComponents.GAME_WON_MESSAGE.generate(winner)
             for (player in minigame.getAllPlayers()) {
                 player.sendTitle(title)
             }

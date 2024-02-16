@@ -3,6 +3,7 @@ package net.casual.championships.minigame
 import com.google.gson.JsonObject
 import net.casual.arcade.area.StructuredAreaConfig
 import net.casual.arcade.events.GlobalEventHandler
+import net.casual.arcade.events.player.PlayerCanLoginEvent
 import net.casual.arcade.events.player.PlayerJoinEvent
 import net.casual.arcade.events.server.ServerLoadedEvent
 import net.casual.arcade.events.server.ServerSaveEvent
@@ -11,10 +12,12 @@ import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.Minigames
 import net.casual.arcade.minigame.events.MinigamesEventConfig
 import net.casual.arcade.minigame.events.MinigamesEventConfigSerializer
+import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.MinigameUtils.getMinigame
-import net.casual.championships.minigame.lobby.ui.LobbyBossBarConfig
-import net.casual.championships.util.CasualUtils
+import net.casual.championships.common.ui.LobbyBossBarConfig
+import net.casual.championships.minigame.duel.DuelMinigame
+import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
 import net.minecraft.server.MinecraftServer
 import java.nio.file.Path
@@ -46,8 +49,14 @@ object CasualMinigames {
     }
 
     internal fun registerEvents() {
-        Minigames.registerFactory(CasualUtils.id("uhc_minigame"), this.event::createUHCMinigame)
-        Minigames.registerFactory(CasualUtils.id("duel_minigame"), this.event::createDuelMinigame)
+        Minigames.registerFactory(UHCMinigame.ID, this.event::createUHCMinigame)
+        Minigames.registerFactory(DuelMinigame.ID, this.event::createDuelMinigame)
+
+        GlobalEventHandler.register<PlayerCanLoginEvent> { event ->
+            if (floodgates && !event.server.playerList.isOp(event.profile)) {
+                event.cancel("CasualChampionships isn't quite ready yet...".literal())
+            }
+        }
 
         GlobalEventHandler.register<ServerLoadedEvent>(Int.MAX_VALUE) {
             this.loadMinigameEventData(it.server)
@@ -55,9 +64,7 @@ object CasualMinigames {
 
         GlobalEventHandler.register<PlayerJoinEvent> {
             val player = it.player
-            if (player.getMinigame() == null) {
-                this.event.addPlayer(player)
-            }
+            this.event.addPlayer(player)
         }
 
         GlobalEventHandler.register<ServerSaveEvent> {

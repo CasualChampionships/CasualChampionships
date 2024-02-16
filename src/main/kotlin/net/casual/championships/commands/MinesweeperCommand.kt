@@ -2,7 +2,7 @@ package net.casual.championships.commands
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
-import net.casual.championships.screen.MinesweeperScreen
+import net.casual.championships.common.ui.MinesweeperScreen
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 

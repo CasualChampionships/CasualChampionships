@@ -11,8 +11,6 @@ plugins {
 group = property("maven_group")!!
 version = this.getGitHash().substring(0, 6)
 
-
-
 repositories {
     mavenLocal()
     maven {
@@ -41,6 +39,9 @@ dependencies {
     })
 
     include(modImplementation("com.github.CasualChampionships:arcade:${property("arcade_version")}")!!)
+
+    include(implementation(project(mapOf("path" to ":minigames:common", "configuration" to "namedElements")))!!)
+    include(implementation(project(mapOf("path" to ":minigames:uhc", "configuration" to "namedElements")))!!)
 
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
@@ -72,35 +73,6 @@ dependencies {
 }
 
 tasks {
-    sourceSets {
-        create("datagen") {
-            compileClasspath += main.get().compileClasspath
-            runtimeClasspath += main.get().runtimeClasspath
-            compileClasspath += main.get().output
-            compileClasspath += test.get().compileClasspath
-            runtimeClasspath += test.get().runtimeClasspath
-        }
-    }
-
-    loom {
-        mods {
-            create("datagen") {
-                sourceSet(sourceSets["datagen"])
-            }
-        }
-
-        runs {
-            create("datagenClient") {
-                client()
-                name = "Test Mod Client"
-                runDir = "run-datagen"
-                setSource(sourceSets["datagen"])
-            }
-        }
-
-        accessWidenerPath.set(file("src/main/resources/uhc.accesswidener"))
-    }
-
     processResources {
         inputs.property("version", project.version)
         filesMatching("fabric.mod.json") {

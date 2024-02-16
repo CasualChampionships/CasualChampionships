@@ -3,8 +3,8 @@ package net.casual.championships.items
 import net.casual.arcade.items.ArcadeModelledItem
 import net.casual.arcade.items.ItemModeller
 import net.casual.arcade.items.ResourcePackItemModeller
-import net.casual.championships.resources.CasualResourcePack
-import net.casual.championships.util.CasualUtils
+import net.casual.championships.CasualMod
+import net.casual.championships.common.item.CasualCommonItems
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -20,7 +20,7 @@ class FlyingMachineItem private constructor(): Item(Properties()), ArcadeModelle
     }
 
     companion object {
-        val MODELLER = ResourcePackItemModeller(FlyingMachineItem(), CasualResourcePack.pack)
-        val BOUNCER by MODELLER.model(CasualUtils.id("missile_wars/bouncer"))
+        val MODELLER = ResourcePackItemModeller(FlyingMachineItem(), CasualCommonItems.CUSTOM_MODEL_PACK.getCreator())
+        val BOUNCER by MODELLER.model(CasualMod.id("missile_wars/bouncer"))
     }
 }

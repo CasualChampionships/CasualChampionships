@@ -1,7 +1,7 @@
-package net.casual.championships.minigame.uhc.database
+package net.casual.championships.database
 
 import com.google.gson.JsonObject
-import net.casual.championships.minigame.uhc.UHCMinigame
+import net.casual.championships.uhc.UHCMinigame
 import net.minecraft.world.scores.Team
 import java.util.concurrent.CompletableFuture
 

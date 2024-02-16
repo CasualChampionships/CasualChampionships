@@ -1,29 +1,26 @@
 package net.casual.championships.minigame.duel
 
 import net.casual.arcade.gui.screen.SelectionScreenStyle
-import net.casual.arcade.settings.display.DisplayableGameSettingBuilder
 import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.bool
 import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.float64
 import net.casual.arcade.settings.display.DisplayableSettings
+import net.casual.arcade.settings.display.DisplayableSettingsDefaults
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ItemUtils.hideTooltips
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.ScreenUtils
-import net.casual.championships.items.MenuItem
-import net.casual.championships.util.CasualScreenUtils
-import net.casual.championships.util.CasualUtils
+import net.casual.championships.common.util.CommonScreens
 import net.minecraft.world.MenuProvider
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
-class DuelSettings: DisplayableSettings() {
+class DuelSettings: DisplayableSettings(DisplayableSettingsDefaults()) {
     var teams by this.register(bool {
         name = "teams"
         display = Items.GREEN_BANNER.named("Teams")
         value = false
-        defaultOptionsFor(this)
+        defaults.options(this)
     })
 
     var health by this.register(float64 {
@@ -39,7 +36,7 @@ class DuelSettings: DisplayableSettings() {
         name = "natural_regeneration"
         display = Items.GOLDEN_APPLE.named("Natural Regeneration")
         value = false
-        defaultOptionsFor(this)
+        defaults.options(this)
     })
 
     val borderRadius by this.register(float64 {
@@ -55,30 +52,22 @@ class DuelSettings: DisplayableSettings() {
         name = "glowing"
         display = Items.SPECTRAL_ARROW.named("Glowing")
         value = false
-        defaultOptionsFor(this)
+        defaults.options(this)
     })
 
     var playerDropsHead by this.register(bool {
         name = "player_drops_head"
         display = Items.PLAYER_HEAD.named("Player Drops Head")
         value = true
-        defaultOptionsFor(this)
+        defaults.options(this)
     })
 
     override fun menu(parent: MenuProvider?): MenuProvider {
         return ScreenUtils.createSettingsMenu(
             this,
-            components = CasualScreenUtils.named("Duel Settings".literal()),
+            components = CommonScreens.named("Duel Settings".literal()),
             parent = parent,
             style = SelectionScreenStyle.centered(5, 3)
         )
-    }
-
-    override fun defaultOptionsFor(
-        builder: DisplayableGameSettingBuilder<Boolean>,
-        enabled: ItemStack,
-        disabled: ItemStack
-    ) {
-        super.defaultOptionsFor(builder, MenuItem.TICK.named("Enabled"), MenuItem.CROSS.named("Disabled"))
     }
 }

@@ -6,13 +6,12 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import net.casual.arcade.utils.ComponentUtils.command
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.PlayerUtils.broadcastUnsignedTeamMessage
-import net.casual.championships.util.Texts
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.network.chat.Component
 
 object PosCommand: Command {
-    private val NO_TEAM = SimpleCommandExceptionType(Texts.COMMAND_NO_TEAM)
+    // private val NO_TEAM = SimpleCommandExceptionType(Texts.COMMAND_NO_TEAM)
 
     override fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         dispatcher.register(
@@ -25,7 +24,7 @@ object PosCommand: Command {
         val team = player.team
 
         if (team === null) {
-            throw NO_TEAM.create()
+            // throw NO_TEAM.create()
         }
 
         val pos = player.position()
@@ -34,7 +33,7 @@ object PosCommand: Command {
             .command("/look towards ${pos.x} ${pos.y} ${pos.z}")
 
         // TODO:
-        player.broadcastUnsignedTeamMessage(Texts.COMMAND_POS.generate(position))
+        // player.broadcastUnsignedTeamMessage(Texts.COMMAND_POS.generate(position))
         return 1
     }
 }

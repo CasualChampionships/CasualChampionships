@@ -15,18 +15,15 @@ import net.casual.arcade.utils.LootTableUtils.createPool
 import net.casual.arcade.utils.LootTableUtils.durability
 import net.casual.arcade.utils.LootTableUtils.enchant
 import net.casual.arcade.utils.LootTableUtils.exactly
+import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.resetHealth
-import net.casual.championships.items.CasualItems
-import net.casual.championships.minigame.uhc.resources.UHCResources
-import net.casual.championships.util.CasualPlayerUtils.boostHealth
-import net.casual.championships.util.CasualUtils
-import net.casual.championships.util.HeadUtils
-import net.minecraft.resources.ResourceLocation
+import net.casual.championships.CasualMod
+import net.casual.championships.common.item.CasualCommonItems
+import net.casual.championships.common.util.HeadUtils
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.MenuProvider
 import net.minecraft.world.item.ArmorItem
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
@@ -42,7 +39,7 @@ class DuelMinigame(
     server: MinecraftServer,
     val duelSettings: DuelSettings
 ): Minigame<DuelMinigame>(server) {
-    override val id: ResourceLocation = CasualUtils.id("duel_minigame")
+    override val id = ID
 
     val level by lazy { this.createRandomOverworld() }
 
@@ -50,8 +47,6 @@ class DuelMinigame(
 
     init {
         this.settings.copyFrom(this.duelSettings)
-
-        this.addResources(UHCResources)
     }
 
     override fun getPhases(): Collection<MinigamePhase<DuelMinigame>> {
@@ -126,6 +121,7 @@ class DuelMinigame(
 
     companion object {
         private val duelLoot = this.createToolTable()
+        val ID = CasualMod.id("duel_minigame")
 
         private fun createToolTable(): LootTable {
             return LootTableUtils.create {
@@ -186,10 +182,10 @@ class DuelMinigame(
                         count(between(1, 2))
                         setWeight(4)
                     }
-                    addItem(CasualItems.PLAYER_HEAD) {
+                    addItem(CasualCommonItems.PLAYER_HEAD) {
                         setWeight(2)
                     }
-                    addItem(CasualItems.GOLDEN_HEAD) {
+                    addItem(CasualCommonItems.GOLDEN_HEAD) {
                         setWeight(1)
                     }
                 }

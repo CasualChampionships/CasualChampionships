@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.uhc.database
+package net.casual.championships.database
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
@@ -6,15 +6,12 @@ import com.mongodb.MongoClient
 import com.mongodb.MongoClientURI
 import com.mongodb.client.model.Filters
 import net.casual.arcade.utils.JsonUtils.writeForDatabase
-import net.casual.championships.database.MongoDatabaseWriter
-import net.casual.championships.managers.TeamManager
-import net.casual.championships.minigame.uhc.UHCMinigame
+import net.casual.championships.uhc.UHCMinigame
 import net.minecraft.world.scores.Team
 import org.bson.Document
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.DocumentCodec
 import org.slf4j.LoggerFactory
-import java.nio.file.Files
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
