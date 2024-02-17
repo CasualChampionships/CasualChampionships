@@ -64,14 +64,15 @@ object DuelCommand: Command {
 
         val all = HashSet(players)
         all.add(executing)
+        val allButExecuting = all.filter { it !== executing }
 
         val requester = DuelRequester(executing, all)
-        if (all.size < 2 && !Config.dev) {
+        if (allButExecuting.isEmpty() && !Config.dev) {
             requester.broadcastTo("Not enough players for a duel!".literal().red(), executing)
             return
         }
 
-        val unready = requester.arePlayersReady(players.filter { it !== executing }) {
+        val unready = requester.arePlayersReady(allButExecuting) {
             if (!started) {
                 started = true
                 this.startFreeForAll(server, executing, players, settings)
@@ -80,9 +81,9 @@ object DuelCommand: Command {
         val startAnyways = "Click here to start duel with accepted players".literal().green().singleUseFunction {
             if (!started) {
                 started = true
-                val ready = HashSet(players)
+                val ready = HashSet(all)
                 ready.removeAll(unready.toSet())
-                this.startFreeForAll(server, executing, players, settings)
+                this.startFreeForAll(server, executing, ready, settings)
             }
         }
         requester.broadcastTo(startAnyways, executing)
