@@ -4,7 +4,6 @@ import net.casual.arcade.events.minigame.MinigameAddSpectatorEvent
 import net.casual.arcade.events.minigame.MinigameCloseEvent
 import net.casual.arcade.events.player.PlayerAdvancementEvent
 import net.casual.arcade.events.player.PlayerDeathEvent
-import net.casual.arcade.events.player.PlayerRespawnEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.minigame.MinigameSettings
@@ -21,13 +20,9 @@ import net.casual.arcade.utils.LootTableUtils.exactly
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.resetHealth
-import net.casual.arcade.utils.PlayerUtils.teleportTo
-import net.casual.arcade.utils.impl.Location
 import net.casual.championships.CasualMod
 import net.casual.championships.common.item.CasualCommonItems
 import net.casual.championships.common.util.HeadUtils
-import net.minecraft.core.BlockPos
-import net.minecraft.core.GlobalPos
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -38,10 +33,8 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet
-import net.minecraft.world.phys.Vec3
 import xyz.nucleoid.fantasy.Fantasy
 import xyz.nucleoid.fantasy.RuntimeWorldConfig
-import kotlin.jvm.optionals.getOrElse
 import kotlin.random.Random
 
 class DuelMinigame(
@@ -93,7 +86,7 @@ class DuelMinigame(
                 .setDimensionType(BuiltinDimensionTypes.OVERWORLD)
                 .setGenerator(LevelUtils.overworld().chunkSource.generator)
         )
-        this.addLevel(handle)
+        this.levels.add(handle)
         return handle.asWorld()
     }
 

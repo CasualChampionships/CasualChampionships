@@ -79,6 +79,7 @@ object DuelCommand: Command {
             }
         }
         val startAnyways = "Click here to start duel with accepted players".literal().green().singleUseFunction {
+            // TODO: Make it so that you cannot start a duel after readying
             if (!started) {
                 started = true
                 val ready = HashSet(all)
