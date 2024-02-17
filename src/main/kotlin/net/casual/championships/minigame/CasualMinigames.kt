@@ -3,6 +3,7 @@ package net.casual.championships.minigame
 import com.google.gson.JsonObject
 import net.casual.arcade.area.StructuredAreaConfig
 import net.casual.arcade.events.GlobalEventHandler
+import net.casual.arcade.events.minigame.MinigameCloseEvent
 import net.casual.arcade.events.player.PlayerCanLoginEvent
 import net.casual.arcade.events.player.PlayerJoinEvent
 import net.casual.arcade.events.server.ServerLoadedEvent
@@ -14,8 +15,8 @@ import net.casual.arcade.minigame.events.MinigamesEventConfig
 import net.casual.arcade.minigame.events.MinigamesEventConfigSerializer
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.JsonUtils
-import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.championships.common.ui.LobbyBossBarConfig
+import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.minigame.duel.DuelMinigame
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
@@ -30,7 +31,7 @@ import kotlin.io.path.exists
 object CasualMinigames {
     private val path: Path
     private val config: MinigamesEventConfigSerializer
-    lateinit var event: CasualMinigamesEvent
+    val event: CasualChampionshipsEvent
 
     val minigame: Minigame<*>
         get() = this.event.current
@@ -41,11 +42,12 @@ object CasualMinigames {
     init {
         this.path = Config.resolve("event")
         this.config = MinigamesEventConfigSerializer().apply {
-            addAreaFactory(StructuredAreaConfig.factory(Config.resolve("lobbies")))
+            val lobbies = Config.resolve("lobbies").createDirectories()
+            addAreaFactory(StructuredAreaConfig.factory(lobbies))
             addBossbarFactory(LobbyBossBarConfig)
         }
 
-        this.readMinigameEvent()
+        this.event = CasualChampionshipsEvent(this.readMinigameEvent())
     }
 
     internal fun registerEvents() {
@@ -53,8 +55,12 @@ object CasualMinigames {
         Minigames.registerFactory(DuelMinigame.ID, this.event::createDuelMinigame)
 
         GlobalEventHandler.register<PlayerCanLoginEvent> { event ->
-            if (floodgates && !event.server.playerList.isOp(event.profile)) {
+            if (!floodgates && !event.server.playerList.isOp(event.profile)) {
                 event.cancel("CasualChampionships isn't quite ready yet...".literal())
+                this.minigame.chat.broadcastTo(
+                    "${event.profile.name} tried to join, but floodgates are closed".literal(),
+                    this.minigame.getAdminPlayers()
+                )
             }
         }
 
@@ -71,28 +77,31 @@ object CasualMinigames {
             this.writeMinigameEventData()
         }
         GlobalEventHandler.register<ServerStoppingEvent> {
-            this.writeMinigameEvent()
+            this.writeMinigameEvent(this.event.config)
+        }
+
+        GlobalEventHandler.register<CasualConfigReloaded> {
+            this.event.config = this.readMinigameEvent()
         }
     }
 
-    private fun readMinigameEvent() {
+    private fun readMinigameEvent(): MinigamesEventConfig {
         val path = this.path.resolve("event.json")
         if (path.exists()) {
             path.bufferedReader().use {
                 val json = JsonUtils.GSON.fromJson(it, JsonObject::class.java)
-                this.event = CasualMinigamesEvent(this.config.deserialize(json))
+                return this.config.deserialize(json)
             }
-            return
         }
-        this.event = CasualMinigamesEvent(MinigamesEventConfig.DEFAULT)
-        this.writeMinigameEvent()
+        this.writeMinigameEvent(MinigamesEventConfig.DEFAULT)
+        return MinigamesEventConfig.DEFAULT
     }
 
-    private fun writeMinigameEvent() {
+    private fun writeMinigameEvent(config: MinigamesEventConfig) {
         val path = this.path.resolve("event.json")
         path.parent.createDirectories()
         path.bufferedWriter().use {
-            JsonUtils.GSON.toJson(this.config.serialize(this.event.config), it)
+            JsonUtils.GSON.toJson(this.config.serialize(config), it)
         }
     }
 

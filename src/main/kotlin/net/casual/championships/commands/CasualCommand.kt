@@ -1,6 +1,7 @@
 package net.casual.championships.commands
 
 import com.mojang.brigadier.CommandDispatcher
+import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.minigame.MinigameResources.Companion.sendTo
 import net.casual.arcade.utils.CommandUtils.fail
@@ -30,7 +31,9 @@ object CasualCommand: Command {
                 )
             ).then(
                 Commands.literal("resources").then(
-                    Commands.literal("regenerate").executes(this::regenerateResources)
+                    Commands.literal("regenerate").then(
+                        Commands.argument("reload", BoolArgumentType.bool()).executes(this::regenerateResources)
+                    ).executes { this.regenerateResources(it, false) }
                 ).then(
                     Commands.literal("reload").executes(this::reloadResources)
                 )
@@ -56,8 +59,15 @@ object CasualCommand: Command {
         return context.source.success("Successfully reloaded config", true)
     }
 
-    private fun regenerateResources(context: CommandContext<CommandSourceStack>): Int {
+    private fun regenerateResources(
+        context: CommandContext<CommandSourceStack>,
+        reload: Boolean = BoolArgumentType.getBool(context, "reload")
+    ): Int {
         CasualResourcePack.generate()
+        if (reload) {
+            context.source.success("Successfully regenerated resources")
+            return this.reloadResources(context)
+        }
         return context.source.success("Successfully regenerated resources, reload resources to refresh clients")
     }
 
@@ -65,7 +75,9 @@ object CasualCommand: Command {
         CasualResourcePackHost.reload().thenAcceptAsync({
             if (it) {
                 context.source.success("Successfully reloaded resources, resending pack...")
-                CasualMinigames.minigame.getResources().sendTo(CasualMinigames.minigame.getAllPlayers())
+                for (player in CasualMinigames.minigame.getAllPlayers()) {
+                    CasualMinigames.event.sendResourcesTo(player)
+                }
             } else {
                 context.source.fail("Failed to reload resources...")
             }

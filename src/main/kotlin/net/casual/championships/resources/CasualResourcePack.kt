@@ -39,4 +39,8 @@ object CasualResourcePack {
             }
         }
     }
+
+    fun getPackNames(): List<String> {
+        return this.packs.map { it.zippedName() }
+    }
 }

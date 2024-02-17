@@ -88,7 +88,7 @@ enum class DuelPhase(
             }
 
             minigame.scheduler.schedule(20.Seconds) {
-                minigame.close()
+                minigame.complete()
             }
         }
     }
