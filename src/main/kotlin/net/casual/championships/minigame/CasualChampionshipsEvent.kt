@@ -5,7 +5,6 @@ import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.minigame.MinigameCloseEvent
 import net.casual.arcade.events.minigame.MinigameCompleteEvent
 import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
-import net.casual.arcade.events.player.PlayerJoinEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.player.PlayerTeamLeaveEvent
 import net.casual.arcade.minigame.Minigame
@@ -94,7 +93,7 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
             val (player, team) = event
             if (!minigame.teams.isTeamIgnored(team)) {
                 minigame.removeSpectator(player)
-            } else if (minigame.isSpectating(player)) {
+            } else {
                 minigame.makeSpectator(player)
             }
         }

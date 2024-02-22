@@ -41,6 +41,7 @@ object CasualMod: DedicatedServerModInitializer {
     // TODO:
     //   Ready Translations
     //   MOTD
+    //   SpreadPlayers
     //   Implement podium
     //   Minesweeper AI - Make sure all maps are non-luck based
 }
