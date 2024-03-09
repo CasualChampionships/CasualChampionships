@@ -1,0 +1,85 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "casual_common:font/backgrounds/background240.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "casual_common:font/backgrounds/background180.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "casual_common:font/backgrounds/background120.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "casual_common:font/backgrounds/background40.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE003"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "casual_common:font/hud/hardcore_heart.png",
+      "ascent": 7,
+      "height": 7,
+      "chars": [
+        "\uE004"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "casual_common:font/hud/no_connection.png",
+      "ascent": 7,
+      "height": 7,
+      "chars": [
+        "\uE005"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "casual_common:font/hud/cross.png",
+      "ascent": 7,
+      "height": 7,
+      "chars": [
+        "\uE006"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "casual_common:font/hud/kills.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": [
+        "\uE007"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "casual_common:font/hud/players.png",
+      "ascent": 10,
+      "height": 11,
+      "chars": [
+        "\uE008"
+      ]
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 /.idea/
-/.gradle/
+.gradle/
 
-/build/
-/run/
-/run-datagen/
+build/
+run/
+run-datagen/
 
 *.psd

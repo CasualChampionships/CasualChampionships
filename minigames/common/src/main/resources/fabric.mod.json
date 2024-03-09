@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "casual_common",
+  "version": "${version}",
+  "name": "CasualCommon",
+  "description": "This mod provides common utilities and resources used in all the CasualChampionship minigames.",
+  "authors": [
+    "Sensei"
+  ],
+  "contact": {
+    "repo": "https://github.com/CasualChampionships/CasualMinigamesCommon"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "server": [
+      {
+        "adapter": "kotlin",
+        "value": "net.casual.championships.common.CasualCommonMod"
+      }
+    ]
+  },
+  "mixins": [
+    "casual_common.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.12",
+    "minecraft": "1.20.x",
+    "java": ">=17",
+    "fabric-language-kotlin": ">=1.9.0+kotlin.1.8.0"
+  }
+}

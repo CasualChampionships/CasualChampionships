@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "casual-datagen",
+  "version": "1.0.0",
+  "name": "Datagen",
+  "description": "",
+  "authors": [
+    "Sensei"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.casual.championships.common.CasualCommonDatagen"
+    ]
+  },
+  "depends": {
+
+  }
+}

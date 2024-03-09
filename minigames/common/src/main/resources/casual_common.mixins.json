@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.casual.championships.common.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "event.EntityMixin",
+    "event.PortalForcerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
