@@ -1,8 +1,0 @@
-.idea/
-.gradle/
-
-build/
-run/
-/run-datagen/
-
-*.psd
