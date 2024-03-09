@@ -17,6 +17,7 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.JsonUtils
 import net.casual.championships.common.ui.LobbyBossBarConfig
 import net.casual.championships.events.CasualConfigReloaded
+import net.casual.championships.managers.TeamManager
 import net.casual.championships.minigame.duel.DuelMinigame
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
@@ -114,6 +115,7 @@ object CasualMinigames {
             }
         } else {
             this.event.returnToLobby(server)
+            TeamManager.createTeams()
         }
     }
 

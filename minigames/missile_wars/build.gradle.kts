@@ -17,16 +17,10 @@ repositories {
         url = uri("https://maven.parchmentmc.org/")
     }
     maven {
-        url = uri("https://masa.dy.fi/maven")
-    }
-    maven {
         url = uri("https://jitpack.io")
     }
     maven {
         url = uri("https://maven.nucleoid.xyz")
-    }
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
     }
     mavenCentral()
 }
@@ -38,34 +32,28 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${property("parchment_version")}@zip")
     })
 
-    include(modImplementation("com.github.CasualChampionships:arcade:${property("arcade_version")}")!!)
-
-    include(implementation(project(mapOf("path" to ":minigames:common", "configuration" to "namedElements")))!!)
-    include(implementation(project(mapOf("path" to ":minigames:uhc", "configuration" to "namedElements")))!!)
-
-    modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
-
-    include(modImplementation("xyz.nucleoid:server-translations-api:${property("server_translations_api_version")}")!!)
-    include(modImplementation("xyz.nucleoid:fantasy:${property("fantasy_version")}")!!)
-    include(modImplementation("com.github.senseiwells:ServerReplay:${property("server_replay_version")}")!!)
-    include(modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")!!)
-    modImplementation("me.lucko:fabric-permissions-api:${property("permissions_version")}")
-
-    modImplementation("eu.pb4:polymer-core:${property("polymer_version")}")
-    modImplementation("eu.pb4:polymer-blocks:${property("polymer_version")}")
+    modImplementation("com.github.CasualChampionships:arcade:${property("arcade_version")}")
+    modImplementation("xyz.nucleoid:fantasy:${property("fantasy_version")}")
+    modImplementation("com.github.senseiwells:ServerReplay:${property("server_replay_version")}")
     modImplementation("eu.pb4:polymer-resource-pack:${property("polymer_version")}")
-    modImplementation("eu.pb4:polymer-virtual-entity:${property("polymer_version")}")
 
-    include(implementation("org.mongodb:mongo-java-driver:3.12.11")!!)
-    // include(implementation("org.java-websocket:Java-WebSocket:1.5.3")!!)
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
+    modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
 
-    implementation(kotlin("stdlib-jdk8"))
-
-    testImplementation("org.apache.commons:commons-text:1.11.0")
+    implementation(project(mapOf("path" to ":minigames:common", "configuration" to "namedElements")))
 }
 
 tasks {
+    sourceSets {
+        create("datagen") {
+            compileClasspath += main.get().compileClasspath
+            runtimeClasspath += main.get().runtimeClasspath
+            compileClasspath += main.get().output
+            compileClasspath += test.get().compileClasspath
+            runtimeClasspath += test.get().runtimeClasspath
+        }
+    }
+
     processResources {
         inputs.property("version", project.version)
         filesMatching("fabric.mod.json") {

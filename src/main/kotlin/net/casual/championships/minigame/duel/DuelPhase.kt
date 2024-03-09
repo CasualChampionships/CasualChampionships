@@ -1,6 +1,5 @@
 package net.casual.championships.minigame.duel
 
-import net.casual.arcade.Arcade
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.literal
@@ -27,6 +26,8 @@ enum class DuelPhase(
 ): MinigamePhase<DuelMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: DuelMinigame) {
+            // Un-lazy the minigame level
+            minigame.level
             minigame.setGameRules {
                 resetToDefault()
                 if (!minigame.duelSettings.naturalRegen) {

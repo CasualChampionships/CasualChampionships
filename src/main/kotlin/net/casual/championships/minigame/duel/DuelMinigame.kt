@@ -4,9 +4,12 @@ import net.casual.arcade.events.minigame.MinigameAddSpectatorEvent
 import net.casual.arcade.events.minigame.MinigameCloseEvent
 import net.casual.arcade.events.player.PlayerAdvancementEvent
 import net.casual.arcade.events.player.PlayerDeathEvent
+import net.casual.arcade.events.player.PlayerRespawnEvent
+import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.minigame.MinigameSettings
+import net.casual.arcade.minigame.annotation.HAS_PLAYER
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.utils.LevelUtils
 import net.casual.arcade.utils.LootTableUtils
@@ -20,8 +23,14 @@ import net.casual.arcade.utils.LootTableUtils.exactly
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.resetHealth
+import net.casual.arcade.utils.PlayerUtils.teleportTo
+import net.casual.arcade.utils.PlayerUtils.unboostHealth
+import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.arcade.utils.impl.Location
 import net.casual.championships.CasualMod
 import net.casual.championships.common.item.CasualCommonItems
+import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.HeadUtils
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
@@ -33,6 +42,7 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet
+import net.minecraft.world.phys.Vec3
 import xyz.nucleoid.fantasy.Fantasy
 import xyz.nucleoid.fantasy.RuntimeWorldConfig
 import kotlin.random.Random
@@ -43,12 +53,15 @@ class DuelMinigame(
 ): Minigame<DuelMinigame>(server) {
     override val id = ID
 
+    private var emptyTicks = 0
+
     val level by lazy { this.createRandomOverworld() }
 
     override val settings = MinigameSettings(this@DuelMinigame)
 
     init {
         this.settings.copyFrom(this.duelSettings)
+        this.recipes.add(listOf(GoldenHeadRecipe.create()))
     }
 
     override fun getPhases(): Collection<MinigamePhase<DuelMinigame>> {
@@ -90,19 +103,22 @@ class DuelMinigame(
         return handle.asWorld()
     }
 
+    @Listener
+    private fun onTick(event: ServerTickEvent) {
+        if (this.getPlayingPlayers().size <= 1) {
+            this.emptyTicks++
+            if (this.emptyTicks.Ticks > 15.Seconds) {
+                this.close()
+            }
+        }
+    }
+
     @Listener(phases = [DUELING_ID])
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         val player = event.player
         val killer = player.killCredit
 
         this.makeSpectator(player)
-        event.player.setRespawnPosition(
-            this.level.dimension(),
-            event.player.blockPosition(),
-            0.0F,
-            true,
-            false
-        )
 
         if (this.duelSettings.playerDropsHead) {
             val head = HeadUtils.createConsumablePlayerHead(player)
@@ -121,6 +137,14 @@ class DuelMinigame(
         }
     }
 
+    @Listener(flags = HAS_PLAYER)
+    private fun onPlayerRespawn(event: PlayerRespawnEvent) {
+        val position = event.player.lastDeathLocation.map { it.pos().center }.orElseGet {
+            Vec3(0.0, 128.0, 0.0)
+        }
+        event.player.teleportTo(Location.of(position, level = this.level))
+    }
+
     @Listener
     private fun onMinigameAddSpectator(event: MinigameAddSpectatorEvent) {
         event.player.setGameMode(GameType.SPECTATOR)
@@ -130,6 +154,7 @@ class DuelMinigame(
     private fun onMinigameClose(event: MinigameCloseEvent) {
         for (player in this.getAllPlayers()) {
             player.setGlowingTag(false)
+            player.unboostHealth()
         }
     }
 

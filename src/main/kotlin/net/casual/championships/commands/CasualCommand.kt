@@ -92,6 +92,6 @@ object CasualCommand: Command {
 
     private fun floodgates(context: CommandContext<CommandSourceStack>, open: Boolean): Int {
         CasualMinigames.floodgates = open
-        return context.source.success("Successfully ${if (open) "opened" else "closed"} the floodgates")
+        return context.source.success("Successfully ${if (open) "opened" else "closed"} the floodgates", true)
     }
 }

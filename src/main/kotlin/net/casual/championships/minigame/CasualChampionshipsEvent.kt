@@ -152,8 +152,6 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
 
         minigame.events.register<MinigameCloseEvent> {
             this.updateDatabase(minigame)
-        }
-        minigame.events.register<MinigameCompleteEvent> {
             this.returnToLobby(server)
         }
         minigame.events.register<PlayerTeamJoinEvent> {

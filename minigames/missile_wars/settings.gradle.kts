@@ -1,8 +1,4 @@
-rootProject.name = "CasualChampionships"
-
-include("minigames:uhc")
-include("minigames:missile_wars")
-include("minigames:common")
+rootProject.name = "CasualMissileWars"
 
 pluginManagement {
     repositories {

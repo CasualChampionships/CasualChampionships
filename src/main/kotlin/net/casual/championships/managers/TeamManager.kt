@@ -6,6 +6,7 @@ import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.championships.CasualMod
 import net.casual.championships.minigame.CasualMinigames
+import net.casual.championships.uhc.UHCMod
 import net.casual.championships.util.Config
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
@@ -35,12 +36,19 @@ object TeamManager {
                 val player = PlayerUtils.player(operator)
                 if (player != null) {
                     minigame.makeAdmin(player)
-                    minigame.makeSpectator(player)
+                    val team = player.team
+                    if (team == null || team == minigame.teams.getAdminTeam()) {
+                        // TODO: Remove
+                        UHCMod.logger.info("Making ${player.scoreboardName} spectator")
+                        minigame.makeSpectator(player)
+                    }
                 }
             }
 
             for (player in minigame.getAllPlayers()) {
                 if (player.team == null) {
+                    // TODO: Remove
+                    UHCMod.logger.info("Making ${player.scoreboardName} spectator")
                     minigame.makeSpectator(player)
                 }
             }
