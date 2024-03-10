@@ -31,7 +31,7 @@ object CommonUI {
         predicate: PlayerObserverPredicate = CommonPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
     ): ArcadeNameTag {
         return ArcadeNameTag(
-            { String.format("%.1f ", it.health / 2).literal().append(CommonComponents.HARDCORE_HEART_BITMAP) },
+            { String.format("%.1f ", it.health / 2).literal().append(CommonComponents.Bitmap.HARDCORE_HEART) },
             predicate
         )
     }

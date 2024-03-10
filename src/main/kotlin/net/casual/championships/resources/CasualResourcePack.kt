@@ -9,7 +9,6 @@ import net.casual.championships.common.CasualCommonMod
 import net.casual.championships.common.item.CasualCommonItems
 import net.casual.championships.uhc.UHCMod
 import net.casual.championships.util.Config
-import java.nio.file.Path
 import kotlin.io.path.readBytes
 
 object CasualResourcePack {

@@ -13,7 +13,10 @@ import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer
 
 class TeammateRow(private val index: Int, private val buffer: Component): SidebarSupplier {
-    private val none = SidebarComponent.withCustomScore(this.createTeammate(), CommonComponents.UNAVAILABLE_BITMAP.append(this.buffer))
+    private val none = SidebarComponent.withCustomScore(
+        this.createTeammate(),
+        CommonComponents.Bitmap.UNAVAILABLE.append(this.buffer)
+    )
 
     override fun getComponent(player: ServerPlayer): SidebarComponent {
         val team = player.team
@@ -40,12 +43,12 @@ class TeammateRow(private val index: Int, private val buffer: Component): Sideba
         val score = if (teammate != null) {
             if (teammate.isSurvival && teammate.isAlive) {
                 val health = " %04.1f".format(teammate.health / 2.0)
-                health.literal().append(ComponentUtils.space(1)).append(CommonComponents.HARDCORE_HEART_BITMAP)
+                health.literal().append(ComponentUtils.space(1)).append(CommonComponents.Bitmap.HARDCORE_HEART)
             } else {
-                CommonComponents.UNAVAILABLE_BITMAP
+                CommonComponents.Bitmap.UNAVAILABLE
             }
         } else {
-            CommonComponents.NO_CONNECTION_BITMAP
+            CommonComponents.Bitmap.NO_CONNECTION
         }
         return SidebarComponent.withCustomScore(formatted, score.append(this.buffer))
     }

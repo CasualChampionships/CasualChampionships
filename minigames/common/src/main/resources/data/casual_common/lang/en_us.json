@@ -7,6 +7,8 @@
 
   "casual.tags.teamglow": "Teamglowing has been %s",
   "casual.tags.fullbright": "Fullbright has been %s",
+  "casual.toggle.enable": "Enable",
+  "casual.toggle.disable": "Disable",
   "casual.toggle.enabled": "Enabled",
   "casual.toggle.disabled": "Disabled",
 

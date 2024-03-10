@@ -3,18 +3,14 @@ package net.casual.championships.managers
 import com.google.gson.JsonObject
 import net.casual.arcade.Arcade
 import net.casual.arcade.utils.PlayerUtils
-import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.championships.CasualMod
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.uhc.UHCMod
-import net.casual.championships.util.Config
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.server.ServerScoreboard
-import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
-import java.util.*
 
 object TeamManager {
     private const val SPECTATOR = "Spectator"

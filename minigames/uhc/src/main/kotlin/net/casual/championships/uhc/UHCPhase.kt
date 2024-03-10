@@ -103,7 +103,7 @@ enum class UHCPhase(
             minigame.ui.addNameTag(CommonUI.createPlayingHealthTag())
             minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
 
-            val sidebar = ArcadeSidebar(ComponentSupplier.of(UHCComponents.TITLE))
+            val sidebar = ArcadeSidebar(ComponentSupplier.of(UHCComponents.Bitmap.TITLE))
             // TODO: Configure team sizes
             CommonUI.addTeammates(sidebar, 5)
             sidebar.addRow(SidebarSupplier.empty())
@@ -114,7 +114,7 @@ enum class UHCPhase(
     },
     Grace(GRACE_ID) {
         override fun start(minigame: UHCMinigame) {
-            minigame.settings.isTeamChat = true
+            minigame.settings.isChatGlobal = false
             minigame.settings.mobsWithNoAIAreFlammable = true
             val duration = minigame.settings.gracePeriod + 19.Ticks
             val task = GracePeriodBossBarTask(minigame)
@@ -158,7 +158,7 @@ enum class UHCPhase(
         override fun start(minigame: UHCMinigame) {
             minigame.stats.freeze()
 
-            minigame.settings.isTeamChat = false
+            minigame.settings.isChatGlobal = true
             minigame.settings.canTakeDamage.set(false)
 
             val teams = minigame.teams.getPlayingTeams()

@@ -92,9 +92,12 @@ class DuelMinigame(
     }
 
     private fun createRandomOverworld(): ServerLevel {
+        val seeds = listOf(
+            1246918500008390635
+        )
         val handle = Fantasy.get(this.server).openTemporaryWorld(
             RuntimeWorldConfig()
-                .setSeed(Random.nextLong())
+                .setSeed(seeds.random())
                 .setShouldTickTime(true)
                 .setDimensionType(BuiltinDimensionTypes.OVERWORLD)
                 .setGenerator(LevelUtils.overworld().chunkSource.generator)

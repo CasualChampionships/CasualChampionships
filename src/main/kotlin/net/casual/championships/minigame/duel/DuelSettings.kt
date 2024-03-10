@@ -1,8 +1,8 @@
 package net.casual.championships.minigame.duel
 
 import net.casual.arcade.gui.screen.SelectionScreenStyle
-import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.bool
-import net.casual.arcade.settings.display.DisplayableGameSettingBuilder.Companion.float64
+import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.bool
+import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.float64
 import net.casual.arcade.settings.display.DisplayableSettings
 import net.casual.arcade.settings.display.DisplayableSettingsDefaults
 import net.casual.arcade.utils.ComponentUtils.literal

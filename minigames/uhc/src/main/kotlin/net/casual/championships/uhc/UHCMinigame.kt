@@ -562,6 +562,10 @@ class UHCMinigame(
     }
 
     private fun updateHUD(player: ServerPlayer) {
+        if (this.isSpectating(player)) {
+            return
+        }
+
         val direction = CommonComponents.direction(Direction.orderedByNearest(player).filter { it.axis != Direction.Axis.Y }[0])
         val back = ComponentUtils.negativeWidthOf(direction)
         val position = "(${player.blockX}, ${player.blockY}, ${player.blockZ})"
