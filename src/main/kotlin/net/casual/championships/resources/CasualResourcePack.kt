@@ -12,21 +12,12 @@ import net.casual.championships.util.Config
 import kotlin.io.path.readBytes
 
 object CasualResourcePack {
-    private val CHAMPIONSHIPS_PACK = NamedResourcePackCreator.named("casual_championships") {
-        addAssetSource(CasualMod.ID)
-        packDescription = "Provides resources for Casual Championships".literal()
-        val container = CasualMod.container
-        val path = container.findPath(container.metadata.getIconPath(64).get()).get()
-        packIcon = path.readBytes()
-    }
-
     private val default = listOf(
         ArcadePacks.NO_SHADOW_PACK,
         ArcadePacks.SPACES_FONT_PACK,
         ArcadePacks.ACTION_BAR_FONT_PACK,
         CasualCommonMod.COMMON_PACK,
-        CasualCommonItems.CUSTOM_MODEL_PACK,
-        CHAMPIONSHIPS_PACK
+        CasualCommonItems.CUSTOM_MODEL_PACK
     )
 
     private val all = default.concat(listOf(UHCMod.UHC_PACK))

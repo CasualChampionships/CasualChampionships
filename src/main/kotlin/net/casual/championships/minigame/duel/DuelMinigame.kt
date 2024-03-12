@@ -7,10 +7,10 @@ import net.casual.arcade.events.player.PlayerDeathEvent
 import net.casual.arcade.events.player.PlayerRespawnEvent
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.minigame.MinigamePhase
 import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.HAS_PLAYER
 import net.casual.arcade.minigame.annotation.Listener
+import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.utils.LevelUtils
 import net.casual.arcade.utils.LootTableUtils
 import net.casual.arcade.utils.LootTableUtils.addItem
@@ -64,7 +64,7 @@ class DuelMinigame(
         this.recipes.add(listOf(GoldenHeadRecipe.create()))
     }
 
-    override fun getPhases(): Collection<MinigamePhase<DuelMinigame>> {
+    override fun getPhases(): Collection<Phase<DuelMinigame>> {
         return DuelPhase.values().toList()
     }
 

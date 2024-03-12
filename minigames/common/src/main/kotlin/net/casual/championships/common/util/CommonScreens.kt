@@ -11,8 +11,8 @@ import net.minecraft.network.chat.Component
 
 object CommonScreens {
     private val COMPONENTS = SelectionScreenComponents.Builder().apply {
-        next(MenuItem.LONG_NEXT.named(NEXT_MESSAGE), MenuItem.UNAVAILABLE_LONG_NEXT.named(NEXT_MESSAGE))
-        previous(MenuItem.LONG_PREVIOUS.named(PREVIOUS_MESSAGE), MenuItem.UNAVAILABLE_LONG_PREVIOUS.named(PREVIOUS_MESSAGE))
+        next(MenuItem.GREEN_LONG_RIGHT.named(NEXT_MESSAGE), MenuItem.GREY_GREEN_LONG_RIGHT.named(NEXT_MESSAGE))
+        previous(MenuItem.GREEN_LONG_LEFT.named(PREVIOUS_MESSAGE), MenuItem.GREY_GREEN_LONG_LEFT.named(PREVIOUS_MESSAGE))
         back(MenuItem.CROSS.named(BACK_MESSAGE), MenuItem.CROSS.named(EXIT_MESSAGE))
     }.build()
 

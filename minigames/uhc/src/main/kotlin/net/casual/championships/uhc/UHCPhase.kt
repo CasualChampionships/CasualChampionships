@@ -4,7 +4,7 @@ import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.sidebar.SidebarSupplier
 import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.level.VanillaDimension
-import net.casual.arcade.minigame.MinigamePhase
+import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.scheduler.GlobalTickedScheduler
@@ -16,7 +16,6 @@ import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.red
-import net.casual.arcade.utils.ComponentUtils.withFont
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
 import net.casual.arcade.utils.PlayerUtils
@@ -43,7 +42,7 @@ const val GAME_OVER_ID = "game_over"
 
 enum class UHCPhase(
     override val id: String
-): MinigamePhase<UHCMinigame> {
+): Phase<UHCMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: UHCMinigame) {
             minigame.settings.canPvp.set(false)

@@ -1,6 +1,6 @@
 package net.casual.championships.minigame.duel
 
-import net.casual.arcade.minigame.MinigamePhase
+import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
@@ -23,7 +23,7 @@ const val COMPLETE_ID = "complete"
 
 enum class DuelPhase(
     override val id: String
-): MinigamePhase<DuelMinigame> {
+): Phase<DuelMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: DuelMinigame) {
             // Un-lazy the minigame level

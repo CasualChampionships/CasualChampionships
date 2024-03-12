@@ -3,7 +3,6 @@ package net.casual.championships.minigame
 import com.google.gson.JsonArray
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.minigame.MinigameCloseEvent
-import net.casual.arcade.events.minigame.MinigameCompleteEvent
 import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.player.PlayerTeamLeaveEvent
@@ -15,19 +14,24 @@ import net.casual.arcade.minigame.events.MinigamesEvent
 import net.casual.arcade.minigame.events.MinigamesEventConfig
 import net.casual.arcade.minigame.events.lobby.Lobby
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
+import net.casual.arcade.minigame.events.lobby.LobbyMinigame.LobbyPhase
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.resources.PackInfo
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.red
+import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.FantasyUtils
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.LevelUtils
 import net.casual.arcade.utils.MinigameUtils.transferTo
+import net.casual.arcade.utils.PlayerUtils.sendTitle
+import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.json.LongSerializer
 import net.casual.championships.CasualMod
 import net.casual.championships.common.minigame.CasualSettings
@@ -71,7 +75,12 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
         minigame.events.register<MinigameAddPlayerEvent> { event ->
             val (_, player) = event
 
-            player.sendSystemMessage(CommonComponents.WELCOME_MESSAGE.generate("CasualChampionships").gold())
+
+            player.setTitleAnimation(stay = 5.Seconds)
+            player.sendTitle(
+                Component.empty().append(CommonComponents.Bitmap.WELCOME_TO_CASUAL_CHAMPIONSHIPS.shadowless())
+            )
+            // player.sendSystemMessage(CommonComponents.WELCOME_MESSAGE.generate("CasualChampionships").gold())
             if (!minigame.isAdmin(player)) {
                 player.setGameMode(GameType.ADVENTURE)
             } else if (Config.dev) {
@@ -182,7 +191,7 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
             minigame.transferTo(this.current, start = false, close = false)
         }
         minigame.events.register(MinigameSetPhaseEvent::class.java, flags = NONE) {
-            if (it.minigame is LobbyMinigame && this.current === it.minigame && it.phase == LobbyMinigame.Phase.Readying) {
+            if (it.minigame is LobbyMinigame && this.current === it.minigame && it.phase == LobbyPhase.Readying) {
                 minigame.close()
             }
         }

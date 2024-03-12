@@ -9,6 +9,10 @@ import net.casual.arcade.settings.display.MenuGameSettingBuilder
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.championships.common.item.MenuItem
+import net.casual.championships.common.item.MenuItem.Companion.CROSS
+import net.casual.championships.common.item.MenuItem.Companion.GREY_CROSS
+import net.casual.championships.common.item.MenuItem.Companion.GREY_TICK
+import net.casual.championships.common.item.MenuItem.Companion.TICK
 import net.casual.championships.common.util.CommonComponents.DISABLED_MESSAGE
 import net.casual.championships.common.util.CommonComponents.DISABLE_MESSAGE
 import net.casual.championships.common.util.CommonComponents.ENABLED_MESSAGE
@@ -29,13 +33,11 @@ open class CasualSettings(
         }
 
         override fun options(builder: MenuGameSettingBuilder<Boolean>, enabled: ItemStack, disabled: ItemStack) {
-            builder.option("enabled", MenuItem.TICK.named(ENABLED_MESSAGE), true) { setting, stack, player ->
-                stack.setHoverName(if (setting.get()) ENABLED_MESSAGE else ENABLE_MESSAGE)
-                MenuGameSettingBuilder.enchantWhenSetTo(true).invoke(setting, stack, player)
+            builder.option("enabled", TICK.named(ENABLED_MESSAGE), true) { setting, _, _ ->
+                if (setting.get()) TICK.named(ENABLED_MESSAGE) else GREY_TICK.named(ENABLE_MESSAGE)
             }
-            builder.option("disabled", MenuItem.CROSS.named(DISABLED_MESSAGE), false) { setting, stack, player ->
-                stack.setHoverName(if (setting.get()) DISABLE_MESSAGE else DISABLED_MESSAGE)
-                MenuGameSettingBuilder.enchantWhenSetTo(false).invoke(setting, stack, player)
+            builder.option("disabled", CROSS.named(DISABLED_MESSAGE), false) { setting, _, _ ->
+                if (setting.get()) GREY_CROSS.named(DISABLE_MESSAGE) else CROSS.named(DISABLED_MESSAGE)
             }
         }
     }

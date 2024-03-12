@@ -4,6 +4,7 @@ import net.casual.arcade.resources.NamedResourcePackCreator
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ResourcePackUtils.addBitmapFont
 import net.casual.arcade.utils.ResourcePackUtils.addLangsFromData
+import net.casual.championships.common.entity.CasualCommonEntities
 import net.casual.championships.common.item.CasualCommonItems
 import net.casual.championships.common.util.AntiCheat
 import net.casual.championships.common.util.CommonComponents
@@ -26,6 +27,7 @@ object CasualCommonMod: DedicatedServerModInitializer {
 
     override fun onInitializeServer() {
         CasualCommonItems.noop()
+        CasualCommonEntities.noop()
 
         AntiCheat.registerEvents()
     }

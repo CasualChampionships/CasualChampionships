@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "casual_common:item/minesweeper/mine"
-  }
-}

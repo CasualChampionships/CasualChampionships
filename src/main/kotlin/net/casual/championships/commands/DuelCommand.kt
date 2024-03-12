@@ -41,12 +41,12 @@ object DuelCommand: Command {
             selection(Items.MAP.named("Configure")) {
                 it.openMenu(settings.menu(build()))
             }
-            selection(MenuItem.TICK.named("Confirm")) {
+            selection(MenuItem.GREY_TICK.named("Confirm")) {
                 it.closeContainer()
                 val players = EntityArgument.getPlayers(context, "players")
                 confirmFreeForAll(context.source.server, player, players, settings)
             }
-            selection(MenuItem.CROSS.named("Cancel")) {
+            selection(MenuItem.GREY_CROSS.named("Cancel")) {
                 it.closeContainer()
             }
         }

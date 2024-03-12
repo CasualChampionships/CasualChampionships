@@ -95,8 +95,6 @@ object CommonComponents {
     val GRACE_MESSAGE = translatableWithArgs("casual.game.grace")
     val GLOWING_MESSAGE = translatableWithArgs("casual.game.glowing")
 
-
-
     val STARTING_IN_BACKGROUNDED = backgrounded(STARTING_IN_MESSAGE.generate(), Bitmap.BACKGROUND_240)
     val STARTING_SOON_BACKGROUNDED = backgrounded(STARTING_SOON_MESSAGE, Bitmap.BACKGROUND_240)
     val TIME_ELAPSED_BACKGROUNDED = backgrounded(TIME_ELAPSED_MESSAGE.generate(), Bitmap.BACKGROUND_240)
@@ -148,5 +146,7 @@ object CommonComponents {
         val UNAVAILABLE by add(texture("hud/cross.png"), 7, 7)
         val KILLS_COUNT by add(texture("hud/kills.png"), 10, 12)
         val PLAYER_COUNT by add(texture("hud/players.png"), 10, 11)
+
+        val WELCOME_TO_CASUAL_CHAMPIONSHIPS by add(texture("text/welcome_to_casual_championships.png"), 6, 16)
     }
 }
