@@ -1,6 +1,3 @@
-import org.apache.commons.io.output.ByteArrayOutputStream
-import java.nio.charset.Charset
-
 plugins {
     kotlin("jvm")
     id("fabric-loom")
@@ -9,7 +6,7 @@ plugins {
 }
 
 group = property("maven_group")!!
-version = this.getGitHash().substring(0, 6)
+version = property("mod_version")!!
 
 repositories {
     mavenLocal()
@@ -44,15 +41,13 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${property("parchment_version")}@zip")
     })
 
-    modImplementation("com.github.CasualChampionships:arcade:${property("arcade_version")}")
-    modImplementation("eu.pb4:polymer-core:${property("polymer_version")}")
-    modImplementation("eu.pb4:polymer-resource-pack:${property("polymer_version")}")
-    // modImplementation("xyz.nucleoid:fantasy:${property("fantasy_version")}")
-    // modImplementation("com.github.senseiwells:ServerReplay:${property("server_replay_version")}")
+    include(modApi("com.github.CasualChampionships:arcade:${property("arcade_version")}")!!)
+    include(modApi("com.github.senseiwells:ServerReplay:${property("server_replay_version")}")!!)
+    include(modImplementation("xyz.nucleoid:server-translations-api:${property("server_translations_api_version")}")!!)
 
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
+    modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
+    modApi("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")
     modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:${property("fabric_kotlin_version")}")
 
     "modDatagenImplementation"("com.github.CasualChampionships:arcade-datagen:1.0.3")
     "modDatagenImplementation"("org.apache.commons:commons-text:1.11.0")
@@ -111,13 +106,4 @@ tasks {
 
 java {
     withSourcesJar()
-}
-
-fun getGitHash(): String {
-    val out = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "rev-parse", "HEAD")
-        standardOutput = out
-    }
-    return out.toString(Charset.defaultCharset()).trim()
 }

@@ -16,9 +16,9 @@ import net.casual.arcade.minigame.events.MinigamesEventConfigSerializer
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.JsonUtils
 import net.casual.championships.common.ui.LobbyBossBarConfig
+import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.managers.TeamManager
-import net.casual.championships.minigame.duel.DuelMinigame
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
 import net.minecraft.server.MinecraftServer
@@ -41,6 +41,8 @@ object CasualMinigames {
     var floodgates = false
 
     init {
+
+
         this.path = Config.resolve("event")
         this.config = MinigamesEventConfigSerializer().apply {
             val lobbies = Config.resolve("lobbies").createDirectories()

@@ -31,5 +31,7 @@ class MinesweeperItem private constructor(): Item(Properties()), ArcadeModelledI
         val EIGHT by MODELLER.model(CasualCommonMod.id("minesweeper/8"))
         val MINE by MODELLER.model(CasualCommonMod.id("minesweeper/mine"))
         val EMPTY by MODELLER.model(CasualCommonMod.id("minesweeper/empty"))
+        val FLAG by MODELLER.model(CasualCommonMod.id("minesweeper/flag"))
+        val FLAG_COUNTER by MODELLER.model(CasualCommonMod.id("minesweeper/flag_counter"))
     }
 }

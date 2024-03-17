@@ -4,6 +4,7 @@ import com.google.gson.JsonObject
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
+import me.senseiwells.nametag.impl.PlaceholderNameTag
 import me.senseiwells.replay.player.PlayerRecorders
 import net.casual.arcade.border.MultiLevelBorderListener
 import net.casual.arcade.border.MultiLevelBorderTracker
@@ -459,7 +460,7 @@ class UHCMinigame(
         } else {
             GlobalTickedScheduler.later {
                 if (!PlayerRecorders.has(player) && this.isPlaying(player) && this.settings.replay) {
-                    PlayerRecorders.create(player).tryStart()
+                    PlayerRecorders.create(player).start()
                 }
             }
         }

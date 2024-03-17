@@ -9,7 +9,6 @@ object CommandManager {
         GlobalEventHandler.register<ServerRegisterCommandEvent> { (dispatcher, context) ->
             MinesweeperCommand.register(dispatcher, context)
             CasualCommand.register(dispatcher, context)
-            DuelCommand.register(dispatcher, context)
         }
     }
 }

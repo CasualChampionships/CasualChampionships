@@ -4,11 +4,13 @@ import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
 import net.casual.arcade.gui.screen.ArcadeGenericScreen
 import net.casual.arcade.gui.screen.FrozenUsableScreen
+import net.casual.arcade.utils.ComponentUtils
+import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.PlayerUtils
+import net.casual.championships.common.item.MenuItem
 import net.casual.championships.common.item.MinesweeperItem
-import net.casual.championships.common.item.MinesweeperItem.Companion.EMPTY
 import net.casual.championships.common.item.MinesweeperItem.Companion.MINE
 import net.casual.championships.common.item.MinesweeperItem.Companion.UNKNOWN
 import net.casual.championships.common.util.CommonComponents
@@ -33,8 +35,8 @@ class MinesweeperScreen(
     private val guessed = IntArraySet()
     private val flags = IntArraySet()
     private val grid = Grid(9, 9)
-    private val flagItem = Items.MANGROVE_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_FLAGS)
-    private val clockItem: ItemStack = Items.CLOCK.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_TIMER)
+    private val flagItem = MinesweeperItem.FLAG_COUNTER.named(CommonComponents.MINESWEEPER_FLAGS)
+    private val clockItem: ItemStack = Items.CLOCK.defaultInstance.named(CommonComponents.MINESWEEPER_TIMER)
     private var complete = false
 
     init {
@@ -48,9 +50,8 @@ class MinesweeperScreen(
         this.slots[83].set(DESC_TILE_2)
         this.slots[84].set(DESC_TILE_3)
         this.slots[85].set(DESC_TILE_4)
-        this.slots[86].set(this.flagItem)
-        this.slots[87].set(this.clockItem)
-        this.slots[88].set(BLANK_TILE)
+        this.slots[87].set(this.flagItem)
+        this.slots[88].set(this.clockItem)
         this.slots[89].set(PLAY_AGAIN_TILE)
     }
 
@@ -127,7 +128,7 @@ class MinesweeperScreen(
             UNKNOWN_TILE
         } else {
             this.flags.add(index)
-            Items.MANGROVE_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_FLAG)
+            MinesweeperItem.FLAG.named(CommonComponents.MINESWEEPER_FLAG)
         }
         this.flagItem.count = (12 - flags.size).coerceAtLeast(1)
         current.set(stack)
@@ -173,7 +174,7 @@ class MinesweeperScreen(
         check(tile <= 8 && tile >= -1) { "Invalid tile: $tile" }
         return when (tile) {
             -1 -> MINE.setHoverName(CommonComponents.MINESWEEPER_MINE)
-            0 -> EMPTY.named("")
+            0 -> ItemStack.EMPTY
             else -> MinesweeperItem.MODELLER.create(tile).named(tile.toString())
         }
     }
@@ -283,20 +284,20 @@ class MinesweeperScreen(
 
     companion object {
         private val UNKNOWN_TILE = UNKNOWN.named("?")
-        private val EXIT_TILE = Items.RED_STAINED_GLASS.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_EXIT)
+        private val EXIT_TILE = MenuItem.CROSS.named(CommonComponents.EXIT_MESSAGE)
         private val DESC_TILE_1 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_1)
         private val DESC_TILE_2 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_2)
         private val DESC_TILE_3 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_3)
         private val DESC_TILE_4 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_4)
-        private val BLANK_TILE = Items.GRAY_STAINED_GLASS.named("")
-        private val PLAY_AGAIN_TILE = Items.GREEN_STAINED_GLASS.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_PLAY_AGAIN)
+        private val PLAY_AGAIN_TILE = MenuItem.GREEN_LONG_RIGHT.named(CommonComponents.MINESWEEPER_PLAY_AGAIN)
 
         private var record = 127.0
 
         fun createScreenFactory(): SimpleMenuProvider {
             return SimpleMenuProvider(
                 { syncId, _, player -> MinesweeperScreen(player, syncId) },
-                Component.literal("Minesweeper")
+                Component.empty().append(ComponentUtils.space(-8))
+                    .append(CommonComponents.Bitmap.MINESWEEPER_MENU.white())
             )
         }
     }

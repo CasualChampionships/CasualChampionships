@@ -147,6 +147,14 @@ object CommonComponents {
         val KILLS_COUNT by add(texture("hud/kills.png"), 10, 12)
         val PLAYER_COUNT by add(texture("hud/players.png"), 10, 11)
 
+        val MINESWEEPER_MENU by add(texture("hud/minesweeper_menu.png"), 19, 227)
+
+        val CASUAL by add(texture("text/casual.png"), 8, 9)
+        val CHAMPIONSHIPS by add(texture("text/championships.png"), 8, 9)
+
+        val SERVER_HOSTED_BY by add(texture("text/server_hosted_by.png"), 8, 9)
+        val KIWITECH by add(texture("text/kiwitech.png"), 8, 9)
+
         val WELCOME_TO_CASUAL_CHAMPIONSHIPS by add(texture("text/welcome_to_casual_championships.png"), 6, 16)
     }
 }

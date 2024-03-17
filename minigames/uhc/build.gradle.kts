@@ -1,6 +1,3 @@
-import org.apache.commons.io.output.ByteArrayOutputStream
-import java.nio.charset.Charset
-
 plugins {
     kotlin("jvm")
     id("fabric-loom")
@@ -9,7 +6,7 @@ plugins {
 }
 
 group = property("maven_group")!!
-version = this.getGitHash().substring(0, 6)
+version = property("mod_version")!!
 
 repositories {
     mavenLocal()
@@ -31,14 +28,6 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-${property("parchment_version")}@zip")
     })
-
-    modImplementation("com.github.CasualChampionships:arcade:${property("arcade_version")}")
-    modImplementation("xyz.nucleoid:fantasy:${property("fantasy_version")}")
-    modImplementation("com.github.senseiwells:ServerReplay:${property("server_replay_version")}")
-    modImplementation("eu.pb4:polymer-resource-pack:${property("polymer_version")}")
-
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
-    modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
 
     implementation(project(mapOf("path" to ":minigames:common", "configuration" to "namedElements")))
 }
@@ -89,13 +78,4 @@ tasks {
 
 java {
     withSourcesJar()
-}
-
-fun getGitHash(): String {
-    val out = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "rev-parse", "HEAD")
-        standardOutput = out
-    }
-    return out.toString(Charset.defaultCharset()).trim()
 }

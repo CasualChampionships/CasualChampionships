@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.duel
+package net.casual.championships.duel
 
 import net.casual.arcade.commands.hidden.HiddenCommand
 import net.casual.arcade.minigame.events.lobby.ReadyChecker

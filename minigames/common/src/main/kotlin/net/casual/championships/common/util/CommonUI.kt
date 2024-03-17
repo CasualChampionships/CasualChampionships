@@ -9,6 +9,7 @@ import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.sidebar.SidebarSupplier
 import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.gui.tab.ArcadeTabDisplay
+import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.aqua
 import net.casual.arcade.utils.ComponentUtils.bold
@@ -17,6 +18,10 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.TickUtils
 import net.casual.championships.common.ui.BorderDistanceRow
 import net.casual.championships.common.ui.TeammateRow
+import net.casual.championships.common.util.CommonComponents.Bitmap.CASUAL
+import net.casual.championships.common.util.CommonComponents.Bitmap.CHAMPIONSHIPS
+import net.casual.championships.common.util.CommonComponents.Bitmap.KIWITECH
+import net.casual.championships.common.util.CommonComponents.Bitmap.SERVER_HOSTED_BY
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 
@@ -56,17 +61,23 @@ object CommonUI {
         }
     }
 
-    fun createTabDisplay(): ArcadeTabDisplay {
+    fun createTabDisplay(minigame: Minigame<*>): ArcadeTabDisplay {
         val display = ArcadeTabDisplay(
-            ComponentSupplier.of("\n".literal().append("Casual Championships").gold().bold())
-        ) { _ ->
+            ComponentSupplier.of("\n".literal().append(CASUAL).append(" ").append(CHAMPIONSHIPS).append("\n"))
+        ) { player ->
             val tps = TickUtils.calculateTPS()
             val formatting = if (tps >= 20) ChatFormatting.DARK_GREEN else if (tps > 15) ChatFormatting.YELLOW else if (tps > 10) ChatFormatting.RED else ChatFormatting.DARK_RED
             Component.literal("\n").apply {
-                append("TPS: ")
-                append(Component.literal("%.1f".format(tps)).withStyle(formatting))
-                append("\n")
-                append(CommonComponents.HOSTED_BY_MESSAGE.aqua().bold())
+                if (minigame.isAdmin(player)) {
+                    append("TPS: ")
+                    append(Component.literal("%.1f".format(tps)).withStyle(formatting))
+                    append("\n")
+                }
+                append("    ")
+                append(SERVER_HOSTED_BY)
+                append(" ")
+                append(KIWITECH)
+                append("    ")
             }
         }
         return display

@@ -1,7 +1,7 @@
-package net.casual.championships.minigame.duel
+package net.casual.championships.duel
 
 import net.casual.arcade.events.minigame.MinigameAddSpectatorEvent
-import net.casual.arcade.events.minigame.MinigameCloseEvent
+import net.casual.arcade.events.minigame.MinigameRemovePlayerEvent
 import net.casual.arcade.events.player.PlayerAdvancementEvent
 import net.casual.arcade.events.player.PlayerDeathEvent
 import net.casual.arcade.events.player.PlayerRespawnEvent
@@ -28,7 +28,6 @@ import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.impl.Location
-import net.casual.championships.CasualMod
 import net.casual.championships.common.item.CasualCommonItems
 import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.HeadUtils
@@ -62,6 +61,10 @@ class DuelMinigame(
     init {
         this.settings.copyFrom(this.duelSettings)
         this.recipes.add(listOf(GoldenHeadRecipe.create()))
+
+        this.effects.setGlowingPredicate { _, _ ->
+            this.duelSettings.glowing
+        }
     }
 
     override fun getPhases(): Collection<Phase<DuelMinigame>> {
@@ -72,8 +75,6 @@ class DuelMinigame(
         player.setGameMode(GameType.SURVIVAL)
         player.boostHealth(this.duelSettings.health)
         player.resetHealth()
-
-        player.setGlowingTag(this.duelSettings.glowing)
 
         val stacks = duelLoot.getRandomItems(
             LootParams.Builder(player.serverLevel()).create(LootContextParamSet.builder().build()),
@@ -154,11 +155,8 @@ class DuelMinigame(
     }
 
     @Listener
-    private fun onMinigameClose(event: MinigameCloseEvent) {
-        for (player in this.getAllPlayers()) {
-            player.setGlowingTag(false)
-            player.unboostHealth()
-        }
+    private fun onMinigameRemovePlayer(event: MinigameRemovePlayerEvent) {
+        event.player.unboostHealth()
     }
 
     @Listener
@@ -167,8 +165,8 @@ class DuelMinigame(
     }
 
     companion object {
-        private val duelLoot = this.createToolTable()
-        val ID = CasualMod.id("duel_minigame")
+        private val duelLoot = createToolTable()
+        val ID = CasualDuelMod.id("duel_minigame")
 
         private fun createToolTable(): LootTable {
             return LootTableUtils.create {

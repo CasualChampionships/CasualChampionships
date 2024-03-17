@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.duel
+package net.casual.championships.duel
 
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.scheduler.GlobalTickedScheduler
@@ -9,7 +9,6 @@ import net.casual.arcade.utils.MinigameUtils.countdown
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TimeUtils.Seconds
-import net.casual.championships.CasualMod
 import net.casual.championships.common.ui.ActiveBossBar
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.ChatFormatting
@@ -79,7 +78,7 @@ enum class DuelPhase(
                 minigame.getPlayingPlayers().firstOrNull()?.displayName
             }
             if (winner == null) {
-                CasualMod.logger.warn("Couldn't find winner for duel!")
+                CasualDuelMod.logger.warn("Couldn't find winner for duel!")
                 winner = "Unknown".literal().withStyle(ChatFormatting.OBFUSCATED)
             }
 

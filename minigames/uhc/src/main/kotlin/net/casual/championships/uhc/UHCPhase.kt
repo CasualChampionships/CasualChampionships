@@ -97,7 +97,7 @@ enum class UHCPhase(
 
             minigame.teams.hideNameTags()
 
-            minigame.ui.setTabDisplay(CommonUI.createTabDisplay())
+            minigame.ui.setTabDisplay(CommonUI.createTabDisplay(minigame))
 
             minigame.ui.addNameTag(CommonUI.createPlayingHealthTag())
             minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
