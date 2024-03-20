@@ -1,5 +1,7 @@
 package net.casual.championships.common.ui
 
+import net.casual.arcade.font.heads.PlayerHeadComponents
+import net.casual.arcade.font.heads.PlayerHeadFont
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.sidebar.SidebarSupplier
 import net.casual.arcade.utils.ComponentUtils
@@ -11,10 +13,11 @@ import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.scores.Team
 
 class TeammateRow(private val index: Int, private val buffer: Component): SidebarSupplier {
     private val none = SidebarComponent.withCustomScore(
-        this.createTeammate(),
+        Component.empty().append(this.buffer).append(" - "),
         CommonComponents.Bitmap.UNAVAILABLE.append(this.buffer)
     )
 
@@ -39,7 +42,7 @@ class TeammateRow(private val index: Int, private val buffer: Component): Sideba
             teammate = PlayerUtils.player(name)
         }
 
-        val formatted = this.createTeammate(name.literal().withStyle(team.color))
+        val formatted = this.createTeammate(name, team)
         val score = if (teammate != null) {
             if (teammate.isSurvival && teammate.isAlive) {
                 val health = " %04.1f".format(teammate.health / 2.0)
@@ -53,7 +56,13 @@ class TeammateRow(private val index: Int, private val buffer: Component): Sideba
         return SidebarComponent.withCustomScore(formatted, score.append(this.buffer))
     }
 
-    private fun createTeammate(name: Component = Component.empty()): MutableComponent {
-        return Component.empty().append(this.buffer).append(" - ").append(name)
+    private fun createTeammate(name: String, team: Team): MutableComponent {
+        return Component.empty().apply {
+            append(buffer)
+            append(" ")
+            append(PlayerHeadComponents.getHeadOrDefault(name))
+            append(" ")
+            append(name.literal().withStyle(team.color))
+        }
     }
 }

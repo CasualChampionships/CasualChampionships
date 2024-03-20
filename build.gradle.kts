@@ -13,21 +13,10 @@ version = this.getGitHash().substring(0, 6)
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri("https://maven.parchmentmc.org/")
-    }
-    maven {
-        url = uri("https://masa.dy.fi/maven")
-    }
-    maven {
-        url = uri("https://jitpack.io")
-    }
-    maven {
-        url = uri("https://maven.nucleoid.xyz")
-    }
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-    }
+    maven("https://maven.parchmentmc.org/")
+    maven("https://jitpack.io")
+    maven("https://maven.nucleoid.xyz")
+    maven("https://repo.fruxz.dev/releases/")
     mavenCentral()
 }
 

@@ -99,8 +99,8 @@ enum class UHCPhase(
 
             minigame.ui.setTabDisplay(CommonUI.createTabDisplay(minigame))
 
-            minigame.ui.addNameTag(CommonUI.createPlayingHealthTag())
             minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
+            minigame.ui.addNameTag(CommonUI.createPlayingHealthTag())
 
             val sidebar = ArcadeSidebar(ComponentSupplier.of(UHCComponents.Bitmap.TITLE))
             // TODO: Configure team sizes

@@ -1,5 +1,6 @@
 package net.casual.championships.common.util
 
+import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.gui.nametag.ArcadeNameTag
 import net.casual.arcade.gui.predicate.EntityObserverPredicate
 import net.casual.arcade.gui.predicate.PlayerObserverPredicate
@@ -26,6 +27,8 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 
 object CommonUI {
+    val INFO_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Info]").gold().bold())
+
     fun createPlayingNameTag(
         predicate: PlayerObserverPredicate = EntityObserverPredicate.visibleObservee().toPlayer()
     ): ArcadeNameTag {

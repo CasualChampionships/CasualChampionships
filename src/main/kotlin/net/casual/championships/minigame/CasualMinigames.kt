@@ -1,6 +1,7 @@
 package net.casual.championships.minigame
 
 import com.google.gson.JsonObject
+import eu.pb4.placeholders.api.node.parent.GradientNode
 import net.casual.arcade.area.StructuredAreaConfig
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.minigame.MinigameCloseEvent
@@ -13,14 +14,25 @@ import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.Minigames
 import net.casual.arcade.minigame.events.MinigamesEventConfig
 import net.casual.arcade.minigame.events.MinigamesEventConfigSerializer
+import net.casual.arcade.utils.ComponentUtils.bold
+import net.casual.arcade.utils.ComponentUtils.colour
+import net.casual.arcade.utils.ComponentUtils.crimson
+import net.casual.arcade.utils.ComponentUtils.green
+import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.ComponentUtils.white
+import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.JsonUtils
+import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
+import net.casual.arcade.utils.StringUtils.toSmallCaps
 import net.casual.championships.common.ui.LobbyBossBarConfig
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.managers.TeamManager
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.MinecraftServer
 import java.nio.file.Path
 import kotlin.io.path.bufferedReader
@@ -41,8 +53,6 @@ object CasualMinigames {
     var floodgates = false
 
     init {
-
-
         this.path = Config.resolve("event")
         this.config = MinigamesEventConfigSerializer().apply {
             val lobbies = Config.resolve("lobbies").createDirectories()
@@ -69,6 +79,8 @@ object CasualMinigames {
 
         GlobalEventHandler.register<ServerLoadedEvent>(Int.MAX_VALUE) {
             this.loadMinigameEventData(it.server)
+
+            it.server.setMessageOfTheDay(this.getMOTD())
         }
 
         GlobalEventHandler.register<PlayerJoinEvent> {
@@ -126,6 +138,45 @@ object CasualMinigames {
         eventData.parent.createDirectories()
         eventData.bufferedWriter().use {
             JsonUtils.GSON.toJson(this.event.serialize(), it)
+        }
+    }
+
+    private fun getMOTD(): Component {
+        return Component.empty().apply {
+            append("╔".literal().colour(0x009BFF))
+            append("═".literal().colour(0x19A5FF))
+            append("═".literal().colour(0x33AFFF))
+            append("═".literal().colour(0x4DB9FF))
+            append("═".literal().colour(0x66C3FF))
+            append("═".literal().colour(0x80CDFF))
+            append("\uD83D\uDDE1".literal().yellow())
+            append(" ")
+            append("C${"asual".toSmallCaps()} C${"hampionships".toSmallCaps()}".literal().bold().colour(0xFFAC1C))
+            append(" ")
+            append("\uD83C\uDFF9".literal().yellow())
+            append("═".literal().colour(0x80CDFF))
+            append("═".literal().colour(0x66C3FF))
+            append("═".literal().colour(0x4DB9FF))
+            append("═".literal().colour(0x33AFFF))
+            append("═".literal().colour(0x19A5FF))
+            append("╗".literal().colour(0x009BFF))
+            append("\n")
+
+            append("╚".literal().colour(0x009BFF))
+            append("═".literal().colour(0x19A5FF))
+            append("═".literal().colour(0x33AFFF))
+
+            append("   ")
+            append("be prepared".toSmallCaps().literal().lime())
+            append(" ")
+            append("◆".literal().white())
+            append(" ")
+            append("let the chaos ensue".toSmallCaps().literal().lime())
+            append("    ")
+
+            append("═".literal().colour(0x33AFFF))
+            append("═".literal().colour(0x19A5FF))
+            append("╝".literal().colour(0x009BFF))
         }
     }
 }

@@ -16,6 +16,7 @@ object CasualResourcePack {
         ArcadePacks.NO_SHADOW_PACK,
         ArcadePacks.SPACES_FONT_PACK,
         ArcadePacks.ACTION_BAR_FONT_PACK,
+        ArcadePacks.PLAYER_HEADS_PACK,
         CasualCommonMod.COMMON_PACK,
         CasualCommonItems.CUSTOM_MODEL_PACK
     )

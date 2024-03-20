@@ -62,10 +62,7 @@ import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.task.GlowingBossBarTask
 import net.casual.championships.common.task.GracePeriodBossBarTask
 import net.casual.championships.common.ui.ActiveBossBar
-import net.casual.championships.common.util.CommonCommands
-import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonTags
-import net.casual.championships.common.util.HeadUtils
+import net.casual.championships.common.util.*
 import net.casual.championships.events.border.BorderEntityPortalEntryPointEvent
 import net.casual.championships.uhc.UHCPhase.*
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
@@ -485,7 +482,6 @@ class UHCMinigame(
     private fun onMinigameAddSpectator(event: MinigameAddSpectatorEvent) {
         val (_, player) = event
         player.setGameMode(GameType.SPECTATOR)
-        player.setGlowingTag(false)
 
         this.effects.addFullbright(player)
         this.tags.remove(player, CommonTags.HAS_TEAM_GLOW)
@@ -493,6 +489,8 @@ class UHCMinigame(
         if (!this.levels.has(player.serverLevel())) {
             player.teleportTo(Location.of(0.0, 128.0, 0.0, level = this.overworld))
         }
+
+        this.chat.broadcastTo(UHCComponents.BROADCAST_SPECTATING, player, CommonUI.INFO_ANNOUNCEMENT)
     }
 
     private fun shouldObserveeGlow(observee: Entity, observer: ServerPlayer): Boolean {

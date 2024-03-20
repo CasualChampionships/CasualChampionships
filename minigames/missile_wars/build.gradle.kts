@@ -10,15 +10,10 @@ version = property("mod_version")!!
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri("https://maven.parchmentmc.org/")
-    }
-    maven {
-        url = uri("https://jitpack.io")
-    }
-    maven {
-        url = uri("https://maven.nucleoid.xyz")
-    }
+    maven("https://maven.parchmentmc.org/")
+    maven("https://jitpack.io")
+    maven("https://maven.nucleoid.xyz")
+    maven("https://repo.fruxz.dev/releases/")
     mavenCentral()
 }
 
@@ -33,16 +28,6 @@ dependencies {
 }
 
 tasks {
-    sourceSets {
-        create("datagen") {
-            compileClasspath += main.get().compileClasspath
-            runtimeClasspath += main.get().runtimeClasspath
-            compileClasspath += main.get().output
-            compileClasspath += test.get().compileClasspath
-            runtimeClasspath += test.get().runtimeClasspath
-        }
-    }
-
     processResources {
         inputs.property("version", project.version)
         filesMatching("fabric.mod.json") {
@@ -52,23 +37,6 @@ tasks {
 
     jar {
         from("LICENSE")
-    }
-
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                artifact(remapJar) {
-                    builtBy(remapJar)
-                }
-                artifact(kotlinSourcesJar) {
-                    builtBy(remapSourcesJar)
-                }
-            }
-        }
-
-        repositories {
-
-        }
     }
 
     compileKotlin {

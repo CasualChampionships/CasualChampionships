@@ -10,15 +10,10 @@ version = property("mod_version")!!
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri("https://maven.parchmentmc.org/")
-    }
-    maven {
-        url = uri("https://jitpack.io")
-    }
-    maven {
-        url = uri("https://maven.nucleoid.xyz")
-    }
+    maven("https://maven.parchmentmc.org/")
+    maven("https://jitpack.io")
+    maven("https://maven.nucleoid.xyz")
+    maven("https://repo.fruxz.dev/releases/")
     mavenCentral()
 }
 
@@ -80,23 +75,6 @@ tasks {
 
     jar {
         from("LICENSE")
-    }
-
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                artifact(remapJar) {
-                    builtBy(remapJar)
-                }
-                artifact(kotlinSourcesJar) {
-                    builtBy(remapSourcesJar)
-                }
-            }
-        }
-
-        repositories {
-
-        }
     }
 
     compileKotlin {
