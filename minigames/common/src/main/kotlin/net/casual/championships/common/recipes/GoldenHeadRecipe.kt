@@ -2,7 +2,7 @@ package net.casual.championships.common.recipes
 
 import net.casual.arcade.recipes.CraftingRecipeBuilder
 import net.casual.championships.common.CasualCommonMod
-import net.casual.championships.common.item.CasualCommonItems
+import net.casual.championships.common.item.CommonItems
 import net.casual.championships.common.util.HeadUtils
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.crafting.CraftingBookCategory
@@ -18,7 +18,7 @@ object GoldenHeadRecipe {
             width = 3
             result = HeadUtils.createConsumableGoldenHead()
             val x = Items.GOLD_INGOT
-            val o = CasualCommonItems.PLAYER_HEAD
+            val o = CommonItems.PLAYER_HEAD
             ingredients(
                 x, x, x,
                 x, o, x,

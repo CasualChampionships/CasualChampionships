@@ -45,7 +45,7 @@ class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(
 
         this.commands.register(this.createDuelCommand())
 
-        this.ui.setTabDisplay(CommonUI.createTabDisplay(this))
+        this.ui.setPlayerListDisplay(CommonUI.createTabDisplay(this))
     }
 
     @Listener

@@ -35,12 +35,19 @@ allprojects {
         mavenCentral()
     }
 
+    configurations.all {
+        // This is to resolve any conflicts with arcade-datagen
+        resolutionStrategy {
+            force("com.github.CasualChampionships:arcade:$arcadeVersion")
+        }
+    }
+
     dependencies {
         minecraft("com.mojang:minecraft:$minecraftVersion")
         @Suppress("UnstableApiUsage")
         mappings(loom.layered {
             officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-$parchmentVersion}@zip")
+            parchment("org.parchmentmc.data:parchment-$parchmentVersion@zip")
         })
         modImplementation("net.fabricmc:fabric-loader:$loaderVersion")
         modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricVersion")
@@ -74,6 +81,10 @@ allprojects {
 }
 
 dependencies {
+    include("com.github.CasualChampionships:arcade:$arcadeVersion")
+    include("com.github.senseiwells:ServerReplay:$serverReplayVersion")
+    include("xyz.nucleoid:server-translations-api:$serverTranslationsVersion")
+
     include(implementation(project(mapOf("path" to ":minigames:common", "configuration" to "namedElements")))!!)
     include(implementation(project(mapOf("path" to ":minigames:uhc", "configuration" to "namedElements")))!!)
     include(implementation(project(mapOf("path" to ":minigames:duel", "configuration" to "namedElements")))!!)

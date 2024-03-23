@@ -3,6 +3,7 @@ package net.casual.championships.common.ui
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.sidebar.SidebarSupplier
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.ChatFormatting.*
@@ -17,7 +18,7 @@ class BorderDistanceRow(private val buffer: Component): SidebarSupplier {
 
         val percent = distanceToBorder / (player.level().worldBorder.size / 2.0)
         val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
-        val display = Component.empty().append(this.buffer).append(CommonComponents.BORDER_DISTANCE_MESSAGE)
+        val display = Component.empty().append(this.buffer).append(CommonComponents.BORDER_DISTANCE_MESSAGE.mini())
         val score = distanceToBorder.toString().literal().append(this.buffer).withStyle(colour)
         return SidebarComponent.withCustomScore(display, score)
     }

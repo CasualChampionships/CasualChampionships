@@ -28,7 +28,7 @@ import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.impl.Location
-import net.casual.championships.common.item.CasualCommonItems
+import net.casual.championships.common.item.CommonItems
 import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.HeadUtils
 import net.minecraft.server.MinecraftServer
@@ -227,10 +227,10 @@ class DuelMinigame(
                         count(between(1, 2))
                         setWeight(4)
                     }
-                    addItem(CasualCommonItems.PLAYER_HEAD) {
+                    addItem(CommonItems.PLAYER_HEAD) {
                         setWeight(2)
                     }
-                    addItem(CasualCommonItems.GOLDEN_HEAD) {
+                    addItem(CommonItems.GOLDEN_HEAD) {
                         setWeight(1)
                     }
                 }

@@ -1,10 +1,8 @@
 package net.casual.championships.minigame
 
 import com.google.gson.JsonObject
-import eu.pb4.placeholders.api.node.parent.GradientNode
 import net.casual.arcade.area.StructuredAreaConfig
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.minigame.MinigameCloseEvent
 import net.casual.arcade.events.player.PlayerCanLoginEvent
 import net.casual.arcade.events.player.PlayerJoinEvent
 import net.casual.arcade.events.server.ServerLoadedEvent
@@ -16,8 +14,6 @@ import net.casual.arcade.minigame.events.MinigamesEventConfig
 import net.casual.arcade.minigame.events.MinigamesEventConfigSerializer
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.colour
-import net.casual.arcade.utils.ComponentUtils.crimson
-import net.casual.arcade.utils.ComponentUtils.green
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.white
@@ -25,6 +21,7 @@ import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.arcade.utils.StringUtils.toSmallCaps
+import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.LobbyBossBarConfig
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.events.CasualConfigReloaded
@@ -32,7 +29,6 @@ import net.casual.championships.managers.TeamManager
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.MinecraftServer
 import java.nio.file.Path
 import kotlin.io.path.bufferedReader
@@ -58,6 +54,7 @@ object CasualMinigames {
             val lobbies = Config.resolve("lobbies").createDirectories()
             addAreaFactory(StructuredAreaConfig.factory(lobbies))
             addBossbarFactory(LobbyBossBarConfig)
+            addCountdownFactory(CasualCountdown.Config)
         }
 
         this.event = CasualChampionshipsEvent(this.readMinigameEvent())

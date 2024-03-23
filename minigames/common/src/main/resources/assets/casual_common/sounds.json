@@ -1,0 +1,26 @@
+{
+  "countdown.tick.end": {
+    "sounds": [
+      {
+        "name": "casual_common:countdown.tick.end",
+        "volume": 0.7
+      }
+    ]
+  },
+  "countdown.tick.high": {
+    "sounds": [
+      {
+        "name": "casual_common:countdown.tick.high",
+        "volume": 0.7
+      }
+    ]
+  },
+  "countdown.tick.normal": {
+    "sounds": [
+      {
+        "name": "casual_common:countdown.tick.normal",
+        "volume": 0.7
+      }
+    ]
+  }
+}

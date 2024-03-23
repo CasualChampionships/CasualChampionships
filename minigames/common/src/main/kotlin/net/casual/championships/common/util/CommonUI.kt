@@ -9,15 +9,18 @@ import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.sidebar.SidebarSupplier
 import net.casual.arcade.gui.suppliers.ComponentSupplier
-import net.casual.arcade.gui.tab.ArcadeTabDisplay
+import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
+import net.casual.arcade.gui.tab.MinigamePlayerListEntries
+import net.casual.arcade.gui.tab.VanillaPlayerListEntries
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.ComponentUtils.aqua
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.TickUtils
 import net.casual.championships.common.ui.BorderDistanceRow
+import net.casual.championships.common.ui.CasualPlayerListEntries
 import net.casual.championships.common.ui.TeammateRow
 import net.casual.championships.common.util.CommonComponents.Bitmap.CASUAL
 import net.casual.championships.common.util.CommonComponents.Bitmap.CHAMPIONSHIPS
@@ -46,7 +49,7 @@ object CommonUI {
 
     fun addTeammates(sidebar: ArcadeSidebar, size: Int): ArcadeSidebar {
         val buffer = ComponentUtils.space()
-        val teammates = Component.empty().append(buffer).append(CommonComponents.TEAMMATES_MESSAGE)
+        val teammates = Component.empty().append(buffer).append(CommonComponents.TEAMMATES_MESSAGE.mini())
         sidebar.addRow(SidebarSupplier.withNoScore(teammates))
         for (i in 0 until size) {
             sidebar.addRow(TeammateRow(i, buffer))
@@ -58,14 +61,16 @@ object CommonUI {
         val buffer = ComponentUtils.space()
         sidebar.addRow(BorderDistanceRow(buffer))
         sidebar.addRow { player ->
-            val display = Component.empty().append(buffer).append(CommonComponents.BORDER_RADIUS_MESSAGE)
+            val display = Component.empty().append(buffer).append(CommonComponents.BORDER_RADIUS_MESSAGE.mini())
             val score = (player.level().worldBorder.size / 2.0).toInt().toString().literal().append(buffer)
             SidebarComponent.withCustomScore(display, score)
         }
     }
 
-    fun createTabDisplay(minigame: Minigame<*>): ArcadeTabDisplay {
-        val display = ArcadeTabDisplay(
+    fun createTabDisplay(minigame: Minigame<*>): ArcadePlayerListDisplay {
+        val display = ArcadePlayerListDisplay(CasualPlayerListEntries(minigame))
+
+        display.setDisplay(
             ComponentSupplier.of("\n".literal().append(CASUAL).append(" ").append(CHAMPIONSHIPS).append("\n"))
         ) { player ->
             val tps = TickUtils.calculateTPS()

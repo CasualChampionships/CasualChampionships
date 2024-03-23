@@ -8,7 +8,7 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MobCategory
 
-object CasualCommonEntities {
+object CommonEntities {
     val MYSTERIOUS_PEARL = register(
         "mysterious_pearl",
         EntityType.Builder.of(::MysteriousPearl, MobCategory.MISC).sized(0.25F, 0.25F)

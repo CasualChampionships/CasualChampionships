@@ -4,7 +4,7 @@ import eu.pb4.polymer.core.api.item.PolymerItem
 import net.casual.arcade.utils.ResourcePackUtils.registerNextModel
 import net.casual.championships.common.CasualCommonMod.id
 import net.casual.championships.common.entity.MysteriousPearl
-import net.casual.championships.common.item.CasualCommonItems.CUSTOM_MODEL_PACK
+import net.casual.championships.common.item.CommonItems.CUSTOM_MODEL_PACK
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResultHolder

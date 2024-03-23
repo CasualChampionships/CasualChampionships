@@ -3,7 +3,6 @@ package net.casual.championships.common.item
 import net.casual.arcade.items.ArcadeModelledItem
 import net.casual.arcade.items.ItemModeller
 import net.casual.arcade.items.ResourcePackItemModeller
-import net.casual.championships.common.CasualCommonMod
 import net.casual.championships.common.CasualCommonMod.id
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
@@ -20,7 +19,7 @@ class MenuItem private constructor(): Item(Properties()), ArcadeModelledItem {
     }
 
     companion object {
-        val MODELLER = ResourcePackItemModeller(MenuItem(), CasualCommonItems.CUSTOM_MODEL_PACK.getCreator())
+        val MODELLER = ResourcePackItemModeller(MenuItem(), CommonItems.CUSTOM_MODEL_PACK.getCreator())
         val TICK by MODELLER.model(id("gui/green_tick"))
         val GREY_TICK by MODELLER.model(id("gui/greyed_green_tick"))
         val CROSS by MODELLER.model(id("gui/red_cross"))

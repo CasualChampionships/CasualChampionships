@@ -25,7 +25,7 @@ class PlayerHeadItem: HeadItem() {
     }
 
     override fun getName(stack: ItemStack): Component? {
-        if (stack.isOf(CasualCommonItems.PLAYER_HEAD) && stack.hasTag()) {
+        if (stack.isOf(CommonItems.PLAYER_HEAD) && stack.hasTag()) {
             var string: String? = null
             val tag = stack.orCreateTag
             if (tag.contains("SkullOwner", Tag.TAG_STRING.toInt())) {

@@ -50,8 +50,6 @@ enum class UHCPhase(
             minigame.levels.all().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
             for (player in minigame.getAllPlayers()) {
-                player.sendSound(SoundEvents.NOTE_BLOCK_PLING.value())
-
                 player.revokeAllAdvancements()
             }
 
@@ -97,7 +95,7 @@ enum class UHCPhase(
 
             minigame.teams.hideNameTags()
 
-            minigame.ui.setTabDisplay(CommonUI.createTabDisplay(minigame))
+            minigame.ui.setPlayerListDisplay(CommonUI.createTabDisplay(minigame))
 
             minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
             minigame.ui.addNameTag(CommonUI.createPlayingHealthTag())

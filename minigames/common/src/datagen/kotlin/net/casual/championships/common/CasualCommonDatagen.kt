@@ -28,23 +28,23 @@ class CasualCommonDatagen: ClientModInitializer {
         val generator = LanguageGenerator(listOf("en_us", "es_es")).apply {
             add(CentredSpacingGenerator(
                 CommonComponents.STARTING_IN_MESSAGE.generate("00:00:00"),
-                CommonComponents.BACKGROUND_240_BITMAP
+                CommonComponents.Bitmap.BACKGROUND_240
             ))
             add(CentredSpacingGenerator(
                 CommonComponents.TIME_ELAPSED_MESSAGE.generate("00:00:00"),
-                CommonComponents.BACKGROUND_240_BITMAP
+                CommonComponents.Bitmap.BACKGROUND_240
             ))
             add(CentredSpacingGenerator(
                 CommonComponents.GRACE_MESSAGE.generate("00:00"),
-                CommonComponents.BACKGROUND_180_BITMAP
+                CommonComponents.Bitmap.BACKGROUND_180
             ))
             add(CentredSpacingGenerator(
                 CommonComponents.GLOWING_MESSAGE.generate("00:00"),
-                CommonComponents.BACKGROUND_180_BITMAP
+                CommonComponents.Bitmap.BACKGROUND_180
             ))
             add(CentredSpacingGenerator(
                 CommonComponents.STARTING_SOON_MESSAGE,
-                CommonComponents.BACKGROUND_240_BITMAP
+                CommonComponents.Bitmap.BACKGROUND_240
             ))
 
             for (direction in Direction8.values()) {

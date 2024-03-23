@@ -4,6 +4,7 @@ import net.casual.arcade.font.BitmapFont
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.crimson
 import net.casual.arcade.utils.ComponentUtils.lime
+import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.ComponentUtils.translatable
 import net.casual.arcade.utils.ComponentUtils.translatableWithArgs
@@ -108,7 +109,7 @@ object CommonComponents {
                 append(Component.translatable("$key.space.1").withSpacesFont())
                 append(background.shadowless())
                 append(Component.translatable("$key.space.2").withSpacesFont())
-                append(Component.translatable(key, *it))
+                append(Component.translatable(key, *it).mini())
             }
         }
     }

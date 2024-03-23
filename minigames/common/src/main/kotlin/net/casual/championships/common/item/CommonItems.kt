@@ -6,7 +6,7 @@ import net.casual.championships.common.CasualCommonMod
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Items
 
-object CasualCommonItems {
+object CommonItems {
     val CUSTOM_MODEL_PACK = NamedResourcePackCreator.named("common_models") {
         addMissingItemModels(CasualCommonMod.MOD_ID)
     }

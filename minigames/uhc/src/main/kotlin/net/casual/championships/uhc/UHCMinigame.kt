@@ -669,9 +669,6 @@ class UHCMinigame(
     fun setAsPlaying(player: ServerPlayer) {
         this.removeSpectator(player)
 
-        player.sendTitle(CommonComponents.GOOD_LUCK_MESSAGE.gold().bold())
-        player.sendSound(SoundEvents.NOTE_BLOCK_BELL.value())
-
         player.grantAllRecipes()
 
         player.grantAdvancement(UHCAdvancements.ROOT)

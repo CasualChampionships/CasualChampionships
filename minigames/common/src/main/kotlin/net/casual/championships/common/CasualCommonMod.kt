@@ -5,10 +5,11 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ResourcePackUtils.addBitmapFont
 import net.casual.arcade.utils.ResourcePackUtils.addLangsFrom
 import net.casual.arcade.utils.ResourcePackUtils.addLangsFromData
-import net.casual.championships.common.entity.CasualCommonEntities
-import net.casual.championships.common.item.CasualCommonItems
+import net.casual.championships.common.entity.CommonEntities
+import net.casual.championships.common.item.CommonItems
 import net.casual.championships.common.util.AntiCheat
 import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.util.CommonSounds
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.resources.ResourceLocation
@@ -31,8 +32,9 @@ object CasualCommonMod: DedicatedServerModInitializer {
     }
 
     override fun onInitializeServer() {
-        CasualCommonItems.noop()
-        CasualCommonEntities.noop()
+        CommonItems.noop()
+        CommonEntities.noop()
+        CommonSounds.noop()
 
         AntiCheat.registerEvents()
     }

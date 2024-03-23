@@ -1,7 +1,7 @@
 package net.casual.championships.common.entity
 
 import eu.pb4.polymer.core.api.entity.PolymerEntity
-import net.casual.championships.common.item.CasualCommonItems
+import net.casual.championships.common.item.CommonItems
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity
@@ -14,10 +14,10 @@ import net.minecraft.world.phys.HitResult
 class MysteriousPearl: ThrowableItemProjectile, PolymerEntity {
     constructor(type: EntityType<out MysteriousPearl>, level: Level): super(type, level)
 
-    constructor(level: Level, shooter: LivingEntity): super(CasualCommonEntities.MYSTERIOUS_PEARL, shooter, level)
+    constructor(level: Level, shooter: LivingEntity): super(CommonEntities.MYSTERIOUS_PEARL, shooter, level)
 
     init {
-        this.item = CasualCommonItems.MYSTERIOUS_PEARL.defaultInstance
+        this.item = CommonItems.MYSTERIOUS_PEARL.defaultInstance
     }
 
     override fun getPolymerEntityType(player: ServerPlayer?): EntityType<*> {

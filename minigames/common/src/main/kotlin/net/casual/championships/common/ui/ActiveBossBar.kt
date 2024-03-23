@@ -5,6 +5,7 @@ import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.stats.ArcadeStats
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatHHMMSS

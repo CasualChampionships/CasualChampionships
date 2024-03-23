@@ -6,6 +6,7 @@ import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.sidebar.SidebarSupplier
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
@@ -62,7 +63,7 @@ class TeammateRow(private val index: Int, private val buffer: Component): Sideba
             append(" ")
             append(PlayerHeadComponents.getHeadOrDefault(name))
             append(" ")
-            append(name.literal().withStyle(team.color))
+            append(name.literal().mini().withStyle(team.color))
         }
     }
 }

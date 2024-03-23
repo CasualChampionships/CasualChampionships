@@ -1,4 +1,4 @@
-base.archivesName.set("casual-common")
+base.archivesName.set("casual-uhc")
 version = rootProject.version
 
 dependencies {
