@@ -4,7 +4,7 @@ import net.casual.arcade.items.ArcadeModelledItem
 import net.casual.arcade.items.ItemModeller
 import net.casual.arcade.items.ResourcePackItemModeller
 import net.casual.championships.CasualMod
-import net.casual.championships.common.item.CommonItems
+import net.casual.championships.common.util.CommonItems
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack

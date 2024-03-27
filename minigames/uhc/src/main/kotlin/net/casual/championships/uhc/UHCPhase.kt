@@ -1,8 +1,9 @@
 package net.casual.championships.uhc
 
+import net.casual.arcade.gui.elements.ComponentElements
+import net.casual.arcade.gui.elements.SidebarElements
+import net.casual.arcade.gui.elements.UniversalElement
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
-import net.casual.arcade.gui.sidebar.SidebarSupplier
-import net.casual.arcade.gui.suppliers.ComponentSupplier
 import net.casual.arcade.level.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.task.impl.MinigameTask
@@ -28,7 +29,9 @@ import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.task.GlowingBossBarTask
 import net.casual.championships.common.task.GracePeriodBossBarTask
+import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
+import net.casual.championships.uhc.ui.UHCStatusRow
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
@@ -49,6 +52,9 @@ enum class UHCPhase(
             minigame.settings.tickFreezeOnPause.set(true)
             minigame.levels.all().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
+
+            minigame.ui.removeAllNameTags()
+
             for (player in minigame.getAllPlayers()) {
                 player.revokeAllAdvancements()
             }
@@ -95,17 +101,15 @@ enum class UHCPhase(
 
             minigame.teams.hideNameTags()
 
-            minigame.ui.setPlayerListDisplay(CommonUI.createTabDisplay(minigame))
-
             minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
             minigame.ui.addNameTag(CommonUI.createPlayingHealthTag())
 
-            val sidebar = ArcadeSidebar(ComponentSupplier.of(UHCComponents.Bitmap.TITLE))
+            val sidebar = ArcadeSidebar(ComponentElements.of(UHCComponents.Bitmap.TITLE))
             // TODO: Configure team sizes
             CommonUI.addTeammates(sidebar, 5)
-            sidebar.addRow(SidebarSupplier.empty())
+            sidebar.addRow(SidebarElements.empty())
             CommonUI.addBorderDistanceAndRadius(sidebar)
-            sidebar.addRow(SidebarSupplier.empty())
+            sidebar.addRow(SidebarElements.empty())
             minigame.ui.setSidebar(sidebar)
         }
     },
@@ -127,7 +131,7 @@ enum class UHCPhase(
             val message = CommonComponents.BORDER_GRACE_OVER_MESSAGE.red().bold()
             for (player in minigame.getAllPlayers()) {
                 player.sendSystemMessage(message)
-                player.sendSound(SoundEvents.ENDER_DRAGON_GROWL)
+                player.sendSound(CommonSounds.GAME_BORDER_MOVING)
             }
             minigame.settings.canPvp.set(true)
         }

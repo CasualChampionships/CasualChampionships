@@ -35,12 +35,14 @@ object CasualMod: DedicatedServerModInitializer {
         CasualResourcePackHost.registerEvents()
         CasualMinigames.registerEvents()
 
-        CasualResourcePack.generate()
+        CasualResourcePack.generateAll()
     }
 
     // TODO:
-    //   Ready Translations
-    //   MOTD
+    //   Finish TAB
+    //   Status for UHC (grace, border moving, border paused, game over)
+    //   Generic info messages and game messages (with sound)
+    //   Lots of translations (Ready)
     //   SpreadPlayers
     //   Implement podium
     //   Minesweeper AI - Make sure all maps are non-luck based

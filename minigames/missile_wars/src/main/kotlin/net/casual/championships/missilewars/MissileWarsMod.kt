@@ -1,6 +1,6 @@
 package net.casual.championships.missilewars
 
-import net.casual.arcade.resources.NamedResourcePackCreator
+import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ResourcePackUtils.addLangsFromData
 import net.fabricmc.api.DedicatedServerModInitializer

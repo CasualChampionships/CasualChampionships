@@ -1,8 +1,9 @@
-package net.casual.championships.common.item
+package net.casual.championships.common.items
 
 import eu.pb4.polymer.core.api.utils.PolymerUtils
 import net.casual.arcade.utils.HeadTextures
 import net.casual.arcade.utils.ItemUtils.isOf
+import net.casual.championships.common.util.CommonItems
 import net.minecraft.nbt.Tag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer

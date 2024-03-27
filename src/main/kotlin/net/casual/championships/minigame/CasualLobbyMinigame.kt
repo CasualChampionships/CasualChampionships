@@ -3,6 +3,7 @@ package net.casual.championships.minigame
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
+import net.casual.arcade.events.minigame.LobbyMoveToNextMinigameEvent
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.gui.screen.SelectionScreenBuilder
@@ -21,10 +22,9 @@ import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.TimeUtils.Seconds
-import net.casual.championships.common.item.MenuItem
+import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonUI
 import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.util.Config
@@ -44,8 +44,6 @@ class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(
         super.initialize()
 
         this.commands.register(this.createDuelCommand())
-
-        this.ui.setPlayerListDisplay(CommonUI.createTabDisplay(this))
     }
 
     @Listener
@@ -81,6 +79,11 @@ class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(
         } else {
             this.makeSpectator(player)
         }
+    }
+
+    @Listener
+    private fun onMoveToNextMinigame(event: LobbyMoveToNextMinigameEvent) {
+        event.delay = 3.Seconds
     }
 
     private fun createDuelCommand(): LiteralArgumentBuilder<CommandSourceStack> {

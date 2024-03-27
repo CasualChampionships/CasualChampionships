@@ -13,11 +13,14 @@
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-    "server": [
+    "main": [
       {
         "adapter": "kotlin",
-        "value": "net.casual.championships.common.CasualCommonMod"
+        "value": "net.casual.championships.common.CommonMod"
       }
+    ],
+    "arcade-datagen": [
+      "net.casual.championships.common.datagen.CommonDatagen"
     ]
   },
   "mixins": [

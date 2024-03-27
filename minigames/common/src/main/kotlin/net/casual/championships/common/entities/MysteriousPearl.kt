@@ -1,7 +1,8 @@
-package net.casual.championships.common.entity
+package net.casual.championships.common.entities
 
 import eu.pb4.polymer.core.api.entity.PolymerEntity
-import net.casual.championships.common.item.CommonItems
+import net.casual.championships.common.util.CommonEntities
+import net.casual.championships.common.util.CommonItems
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity

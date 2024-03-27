@@ -2,7 +2,7 @@ package net.casual.championships.common.util
 
 import net.casual.arcade.gui.screen.SelectionScreenComponents
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.championships.common.item.MenuItem
+import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.CommonComponents.BACK_MESSAGE
 import net.casual.championships.common.util.CommonComponents.EXIT_MESSAGE
 import net.casual.championships.common.util.CommonComponents.NEXT_MESSAGE

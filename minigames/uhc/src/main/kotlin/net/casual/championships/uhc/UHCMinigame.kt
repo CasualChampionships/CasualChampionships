@@ -113,7 +113,7 @@ class UHCMinigame(
     private val spawn by lazy {
         this.overworld.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, BlockPos.ZERO)
     }
-    private var bordersMoving = false
+    internal var bordersMoving = false
 
     override val id = ID
 
@@ -491,6 +491,7 @@ class UHCMinigame(
         }
 
         this.chat.broadcastTo(UHCComponents.BROADCAST_SPECTATING, player, CommonUI.INFO_ANNOUNCEMENT)
+        player.sendSound(CommonSounds.GLOBAL_SERVER_NOTIFICATION_LOW)
     }
 
     private fun shouldObserveeGlow(observee: Entity, observer: ServerPlayer): Boolean {

@@ -8,11 +8,10 @@ import net.casual.arcade.settings.display.MenuGameSetting
 import net.casual.arcade.settings.display.MenuGameSettingBuilder
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.championships.common.item.MenuItem
-import net.casual.championships.common.item.MenuItem.Companion.CROSS
-import net.casual.championships.common.item.MenuItem.Companion.GREY_CROSS
-import net.casual.championships.common.item.MenuItem.Companion.GREY_TICK
-import net.casual.championships.common.item.MenuItem.Companion.TICK
+import net.casual.championships.common.items.MenuItem.Companion.CROSS
+import net.casual.championships.common.items.MenuItem.Companion.GREY_CROSS
+import net.casual.championships.common.items.MenuItem.Companion.GREY_TICK
+import net.casual.championships.common.items.MenuItem.Companion.TICK
 import net.casual.championships.common.util.CommonComponents.DISABLED_MESSAGE
 import net.casual.championships.common.util.CommonComponents.DISABLE_MESSAGE
 import net.casual.championships.common.util.CommonComponents.ENABLED_MESSAGE

@@ -9,10 +9,10 @@ import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.PlayerUtils
-import net.casual.championships.common.item.MenuItem
-import net.casual.championships.common.item.MinesweeperItem
-import net.casual.championships.common.item.MinesweeperItem.Companion.MINE
-import net.casual.championships.common.item.MinesweeperItem.Companion.UNKNOWN
+import net.casual.championships.common.items.MenuItem
+import net.casual.championships.common.items.MinesweeperItem
+import net.casual.championships.common.items.MinesweeperItem.Companion.MINE
+import net.casual.championships.common.items.MinesweeperItem.Companion.UNKNOWN
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonStats
 import net.minecraft.network.chat.Component
@@ -145,8 +145,7 @@ class MinesweeperScreen(
         this.complete = true
         val seconds = (System.nanoTime() - grid.startTime) / 1000000000.0
         if (seconds <= 40) {
-            // TODO:
-            // player.grantAdvancement(UHCAdvancements.OFFICIALLY_BORED)
+
         }
         val time = String.format("%.2f", seconds)
         player.sendSystemMessage(CommonComponents.MINESWEEPER_WON.generate(time))

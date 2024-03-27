@@ -22,7 +22,7 @@ class ActiveBossBar(
             .append(ComponentUtils.space(-2))
             .append(CommonComponents.Bitmap.BACKGROUND_40.shadowless())
             .append(ComponentUtils.space(-27))
-            .append("%02d".format(this.owner.getPlayingPlayers().size).literal())
+            .append("%02d".format(this.owner.getPlayingPlayers().size).literal().mini())
             .append(CommonComponents.Bitmap.PLAYER_COUNT)
             .append(ComponentUtils.space(42))
             .append(ComponentUtils.space(1, 2))
@@ -30,9 +30,9 @@ class ActiveBossBar(
             .append(ComponentUtils.space(39))
             .append(CommonComponents.Bitmap.BACKGROUND_40.shadowless())
             .append(ComponentUtils.space(-27))
-            .append("%02d".format(this.owner.stats.getOrCreateStat(player, ArcadeStats.KILLS).value).literal())
+            .append("%02d".format(this.owner.stats.getOrCreateStat(player, ArcadeStats.KILLS).value).literal().mini())
             .append(CommonComponents.Bitmap.KILLS_COUNT)
-        val middle = CommonComponents.TIME_ELAPSED_BACKGROUNDED.generate(this.owner.uptime.Ticks.formatHHMMSS())
+        val middle = CommonComponents.TIME_ELAPSED_BACKGROUNDED.generate(this.owner.uptime.Ticks.formatHHMMSS()).mini()
         return start.append(middle).append(end)
     }
 

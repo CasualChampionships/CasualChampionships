@@ -2,7 +2,6 @@ package net.casual.championships.common.util
 
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.unitalicise
-import net.casual.championships.common.item.CommonItems
 import net.minecraft.nbt.StringTag
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack

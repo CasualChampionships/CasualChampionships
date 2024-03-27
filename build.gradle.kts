@@ -19,6 +19,7 @@ val fabricVersion: String by project
 val fabricKotlinVersion: String by project
 
 val arcadeVersion: String by project
+val arcadeDatagenVersion: String by project
 val serverReplayVersion: String by project
 val serverTranslationsVersion: String by project
 
@@ -54,12 +55,23 @@ allprojects {
         modImplementation("net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion")
 
         modImplementation("com.github.CasualChampionships:arcade:$arcadeVersion")
+        modImplementation("com.github.CasualChampionships:arcade-datagen:$arcadeDatagenVersion")
         modImplementation("com.github.senseiwells:ServerReplay:$serverReplayVersion")
         modImplementation("xyz.nucleoid:server-translations-api:$serverTranslationsVersion")
     }
 
     java {
         withSourcesJar()
+    }
+
+    loom {
+        runs {
+            create("datagenClient") {
+                client()
+                programArgs("--arcade-datagen")
+                runDir = "run-datagen"
+            }
+        }
     }
 
     tasks {

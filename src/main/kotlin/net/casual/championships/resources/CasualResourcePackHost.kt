@@ -2,9 +2,9 @@ package net.casual.championships.resources
 
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.server.ServerStoppingEvent
-import net.casual.arcade.resources.DirectoryPackSupplier
-import net.casual.arcade.resources.HostedPack
-import net.casual.arcade.resources.PackHost
+import net.casual.arcade.resources.hosting.DirectoryPackSupplier
+import net.casual.arcade.resources.hosting.HostedPack
+import net.casual.arcade.resources.hosting.PackHost
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.util.Config

@@ -1,7 +1,8 @@
-package net.casual.championships.common.entity
+package net.casual.championships.common.util
 
 import eu.pb4.polymer.core.api.entity.PolymerEntityUtils
-import net.casual.championships.common.CasualCommonMod
+import net.casual.championships.common.CommonMod
+import net.casual.championships.common.entities.MysteriousPearl
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.entity.Entity
@@ -20,7 +21,7 @@ object CommonEntities {
 
     private fun <T: Entity> register(key: String, builder: EntityType.Builder<T>): EntityType<T> {
         val type = builder.build(key)
-        Registry.register(BuiltInRegistries.ENTITY_TYPE, CasualCommonMod.id(key), type)
+        Registry.register(BuiltInRegistries.ENTITY_TYPE, CommonMod.id(key), type)
         PolymerEntityUtils.registerType(type)
         return type
     }

@@ -1,9 +1,10 @@
-package net.casual.championships.common.item
+package net.casual.championships.common.items
 
 import net.casual.arcade.items.ArcadeModelledItem
 import net.casual.arcade.items.ItemModeller
 import net.casual.arcade.items.ResourcePackItemModeller
-import net.casual.championships.common.CasualCommonMod.id
+import net.casual.championships.common.CommonMod.id
+import net.casual.championships.common.util.CommonItems
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack

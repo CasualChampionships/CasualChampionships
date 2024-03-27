@@ -45,7 +45,6 @@ class UHCAdvancementManager(
         var lowest: PlayerAttacker? = null
         var highest: PlayerAttacker? = null
         for (player in this.uhc.getAllPlayers()) {
-            this.uhc.uhcAdvancements
             val team = player.team
             if (team != null && this.uhc.teams.isTeamIgnored(team)) {
                 val current = this.uhc.stats.getOrCreateStat(player, ArcadeStats.DAMAGE_DEALT).value

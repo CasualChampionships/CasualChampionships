@@ -1,15 +1,12 @@
 package net.casual.championships.minigame
 
 import com.google.gson.JsonArray
-import com.mojang.brigadier.builder.LiteralArgumentBuilder
-import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.minigame.MinigameCloseEvent
 import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.player.PlayerTeamLeaveEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameResources
-import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.NONE
 import net.casual.arcade.minigame.events.MinigamesEvent
 import net.casual.arcade.minigame.events.MinigamesEventConfig
@@ -18,38 +15,29 @@ import net.casual.arcade.minigame.events.lobby.LobbyMinigame
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame.LobbyPhase
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.resources.PackInfo
-import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.utils.ComponentUtils.red
-import net.casual.arcade.utils.ComponentUtils.shadowless
+import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.utils.FantasyUtils
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.LevelUtils
 import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
-import net.casual.arcade.utils.PlayerUtils.sendTitle
-import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
-import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.json.LongSerializer
 import net.casual.championships.CasualMod
-import net.casual.championships.common.minigame.CasualSettings
-import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.CommonMod
+import net.casual.championships.common.ui.CasualCountdown
+import net.casual.championships.common.ui.CasualReadyChecker
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.PerformanceUtils
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelSettings
-import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
-import net.minecraft.commands.CommandSourceStack
-import net.minecraft.commands.Commands
-import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
-import net.minecraft.world.level.GameType
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.levelgen.WorldOptions
 import xyz.nucleoid.fantasy.RuntimeWorldConfig
@@ -62,7 +50,7 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
     private val seed by Config.any(default = WorldOptions.randomSeed(), serializer = LongSerializer)
 
     override fun getAdditionalPacks(): List<String> {
-        return CasualResourcePack.getPackNames()
+        return CommonMod.COMMON_PACKS.map(NamedResourcePackCreator::zippedName)
     }
 
     override fun getPackInfo(name: String): PackInfo? {
@@ -70,7 +58,9 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
     }
 
     override fun createLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame {
-        return CasualLobbyMinigame(server, lobby)
+        val minigame = CasualLobbyMinigame(server, lobby)
+        this.setCasualUI(minigame)
+        return minigame
     }
 
     fun createUHCMinigame(context: MinigameCreationContext): UHCMinigame {
@@ -113,6 +103,7 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
         val minigame = UHCMinigame.of(server, overworld, nether, end)
         PerformanceUtils.reduceMinigameMobcap(minigame)
         PerformanceUtils.disableEntityAI(minigame)
+        this.setCasualUI(minigame)
 
         minigame.addResources(object: MinigameResources {
             override fun getPacks(): Collection<PackInfo> {
@@ -157,7 +148,14 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
                 minigame.close()
             }
         }
+        this.setCasualUI(minigame)
         return minigame
+    }
+
+    private fun setCasualUI(minigame: Minigame<*>) {
+        minigame.ui.setPlayerListDisplay(CommonUI.createTabDisplay(minigame))
+        minigame.ui.readier = CasualReadyChecker(minigame)
+        minigame.ui.countdown = CasualCountdown
     }
 
     // TODO: Use a proper database

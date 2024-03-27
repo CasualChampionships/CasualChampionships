@@ -3,7 +3,6 @@ package net.casual.championships.commands
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
-import net.casual.arcade.minigame.MinigameResources.Companion.sendTo
 import net.casual.arcade.utils.CommandUtils.fail
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.MinigameUtils.requiresAdminOrPermission
@@ -63,7 +62,7 @@ object CasualCommand: Command {
         context: CommandContext<CommandSourceStack>,
         reload: Boolean = BoolArgumentType.getBool(context, "reload")
     ): Int {
-        CasualResourcePack.generate()
+        CasualResourcePack.generateAll()
         if (reload) {
             context.source.success("Successfully regenerated resources")
             return this.reloadResources(context)

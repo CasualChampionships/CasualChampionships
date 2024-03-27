@@ -1,4 +1,4 @@
-package net.casual.championships.common.item
+package net.casual.championships.common.items
 
 import eu.pb4.polymer.core.api.item.PolymerItem
 import net.casual.championships.common.util.CommonComponents

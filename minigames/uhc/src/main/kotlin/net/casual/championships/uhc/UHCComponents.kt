@@ -1,6 +1,6 @@
 package net.casual.championships.uhc
 
-import net.casual.arcade.font.BitmapFont
+import net.casual.arcade.resources.font.FontResources
 import net.casual.arcade.utils.ComponentUtils.translatable
 import net.minecraft.network.chat.Component
 
@@ -81,7 +81,7 @@ object UHCComponents {
     val BROADCAST_PLAYER_HEADS by translatable("uhc.broadcast.playerHeads")
     val BROADCAST_REMOVE_ME by translatable("uhc.broadcast.joke")
 
-    object Bitmap: BitmapFont(UHCMod.id("bitmap_font")) {
-        val TITLE by add(texture("uhc_title.png"), 8, 9)
+    object Bitmap: FontResources(UHCMod.id("bitmap_font")) {
+        val TITLE by bitmap(at("uhc_title.png"), 8, 9)
     }
 }

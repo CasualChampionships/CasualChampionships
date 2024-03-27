@@ -1,9 +1,8 @@
 package net.casual.championships.common.ui
 
-import net.casual.arcade.font.heads.PlayerHeadComponents
-import net.casual.arcade.font.heads.PlayerHeadFont
+import net.casual.arcade.gui.elements.PlayerSpecificElement
 import net.casual.arcade.gui.sidebar.SidebarComponent
-import net.casual.arcade.gui.sidebar.SidebarSupplier
+import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
@@ -16,13 +15,13 @@ import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.Team
 
-class TeammateRow(private val index: Int, private val buffer: Component): SidebarSupplier {
+class TeammateRow(private val index: Int, private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
     private val none = SidebarComponent.withCustomScore(
         Component.empty().append(this.buffer).append(" - "),
         CommonComponents.Bitmap.UNAVAILABLE.append(this.buffer)
     )
 
-    override fun getComponent(player: ServerPlayer): SidebarComponent {
+    override fun get(player: ServerPlayer): SidebarComponent {
         val team = player.team
         val minigame = player.getMinigame()
         if (team == null || (minigame != null && minigame.teams.isTeamIgnored(team))) {
@@ -47,7 +46,7 @@ class TeammateRow(private val index: Int, private val buffer: Component): Sideba
         val score = if (teammate != null) {
             if (teammate.isSurvival && teammate.isAlive) {
                 val health = " %04.1f".format(teammate.health / 2.0)
-                health.literal().append(ComponentUtils.space(1)).append(CommonComponents.Bitmap.HARDCORE_HEART)
+                health.literal().mini().append(ComponentUtils.space(1)).append(CommonComponents.Bitmap.HARDCORE_HEART)
             } else {
                 CommonComponents.Bitmap.UNAVAILABLE
             }
