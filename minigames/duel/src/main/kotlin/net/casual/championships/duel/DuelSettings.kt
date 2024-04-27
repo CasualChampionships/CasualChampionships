@@ -1,21 +1,17 @@
 package net.casual.championships.duel
 
-import net.casual.arcade.gui.screen.SelectionScreenStyle
+import net.casual.arcade.settings.display.DisplayableSettings
 import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.bool
 import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.float64
-import net.casual.arcade.settings.display.DisplayableSettings
-import net.casual.arcade.settings.display.DisplayableSettingsDefaults
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ItemUtils.hideTooltips
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
-import net.casual.arcade.utils.ScreenUtils
-import net.casual.championships.common.util.CommonScreens
-import net.minecraft.world.MenuProvider
+import net.casual.championships.common.minigame.CasualSettings
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
-class DuelSettings: DisplayableSettings(DisplayableSettingsDefaults()) {
+class DuelSettings: DisplayableSettings(CasualSettings.Defaults("Duel Settings".literal())) {
     var teams by this.register(bool {
         name = "teams"
         display = Items.GREEN_BANNER.named("Teams")
@@ -61,13 +57,4 @@ class DuelSettings: DisplayableSettings(DisplayableSettingsDefaults()) {
         value = true
         defaults.options(this)
     })
-
-    override fun menu(parent: MenuProvider?): MenuProvider {
-        return ScreenUtils.createSettingsMenu(
-            this,
-            components = CommonScreens.named("Duel Settings".literal()),
-            parent = parent,
-            style = SelectionScreenStyle.centered(5, 3)
-        )
-    }
 }

@@ -50,7 +50,7 @@ abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerIte
 
     override fun appendHoverText(stack: ItemStack, level: Level?, tooltipComponents: MutableList<Component>, isAdvanced: TooltipFlag) {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced)
-        tooltipComponents.add(CommonComponents.HEAD_TOOLTIP_MESSAGE.withStyle(ChatFormatting.GRAY))
+        tooltipComponents.add(CommonComponents.HEAD_TOOLTIP.withStyle(ChatFormatting.GRAY))
     }
 
     override fun getPolymerItem(itemStack: ItemStack, player: ServerPlayer?): Item {

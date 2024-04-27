@@ -2,7 +2,8 @@ package net.casual.championships.commands
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
-import net.casual.championships.common.ui.MinesweeperScreen
+import net.casual.arcade.utils.CommandUtils.commandSuccess
+import net.casual.championships.common.ui.MinesweeperGui
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 
@@ -12,7 +13,6 @@ object MinesweeperCommand: Command {
     }
 
     private fun execute(context: CommandContext<CommandSourceStack>): Int {
-        context.source.playerOrException.openMenu(MinesweeperScreen.createScreenFactory())
-        return 1
+        return MinesweeperGui(context.source.playerOrException).open().commandSuccess()
     }
 }

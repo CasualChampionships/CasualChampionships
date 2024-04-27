@@ -39,7 +39,7 @@ enum class DuelPhase(
             val borderRadius = minigame.duelSettings.borderRadius
             minigame.level.worldBorder.size = borderRadius * 2
 
-            val playing = minigame.getPlayingPlayers()
+            val playing = minigame.players.playing
             PlayerUtils.spread(
                 minigame.level,
                 Vec2(0.0F, 0.0F),
@@ -48,9 +48,6 @@ enum class DuelPhase(
                 minigame.duelSettings.teams,
                 playing
             )
-            for (player in playing) {
-                minigame.setPlayingPlaying(player)
-            }
 
             GlobalTickedScheduler.later {
                 minigame.setPhase(Countdown)
@@ -75,15 +72,15 @@ enum class DuelPhase(
             var winner = if (minigame.duelSettings.teams) {
                 minigame.teams.getPlayingTeams().firstOrNull()?.formattedDisplayName
             } else {
-                minigame.getPlayingPlayers().firstOrNull()?.displayName
+                minigame.players.playing.firstOrNull()?.displayName
             }
             if (winner == null) {
                 CasualDuelMod.logger.warn("Couldn't find winner for duel!")
                 winner = "Unknown".literal().withStyle(ChatFormatting.OBFUSCATED)
             }
 
-            val title = CommonComponents.GAME_WON_MESSAGE.generate(winner)
-            for (player in minigame.getAllPlayers()) {
+            val title = CommonComponents.GAME_WON.generate(winner)
+            for (player in minigame.players) {
                 player.sendTitle(title)
             }
 

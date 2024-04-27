@@ -3,7 +3,6 @@ package net.casual.championships.common.util
 import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.gui.elements.ComponentElements
 import net.casual.arcade.gui.elements.LevelSpecificElement
-import net.casual.arcade.gui.elements.PlayerSpecificElement
 import net.casual.arcade.gui.elements.SidebarElements
 import net.casual.arcade.gui.nametag.ArcadeNameTag
 import net.casual.arcade.gui.predicate.EntityObserverPredicate
@@ -13,25 +12,64 @@ import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
 import net.casual.arcade.minigame.Minigame
+import net.casual.arcade.minigame.managers.MinigameChatManager
 import net.casual.arcade.utils.ComponentUtils
+import net.casual.arcade.utils.ComponentUtils.aqua
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
+import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.utils.ComponentUtils.teal
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
+import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.TickUtils
+import net.casual.arcade.utils.impl.Sound
 import net.casual.championships.common.ui.CasualPlayerListEntries
 import net.casual.championships.common.ui.TeammateRow
-import net.casual.championships.common.util.CommonComponents.Bitmap.CASUAL
-import net.casual.championships.common.util.CommonComponents.Bitmap.CHAMPIONSHIPS
-import net.casual.championships.common.util.CommonComponents.Bitmap.KIWITECH
-import net.casual.championships.common.util.CommonComponents.Bitmap.SERVER_HOSTED_BY
+import net.casual.championships.common.util.CommonComponents.Text.CASUAL
+import net.casual.championships.common.util.CommonComponents.Text.CHAMPIONSHIPS
+import net.casual.championships.common.util.CommonComponents.Text.KIWITECH
+import net.casual.championships.common.util.CommonComponents.Text.SERVER_HOSTED_BY
+import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.minecraft.ChatFormatting.*
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.border.BorderStatus
 
 object CommonUI {
-    val INFO_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Info]").gold().bold())
+    val INFO_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Info]").gold().bold().mini())
+    val GAME_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Game]").lime().bold().mini())
+    val RULES_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Rules]").teal().bold().mini())
+    val READY_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Ready]").lime().bold().mini())
+
+    fun MinigameChatManager.broadcastInfo(
+        component: Component,
+        players: Iterable<ServerPlayer> = this.getAllPlayers(),
+        sound: Sound = Sound(CommonSounds.GLOBAL_SERVER_NOTIFICATION_LOW)
+    ) {
+        this.broadcastWithSound(component, sound, players, INFO_ANNOUNCEMENT)
+    }
+
+    fun MinigameChatManager.broadcastGame(
+        component: Component,
+        players: Iterable<ServerPlayer> = this.getAllPlayers(),
+        sound: Sound = Sound(CommonSounds.GLOBAL_SERVER_NOTIFICATION)
+    ) {
+        this.broadcastWithSound(component, sound, players, GAME_ANNOUNCEMENT)
+    }
+
+    fun MinigameChatManager.broadcastWithSound(
+        component: Component,
+        sound: Sound = Sound(CommonSounds.GLOBAL_SERVER_NOTIFICATION),
+        players: Iterable<ServerPlayer> = this.getAllPlayers(),
+        formatter: ChatFormatter? = this.systemChatFormatter
+    ) {
+        this.broadcastTo(component, players, formatter)
+        for (player in players) {
+            player.sendSound(sound)
+        }
+    }
 
     fun createPlayingNameTag(
         predicate: PlayerObserverPredicate = EntityObserverPredicate.visibleObservee().toPlayer()
@@ -43,14 +81,14 @@ object CommonUI {
         predicate: PlayerObserverPredicate = CommonPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
     ): ArcadeNameTag {
         return ArcadeNameTag(
-            { String.format("%.1f ", it.health / 2).literal().append(CommonComponents.Bitmap.HARDCORE_HEART) },
+            { String.format("%.1f ", it.health / 2).literal().append(CommonComponents.Hud.HARDCORE_HEART) },
             predicate
         )
     }
 
     fun addTeammates(sidebar: ArcadeSidebar, size: Int): ArcadeSidebar {
         val buffer = ComponentUtils.space()
-        val teammates = Component.empty().append(buffer).append(CommonComponents.TEAMMATES_MESSAGE.mini())
+        val teammates = Component.empty().append(buffer).append(CommonComponents.TEAMMATES.mini())
         sidebar.addRow(SidebarElements.withNoScore(teammates))
         for (i in 0 until size) {
             sidebar.addRow(TeammateRow(i, buffer))
@@ -71,7 +109,7 @@ object CommonUI {
                 .append(buffer)
                 .append(border)
                 .append(ComponentUtils.space())
-                .append(CommonComponents.BORDER_INFO_MESSAGE.mini())
+                .append(CommonComponents.BORDER_INFO.mini())
             SidebarComponent.withNoScore(display)
         })
         sidebar.addRow { player ->
@@ -81,12 +119,12 @@ object CommonUI {
 
             val percent = distanceToBorder / (player.level().worldBorder.size / 2.0)
             val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
-            val display = Component.empty().append(buffer).append(CommonComponents.BORDER_DISTANCE_MESSAGE.mini())
+            val display = Component.empty().append(buffer).append(" ").append(CommonComponents.BORDER_DISTANCE.mini())
             val score = distanceToBorder.toString().literal().append(buffer).withStyle(colour)
             SidebarComponent.withCustomScore(display, score.mini())
         }
         sidebar.addRow(LevelSpecificElement.cached { level ->
-            val display = Component.empty().append(buffer).append(CommonComponents.BORDER_RADIUS_MESSAGE.mini())
+            val display = Component.empty().append(buffer).append(" ").append(CommonComponents.BORDER_RADIUS.mini())
             val score = (level.worldBorder.size / 2.0).toInt().toString().literal().append(buffer)
             SidebarComponent.withCustomScore(display, score.mini())
         })
@@ -99,7 +137,7 @@ object CommonUI {
             ComponentElements.of("\n".literal().append(CASUAL).append(" ").append(CHAMPIONSHIPS).append("\n"))
         ) { player ->
             Component.literal("\n").apply {
-                if (minigame.isAdmin(player)) {
+                if (minigame.players.isAdmin(player)) {
                     val tps = TickUtils.calculateTPS()
                     val formatting = if (tps >= 20) DARK_GREEN else if (tps > 15) YELLOW else if (tps > 10) RED else DARK_RED
                     append("TPS: ")

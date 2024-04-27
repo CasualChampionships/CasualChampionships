@@ -1,10 +1,13 @@
 package net.casual.championships.minigame
 
 import com.google.gson.JsonArray
+import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.minigame.MinigameCloseEvent
+import net.casual.arcade.events.minigame.MinigamePauseEvent
 import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.player.PlayerTeamLeaveEvent
+import net.casual.arcade.events.team.TeamExtensionEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.annotation.NONE
@@ -14,8 +17,10 @@ import net.casual.arcade.minigame.events.lobby.Lobby
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame.LobbyPhase
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
+import net.casual.arcade.mixin.level.ServerPlayerMixin
 import net.casual.arcade.resources.PackInfo
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
+import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.FantasyUtils
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.JsonUtils.obj
@@ -24,12 +29,15 @@ import net.casual.arcade.utils.LevelUtils
 import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
 import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.json.LongSerializer
 import net.casual.championships.CasualMod
 import net.casual.championships.common.CommonMod
 import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualReadyChecker
+import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
+import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.common.util.PerformanceUtils
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelSettings
@@ -40,6 +48,7 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.levelgen.WorldOptions
+import net.minecraft.world.scores.Team
 import xyz.nucleoid.fantasy.RuntimeWorldConfig
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.bufferedReader
@@ -64,22 +73,6 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
     }
 
     fun createUHCMinigame(context: MinigameCreationContext): UHCMinigame {
-        val server = context.server
-        val seed = this.seed
-        val overworldConfig = RuntimeWorldConfig()
-            .setSeed(seed)
-            .setShouldTickTime(true)
-            .setDimensionType(BuiltinDimensionTypes.OVERWORLD)
-            .setGenerator(LevelUtils.overworld().chunkSource.generator)
-        val netherConfig = RuntimeWorldConfig()
-            .setSeed(seed)
-            .setDimensionType(BuiltinDimensionTypes.NETHER)
-            .setGenerator(LevelUtils.nether().chunkSource.generator)
-        val endConfig = RuntimeWorldConfig()
-            .setSeed(seed)
-            .setDimensionType(BuiltinDimensionTypes.END)
-            .setGenerator(LevelUtils.end().chunkSource.generator)
-
         val overworldId: ResourceLocation
         val netherId: ResourceLocation
         val endId: ResourceLocation
@@ -94,11 +87,13 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
             endId = ResourceUtils.random { "end_$it" }
         }
 
+        val server = context.server
+        val seed = this.seed
         val (overworld, nether, end) = FantasyUtils.createPersistentVanillaLikeLevels(
             server,
-            FantasyUtils.PersistentConfig(overworldId, overworldConfig),
-            FantasyUtils.PersistentConfig(netherId, netherConfig),
-            FantasyUtils.PersistentConfig(endId, endConfig)
+            FantasyUtils.PersistentConfig(overworldId, FantasyUtils.createOverworldConfig(seed)),
+            FantasyUtils.PersistentConfig(netherId, FantasyUtils.createNetherConfig(seed)),
+            FantasyUtils.PersistentConfig(endId, FantasyUtils.createEndConfig(seed))
         )
         val minigame = UHCMinigame.of(server, overworld, nether, end)
         PerformanceUtils.reduceMinigameMobcap(minigame)
@@ -143,6 +138,7 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
         minigame.events.register<MinigameCloseEvent> {
             minigame.transferPlayersTo(this.current)
         }
+        // If the lobby starts reading, we kick everyone back to the main minigame
         minigame.events.register(MinigameSetPhaseEvent::class.java, flags = NONE) {
             if (it.minigame is LobbyMinigame && this.current === it.minigame && it.phase == LobbyPhase.Readying) {
                 minigame.close()
@@ -156,6 +152,25 @@ class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(con
         minigame.ui.setPlayerListDisplay(CommonUI.createTabDisplay(minigame))
         minigame.ui.readier = CasualReadyChecker(minigame)
         minigame.ui.countdown = CasualCountdown
+
+        minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
+        minigame.events.register<MinigameAddPlayerEvent> {
+            it.player.team?.nameTagVisibility = Team.Visibility.NEVER
+        }
+        minigame.events.register<PlayerTeamJoinEvent> {
+            it.team.nameTagVisibility = Team.Visibility.NEVER
+        }
+
+        this.setPauseNotification(minigame)
+    }
+
+    private fun setPauseNotification(minigame: Minigame<*>) {
+        minigame.events.register<MinigamePauseEvent> {
+            minigame.chat.broadcastWithSound(
+                "Minigame is now paused".literal(),
+                Sound(CommonSounds.GAME_PAUSED)
+            )
+        }
     }
 
     // TODO: Use a proper database

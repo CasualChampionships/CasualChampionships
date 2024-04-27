@@ -1,4 +1,4 @@
-package net.casual.championships.events.border
+package net.casual.championships.common.event.border
 
 import net.casual.arcade.events.core.CancellableEvent
 import net.casual.arcade.events.level.LevelEvent

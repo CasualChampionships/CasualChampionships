@@ -1,9 +1,11 @@
 package net.casual.championships.common.ui
 
+import eu.pb4.sgui.api.ClickType
+import eu.pb4.sgui.api.elements.GuiElement
+import eu.pb4.sgui.api.elements.GuiElementInterface
+import eu.pb4.sgui.api.gui.SimpleGui
 import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
-import net.casual.arcade.gui.screen.ArcadeGenericScreen
-import net.casual.arcade.gui.screen.FrozenUsableScreen
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.named
@@ -16,74 +18,69 @@ import net.casual.championships.common.items.MinesweeperItem.Companion.UNKNOWN
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonStats
 import net.minecraft.network.chat.Component
-import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
-import net.minecraft.world.SimpleMenuProvider
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.inventory.ClickType
+import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import org.lwjgl.glfw.GLFW
 import java.util.*
 import kotlin.math.floor
+import net.minecraft.world.inventory.ClickType as ClickAction
 
-class MinesweeperScreen(
-    player: Player,
-    syncId: Int
-): ArcadeGenericScreen(player, syncId, 6), FrozenUsableScreen {
+class MinesweeperGui(
+    player: ServerPlayer
+): SimpleGui(MenuType.GENERIC_9x6, player, true) {
     private val guessed = IntArraySet()
     private val flags = IntArraySet()
     private val grid = Grid(9, 9)
     private val flagItem = MinesweeperItem.FLAG_COUNTER.named(CommonComponents.MINESWEEPER_FLAGS)
-    private val clockItem: ItemStack = Items.CLOCK.defaultInstance.named(CommonComponents.MINESWEEPER_TIMER)
+    private val clockItem = Items.CLOCK.named(CommonComponents.MINESWEEPER_TIMER)
     private var complete = false
 
     init {
         this.flagItem.count = Grid.MINE_COUNT
         for (i in 0..80) {
-            this.slots[i].set(UNKNOWN_TILE)
+            this.setSlot(i, UNKNOWN_TILE)
         }
 
-        this.slots[81].set(EXIT_TILE)
-        this.slots[82].set(DESC_TILE_1)
-        this.slots[83].set(DESC_TILE_2)
-        this.slots[84].set(DESC_TILE_3)
-        this.slots[85].set(DESC_TILE_4)
-        this.slots[87].set(this.flagItem)
-        this.slots[88].set(this.clockItem)
-        this.slots[89].set(PLAY_AGAIN_TILE)
+        this.setSlot(81, GuiElement(EXIT_TILE) { _, _, _, gui -> gui.close() })
+        this.setSlot(82, DESC_TILE_1)
+        this.setSlot(83, DESC_TILE_2)
+        this.setSlot(84, DESC_TILE_3)
+        this.setSlot(85, DESC_TILE_4)
+        this.setSlot(87, this.flagItem)
+        this.setSlot(88, this.clockItem)
+        this.setSlot(89, GuiElement(PLAY_AGAIN_TILE) { _, _, _, gui -> MinesweeperGui(gui.player).open() })
+
+        this.title = Component.empty().append(ComponentUtils.space(-8))
+            .append(CommonComponents.Hud.MINESWEEPER_MENU.white())
     }
 
-    override fun isFrozenUsable(player: ServerPlayer): Boolean {
-        return true
-    }
-
-    override fun onTick(server: MinecraftServer) {
+    override fun onTick() {
         if (this.grid.startTime != 0L && !this.complete) {
             val seconds = floor((System.nanoTime() - this.grid.startTime) / 1000000000.0).toInt()
             this.clockItem.count = Mth.clamp(seconds, 1, 127)
         }
     }
 
-    override fun onClick(slotId: Int, button: Int, type: ClickType, player: ServerPlayer) {
+    override fun onClick(
+        slotId: Int,
+        type: ClickType,
+        action: ClickAction,
+        element: GuiElementInterface
+    ): Boolean {
         if (slotId >= 0 && slotId < this.grid.capacity) {
-            if (type !== ClickType.PICKUP || this.complete) {
-                return
+            if (action != ClickAction.PICKUP || this.complete) {
+                return false
             }
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !this.flags.contains(slotId)) {
+            if (type.isLeft && !this.flags.contains(slotId)) {
                 leftClickTile(slotId, player)
             }
-            if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            if (type.isRight) {
                 rightClickTile(slotId)
             }
         }
-        if (slotId == 81) {
-            player.closeContainer()
-        }
-        if (slotId == 89) {
-            player.openMenu(createScreenFactory())
-        }
+        return false
     }
 
     private fun leftClickTile(index: Int, player: ServerPlayer) {
@@ -102,7 +99,7 @@ class MinesweeperScreen(
         }
         this.guessed.add(index)
         val stack = getTileStack(tile)
-        this.slots[index].set(stack)
+        this.setSlot(index, stack)
         this.checkWin(player)
         if (tile == 0) {
             val set = checked ?: IntArraySet()
@@ -119,8 +116,7 @@ class MinesweeperScreen(
     }
 
     private fun rightClickTile(index: Int) {
-        val current = this.slots[index]
-        if (current.item !== UNKNOWN_TILE && !this.flags.contains(index)) {
+        if (this.guessed.contains(index) && !this.flags.contains(index)) {
             return
         }
         val stack = if (this.flags.contains(index)) {
@@ -131,7 +127,7 @@ class MinesweeperScreen(
             MinesweeperItem.FLAG.named(CommonComponents.MINESWEEPER_FLAG)
         }
         this.flagItem.count = (12 - flags.size).coerceAtLeast(1)
-        current.set(stack)
+        this.setSlot(index, stack)
     }
 
     private fun checkWin(player: ServerPlayer) {
@@ -164,7 +160,7 @@ class MinesweeperScreen(
     private fun onLose(player: ServerPlayer) {
         this.complete = true
         for (i in 0 until grid.capacity) {
-            this.slots[i].set(this.getTileStack(this.grid.getTile(i)))
+            this.setSlot(i, this.getTileStack(this.grid.getTile(i)))
         }
         player.sendSystemMessage(CommonComponents.MINESWEEPER_LOST)
     }
@@ -184,8 +180,8 @@ class MinesweeperScreen(
         var startTime: Long = 0
 
         init {
-            this.capacity = width * height
-            this.tiles = IntArray(capacity)
+            this.capacity = this.width * height
+            this.tiles = IntArray(this.capacity)
         }
 
         fun checkGenerated(first: Int) {
@@ -283,7 +279,7 @@ class MinesweeperScreen(
 
     companion object {
         private val UNKNOWN_TILE = UNKNOWN.named("?")
-        private val EXIT_TILE = MenuItem.CROSS.named(CommonComponents.EXIT_MESSAGE)
+        private val EXIT_TILE = MenuItem.CROSS.named(CommonComponents.EXIT)
         private val DESC_TILE_1 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_1)
         private val DESC_TILE_2 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_2)
         private val DESC_TILE_3 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_3)
@@ -291,13 +287,5 @@ class MinesweeperScreen(
         private val PLAY_AGAIN_TILE = MenuItem.GREEN_LONG_RIGHT.named(CommonComponents.MINESWEEPER_PLAY_AGAIN)
 
         private var record = 127.0
-
-        fun createScreenFactory(): SimpleMenuProvider {
-            return SimpleMenuProvider(
-                { syncId, _, player -> MinesweeperScreen(player, syncId) },
-                Component.empty().append(ComponentUtils.space(-8))
-                    .append(CommonComponents.Bitmap.MINESWEEPER_MENU.white())
-            )
-        }
     }
 }

@@ -17,45 +17,47 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 
 object CommonComponents {
-    val WELCOME_MESSAGE = translatableWithArgs("casual.welcome")
-    val YES_MESSAGE by translatable("casual.yes")
-    val NO_MESSAGE by translatable("casual.no")
-    val GOOD_LUCK_MESSAGE by translatable("casual.goodLuck")
+    val WELCOME = translatableWithArgs("casual.welcome")
+    val YES by translatable("casual.yes")
+    val NO by translatable("casual.no")
+    val GOOD_LUCK by translatable("casual.goodLuck")
 
     val HOSTED_BY_MESSAGE by translatable("casual.hostedBy")
 
     val TOGGLE_TEAMGLOW = translatableWithArgs("casual.tags.teamglow")
     val TOGGLE_FULLBRIGHT = translatableWithArgs("casual.tags.fullbright")
 
-    val ENABLE_MESSAGE by translatable("casual.toggle.enable") { lime() }
-    val DISABLE_MESSAGE by translatable("casual.toggle.disable") { crimson() }
-    val ENABLED_MESSAGE by translatable("casual.toggle.enabled") { lime() }
-    val DISABLED_MESSAGE by translatable("casual.toggle.disabled") { crimson() }
+    val ENABLE by translatable("casual.toggle.enable") { lime() }
+    val DISABLE by translatable("casual.toggle.disable") { crimson() }
+    val ENABLED by translatable("casual.toggle.enabled") { lime() }
+    val DISABLED by translatable("casual.toggle.disabled") { crimson() }
 
-    val PREVIOUS_MESSAGE by translatable("casual.gui.previous")
-    val NEXT_MESSAGE by translatable("casual.gui.next")
-    val EXIT_MESSAGE by translatable("casual.gui.exit")
-    val BACK_MESSAGE by translatable("casual.gui.back")
-    val SPECTATOR_TITLE_MESSAGE by translatable("casual.gui.spectator.title")
+    val PREVIOUS by translatable("casual.gui.previous")
+    val NEXT by translatable("casual.gui.next")
+    val EXIT by translatable("casual.gui.exit")
+    val BACK by translatable("casual.gui.back")
+    val SPECTATOR_TITLE by translatable("casual.gui.spectator.title")
+    val CONFIGURE by translatable("casual.gui.configure")
+    val CONFIRM by translatable("casual.gui.confirm")
+    val CANCEL by translatable("casual.gui.cancel")
 
-    val READY_QUERY_MESSAGE by translatable("casual.ready.question")
-    val NOT_READY_MESSAGE = translatableWithArgs("casual.ready.notReady")
-    val IS_READY_MESSAGE = translatableWithArgs("casual.ready.isReady")
-    val CANNOT_READY_MESSAGE by translatable("casual.ready.notNow")
-    val ALREADY_READY_MESSAGE by translatable("casual.ready.alreadyReady")
-    val ALREADY_UNREADY_MESSAGE by translatable("casual.ready.alreadyUnready")
-    val ALL_READY_MESSAGE by translatable("casual.ready.allReady")
+    val READY_QUERY by translatable("casual.ready.question")
+    val NOT_READY = translatableWithArgs("casual.ready.notReady")
+    val IS_READY = translatableWithArgs("casual.ready.isReady")
+    val CANNOT_READY by translatable("casual.ready.notNow")
+    val ALREADY_READY by translatable("casual.ready.alreadyReady")
+    val ALREADY_UNREADY by translatable("casual.ready.alreadyUnready")
+    val ALL_READY by translatable("casual.ready.allReady")
 
-    val TEAMS_MESSAGE by translatable("casual.team.teams")
-    val TEAMMATES_MESSAGE by translatable("casual.team.teammates")
-    val ADDED_TO_TEAM_MESSAGE = translatableWithArgs("casual.team.added")
+    val TEAMS by translatable("casual.team.teams")
+    val TEAMMATES by translatable("casual.team.teammates")
+    val ADDED_TO_TEAM = translatableWithArgs("casual.team.added")
 
     val NO_TEAM by translatable("casual.team.noTeam")
-    val NOT_SPECTATING_MESSAGE by translatable("casual.spectator.notSpectating")
+    val NOT_SPECTATING by translatable("casual.spectator.notSpectating")
 
-    val BROADCAST_POSITION_MESSAGE = translatableWithArgs("casual.position.broadcast")
+    val BROADCAST_POSITION = translatableWithArgs("casual.position.broadcast")
 
-    val MINESWEEPER_EXIT by translatable("casual.minesweeper.exit")
     val MINESWEEPER_DESC_1 by translatable("casual.minesweeper.desc.1")
     val MINESWEEPER_DESC_2 by translatable("casual.minesweeper.desc.2")
     val MINESWEEPER_DESC_3 by translatable("casual.minesweeper.desc.3")
@@ -69,40 +71,40 @@ object CommonComponents {
     val MINESWEEPER_LOST by translatable("casual.minesweeper.lost")
     val MINESWEEPER_RECORD = translatableWithArgs("casual.minesweeper.record")
 
-    val DIRECTION_MESSAGE by translatable("casual.game.direction")
-    val NORTH_MESSAGE by translatable("casual.game.direction.north")
-    val NORTH_EAST_MESSAGE by translatable("casual.game.direction.northEast")
-    val EAST_MESSAGE by translatable("casual.game.direction.east")
-    val SOUTH_EAST_MESSAGE by translatable("casual.game.direction.southEast")
-    val SOUTH_MESSAGE by translatable("casual.game.direction.south")
-    val SOUTH_WEST_MESSAGE by translatable("casual.game.direction.southWest")
-    val WEST_MESSAGE by translatable("casual.game.direction.west")
-    val NORTH_WEST_MESSAGE by translatable("casual.game.direction.northWest")
+    val DIRECTION by translatable("casual.game.direction")
+    val NORTH by translatable("casual.game.direction.north")
+    val NORTH_EAST by translatable("casual.game.direction.northEast")
+    val EAST by translatable("casual.game.direction.east")
+    val SOUTH_EAST by translatable("casual.game.direction.southEast")
+    val SOUTH by translatable("casual.game.direction.south")
+    val SOUTH_WEST by translatable("casual.game.direction.southWest")
+    val WEST by translatable("casual.game.direction.west")
+    val NORTH_WEST by translatable("casual.game.direction.northWest")
 
-    val BORDER_INFO_MESSAGE by translatable("casual.game.borderInfo")
-    val BORDER_DISTANCE_MESSAGE by translatable("casual.game.borderDistance")
-    val BORDER_RADIUS_MESSAGE by translatable("casual.game.borderRadius")
-    val INSIDE_BORDER_MESSAGE = translatableWithArgs("casual.game.insideBorder")
-    val BORDER_INITIAL_GRACE_MESSAGE = translatableWithArgs("casual.game.grace.first")
-    val BORDER_GENERIC_GRACE_MESSAGE = translatableWithArgs("casual.game.grace.generic")
-    val BORDER_GRACE_OVER_MESSAGE by translatable("casual.game.grace.over")
-    val HAS_BEEN_ELIMINATED_MESSAGE = translatableWithArgs("casual.game.eliminated")
-    val GAME_WON_MESSAGE = translatableWithArgs("casual.game.won")
+    val BORDER_INFO by translatable("casual.game.borderInfo")
+    val BORDER_DISTANCE by translatable("casual.game.borderDistance")
+    val BORDER_RADIUS by translatable("casual.game.borderRadius")
+    val INSIDE_BORDER = translatableWithArgs("casual.game.insideBorder")
+    val BORDER_INITIAL_GRACE = translatableWithArgs("casual.game.grace.first")
+    val BORDER_GENERIC_GRACE = translatableWithArgs("casual.game.grace.generic")
+    val BORDER_GRACE_OVER by translatable("casual.game.grace.over")
+    val HAS_BEEN_ELIMINATED = translatableWithArgs("casual.game.eliminated")
+    val GAME_WON = translatableWithArgs("casual.game.won")
 
-    val GOLDEN_HEAD_MESSAGE by translatable("casual.item.goldenHead")
-    val HEAD_TOOLTIP_MESSAGE by translatable("casual.item.head.tooltip")
+    val GOLDEN_HEAD by translatable("casual.item.goldenHead")
+    val HEAD_TOOLTIP by translatable("casual.item.head.tooltip")
 
-    val STARTING_IN_MESSAGE = translatableWithArgs("casual.game.startingIn")
-    val STARTING_SOON_MESSAGE by translatable("casual.game.startingSoon")
-    val TIME_ELAPSED_MESSAGE = translatableWithArgs("casual.game.timeElapsed")
-    val GRACE_MESSAGE = translatableWithArgs("casual.game.grace")
-    val GLOWING_MESSAGE = translatableWithArgs("casual.game.glowing")
+    val STARTING_IN = translatableWithArgs("casual.game.startingIn")
+    val STARTING_SOON by translatable("casual.game.startingSoon")
+    val TIME_ELAPSED = translatableWithArgs("casual.game.timeElapsed")
+    val GRACE = translatableWithArgs("casual.game.grace")
+    val GLOWING = translatableWithArgs("casual.game.glowing")
 
-    val STARTING_IN_BACKGROUNDED = backgrounded(STARTING_IN_MESSAGE, Bitmap.BACKGROUND_240) { mini() }
-    val STARTING_SOON_BACKGROUNDED = backgrounded({ STARTING_SOON_MESSAGE }, Bitmap.BACKGROUND_240) { mini() }
-    val TIME_ELAPSED_BACKGROUNDED = backgrounded(TIME_ELAPSED_MESSAGE, Bitmap.BACKGROUND_240) { mini() }
-    val GRACE_BACKGROUNDED = backgrounded(GRACE_MESSAGE, Bitmap.BACKGROUND_180) { mini() }
-    val GLOWING_BACKGROUNDED = backgrounded(GLOWING_MESSAGE, Bitmap.BACKGROUND_180) { mini() }
+    val STARTING_IN_BACKGROUNDED = backgrounded(STARTING_IN, Hud.BACKGROUND_240) { mini() }
+    val STARTING_SOON_BACKGROUNDED = backgrounded({ STARTING_SOON }, Hud.BACKGROUND_240) { mini() }
+    val TIME_ELAPSED_BACKGROUNDED = backgrounded(TIME_ELAPSED, Hud.BACKGROUND_240) { mini() }
+    val GRACE_BACKGROUNDED = backgrounded(GRACE, Hud.BACKGROUND_180) { mini() }
+    val GLOWING_BACKGROUNDED = backgrounded(GLOWING, Hud.BACKGROUND_180) { mini() }
 
     fun backgrounded(
         generator: ComponentUtils.ComponentGenerator,
@@ -124,28 +126,28 @@ object CommonComponents {
 
     fun direction(direction: Direction): MutableComponent {
         return when (direction) {
-            Direction.NORTH -> NORTH_MESSAGE
-            Direction.EAST -> EAST_MESSAGE
-            Direction.SOUTH -> SOUTH_MESSAGE
-            Direction.WEST -> WEST_MESSAGE
+            Direction.NORTH -> NORTH
+            Direction.EAST -> EAST
+            Direction.SOUTH -> SOUTH
+            Direction.WEST -> WEST
             else -> Component.literal(direction.getName())
         }
     }
 
     fun direction(direction: Direction8): MutableComponent {
         return when (direction) {
-            Direction8.NORTH -> NORTH_MESSAGE
-            Direction8.NORTH_EAST -> NORTH_EAST_MESSAGE
-            Direction8.EAST -> EAST_MESSAGE
-            Direction8.SOUTH_EAST -> SOUTH_EAST_MESSAGE
-            Direction8.SOUTH -> SOUTH_MESSAGE
-            Direction8.SOUTH_WEST -> SOUTH_WEST_MESSAGE
-            Direction8.WEST -> WEST_MESSAGE
-            Direction8.NORTH_WEST -> NORTH_WEST_MESSAGE
+            Direction8.NORTH -> NORTH
+            Direction8.NORTH_EAST -> NORTH_EAST
+            Direction8.EAST -> EAST
+            Direction8.SOUTH_EAST -> SOUTH_EAST
+            Direction8.SOUTH -> SOUTH
+            Direction8.SOUTH_WEST -> SOUTH_WEST
+            Direction8.WEST -> WEST
+            Direction8.NORTH_WEST -> NORTH_WEST
         }
     }
 
-    object Bitmap: FontResources(CommonMod.id("bitmap_font")) {
+    object Hud: FontResources(CommonMod.id("hud_font")) {
         val BACKGROUND_240 by bitmap(at("backgrounds/background240.png"), 10, 12)
         val BACKGROUND_180 by bitmap(at("backgrounds/background180.png"), 10, 12)
         val BACKGROUND_120 by bitmap(at("backgrounds/background120.png"), 10, 12)
@@ -157,7 +159,9 @@ object CommonComponents {
         val PLAYER_COUNT by bitmap(at("hud/players.png"), 10, 11)
 
         val MINESWEEPER_MENU by bitmap(at("hud/minesweeper_menu.png"), 19, 227)
+    }
 
+    object Text: FontResources(CommonMod.id("text_font")) {
         val CASUAL by bitmap(at("text/casual.png"), 8, 9)
         val CHAMPIONSHIPS by bitmap(at("text/championships.png"), 8, 9)
 
@@ -179,7 +183,7 @@ object CommonComponents {
                 indexed(at("border/red_border_$i.png"), 8, 8)
             }
             for (i in 1..5) {
-                indexed(CommonMod.id("item/border/green_border_$i.png"), 8, 8)
+                indexed(at("border/green_border_$i.png"), 8, 8)
             }
         }
 

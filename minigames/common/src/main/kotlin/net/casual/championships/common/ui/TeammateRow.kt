@@ -18,7 +18,7 @@ import net.minecraft.world.scores.Team
 class TeammateRow(private val index: Int, private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
     private val none = SidebarComponent.withCustomScore(
         Component.empty().append(this.buffer).append(" - "),
-        CommonComponents.Bitmap.UNAVAILABLE.append(this.buffer)
+        CommonComponents.Hud.UNAVAILABLE.append(this.buffer)
     )
 
     override fun get(player: ServerPlayer): SidebarComponent {
@@ -46,12 +46,12 @@ class TeammateRow(private val index: Int, private val buffer: Component): Player
         val score = if (teammate != null) {
             if (teammate.isSurvival && teammate.isAlive) {
                 val health = " %04.1f".format(teammate.health / 2.0)
-                health.literal().mini().append(ComponentUtils.space(1)).append(CommonComponents.Bitmap.HARDCORE_HEART)
+                health.literal().mini().append(ComponentUtils.space(1)).append(CommonComponents.Hud.HARDCORE_HEART)
             } else {
-                CommonComponents.Bitmap.UNAVAILABLE
+                CommonComponents.Hud.UNAVAILABLE
             }
         } else {
-            CommonComponents.Bitmap.NO_CONNECTION
+            CommonComponents.Hud.NO_CONNECTION
         }
         return SidebarComponent.withCustomScore(formatted, score.append(this.buffer))
     }

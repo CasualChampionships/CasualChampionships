@@ -16,8 +16,10 @@
   "casual.gui.next": "Next",
   "casual.gui.exit": "Exit",
   "casual.gui.back": "Back",
+  "casual.gui.configure": "Configure",
+  "casual.gui.confirm": "Confirm",
+  "casual.gui.cancel": "Cancel",
   "casual.gui.spectator.title": "Spectator Screen",
-
 
   "casual.ready.question": "Are you ready?",
   "casual.ready.notReady": "%s is not ready!",

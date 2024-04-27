@@ -9,7 +9,7 @@ import net.minecraft.world.item.PlayerHeadItem
 
 object HeadUtils {
     fun createConsumableGoldenHead(): ItemStack {
-        return ItemStack(CommonItems.GOLDEN_HEAD).setHoverName(CommonComponents.GOLDEN_HEAD_MESSAGE.gold().unitalicise())
+        return ItemStack(CommonItems.GOLDEN_HEAD).setHoverName(CommonComponents.GOLDEN_HEAD.gold().unitalicise())
     }
 
     fun createConsumablePlayerHead(player: ServerPlayer): ItemStack {

@@ -2,7 +2,7 @@ package net.casual.championships.common.util
 
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.level.LevelBlockChangedEvent
-import net.casual.arcade.events.level.LevelCreatedEvent
+import net.casual.arcade.events.level.LevelExtensionEvent
 import net.casual.arcade.events.level.LevelTickEvent
 import net.casual.arcade.events.player.PlayerBlockPlacedEvent
 import net.casual.arcade.utils.LevelUtils.addExtension
@@ -27,7 +27,7 @@ object AntiCheat {
     }
 
     internal fun registerEvents() {
-        GlobalEventHandler.register<LevelCreatedEvent> { it.level.addExtension(WorldBlockTrackerExtension()) }
+        GlobalEventHandler.register<LevelExtensionEvent> { it.level.addExtension(WorldBlockTrackerExtension()) }
         GlobalEventHandler.register<LevelTickEvent> { it.level.blockTracker.tick() }
         GlobalEventHandler.register<LevelBlockChangedEvent> { onBlockChanged(it) }
         GlobalEventHandler.register<PlayerBlockPlacedEvent> { onPlayerBlockPlaced(it) }

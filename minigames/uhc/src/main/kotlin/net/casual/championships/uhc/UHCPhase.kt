@@ -2,20 +2,17 @@ package net.casual.championships.uhc
 
 import net.casual.arcade.gui.elements.ComponentElements
 import net.casual.arcade.gui.elements.SidebarElements
-import net.casual.arcade.gui.elements.UniversalElement
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.level.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.scheduler.MinecraftTimeUnit
-import net.casual.arcade.scheduler.MinecraftTimeUnit.Ticks
 import net.casual.arcade.utils.BossbarUtils.then
 import net.casual.arcade.utils.BossbarUtils.withDuration
-import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
@@ -25,17 +22,18 @@ import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Minutes
+import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.championships.common.util.CommonComponents
+import net.casual.arcade.utils.impl.Sound
 import net.casual.championships.common.task.GlowingBossBarTask
 import net.casual.championships.common.task.GracePeriodBossBarTask
+import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
-import net.casual.championships.uhc.ui.UHCStatusRow
+import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
-import kotlin.math.roundToInt
 
 const val INITIALIZING_ID = "initializing"
 const val GRACE_ID = "grace"
@@ -53,9 +51,7 @@ enum class UHCPhase(
             minigame.levels.all().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
 
-            minigame.ui.removeAllNameTags()
-
-            for (player in minigame.getAllPlayers()) {
+            for (player in minigame.players) {
                 player.revokeAllAdvancements()
             }
 
@@ -73,14 +69,11 @@ enum class UHCPhase(
                 500.0,
                 range,
                 true,
-                minigame.getPlayingPlayers(),
+                minigame.players.playing,
                 120
             )
 
-            for (player in minigame.getPlayingPlayers()) {
-                minigame.setAsPlaying(player)
-            }
-            for (player in minigame.getSpectatingPlayers()) {
+            for (player in minigame.players.spectating) {
                 if (player.level() != level) {
                     player.teleportTo(level, 0.0, 200.0, 0.0, 0.0F, 0.0F)
                 }
@@ -101,6 +94,7 @@ enum class UHCPhase(
 
             minigame.teams.hideNameTags()
 
+            minigame.ui.removeAllNameTags()
             minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
             minigame.ui.addNameTag(CommonUI.createPlayingHealthTag())
 
@@ -117,22 +111,21 @@ enum class UHCPhase(
         override fun start(minigame: UHCMinigame) {
             minigame.settings.isChatGlobal = false
             minigame.settings.mobsWithNoAIAreFlammable = true
-            val duration = minigame.settings.gracePeriod + 19.Ticks
+            val duration = minigame.settings.gracePeriod
             val task = GracePeriodBossBarTask(minigame)
-                .withDuration(duration)
+                .withDuration(duration - 1.Ticks)
                 .then(PhaseChangeTask(minigame, BorderMoving))
-            minigame.scheduler.schedulePhasedCancellable(duration, task).runOnCancel()
+            minigame.scheduler.schedulePhasedCancellable(duration, task).runIfCancelled()
 
-            val minutes = duration.toMinutes().roundToInt()
-            minigame.chat.broadcast(CommonComponents.BORDER_INITIAL_GRACE_MESSAGE.generate(minutes).gold())
+            val minutes = duration.minutes
+            minigame.chat.broadcastGame(CommonComponents.BORDER_INITIAL_GRACE.generate(minutes).gold().mini())
         }
 
         override fun end(minigame: UHCMinigame) {
-            val message = CommonComponents.BORDER_GRACE_OVER_MESSAGE.red().bold()
-            for (player in minigame.getAllPlayers()) {
-                player.sendSystemMessage(message)
-                player.sendSound(CommonSounds.GAME_BORDER_MOVING)
-            }
+            minigame.chat.broadcastGame(
+                CommonComponents.BORDER_GRACE_OVER.red().mini(),
+                sound = Sound(CommonSounds.GAME_BORDER_MOVING)
+            )
             minigame.settings.canPvp.set(true)
         }
     },
@@ -146,13 +139,11 @@ enum class UHCPhase(
             val task = GlowingBossBarTask(minigame)
                 .withDuration(2.Minutes)
                 .then(MinigameTask(minigame, UHCMinigame::onBorderFinish))
-            minigame.scheduler.schedulePhasedCancellable(2.Minutes, task).runOnCancel()
+            minigame.scheduler.schedulePhasedCancellable(2.Minutes, task).runIfCancelled()
         }
 
         override fun end(minigame: UHCMinigame) {
-            minigame.ui.removeAllBossbars()
-            minigame.ui.removeSidebar()
-            minigame.server.isPvpAllowed = false
+            minigame.settings.canPvp.set(false)
         }
     },
     GameOver(GAME_OVER_ID) {
@@ -172,29 +163,28 @@ enum class UHCPhase(
 
             minigame.uhcAdvancements.grantFinalAdvancements(team.getOnlinePlayers())
 
-            for (player in minigame.getAllPlayers()) {
-                player.setGlowingTag(false)
-                player.sendTitle(CommonComponents.GAME_WON_MESSAGE.generate(team.name).withStyle(team.color))
+            for (player in minigame.players) {
+                player.sendTitle(CommonComponents.GAME_WON.generate(team.name).withStyle(team.color).mini())
             }
 
             // TODO: Better winning screen
             val winTask = MinigameTask(minigame) {
-                for (player in it.getAllPlayers()) {
+                for (player in it.players) {
                     player.sendSound(SoundEvents.FIREWORK_ROCKET_BLAST, volume = 0.5F)
                     player.sendSound(SoundEvents.FIREWORK_ROCKET_LAUNCH, volume = 0.5F)
                     player.sendSound(SoundEvents.FIREWORK_ROCKET_BLAST_FAR, volume = 0.5F)
                 }
                 it.scheduler.schedulePhased(6.Ticks) {
-                    for (player in it.getAllPlayers()) {
+                    for (player in it.players) {
                         player.sendSound(SoundEvents.FIREWORK_ROCKET_SHOOT, volume = 0.5F)
                         player.sendSound(SoundEvents.FIREWORK_ROCKET_LAUNCH, volume = 0.5F)
                         player.sendSound(SoundEvents.FIREWORK_ROCKET_LARGE_BLAST_FAR, volume = 0.5F)
                     }
                 }
             }
-            minigame.scheduler.schedulePhasedInLoop(0, 4, 100, Ticks, winTask)
+            minigame.scheduler.schedulePhasedInLoop(0.Ticks, 4.Ticks, 100.Ticks, winTask)
 
-            minigame.scheduler.schedulePhased(20, MinecraftTimeUnit.Seconds, MinigameTask(minigame) {
+            minigame.scheduler.schedulePhased(20.Seconds, MinigameTask(minigame) {
                 minigame.complete()
             })
         }

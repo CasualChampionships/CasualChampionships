@@ -1,6 +1,5 @@
 package net.casual.championships
 
-import net.casual.championships.items.CasualItems
 import net.casual.championships.managers.CommandManager
 import net.casual.championships.managers.DataManager
 import net.casual.championships.minigame.CasualMinigames
@@ -26,8 +25,6 @@ object CasualMod: DedicatedServerModInitializer {
 
     override fun onInitializeServer() {
         logger.info("Starting CasualChampionships... Version: ${container.metadata.version}")
-
-        CasualItems.noop()
 
         Config.registerEvents()
         CommandManager.registerEvents()

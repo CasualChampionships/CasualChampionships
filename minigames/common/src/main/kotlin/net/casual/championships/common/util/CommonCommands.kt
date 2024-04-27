@@ -2,6 +2,7 @@ package net.casual.championships.common.util
 
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
+import net.casual.arcade.gui.screen.SelectionGuiBuilder
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.CommandUtils.success
@@ -9,12 +10,13 @@ import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ScreenUtils
+import net.casual.arcade.utils.ScreenUtils.addSpectatableTeams
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityAnchorArgument
 
 object CommonCommands {
-    private val NOT_SPECTATOR = SimpleCommandExceptionType(CommonComponents.NOT_SPECTATING_MESSAGE)
+    private val NOT_SPECTATOR = SimpleCommandExceptionType(CommonComponents.NOT_SPECTATING)
     private val NO_TEAM = SimpleCommandExceptionType(CommonComponents.NO_TEAM)
 
     fun toggleFullbright(
@@ -24,10 +26,10 @@ object CommonCommands {
         val player = context.source.playerOrException
         val toggle = if (minigame.effects.hasFullbright(player)) {
             minigame.effects.removeFullbright(player)
-            CommonComponents.DISABLED_MESSAGE
+            CommonComponents.DISABLED
         } else {
             minigame.effects.addFullbright(player)
-            CommonComponents.ENABLED_MESSAGE
+            CommonComponents.ENABLED
         }
         return context.source.success(CommonComponents.TOGGLE_FULLBRIGHT.generate(toggle))
     }
@@ -39,10 +41,10 @@ object CommonCommands {
         val player = context.source.playerOrException
         val toggle = if (minigame.tags.has(player, CommonTags.HAS_TEAM_GLOW)) {
             minigame.tags.remove(player, CommonTags.HAS_TEAM_GLOW)
-            CommonComponents.DISABLED_MESSAGE
+            CommonComponents.DISABLED
         } else {
             minigame.tags.add(player, CommonTags.HAS_TEAM_GLOW)
-            CommonComponents.ENABLED_MESSAGE
+            CommonComponents.ENABLED
         }
         val team = player.team
         if (team != null) {
@@ -71,7 +73,7 @@ object CommonCommands {
         }
         return minigame.chat.broadcastAsPlayerTo(
             player,
-            CommonComponents.BROADCAST_POSITION_MESSAGE.generate(location),
+            CommonComponents.BROADCAST_POSITION.generate(location),
             team.getOnlinePlayers(),
             minigame.chat.teamChatFormatter
         ).commandSuccess()
@@ -82,14 +84,14 @@ object CommonCommands {
         context: CommandContext<CommandSourceStack>
     ): Int {
         val player = context.source.playerOrException
-        if (!minigame.isAdmin(player) && minigame.isPlaying(player)) {
+        if (!minigame.players.isAdmin(player) && minigame.players.isPlaying(player)) {
             throw NOT_SPECTATOR.create()
         }
 
-        val menu = ScreenUtils.createSpectatorMenu(
-            components = CommonScreens.named(CommonComponents.SPECTATOR_TITLE_MESSAGE),
-            teamFilter = { minigame.teams.getOnlineTeams().contains(it) }
-        )
-        return player.openMenu(menu).commandSuccess()
+        val builder = SelectionGuiBuilder(player, CommonScreens.named(CommonComponents.SPECTATOR_TITLE))
+        builder.addSpectatableTeams(minigame.teams.getOnlineTeams()) { gui, team ->
+            SelectionGuiBuilder(gui, CommonScreens.named(team.displayName))
+        }
+        return builder.build().open().commandSuccess()
     }
 }

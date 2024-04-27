@@ -28,24 +28,24 @@ class CommonDatagen: ArcadeResourceGenerator {
     override fun run(client: Minecraft) {
         val generator = LanguageGenerator(SUPPORTED_LANGUAGES).apply {
             add(CentredSpacingGenerator(
-                CommonComponents.STARTING_IN_MESSAGE.generate("00:00:00").mini(),
-                CommonComponents.Bitmap.BACKGROUND_240
+                CommonComponents.STARTING_IN.generate("00:00:00").mini(),
+                CommonComponents.Hud.BACKGROUND_240
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.TIME_ELAPSED_MESSAGE.generate("00:00:00").mini(),
-                CommonComponents.Bitmap.BACKGROUND_240
+                CommonComponents.TIME_ELAPSED.generate("00:00:00").mini(),
+                CommonComponents.Hud.BACKGROUND_240
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.GRACE_MESSAGE.generate("00:00").mini(),
-                CommonComponents.Bitmap.BACKGROUND_180
+                CommonComponents.GRACE.generate("00:00").mini(),
+                CommonComponents.Hud.BACKGROUND_180
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.GLOWING_MESSAGE.generate("00:00").mini(),
-                CommonComponents.Bitmap.BACKGROUND_180
+                CommonComponents.GLOWING.generate("00:00").mini(),
+                CommonComponents.Hud.BACKGROUND_180
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.STARTING_SOON_MESSAGE.mini(),
-                CommonComponents.Bitmap.BACKGROUND_240
+                CommonComponents.STARTING_SOON.mini(),
+                CommonComponents.Hud.BACKGROUND_240
             ))
 
             for (direction in Direction8.values()) {

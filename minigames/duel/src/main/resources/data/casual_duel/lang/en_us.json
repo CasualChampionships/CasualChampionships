@@ -1,0 +1,9 @@
+{
+  "casual.gui.duel.configure": "Configure Duel",
+
+  "casual.duel.clickToStart": "Click here to start duel with accepted players",
+  "casual.duel.notEnoughPlayers": "Not enough players for duel!",
+  "casual.duel.alreadyStarted": "Duel has already started!",
+
+  "casual.duel.starting": "Starting Duel!"
+}

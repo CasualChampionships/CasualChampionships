@@ -1,17 +1,19 @@
 package net.casual.championships.duel
 
-import net.casual.arcade.events.minigame.MinigameAddSpectatorEvent
 import net.casual.arcade.events.minigame.MinigameRemovePlayerEvent
+import net.casual.arcade.events.minigame.MinigameSetPlayingEvent
+import net.casual.arcade.events.minigame.MinigameSetSpectatingEvent
 import net.casual.arcade.events.player.PlayerAdvancementEvent
 import net.casual.arcade.events.player.PlayerDeathEvent
 import net.casual.arcade.events.player.PlayerRespawnEvent
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameSettings
+import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.HAS_PLAYER
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.phase.Phase
-import net.casual.arcade.utils.LevelUtils
+import net.casual.arcade.utils.FantasyUtils
 import net.casual.arcade.utils.LootTableUtils
 import net.casual.arcade.utils.LootTableUtils.addItem
 import net.casual.arcade.utils.LootTableUtils.between
@@ -37,13 +39,11 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ArmorItem
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet
 import net.minecraft.world.phys.Vec3
 import xyz.nucleoid.fantasy.Fantasy
-import xyz.nucleoid.fantasy.RuntimeWorldConfig
 import kotlin.random.Random
 
 class DuelMinigame(
@@ -71,7 +71,68 @@ class DuelMinigame(
         return DuelPhase.values().toList()
     }
 
-    fun setPlayingPlaying(player: ServerPlayer) {
+    private fun createRandomOverworld(): ServerLevel {
+        val seeds = listOf(
+            1246918500008390635
+        )
+        val handle = Fantasy.get(this.server).openTemporaryWorld(
+            FantasyUtils.createOverworldConfig(seeds.random())
+        )
+        this.levels.add(handle)
+        return handle.asWorld()
+    }
+
+    @Listener
+    private fun onTick(event: ServerTickEvent) {
+        if (this.players.playingPlayerCount <= 1) {
+            this.emptyTicks++
+            if (this.emptyTicks.Ticks > 15.Seconds) {
+                this.close()
+            }
+        }
+    }
+
+    @Listener(during = During(phases = [DUELING_ID]))
+    private fun onPlayerDeath(event: PlayerDeathEvent) {
+        val player = event.player
+        val killer = player.killCredit
+
+        this.players.setSpectating(player)
+
+        if (this.duelSettings.playerDropsHead) {
+            val head = HeadUtils.createConsumablePlayerHead(player)
+            if (killer is ServerPlayer) {
+                if (!killer.inventory.add(head)) {
+                    player.drop(head, true, false)
+                }
+            } else {
+                player.drop(head, true, false)
+            }
+        }
+
+        val remaining = if (!this.duelSettings.teams) this.players.playing else this.teams.getPlayingTeams()
+        if (remaining.size <= 1) {
+            this.setPhase(DuelPhase.Complete)
+        }
+    }
+
+    @Listener(flags = HAS_PLAYER)
+    private fun onPlayerRespawn(event: PlayerRespawnEvent) {
+        val position = event.player.lastDeathLocation.map { it.pos().center }.orElseGet {
+            Vec3(0.0, 128.0, 0.0)
+        }
+        event.player.teleportTo(Location.of(position, level = this.level))
+    }
+
+    @Listener
+    private fun onMinigameSetSpectating(event: MinigameSetSpectatingEvent) {
+        event.player.setGameMode(GameType.SPECTATOR)
+    }
+
+    @Listener
+    private fun onMinigameSetPlaying(event: MinigameSetPlayingEvent) {
+        val player = event.player
+
         player.setGameMode(GameType.SURVIVAL)
         player.boostHealth(this.duelSettings.health)
         player.resetHealth()
@@ -90,68 +151,6 @@ class DuelMinigame(
             }
             player.inventory.add(stack)
         }
-    }
-
-    private fun createRandomOverworld(): ServerLevel {
-        val seeds = listOf(
-            1246918500008390635
-        )
-        val handle = Fantasy.get(this.server).openTemporaryWorld(
-            RuntimeWorldConfig()
-                .setSeed(seeds.random())
-                .setShouldTickTime(true)
-                .setDimensionType(BuiltinDimensionTypes.OVERWORLD)
-                .setGenerator(LevelUtils.overworld().chunkSource.generator)
-        )
-        this.levels.add(handle)
-        return handle.asWorld()
-    }
-
-    @Listener
-    private fun onTick(event: ServerTickEvent) {
-        if (this.getPlayingPlayers().size <= 1) {
-            this.emptyTicks++
-            if (this.emptyTicks.Ticks > 15.Seconds) {
-                this.close()
-            }
-        }
-    }
-
-    @Listener(phases = [DUELING_ID])
-    private fun onPlayerDeath(event: PlayerDeathEvent) {
-        val player = event.player
-        val killer = player.killCredit
-
-        this.makeSpectator(player)
-
-        if (this.duelSettings.playerDropsHead) {
-            val head = HeadUtils.createConsumablePlayerHead(player)
-            if (killer is ServerPlayer) {
-                if (!killer.inventory.add(head)) {
-                    player.drop(head, true, false)
-                }
-            } else {
-                player.drop(head, true, false)
-            }
-        }
-
-        val remaining = if (!this.duelSettings.teams) this.getPlayingPlayers() else this.teams.getPlayingTeams()
-        if (remaining.size <= 1) {
-            this.setPhase(DuelPhase.Complete)
-        }
-    }
-
-    @Listener(flags = HAS_PLAYER)
-    private fun onPlayerRespawn(event: PlayerRespawnEvent) {
-        val position = event.player.lastDeathLocation.map { it.pos().center }.orElseGet {
-            Vec3(0.0, 128.0, 0.0)
-        }
-        event.player.teleportTo(Location.of(position, level = this.level))
-    }
-
-    @Listener
-    private fun onMinigameAddSpectator(event: MinigameAddSpectatorEvent) {
-        event.player.setGameMode(GameType.SPECTATOR)
     }
 
     @Listener

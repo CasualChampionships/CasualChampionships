@@ -29,7 +29,8 @@ object CommonMod: ModInitializer {
         addAssetSource(MOD_ID)
         addLangsFromData(MOD_ID)
         addLangsFrom("minecraft", container.findPath("data/minecraft/lang").get())
-        addFont(CommonComponents.Bitmap)
+        addFont(CommonComponents.Hud)
+        addFont(CommonComponents.Text)
         addFont(CommonComponents.Border)
         addSounds(CommonSounds)
         packDescription = "Common resources used in CasualChampionships".literal()
@@ -44,6 +45,7 @@ object CommonMod: ModInitializer {
         ArcadePacks.SPACES_FONT_PACK,
         ArcadePacks.HIDE_PLAYER_LIST_PING_PACK,
         ArcadePacks.ACTION_BAR_FONT_PACK,
+        ArcadePacks.MINI_ACTION_BAR_FONT_PACK,
         CommonItems.CUSTOM_MODEL_PACK,
         COMMON_PACK
     )

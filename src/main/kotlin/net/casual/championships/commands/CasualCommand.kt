@@ -74,7 +74,7 @@ object CasualCommand: Command {
         CasualResourcePackHost.reload().thenAcceptAsync({
             if (it) {
                 context.source.success("Successfully reloaded resources, resending pack...")
-                for (player in CasualMinigames.minigame.getAllPlayers()) {
+                for (player in CasualMinigames.minigame.players) {
                     CasualMinigames.event.sendResourcesTo(player)
                 }
             } else {

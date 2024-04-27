@@ -1,22 +1,22 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.gui.screen.SelectionScreenComponents
+import net.casual.arcade.gui.screen.SelectionGuiComponents
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.championships.common.items.MenuItem
-import net.casual.championships.common.util.CommonComponents.BACK_MESSAGE
-import net.casual.championships.common.util.CommonComponents.EXIT_MESSAGE
-import net.casual.championships.common.util.CommonComponents.NEXT_MESSAGE
-import net.casual.championships.common.util.CommonComponents.PREVIOUS_MESSAGE
+import net.casual.championships.common.util.CommonComponents.BACK
+import net.casual.championships.common.util.CommonComponents.EXIT
+import net.casual.championships.common.util.CommonComponents.NEXT
+import net.casual.championships.common.util.CommonComponents.PREVIOUS
 import net.minecraft.network.chat.Component
 
 object CommonScreens {
-    private val COMPONENTS = SelectionScreenComponents.Builder().apply {
-        next(MenuItem.GREEN_LONG_RIGHT.named(NEXT_MESSAGE), MenuItem.GREY_GREEN_LONG_RIGHT.named(NEXT_MESSAGE))
-        previous(MenuItem.GREEN_LONG_LEFT.named(PREVIOUS_MESSAGE), MenuItem.GREY_GREEN_LONG_LEFT.named(PREVIOUS_MESSAGE))
-        back(MenuItem.CROSS.named(BACK_MESSAGE), MenuItem.CROSS.named(EXIT_MESSAGE))
-    }.build()
+    private val COMPONENTS: SelectionGuiComponents = SelectionGuiComponents.Builder().apply {
+        next(MenuItem.GREEN_LONG_RIGHT.named(NEXT), MenuItem.GREY_GREEN_LONG_RIGHT.named(NEXT))
+        previous(MenuItem.GREEN_LONG_LEFT.named(PREVIOUS), MenuItem.GREY_GREEN_LONG_LEFT.named(PREVIOUS))
+        back(MenuItem.CROSS.named(BACK), MenuItem.CROSS.named(EXIT))
+    }
 
-    fun named(title: Component): SelectionScreenComponents {
-        return SelectionScreenComponents.Builder(COMPONENTS).title(title).build()
+    fun named(title: Component): SelectionGuiComponents {
+        return SelectionGuiComponents.Builder(COMPONENTS).title(title)
     }
 }

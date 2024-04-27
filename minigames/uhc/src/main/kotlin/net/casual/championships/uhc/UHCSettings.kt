@@ -24,18 +24,10 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         display = Items.GLOWSTONE_DUST.named("Glowing")
         value = false
         defaults.options(this)
-        listener { _, value ->
-            if (value) {
-                var count = 0
-                for (player in uhc.getPlayingPlayers()) {
-                    player.setGlowingTag(true)
-                    count++
-                }
-                UHCMod.logger.info("$count player's are now glowing")
-            } else {
-                for (player in uhc.getAllPlayers()) {
-                    player.setGlowingTag(false)
-                }
+        listener { _, _ ->
+            for (player in uhc.players.playing) {
+                player.setGlowingTag(!player.hasGlowingTag())
+                player.setGlowingTag(!player.hasGlowingTag())
             }
         }
     })

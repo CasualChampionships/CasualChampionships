@@ -60,7 +60,7 @@ class CasualPlayerListEntries(
     private fun isPlayerPlaying(username: String): Boolean? {
         val player = PlayerUtils.player(username)
         if (player != null) {
-            return this.minigame.isPlaying(player)
+            return this.minigame.players.isPlaying(player)
         }
         return null
     }

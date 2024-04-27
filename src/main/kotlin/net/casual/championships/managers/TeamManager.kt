@@ -31,21 +31,17 @@ object TeamManager {
             for (operator in CasualMinigames.event.config.operators) {
                 val player = PlayerUtils.player(operator)
                 if (player != null) {
-                    minigame.makeAdmin(player)
+                    minigame.players.addAdmin(player)
                     val team = player.team
                     if (team == null || team == minigame.teams.getAdminTeam()) {
-                        // TODO: Remove
-                        UHCMod.logger.info("Making ${player.scoreboardName} spectator")
-                        minigame.makeSpectator(player)
+                        minigame.players.setSpectating(player)
                     }
                 }
             }
 
-            for (player in minigame.getAllPlayers()) {
+            for (player in minigame.players) {
                 if (player.team == null) {
-                    // TODO: Remove
-                    UHCMod.logger.info("Making ${player.scoreboardName} spectator")
-                    minigame.makeSpectator(player)
+                    minigame.players.setSpectating(player)
                 }
             }
         }, Arcade.getServer()).exceptionally {

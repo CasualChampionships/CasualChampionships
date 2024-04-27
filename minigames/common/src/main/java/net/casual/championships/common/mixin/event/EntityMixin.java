@@ -1,7 +1,7 @@
 package net.casual.championships.common.mixin.event;
 
 import net.casual.arcade.events.GlobalEventHandler;
-import net.casual.championships.events.border.BorderEntityPortalEntryPointEvent;
+import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;

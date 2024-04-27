@@ -3,8 +3,8 @@ package net.casual.championships.minigame
 import com.google.gson.JsonObject
 import net.casual.arcade.area.StructuredAreaConfig
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.player.PlayerCanLoginEvent
 import net.casual.arcade.events.player.PlayerJoinEvent
+import net.casual.arcade.events.player.PlayerRequestLoginEvent
 import net.casual.arcade.events.server.ServerLoadedEvent
 import net.casual.arcade.events.server.ServerSaveEvent
 import net.casual.arcade.events.server.ServerStoppingEvent
@@ -64,12 +64,12 @@ object CasualMinigames {
         Minigames.registerFactory(UHCMinigame.ID, this.event::createUHCMinigame)
         Minigames.registerFactory(DuelMinigame.ID, this.event::createDuelMinigame)
 
-        GlobalEventHandler.register<PlayerCanLoginEvent> { event ->
+        GlobalEventHandler.register<PlayerRequestLoginEvent> { event ->
             if (!floodgates && !event.server.playerList.isOp(event.profile)) {
                 event.cancel("CasualChampionships isn't quite ready yet...".literal())
                 this.minigame.chat.broadcastTo(
                     "${event.profile.name} tried to join, but floodgates are closed".literal(),
-                    this.minigame.getAdminPlayers()
+                    this.minigame.players.admins
                 )
             }
         }

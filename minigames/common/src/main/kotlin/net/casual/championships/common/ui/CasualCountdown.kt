@@ -23,13 +23,11 @@ import net.minecraft.server.level.ServerPlayer
 
 object CasualCountdown: TitledCountdown {
     override fun getCountdownTitle(current: Int): Component {
-        // TODO: Make this translatable
-        return TitledCountdown.DEFAULT_TITLE.copy().mini()
+        return CommonComponents.STARTING_IN.generate("").mini()
     }
 
     override fun getCountdownSubtitle(current: Int): Component {
-        val subtitle = Component.empty()
-            .append("▶ ").append(current.toString().literal().mini()).append(" ◀")
+        val subtitle = Component.empty().append("▶ ").append(current.toString().literal().mini()).append(" ◀")
         when (current) {
             3 -> subtitle.red()
             2 -> subtitle.yellow()
@@ -52,7 +50,7 @@ object CasualCountdown: TitledCountdown {
         val final = Sound(CommonSounds.COUNTDOWN_TICK_END)
         for (player in players) {
             player.setTitleAnimation()
-            player.sendTitle(CommonComponents.GOOD_LUCK_MESSAGE.gold().bold().mini(), Component.empty())
+            player.sendTitle(CommonComponents.GOOD_LUCK.gold().bold().mini(), Component.empty())
             player.sendSound(final)
         }
     }
