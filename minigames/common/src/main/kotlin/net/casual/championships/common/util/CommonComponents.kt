@@ -37,6 +37,8 @@ object CommonComponents {
     val EXIT by translatable("casual.gui.exit")
     val BACK by translatable("casual.gui.back")
     val SPECTATOR_TITLE by translatable("casual.gui.spectator.title")
+    val SPECTATORS by translatable("casual.gui.spectators")
+    val ADMINS by translatable("casual.gui.admins")
     val CONFIGURE by translatable("casual.gui.configure")
     val CONFIRM by translatable("casual.gui.confirm")
     val CANCEL by translatable("casual.gui.cancel")

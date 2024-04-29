@@ -162,6 +162,8 @@ enum class UHCPhase(
             val team = teams.first()
 
             minigame.uhcAdvancements.grantFinalAdvancements(team.getOnlinePlayers())
+            minigame.winners.clear()
+            minigame.winners.addAll(team.players)
 
             for (player in minigame.players) {
                 player.sendTitle(CommonComponents.GAME_WON.generate(team.name).withStyle(team.color).mini())

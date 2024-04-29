@@ -1,198 +1,58 @@
 package net.casual.championships.minigame
 
-import com.google.gson.JsonArray
-import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
-import net.casual.arcade.events.minigame.MinigameCloseEvent
-import net.casual.arcade.events.minigame.MinigamePauseEvent
-import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
-import net.casual.arcade.events.player.PlayerTeamJoinEvent
-import net.casual.arcade.events.player.PlayerTeamLeaveEvent
-import net.casual.arcade.events.team.TeamExtensionEvent
-import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.minigame.MinigameResources
-import net.casual.arcade.minigame.annotation.NONE
-import net.casual.arcade.minigame.events.MinigamesEvent
-import net.casual.arcade.minigame.events.MinigamesEventConfig
+import com.mojang.serialization.Codec
+import com.mojang.serialization.codecs.RecordCodecBuilder
+import net.casual.arcade.minigame.events.SimpleMinigamesEvent
 import net.casual.arcade.minigame.events.lobby.Lobby
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
-import net.casual.arcade.minigame.events.lobby.LobbyMinigame.LobbyPhase
-import net.casual.arcade.minigame.serialization.MinigameCreationContext
-import net.casual.arcade.mixin.level.ServerPlayerMixin
+import net.casual.arcade.minigame.events.lobby.templates.LobbyTemplate
 import net.casual.arcade.resources.PackInfo
-import net.casual.arcade.resources.creator.NamedResourcePackCreator
-import net.casual.arcade.utils.ComponentUtils.literal
-import net.casual.arcade.utils.FantasyUtils
-import net.casual.arcade.utils.JsonUtils
-import net.casual.arcade.utils.JsonUtils.obj
-import net.casual.arcade.utils.JsonUtils.string
-import net.casual.arcade.utils.LevelUtils
-import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
-import net.casual.arcade.utils.ResourceUtils
-import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
-import net.casual.arcade.utils.impl.Sound
-import net.casual.arcade.utils.json.LongSerializer
+import net.casual.arcade.utils.serialization.CodecProvider
 import net.casual.championships.CasualMod
 import net.casual.championships.common.CommonMod
-import net.casual.championships.common.ui.CasualCountdown
-import net.casual.championships.common.ui.CasualReadyChecker
-import net.casual.championships.common.util.CommonSounds
-import net.casual.championships.common.util.CommonUI
-import net.casual.championships.common.util.CommonUI.broadcastWithSound
-import net.casual.championships.common.util.PerformanceUtils
-import net.casual.championships.duel.DuelMinigame
-import net.casual.championships.duel.DuelSettings
+import net.casual.championships.minigame.lobby.CasualLobbyMinigame
 import net.casual.championships.resources.CasualResourcePackHost
-import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
+import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes
-import net.minecraft.world.level.levelgen.WorldOptions
-import net.minecraft.world.scores.Team
-import xyz.nucleoid.fantasy.RuntimeWorldConfig
-import java.util.concurrent.CompletableFuture
-import kotlin.io.path.bufferedReader
-import kotlin.io.path.bufferedWriter
-import kotlin.io.path.exists
+import net.minecraft.world.level.Level
+import java.util.*
 
-class CasualChampionshipsEvent(config: MinigamesEventConfig): MinigamesEvent(config) {
-    private val seed by Config.any(default = WorldOptions.randomSeed(), serializer = LongSerializer)
-
-    override fun getAdditionalPacks(): List<String> {
-        return CommonMod.COMMON_PACKS.map(NamedResourcePackCreator::zippedName)
-    }
-
-    override fun getPackInfo(name: String): PackInfo? {
-        return CasualResourcePackHost.getHostedPack(name)?.toPackInfo(!Config.dev)
+class CasualChampionshipsEvent(
+    lobby: LobbyTemplate = LobbyTemplate.DEFAULT,
+    dimension: Optional<ResourceKey<Level>>,
+    operators: List<String> = listOf(),
+    minigames: List<ResourceLocation>,
+    repeat: Boolean = true
+): SimpleMinigamesEvent(lobby, dimension, operators, minigames, repeat) {
+    override fun getAdditionalPacks(): Iterable<PackInfo> {
+        return CommonMod.COMMON_PACKS.mapNotNull { creator ->
+            CasualResourcePackHost.getHostedPack(creator.zippedName())?.toPackInfo(!Config.dev)
+        }
     }
 
     override fun createLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame {
         val minigame = CasualLobbyMinigame(server, lobby)
-        this.setCasualUI(minigame)
+        CasualMinigames.setCasualUI(minigame)
         return minigame
     }
 
-    fun createUHCMinigame(context: MinigameCreationContext): UHCMinigame {
-        val overworldId: ResourceLocation
-        val netherId: ResourceLocation
-        val endId: ResourceLocation
-        if (context.hasCustomData()) {
-            val dimensions = context.getCustomData().obj("dimensions")
-            overworldId = ResourceLocation(dimensions.string("overworld"))
-            netherId = ResourceLocation(dimensions.string("nether"))
-            endId = ResourceLocation(dimensions.string("end"))
-        } else {
-            overworldId = ResourceUtils.random { "overworld_$it" }
-            netherId = ResourceUtils.random { "nether_$it" }
-            endId = ResourceUtils.random { "end_$it" }
-        }
-
-        val server = context.server
-        val seed = this.seed
-        val (overworld, nether, end) = FantasyUtils.createPersistentVanillaLikeLevels(
-            server,
-            FantasyUtils.PersistentConfig(overworldId, FantasyUtils.createOverworldConfig(seed)),
-            FantasyUtils.PersistentConfig(netherId, FantasyUtils.createNetherConfig(seed)),
-            FantasyUtils.PersistentConfig(endId, FantasyUtils.createEndConfig(seed))
-        )
-        val minigame = UHCMinigame.of(server, overworld, nether, end)
-        PerformanceUtils.reduceMinigameMobcap(minigame)
-        PerformanceUtils.disableEntityAI(minigame)
-        this.setCasualUI(minigame)
-
-        minigame.addResources(object: MinigameResources {
-            override fun getPacks(): Collection<PackInfo> {
-                val pack = CasualResourcePackHost.getHostedPack("uhc") ?: return listOf()
-                return listOf(pack.toPackInfo(!Config.dev))
-            }
-        })
-
-        minigame.events.register<MinigameCloseEvent> {
-            this.updateDatabase(minigame)
-            this.returnToLobby(server)
-        }
-        minigame.events.register<PlayerTeamJoinEvent> {
-            for (teammate in it.team.getOnlinePlayers()) {
-                minigame.effects.forceUpdate(teammate, it.player)
-                minigame.effects.forceUpdate(it.player, teammate)
-            }
-        }
-        minigame.events.register<PlayerTeamLeaveEvent> {
-            for (teammate in it.team.getOnlinePlayers()) {
-                minigame.effects.forceUpdate(teammate, it.player)
-                minigame.effects.forceUpdate(it.player, teammate)
-            }
-        }
-
-        minigame.settings.replay = !Config.dev
-
-        return minigame
+    override fun codec(): Codec<out CasualChampionshipsEvent> {
+        return CODEC
     }
 
-    fun createDuelMinigame(context: MinigameCreationContext): DuelMinigame {
-        return this.createDuelMinigame(context.server, DuelSettings())
-    }
+    companion object: CodecProvider<CasualChampionshipsEvent> {
+        override val ID: ResourceLocation = CasualMod.id("championships")
 
-    fun createDuelMinigame(server: MinecraftServer, settings: DuelSettings): DuelMinigame {
-        val minigame = DuelMinigame(server, settings)
-        minigame.events.register<MinigameCloseEvent> {
-            minigame.transferPlayersTo(this.current)
-        }
-        // If the lobby starts reading, we kick everyone back to the main minigame
-        minigame.events.register(MinigameSetPhaseEvent::class.java, flags = NONE) {
-            if (it.minigame is LobbyMinigame && this.current === it.minigame && it.phase == LobbyPhase.Readying) {
-                minigame.close()
-            }
-        }
-        this.setCasualUI(minigame)
-        return minigame
-    }
-
-    private fun setCasualUI(minigame: Minigame<*>) {
-        minigame.ui.setPlayerListDisplay(CommonUI.createTabDisplay(minigame))
-        minigame.ui.readier = CasualReadyChecker(minigame)
-        minigame.ui.countdown = CasualCountdown
-
-        minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
-        minigame.events.register<MinigameAddPlayerEvent> {
-            it.player.team?.nameTagVisibility = Team.Visibility.NEVER
-        }
-        minigame.events.register<PlayerTeamJoinEvent> {
-            it.team.nameTagVisibility = Team.Visibility.NEVER
-        }
-
-        this.setPauseNotification(minigame)
-    }
-
-    private fun setPauseNotification(minigame: Minigame<*>) {
-        minigame.events.register<MinigamePauseEvent> {
-            minigame.chat.broadcastWithSound(
-                "Minigame is now paused".literal(),
-                Sound(CommonSounds.GAME_PAUSED)
-            )
-        }
-    }
-
-    // TODO: Use a proper database
-    private fun updateDatabase(minigame: Minigame<*>) {
-        val serialized = minigame.data.toJson()
-        CompletableFuture.runAsync {
-            try {
-                val stats = Config.resolve("stats.json")
-                val existing = if (stats.exists()) {
-                    stats.bufferedReader().use {
-                        JsonUtils.GSON.fromJson(it, JsonArray::class.java)
-                    }
-                } else JsonArray()
-                existing.add(serialized)
-                stats.bufferedWriter().use {
-                    JsonUtils.GSON.toJson(existing, it)
-                }
-            } catch (e: Exception) {
-                CasualMod.logger.error("Failed to write stats!", e)
-                // So we have it somewhere!
-                CasualMod.logger.error(JsonUtils.GSON.toJson(serialized))
-            }
+        override val CODEC: Codec<out CasualChampionshipsEvent> = RecordCodecBuilder.create { instance ->
+            instance.group(
+                LobbyTemplate.CODEC.fieldOf("lobby").forGetter(SimpleMinigamesEvent::lobby),
+                Level.RESOURCE_KEY_CODEC.optionalFieldOf("lobby_dimension").forGetter(SimpleMinigamesEvent::dimension),
+                Codec.STRING.listOf().fieldOf("operators").forGetter(SimpleMinigamesEvent::operators),
+                ResourceLocation.CODEC.listOf().fieldOf("minigames").forGetter(SimpleMinigamesEvent::minigames),
+                Codec.BOOL.fieldOf("repeat").forGetter(SimpleMinigamesEvent::repeat)
+            ).apply(instance, ::CasualChampionshipsEvent)
         }
     }
 }

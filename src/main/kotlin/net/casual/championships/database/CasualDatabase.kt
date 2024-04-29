@@ -3,9 +3,7 @@ package net.casual.championships.database
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import net.casual.arcade.database.DatabaseWriter
 import net.casual.arcade.minigame.serialization.MinigameDataTracker
-import net.casual.arcade.utils.JsonUtils.writeForDatabase
 
 class CasualDatabase {
     private val event = JsonObject()
@@ -25,10 +23,6 @@ class CasualDatabase {
 
     fun writeMinigame(minigame: MinigameDataTracker) {
         this.minigames.add(minigame.toJson())
-    }
-
-    fun write(writer: DatabaseWriter<*>) {
-        this.toJson().writeForDatabase(writer)
     }
 
     fun toJson(): JsonObject {

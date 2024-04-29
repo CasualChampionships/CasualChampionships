@@ -3,6 +3,7 @@ import java.nio.charset.Charset
 
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization") version "1.9.21"
     id("fabric-loom")
     `maven-publish`
     java
@@ -26,6 +27,7 @@ val serverTranslationsVersion: String by project
 allprojects {
     apply(plugin = "fabric-loom")
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
     repositories {
         mavenLocal()

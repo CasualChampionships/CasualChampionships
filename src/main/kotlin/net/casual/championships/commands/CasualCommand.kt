@@ -75,7 +75,7 @@ object CasualCommand: Command {
             if (it) {
                 context.source.success("Successfully reloaded resources, resending pack...")
                 for (player in CasualMinigames.minigame.players) {
-                    CasualMinigames.event.sendResourcesTo(player)
+                    CasualMinigames.getMinigames().sendResourcesTo(player)
                 }
             } else {
                 context.source.fail("Failed to reload resources...")
@@ -85,7 +85,7 @@ object CasualCommand: Command {
     }
 
     private fun returnToLobby(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.event.returnToLobby(context.source.server)
+        CasualMinigames.getMinigames().returnToLobby()
         return context.source.success("Returning to lobby...")
     }
 

@@ -20,6 +20,8 @@
   "casual.gui.confirm": "Confirm",
   "casual.gui.cancel": "Cancel",
   "casual.gui.spectator.title": "Spectator Screen",
+  "casual.gui.spectators": "Spectators",
+  "casual.gui.admins": "Admins",
 
   "casual.ready.question": "Are you ready?",
   "casual.ready.notReady": "%s is not ready!",
@@ -98,5 +100,6 @@
   "casual.game.direction.south.negativeWidth": "\uDAFF\uDFE4",
   "casual.game.direction.southWest.negativeWidth": "\uDAFF\uDFCA",
   "casual.game.direction.west.negativeWidth": "\uDAFF\uDFEA",
-  "casual.game.direction.northWest.negativeWidth": "\uDAFF\uDFCA"
+  "casual.game.direction.northWest.negativeWidth": "\uDAFF\uDFCA",
+  "casual.gui.spectators.difference.admins": "\uDB00\uDC18"
 }

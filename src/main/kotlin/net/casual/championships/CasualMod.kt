@@ -5,6 +5,7 @@ import net.casual.championships.managers.DataManager
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost
+import net.casual.championships.util.CasualRegistration
 import net.casual.championships.util.Config
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.loader.api.FabricLoader
@@ -26,6 +27,8 @@ object CasualMod: DedicatedServerModInitializer {
     override fun onInitializeServer() {
         logger.info("Starting CasualChampionships... Version: ${container.metadata.version}")
 
+        CasualRegistration.register()
+
         Config.registerEvents()
         CommandManager.registerEvents()
         DataManager.registerEvents()
@@ -36,11 +39,7 @@ object CasualMod: DedicatedServerModInitializer {
     }
 
     // TODO:
-    //   Finish TAB
-    //   Status for UHC (grace, border moving, border paused, game over)
-    //   Generic info messages and game messages (with sound)
     //   Lots of translations (Ready)
     //   SpreadPlayers
-    //   Implement podium
     //   Minesweeper AI - Make sure all maps are non-luck based
 }

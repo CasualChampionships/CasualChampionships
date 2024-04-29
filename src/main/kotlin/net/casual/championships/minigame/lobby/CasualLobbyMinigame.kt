@@ -1,4 +1,4 @@
-package net.casual.championships.minigame
+package net.casual.championships.minigame.lobby
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
@@ -31,6 +31,7 @@ import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.duel.DuelComponents
 import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
+import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.util.Config
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
@@ -169,7 +170,7 @@ class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(
             return false
         }
 
-        val duel = CasualMinigames.event.createDuelMinigame(initiator.server, settings)
+        val duel = CasualMinigames.createDuelMinigame(initiator.server, settings)
         this.transferPlayersTo(duel, ready)
 
         duel.chat.broadcastGame(DuelComponents.STARTING_DUEL.mini().green())

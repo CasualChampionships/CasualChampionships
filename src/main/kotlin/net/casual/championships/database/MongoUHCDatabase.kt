@@ -5,7 +5,7 @@ import com.google.gson.JsonObject
 import com.mongodb.MongoClient
 import com.mongodb.MongoClientURI
 import com.mongodb.client.model.Filters
-import net.casual.arcade.utils.JsonUtils.writeForDatabase
+import net.casual.arcade.utils.JsonUtils
 import net.casual.championships.uhc.UHCMinigame
 import net.minecraft.world.scores.Team
 import org.bson.Document
@@ -31,20 +31,19 @@ class MongoUHCDatabase(
     private val executor = Executors.newSingleThreadExecutor()
 
     override fun update(uhc: UHCMinigame) {
-        val bson = uhc.data.toJson().writeForDatabase(MongoDatabaseWriter()).element.asDocument()
-        bson["_id"] = bson.remove("uuid")
-        this.uhc.insertOne(
-            DocumentCodec().decode(bson.asBsonReader(), DecoderContext.builder().build())
-        )
+        // val bson = uhc.data.toJson().writeForDatabase(MongoDatabaseWriter()).element.asDocument()
+        // bson["_id"] = bson.remove("uuid")
+        // this.uhc.insertOne(
+        //     DocumentCodec().decode(bson.asBsonReader(), DecoderContext.builder().build())
+        // )
     }
 
     override fun downloadTeams(): CompletableFuture<List<JsonObject>> {
         return CompletableFuture.supplyAsync({
             val teams = ArrayList<JsonObject>()
             try {
-                val gson = GsonBuilder().setPrettyPrinting().create()
                 for (document in this.teams.find()) {
-                    teams.add(gson.fromJson(document.toJson(), JsonObject::class.java))
+                    teams.add(JsonUtils.decodeToJsonObject(document.toJson().reader()))
                 }
                 this.logger.info("Successfully downloaded Teams.json")
             } catch (e: Exception) {

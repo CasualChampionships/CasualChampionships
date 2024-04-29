@@ -1,10 +1,6 @@
 package net.casual.championships.common.ui
 
-import com.google.gson.JsonObject
-import net.casual.arcade.gui.countdown.Countdown
 import net.casual.arcade.gui.countdown.TitledCountdown
-import net.casual.arcade.minigame.events.lobby.ui.CountdownConfig
-import net.casual.arcade.minigame.events.lobby.ui.CountdownConfigFactory
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
@@ -52,22 +48,6 @@ object CasualCountdown: TitledCountdown {
             player.setTitleAnimation()
             player.sendTitle(CommonComponents.GOOD_LUCK.gold().bold().mini(), Component.empty())
             player.sendSound(final)
-        }
-    }
-
-    object Config: CountdownConfig, CountdownConfigFactory {
-        override val id: String = "casual_countdown"
-
-        override fun create(): Countdown {
-            return CasualCountdown
-        }
-
-        override fun create(data: JsonObject): CountdownConfig {
-            return this
-        }
-
-        override fun write(): JsonObject {
-            return JsonObject()
         }
     }
 }

@@ -110,6 +110,7 @@ class UHCMinigame(
     override val id = ID
 
     val uhcAdvancements = UHCAdvancementManager(this)
+    val winners = HashSet<String>()
 
     override val settings = UHCSettings(this)
 

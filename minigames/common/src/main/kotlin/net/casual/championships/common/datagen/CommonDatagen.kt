@@ -4,6 +4,7 @@ import eu.pb4.polymer.resourcepack.api.ResourcePackCreator
 import net.casual.arcade.datagen.language.CentredSpacingGenerator
 import net.casual.arcade.datagen.language.LanguageGenerator
 import net.casual.arcade.datagen.language.NegativeWidthGenerator
+import net.casual.arcade.datagen.language.WidthDifferenceGenerator
 import net.casual.arcade.datagen.resource.ArcadeResourceGenerator
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.utils.ComponentUtils.mini
@@ -46,6 +47,10 @@ class CommonDatagen: ArcadeResourceGenerator {
             add(CentredSpacingGenerator(
                 CommonComponents.STARTING_SOON.mini(),
                 CommonComponents.Hud.BACKGROUND_240
+            ))
+            add(WidthDifferenceGenerator(
+                CommonComponents.SPECTATORS.mini(),
+                CommonComponents.ADMINS.mini()
             ))
 
             for (direction in Direction8.values()) {

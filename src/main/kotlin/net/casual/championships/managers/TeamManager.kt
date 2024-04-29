@@ -28,9 +28,8 @@ object TeamManager {
             val minigame = CasualMinigames.minigame
             minigame.teams.setAdminTeam(scoreboard.getOrCreateAdminTeam())
             minigame.teams.setSpectatorTeam(scoreboard.getOrCreateSpectatorTeam())
-            for (operator in CasualMinigames.event.config.operators) {
-                val player = PlayerUtils.player(operator)
-                if (player != null) {
+            for (player in PlayerUtils.players()) {
+                if (CasualMinigames.getMinigames().event.isAdmin(player)) {
                     minigame.players.addAdmin(player)
                     val team = player.team
                     if (team == null || team == minigame.teams.getAdminTeam()) {
