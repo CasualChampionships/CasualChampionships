@@ -170,6 +170,7 @@ enum class UHCPhase(
             minigame.winners.addAll(team.players)
 
             for (player in minigame.players) {
+                player.sendSound(CommonSounds.GAME_WON)
                 player.sendTitle(CommonComponents.GAME_WON.generate(team.name).withStyle(team.color).mini())
             }
 

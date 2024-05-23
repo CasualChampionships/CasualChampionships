@@ -47,6 +47,7 @@ import net.casual.championships.common.util.PerformanceUtils
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.events.CasualConfigReloaded
+import net.casual.championships.managers.TeamManager
 import net.casual.championships.missilewars.ExampleMinigame
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.uhc.UHCMinigame
@@ -84,6 +85,10 @@ object CasualMinigames {
         return this.winners.contains(player.scoreboardName)
     }
 
+    fun hasWinner(): Boolean {
+        return this.winners.isNotEmpty()
+    }
+
     internal fun registerEvents() {
         Minigames.registerFactory(UHCMinigame.ID, this::createUHCMinigame)
         Minigames.registerFactory(DuelMinigame.ID, this::createDuelMinigame)
@@ -100,6 +105,8 @@ object CasualMinigames {
         }
 
         GlobalEventHandler.register<ServerLoadedEvent>(Int.MAX_VALUE) {
+            TeamManager.createTeams()
+
             val minigames = SequentialMinigames(this.readMinigameEvent(), it.server)
             this.minigames = minigames
 

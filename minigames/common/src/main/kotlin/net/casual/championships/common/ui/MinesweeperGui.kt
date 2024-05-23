@@ -67,7 +67,7 @@ class MinesweeperGui(
         slotId: Int,
         type: ClickType,
         action: ClickAction,
-        element: GuiElementInterface
+        element: GuiElementInterface?
     ): Boolean {
         if (slotId >= 0 && slotId < this.grid.capacity) {
             if (action != ClickAction.PICKUP || this.complete) {

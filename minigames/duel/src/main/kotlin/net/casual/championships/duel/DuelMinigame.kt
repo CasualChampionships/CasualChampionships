@@ -68,7 +68,7 @@ class DuelMinigame(
     }
 
     override fun getPhases(): Collection<Phase<DuelMinigame>> {
-        return DuelPhase.values().toList()
+        return DuelPhase.entries
     }
 
     private fun createRandomOverworld(): ServerLevel {

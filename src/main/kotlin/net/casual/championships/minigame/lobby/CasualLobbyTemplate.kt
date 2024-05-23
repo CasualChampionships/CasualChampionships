@@ -25,12 +25,14 @@ class CasualLobbyTemplate(
     spawn: LocationTemplate,
     countdown: CountdownTemplate,
     bossbar: TimerBossBarTemplate,
-    val podium: LocationTemplate
+    val podium: LocationTemplate,
+    val podiumView: LocationTemplate
 ): SimpleLobbyTemplate(area, spawn, countdown, bossbar) {
     override fun create(level: ServerLevel): Lobby {
         val area = this.area.create(level)
         val spawn = this.spawn.toLocation(level)
         val podium = this.podium.toLocation(level)
+        val podiumView = this.podiumView.toLocation(level)
 
         return object: Lobby {
             override val area: PlaceableArea = area
@@ -39,6 +41,8 @@ class CasualLobbyTemplate(
             override fun getSpawn(player: ServerPlayer): Location {
                 if (CasualMinigames.isWinner(player)) {
                     return podium
+                } else if (CasualMinigames.hasWinner()) {
+                    return podiumView
                 }
                 return super.getSpawn(player)
             }
@@ -66,7 +70,8 @@ class CasualLobbyTemplate(
                 LocationTemplate.CODEC.fieldOf("spawn").forGetter(SimpleLobbyTemplate::spawn),
                 CountdownTemplate.CODEC.fieldOf("countdown").forGetter(SimpleLobbyTemplate::countdown),
                 TimerBossBarTemplate.CODEC.fieldOf("bossbar").forGetter(SimpleLobbyTemplate::bossbar),
-                LocationTemplate.CODEC.fieldOf("podium").forGetter(CasualLobbyTemplate::podium)
+                LocationTemplate.CODEC.fieldOf("podium").forGetter(CasualLobbyTemplate::podium),
+                LocationTemplate.CODEC.fieldOf("podium_view").forGetter(CasualLobbyTemplate::podiumView)
             ).apply(instance, ::CasualLobbyTemplate)
         }
     }

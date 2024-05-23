@@ -2,6 +2,7 @@ package net.casual.championships
 
 import net.casual.championships.managers.CommandManager
 import net.casual.championships.managers.DataManager
+import net.casual.championships.managers.TeamManager
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost

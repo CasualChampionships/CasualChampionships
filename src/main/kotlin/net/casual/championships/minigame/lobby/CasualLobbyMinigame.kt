@@ -184,7 +184,7 @@ class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(
         }
 
         val duel = CasualMinigames.createDuelMinigame(initiator.server, settings)
-        this.transferPlayersTo(duel, ready)
+        this.transferPlayersTo(duel, ready, transferSpectatorStatus = false)
 
         duel.chat.broadcastGame(DuelComponents.STARTING_DUEL.mini().green())
         duel.start()
