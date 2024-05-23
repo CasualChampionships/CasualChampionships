@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
-import me.senseiwells.replay.player.PlayerRecorders
 import net.casual.arcade.border.MultiLevelBorderListener
 import net.casual.arcade.border.MultiLevelBorderTracker
 import net.casual.arcade.border.TrackedBorder
@@ -96,7 +95,7 @@ import net.minecraft.world.scores.Team
 import xyz.nucleoid.fantasy.RuntimeWorldHandle
 import kotlin.math.atan2
 
-class UHCMinigame(
+class UHCMinigame constructor(
     server: MinecraftServer,
     val overworld: ServerLevel,
     val nether: ServerLevel,
@@ -206,7 +205,7 @@ class UHCMinigame(
     }
 
     override fun getPhases(): Collection<UHCPhase> {
-        return UHCPhase.values().toList()
+        return entries
     }
 
     override fun readData(json: JsonObject) {
@@ -374,10 +373,10 @@ class UHCMinigame(
         event.invoke() // Post event
         val (player, source) = event
 
-        // We can stop recording now...
-        GlobalTickedScheduler.schedule(1.Seconds) {
-            PlayerRecorders.get(player)?.stop()
-        }
+        // TODO: We can stop recording now...
+        // GlobalTickedScheduler.schedule(1.Seconds) {
+        //     PlayerRecorders.get(player)?.stop()
+        // }
 
         if (this.isRunning()) {
             this.onEliminated(player, player.getKillCreditWith(source))
@@ -398,7 +397,7 @@ class UHCMinigame(
         player.resetHunger()
         player.resetExperience()
         player.clearPlayerInventory()
-        PlayerRecorders.get(player)?.stop()
+        // PlayerRecorders.get(player)?.stop()
     }
 
     @Listener
@@ -431,11 +430,11 @@ class UHCMinigame(
         if (player.team == null) {
             event.spectating = true
         } else {
-            GlobalTickedScheduler.later {
-                if (!PlayerRecorders.has(player) && this.players.isPlaying(player) && this.settings.replay) {
-                    PlayerRecorders.create(player).start()
-                }
-            }
+            // GlobalTickedScheduler.later {
+            //     if (!PlayerRecorders.has(player) && this.players.isPlaying(player) && this.settings.replay) {
+            //         PlayerRecorders.create(player).start()
+            //     }
+            // }
         }
 
         // Needed for updating the player's health

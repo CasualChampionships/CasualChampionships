@@ -22,7 +22,7 @@
     ]
   },
   "mixins": [
-    "uhc.mixins.json"
+    "casual.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.12",

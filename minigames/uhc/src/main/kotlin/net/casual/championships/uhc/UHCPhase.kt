@@ -45,7 +45,7 @@ enum class UHCPhase(
     override val id: String
 ): Phase<UHCMinigame> {
     Initializing(INITIALIZING_ID) {
-        override fun start(minigame: UHCMinigame) {
+        override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.settings.canPvp.set(false)
             minigame.settings.tickFreezeOnPause.set(true)
             minigame.levels.all().forEach { it.dayTime = 0 }
@@ -108,7 +108,7 @@ enum class UHCPhase(
         }
     },
     Grace(GRACE_ID) {
-        override fun start(minigame: UHCMinigame) {
+        override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.settings.isChatGlobal = false
             minigame.settings.mobsWithNoAIAreFlammable = true
             val duration = minigame.settings.gracePeriod
@@ -121,33 +121,37 @@ enum class UHCPhase(
             minigame.chat.broadcastGame(CommonComponents.BORDER_INITIAL_GRACE.generate(minutes).gold().mini())
         }
 
-        override fun end(minigame: UHCMinigame) {
-            minigame.chat.broadcastGame(
-                CommonComponents.BORDER_GRACE_OVER.red().mini(),
-                sound = Sound(CommonSounds.GAME_BORDER_MOVING)
-            )
-            minigame.settings.canPvp.set(true)
+        override fun end(minigame: UHCMinigame, next: Phase<UHCMinigame>) {
+            if (this < next) {
+                minigame.chat.broadcastGame(
+                    CommonComponents.BORDER_GRACE_OVER.red().mini(),
+                    sound = Sound(CommonSounds.GAME_BORDER_MOVING)
+                )
+                minigame.settings.canPvp.set(true)
+            }
         }
     },
     BorderMoving(BORDER_MOVING_ID) {
-        override fun start(minigame: UHCMinigame) {
+        override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.startWorldBorders()
         }
     },
     BorderFinished(BORDER_FINISHED_ID) {
-        override fun start(minigame: UHCMinigame) {
+        override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             val task = GlowingBossBarTask(minigame)
                 .withDuration(2.Minutes)
                 .then(MinigameTask(minigame, UHCMinigame::onBorderFinish))
             minigame.scheduler.schedulePhasedCancellable(2.Minutes, task).runIfCancelled()
         }
 
-        override fun end(minigame: UHCMinigame) {
-            minigame.settings.canPvp.set(false)
+        override fun end(minigame: UHCMinigame, next: Phase<UHCMinigame>) {
+            if (this < next) {
+                minigame.settings.canPvp.set(false)
+            }
         }
     },
     GameOver(GAME_OVER_ID) {
-        override fun start(minigame: UHCMinigame) {
+        override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.stats.freeze()
 
             minigame.settings.isChatGlobal = true

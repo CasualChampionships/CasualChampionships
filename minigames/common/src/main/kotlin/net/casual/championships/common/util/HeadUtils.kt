@@ -2,19 +2,23 @@ package net.casual.championships.common.util
 
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.unitalicise
+import net.casual.arcade.utils.ItemUtils.named
+import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.StringTag
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.PlayerHeadItem
+import net.minecraft.world.item.component.ResolvableProfile
+import java.util.*
 
 object HeadUtils {
     fun createConsumableGoldenHead(): ItemStack {
-        return ItemStack(CommonItems.GOLDEN_HEAD).setHoverName(CommonComponents.GOLDEN_HEAD.gold().unitalicise())
+        return ItemStack(CommonItems.GOLDEN_HEAD).named(CommonComponents.GOLDEN_HEAD.gold())
     }
 
     fun createConsumablePlayerHead(player: ServerPlayer): ItemStack {
         val stack = ItemStack(CommonItems.PLAYER_HEAD)
-        stack.addTagElement(PlayerHeadItem.TAG_SKULL_OWNER, StringTag.valueOf(player.scoreboardName))
+        stack.set(DataComponents.PROFILE, ResolvableProfile(player.gameProfile))
         return stack
     }
 

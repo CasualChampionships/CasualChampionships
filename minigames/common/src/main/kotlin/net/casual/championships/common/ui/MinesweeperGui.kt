@@ -168,7 +168,7 @@ class MinesweeperGui(
     private fun getTileStack(tile: Int): ItemStack {
         check(tile <= 8 && tile >= -1) { "Invalid tile: $tile" }
         return when (tile) {
-            -1 -> MINE.setHoverName(CommonComponents.MINESWEEPER_MINE)
+            -1 -> MINE.named(CommonComponents.MINESWEEPER_MINE)
             0 -> ItemStack.EMPTY
             else -> MinesweeperItem.MODELLER.create(tile).named(tile.toString())
         }
@@ -280,10 +280,10 @@ class MinesweeperGui(
     companion object {
         private val UNKNOWN_TILE = UNKNOWN.named("?")
         private val EXIT_TILE = MenuItem.CROSS.named(CommonComponents.EXIT)
-        private val DESC_TILE_1 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_1)
-        private val DESC_TILE_2 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_2)
-        private val DESC_TILE_3 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_3)
-        private val DESC_TILE_4 = Items.OAK_SIGN.defaultInstance.setHoverName(CommonComponents.MINESWEEPER_DESC_4)
+        private val DESC_TILE_1 = Items.OAK_SIGN.named(CommonComponents.MINESWEEPER_DESC_1)
+        private val DESC_TILE_2 = Items.OAK_SIGN.named(CommonComponents.MINESWEEPER_DESC_2)
+        private val DESC_TILE_3 = Items.OAK_SIGN.named(CommonComponents.MINESWEEPER_DESC_3)
+        private val DESC_TILE_4 = Items.OAK_SIGN.named(CommonComponents.MINESWEEPER_DESC_4)
         private val PLAY_AGAIN_TILE = MenuItem.GREEN_LONG_RIGHT.named(CommonComponents.MINESWEEPER_PLAY_AGAIN)
 
         private var record = 127.0

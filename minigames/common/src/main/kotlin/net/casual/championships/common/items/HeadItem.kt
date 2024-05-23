@@ -3,7 +3,8 @@ package net.casual.championships.common.items
 import eu.pb4.polymer.core.api.item.PolymerItem
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.ChatFormatting
-import net.minecraft.nbt.Tag
+import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
@@ -11,14 +12,17 @@ import net.minecraft.world.InteractionResult
 import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.*
+import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Blocks
 
 abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerItem {
-    abstract fun getSkullOwner(stack: ItemStack): Tag
-
     abstract fun addEffects(player: ServerPlayer)
+
+    open fun getResolvableProfile(stack: ItemStack): ResolvableProfile? {
+        return null
+    }
 
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack> {
         if (player is ServerPlayer) {
@@ -48,8 +52,13 @@ abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerIte
         return super.useOn(context)
     }
 
-    override fun appendHoverText(stack: ItemStack, level: Level?, tooltipComponents: MutableList<Component>, isAdvanced: TooltipFlag) {
-        super.appendHoverText(stack, level, tooltipComponents, isAdvanced)
+    override fun appendHoverText(
+        stack: ItemStack,
+        context: TooltipContext,
+        tooltipComponents: MutableList<Component>,
+        tooltipFlag: TooltipFlag
+    ) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag)
         tooltipComponents.add(CommonComponents.HEAD_TOOLTIP.withStyle(ChatFormatting.GRAY))
     }
 
@@ -57,9 +66,17 @@ abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerIte
         return Items.PLAYER_HEAD
     }
 
-    override fun getPolymerItemStack(itemStack: ItemStack, tooltipContext: TooltipFlag, player: ServerPlayer?): ItemStack {
-        val out = super.getPolymerItemStack(itemStack, tooltipContext, player)
-        out.orCreateTag.put("SkullOwner", this.getSkullOwner(itemStack))
+    override fun getPolymerItemStack(
+        stack: ItemStack,
+        tooltip: TooltipFlag,
+        lookup: HolderLookup.Provider,
+        player: ServerPlayer?
+    ): ItemStack {
+        val out = super.getPolymerItemStack(stack, tooltip, lookup, player)
+        val profile = this.getResolvableProfile(stack)
+        if (profile != null) {
+            out.set(DataComponents.PROFILE, profile)
+        }
         return out
     }
 }

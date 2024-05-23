@@ -89,12 +89,12 @@ class ExampleMod: ModInitializer {
     private lateinit var minigame: ExampleMinigame
 
     override fun onInitialize() {
-        GlobalEventHandler.register<ServerLoadedEvent> { (server) ->
-            minigame = ExampleMinigame(server)
-        }
-        GlobalEventHandler.register<PlayerJoinEvent> { (player) ->
-            minigame.players.add(player, spectating = false)
-        }
+        // GlobalEventHandler.register<ServerLoadedEvent> { (server) ->
+        //     minigame = ExampleMinigame(server)
+        // }
+        // GlobalEventHandler.register<PlayerJoinEvent> { (player) ->
+        //     minigame.players.add(player, spectating = false)
+        // }
     }
 }
 
@@ -157,7 +157,7 @@ enum class ExamplePhases(
     override val id: String
 ): Phase<ExampleMinigame> {
     Grace("grace") {
-        override fun start(minigame: ExampleMinigame) {
+        override fun start(minigame: ExampleMinigame, previous: Phase<ExampleMinigame>) {
             minigame.settings.canPvp.set(false)
 
             // In 10 minutes we will move to the next phase
@@ -175,7 +175,7 @@ enum class ExamplePhases(
         }
     },
     Active("active") {
-        override fun start(minigame: ExampleMinigame) {
+        override fun start(minigame: ExampleMinigame, previous: Phase<ExampleMinigame>) {
             minigame.settings.canPvp.set(true)
 
             // In 30 minutes we will move to the next phase
@@ -183,7 +183,7 @@ enum class ExamplePhases(
         }
     },
     DeathMatch("death_match") {
-        override fun start(minigame: ExampleMinigame) {
+        override fun start(minigame: ExampleMinigame, previous: Phase<ExampleMinigame>) {
             // Change to location of the arena
             val location = Location.of()
             for (player in minigame.players.playing) {

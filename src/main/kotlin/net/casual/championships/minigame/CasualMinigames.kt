@@ -200,12 +200,13 @@ object CasualMinigames {
         minigame.events.register<MinigameCloseEvent> {
             minigame.transferPlayersTo(this.minigame)
         }
+        @Suppress("MoveLambdaOutsideParentheses")
         // If the lobby starts reading, we kick everyone back to the main minigame
-        minigame.events.register(MinigameSetPhaseEvent::class.java, flags = ListenerFlags.NONE) {
+        minigame.events.register(MinigameSetPhaseEvent::class.java, ListenerFlags.NONE, {
             if (it.minigame is LobbyMinigame && this.minigame === it.minigame && it.phase == LobbyMinigame.LobbyPhase.Readying) {
                 minigame.close()
             }
-        }
+        })
         this.setCasualUI(minigame)
         return minigame
     }

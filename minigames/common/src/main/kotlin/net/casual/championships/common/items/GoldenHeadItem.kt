@@ -7,10 +7,12 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects.*
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.component.ResolvableProfile
+import java.util.*
 
 class GoldenHeadItem: HeadItem() {
-    override fun getSkullOwner(stack: ItemStack): CompoundTag {
-        return PolymerUtils.createSkullOwner(HeadUtils.GOLDEN)
+    override fun getResolvableProfile(stack: ItemStack): ResolvableProfile {
+        return PolymerUtils.createProfileComponent(HeadUtils.GOLDEN, null)
     }
 
     override fun addEffects(player: ServerPlayer) {

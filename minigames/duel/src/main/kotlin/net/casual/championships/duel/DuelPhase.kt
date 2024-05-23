@@ -24,7 +24,7 @@ enum class DuelPhase(
     override val id: String
 ): Phase<DuelMinigame> {
     Initializing(INITIALIZING_ID) {
-        override fun start(minigame: DuelMinigame) {
+        override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
             // Un-lazy the minigame level
             minigame.level
             minigame.setGameRules {
@@ -55,7 +55,7 @@ enum class DuelPhase(
         }
     },
     Countdown(COUNTDOWN_ID) {
-        override fun start(minigame: DuelMinigame) {
+        override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
             minigame.settings.freezeEntities.set(true)
             minigame.ui.countdown.countdown(minigame).then {
                 minigame.setPhase(Dueling)
@@ -63,12 +63,12 @@ enum class DuelPhase(
         }
     },
     Dueling(DUELING_ID) {
-        override fun start(minigame: DuelMinigame) {
+        override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
             minigame.settings.freezeEntities.set(false)
         }
     },
     Complete(COMPLETE_ID) {
-        override fun start(minigame: DuelMinigame) {
+        override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
             var winner = if (minigame.duelSettings.teams) {
                 minigame.teams.getPlayingTeams().firstOrNull()?.formattedDisplayName
             } else {

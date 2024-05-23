@@ -6,6 +6,7 @@ import eu.pb4.sgui.api.elements.GuiElement
 import net.casual.arcade.events.minigame.LobbyMoveToNextMinigameEvent
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
+import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.gui.screen.SelectionGuiBuilder
 import net.casual.arcade.gui.screen.SelectionGuiStyle
 import net.casual.arcade.minigame.MinigameSettings
@@ -20,6 +21,7 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
+import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.TimeUtils.Seconds
@@ -27,6 +29,7 @@ import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonScreens
+import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.duel.DuelComponents
 import net.casual.championships.duel.DuelRequester
@@ -40,6 +43,7 @@ import net.minecraft.commands.arguments.selector.EntitySelector
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
 
@@ -82,6 +86,15 @@ class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(
     @Listener
     private fun onMoveToNextMinigame(event: LobbyMoveToNextMinigameEvent) {
         event.delay = 3.Seconds
+    }
+
+    @Listener
+    private fun onServerTick(event: ServerTickEvent) {
+        if (this.bossbar.getRemainingDuration() == 25.Seconds) {
+            for (player in this.players) {
+                player.sendSound(CommonSounds.WAITING, SoundSource.MASTER)
+            }
+        }
     }
 
     private fun createDuelCommand(): LiteralArgumentBuilder<CommandSourceStack> {

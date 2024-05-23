@@ -21,7 +21,7 @@ val fabricKotlinVersion: String by project
 
 val arcadeVersion: String by project
 val arcadeDatagenVersion: String by project
-val serverReplayVersion: String by project
+// val serverReplayVersion: String by project
 val serverTranslationsVersion: String by project
 
 allprojects {
@@ -58,7 +58,7 @@ allprojects {
 
         modImplementation("com.github.CasualChampionships:arcade:$arcadeVersion")
         modImplementation("com.github.CasualChampionships:arcade-datagen:$arcadeDatagenVersion")
-        modImplementation("com.github.senseiwells:ServerReplay:$serverReplayVersion")
+        // modImplementation("com.github.senseiwells:ServerReplay:$serverReplayVersion")
         modImplementation("xyz.nucleoid:server-translations-api:$serverTranslationsVersion")
     }
 
@@ -87,22 +87,19 @@ allprojects {
         jar {
             from("LICENSE")
         }
-
-        compileKotlin {
-            kotlinOptions.jvmTarget = "17"
-        }
     }
 }
 
 dependencies {
     include("com.github.CasualChampionships:arcade:$arcadeVersion")
-    include("com.github.senseiwells:ServerReplay:$serverReplayVersion")
+    // include("com.github.senseiwells:ServerReplay:$serverReplayVersion")
     include("xyz.nucleoid:server-translations-api:$serverTranslationsVersion")
 
-    include(implementation(project(mapOf("path" to ":minigames:common", "configuration" to "namedElements")))!!)
-    include(implementation(project(mapOf("path" to ":minigames:uhc", "configuration" to "namedElements")))!!)
-    include(implementation(project(mapOf("path" to ":minigames:duel", "configuration" to "namedElements")))!!)
-    include(implementation(project(mapOf("path" to ":minigames:missile_wars", "configuration" to "namedElements")))!!)
+    for (subproject in project.subprojects) {
+        if (subproject.path != ":minigames") {
+            include(implementation(project(mapOf("path" to subproject.path, "configuration" to "namedElements")))!!)
+        }
+    }
 
     include(implementation("org.mongodb:mongo-java-driver:3.12.11")!!)
 }

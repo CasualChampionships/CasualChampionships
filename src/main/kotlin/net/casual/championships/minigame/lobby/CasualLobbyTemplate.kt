@@ -1,6 +1,6 @@
 package net.casual.championships.minigame.lobby
 
-import com.mojang.serialization.Codec
+import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import net.casual.arcade.area.PlaceableArea
 import net.casual.arcade.area.templates.PlaceableAreaTemplate
@@ -8,7 +8,8 @@ import net.casual.arcade.gui.bossbar.TimerBossBar
 import net.casual.arcade.gui.bossbar.templates.TimerBossBarTemplate
 import net.casual.arcade.gui.countdown.Countdown
 import net.casual.arcade.gui.countdown.templates.CountdownTemplate
-import net.casual.arcade.minigame.events.lobby.*
+import net.casual.arcade.minigame.events.lobby.Lobby
+import net.casual.arcade.minigame.events.lobby.LocationTemplate
 import net.casual.arcade.minigame.events.lobby.templates.LobbyTemplate
 import net.casual.arcade.minigame.events.lobby.templates.SimpleLobbyTemplate
 import net.casual.arcade.utils.impl.Location
@@ -52,14 +53,14 @@ class CasualLobbyTemplate(
         }
     }
 
-    override fun codec(): Codec<out LobbyTemplate> {
+    override fun codec(): MapCodec<out LobbyTemplate> {
         return CODEC
     }
 
     companion object: CodecProvider<CasualLobbyTemplate> {
         override val ID: ResourceLocation = CasualMod.id("lobby")
 
-        override val CODEC: Codec<out CasualLobbyTemplate> = RecordCodecBuilder.create { instance ->
+        override val CODEC: MapCodec<out CasualLobbyTemplate> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
                 PlaceableAreaTemplate.CODEC.fieldOf("area").forGetter(SimpleLobbyTemplate::area),
                 LocationTemplate.CODEC.fieldOf("spawn").forGetter(SimpleLobbyTemplate::spawn),

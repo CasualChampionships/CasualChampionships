@@ -1,24 +1,17 @@
 package net.casual.championships.common.items
 
-import eu.pb4.polymer.core.api.utils.PolymerUtils
-import net.casual.arcade.utils.HeadTextures
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.championships.common.util.CommonItems
-import net.minecraft.nbt.Tag
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import net.minecraft.world.item.PlayerHeadItem
+import kotlin.jvm.optionals.getOrNull
 
 class PlayerHeadItem: HeadItem() {
-    override fun getSkullOwner(stack: ItemStack): Tag {
-        val owner = stack.tag?.get(PlayerHeadItem.TAG_SKULL_OWNER)
-        return owner ?: PolymerUtils.createSkullOwner(HeadTextures.STEVE)
-    }
-
     override fun addEffects(player: ServerPlayer) {
         player.addEffect(MobEffectInstance(MobEffects.REGENERATION, 60, 2))
         player.addEffect(MobEffectInstance(MobEffects.MOVEMENT_SPEED, 15 * 20, 1))
@@ -26,19 +19,10 @@ class PlayerHeadItem: HeadItem() {
     }
 
     override fun getName(stack: ItemStack): Component? {
-        if (stack.isOf(CommonItems.PLAYER_HEAD) && stack.hasTag()) {
-            var string: String? = null
-            val tag = stack.orCreateTag
-            if (tag.contains("SkullOwner", Tag.TAG_STRING.toInt())) {
-                string = tag.getString("SkullOwner")
-            } else if (tag.contains("SkullOwner", Tag.TAG_COMPOUND.toInt())) {
-                val owner = tag.getCompound("SkullOwner")
-                if (owner.contains("Name", Tag.TAG_STRING.toInt())) {
-                    string = owner.getString("Name")
-                }
-            }
-            if (string != null) {
-                return Component.translatable("${Items.PLAYER_HEAD.descriptionId}.named", string)
+        if (stack.isOf(CommonItems.PLAYER_HEAD)) {
+            val name = stack.get(DataComponents.PROFILE)?.name?.getOrNull()
+            if (name != null) {
+                return Component.translatable("${Items.PLAYER_HEAD.descriptionId}.named", name)
             }
         }
         return super.getName(stack)

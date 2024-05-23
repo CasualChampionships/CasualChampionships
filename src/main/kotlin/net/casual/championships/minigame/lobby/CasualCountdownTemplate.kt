@@ -1,6 +1,7 @@
 package net.casual.championships.minigame.lobby
 
 import com.mojang.serialization.Codec
+import com.mojang.serialization.MapCodec
 import net.casual.arcade.gui.countdown.Countdown
 import net.casual.arcade.gui.countdown.templates.CountdownTemplate
 import net.casual.arcade.utils.serialization.CodecProvider
@@ -13,13 +14,13 @@ class CasualCountdownTemplate: CountdownTemplate {
         return CasualCountdown
     }
 
-    override fun codec(): Codec<out CountdownTemplate> {
+    override fun codec(): MapCodec<out CountdownTemplate> {
         return CODEC
     }
 
     companion object: CodecProvider<CasualCountdownTemplate> {
         override val ID: ResourceLocation = CasualMod.id("countdown")
 
-        override val CODEC: Codec<out CasualCountdownTemplate> = Codec.unit(::CasualCountdownTemplate)
+        override val CODEC: MapCodec<out CasualCountdownTemplate> = MapCodec.unit(::CasualCountdownTemplate)
     }
 }

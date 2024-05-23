@@ -14,6 +14,8 @@ object CommonSounds: SoundResources(CommonMod.MOD_ID) {
     val GLOBAL_SERVER_NOTIFICATION = sound(at("global.server.notification"))
     val GLOBAL_SERVER_NOTIFICATION_LOW = sound(at("global.server.notification.low"))
 
+    val WAITING = sound(at("music.waiting"), 1.5F, stream = true)
+
     fun noop() {
 
     }
