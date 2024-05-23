@@ -63,6 +63,9 @@ import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CommonUI.broadcastInfo
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent
+import net.casual.championships.common.minigame.rule.Rule
+import net.casual.championships.common.minigame.rule.Rules
+import net.casual.championships.common.minigame.rule.RulesProvider
 import net.casual.championships.uhc.UHCPhase.*
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
@@ -95,14 +98,14 @@ import net.minecraft.world.scores.Team
 import xyz.nucleoid.fantasy.RuntimeWorldHandle
 import kotlin.math.atan2
 
-class UHCMinigame constructor(
+class UHCMinigame(
     server: MinecraftServer,
     val overworld: ServerLevel,
     val nether: ServerLevel,
     val end: ServerLevel
 ): SavableMinigame<UHCMinigame>(
     server,
-), MultiLevelBorderListener {
+), MultiLevelBorderListener, RulesProvider {
     private val tracker = MultiLevelBorderTracker()
     internal var bordersMoving = false
 
@@ -201,6 +204,83 @@ class UHCMinigame constructor(
         if (this.settings.generatePortals) {
             this.overworld.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
             this.nether.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
+        }
+    }
+
+    override fun getRules(): Rules {
+        return Rules.build {
+            rule {
+                title = Component.translatable("uhc.rules.announcement")
+                entry {
+                    line(Component.translatable("uhc.rules.announcement.1"))
+                }
+            }
+            rule {
+                title = Component.translatable("uhc.rules.mods")
+                entry {
+                    line(Component.translatable("uhc.rules.mods.1"))
+                }
+            }
+            rule {
+                title = Component.translatable("uhc.rules.exploits")
+                entry {
+                    line(Component.translatable("uhc.rules.exploits.1"))
+                }
+            }
+            rule {
+                title = Component.translatable("uhc.rules.gameplay")
+                entry {
+                    line(Component.translatable("uhc.rules.gameplay.1"))
+                    line(Component.translatable("uhc.rules.gameplay.2"))
+                }
+                entry {
+                    line(Component.translatable("uhc.rules.gameplay.3"))
+                    line(Component.translatable("uhc.rules.gameplay.4"))
+                    line(Component.translatable("uhc.rules.gameplay.5"))
+                }
+            }
+            rule {
+                title = Component.translatable("uhc.rules.chat")
+                entry {
+                    line(Component.translatable("uhc.rules.chat.1"))
+                }
+            }
+            rule {
+                title = Component.translatable("uhc.rules.spectators")
+                entry {
+                    line(Component.translatable("uhc.rules.spectators.1"))
+                }
+            }
+            rule {
+                title = Component.translatable("uhc.rules.gentlemansRules")
+                entry {
+                    line(Component.translatable("uhc.rules.gentlemansRules.1"))
+                }
+            }
+            rule {
+                title = Component.translatable("uhc.rules.reminders")
+                entry {
+                    line(Component.translatable("uhc.rules.reminders.1"))
+                    line(Component.translatable("uhc.rules.reminders.2"))
+                }
+                entry {
+                    line(Component.translatable("uhc.rules.reminders.3"))
+                }
+            }
+            rule {
+                title = Component.translatable("uhc.rules.questions")
+                entry {
+                    line(Component.translatable("uhc.rules.questions.1"))
+                }
+            }
+            rule {
+                title = Component.translatable("uhc.rules.finally")
+                entry {
+                    time = 8.Seconds
+                    line(Component.translatable("uhc.rules.finally.1"))
+                    line(Component.translatable("uhc.rules.finally.2"))
+                }
+            }
         }
     }
 

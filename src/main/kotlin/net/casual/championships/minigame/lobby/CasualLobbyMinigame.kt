@@ -3,6 +3,7 @@ package net.casual.championships.minigame.lobby
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.elements.GuiElement
+import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.events.minigame.LobbyMoveToNextMinigameEvent
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
@@ -13,6 +14,7 @@ import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.events.lobby.Lobby
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
+import net.casual.arcade.scheduler.MinecraftTimeDuration
 import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.green
@@ -27,6 +29,7 @@ import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.minigame.CasualSettings
+import net.casual.championships.common.minigame.rule.RulesProvider
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonScreens
 import net.casual.championships.common.util.CommonSounds
@@ -94,6 +97,30 @@ class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(
             for (player in this.players) {
                 player.sendSound(CommonSounds.WAITING, SoundSource.MASTER)
             }
+        }
+    }
+
+    override fun startNextMinigame() {
+        val minigame = this.getNextMinigame()
+        if (minigame !is RulesProvider) {
+            super.startNextMinigame()
+            return
+        }
+
+        val rules = minigame.getRules()
+        var delay = MinecraftTimeDuration.ZERO
+        for (rule in rules) {
+            for (entry in rule.entries) {
+                val formatter = ChatFormatter.createAnnouncement(rule.title)
+                this.scheduler.schedulePhased(delay) {
+                    val message = entry.lines.fold(Component.empty()) { a, b -> a.append("\n").append(b) }
+                    this.chat.broadcast(message, formatter)
+                }
+                delay += entry.time
+            }
+        }
+        this.scheduler.schedulePhased(delay) {
+            super.startNextMinigame()
         }
     }
 
