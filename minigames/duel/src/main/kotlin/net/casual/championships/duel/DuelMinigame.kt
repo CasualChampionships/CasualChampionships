@@ -10,8 +10,8 @@ import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.During
-import net.casual.arcade.minigame.annotation.HAS_PLAYER
 import net.casual.arcade.minigame.annotation.Listener
+import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.utils.FantasyUtils
 import net.casual.arcade.utils.LootTableUtils
@@ -116,7 +116,7 @@ class DuelMinigame(
         }
     }
 
-    @Listener(flags = HAS_PLAYER)
+    @Listener(flags = ListenerFlags.HAS_PLAYER)
     private fun onPlayerRespawn(event: PlayerRespawnEvent) {
         val position = event.player.lastDeathLocation.map { it.pos().center }.orElseGet {
             Vec3(0.0, 128.0, 0.0)

@@ -102,6 +102,7 @@ dependencies {
     include(implementation(project(mapOf("path" to ":minigames:common", "configuration" to "namedElements")))!!)
     include(implementation(project(mapOf("path" to ":minigames:uhc", "configuration" to "namedElements")))!!)
     include(implementation(project(mapOf("path" to ":minigames:duel", "configuration" to "namedElements")))!!)
+    include(implementation(project(mapOf("path" to ":minigames:missile_wars", "configuration" to "namedElements")))!!)
 
     include(implementation("org.mongodb:mongo-java-driver:3.12.11")!!)
 }

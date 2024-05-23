@@ -3,8 +3,8 @@ package net.casual.championships.uhc.advancement
 import com.google.gson.JsonObject
 import net.casual.arcade.events.player.*
 import net.casual.arcade.minigame.annotation.During
-import net.casual.arcade.minigame.annotation.HAS_PLAYER_PLAYING
 import net.casual.arcade.minigame.annotation.Listener
+import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.stats.ArcadeStats
@@ -79,7 +79,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING, priority = 2000, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, priority = 2000, during = During(before = BORDER_FINISHED_ID))
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val relogs = this.uhc.stats.getOrCreateStat(event.player, ArcadeStats.RELOGS)
 
@@ -98,7 +98,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         if (this.claimed.add(UHCRaceAdvancement.Death)) {
             event.player.grantAdvancement(UHCAdvancements.EARLY_EXIT)
@@ -117,7 +117,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
     private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
         val state = event.state
         val block = state.block
@@ -133,21 +133,21 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
     private fun onPlayerCraft(event: PlayerCraftEvent) {
         if (event.stack.`is`(Items.CRAFTING_TABLE) && this.claimed.add(UHCRaceAdvancement.Craft)) {
             event.player.grantAdvancement(UHCAdvancements.WORLD_RECORD_PACE)
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
     private fun onPlayerLoot(event: PlayerLootEvent) {
         if (event.items.any { it.`is`(Items.ENCHANTED_GOLDEN_APPLE) }) {
             event.player.grantAdvancement(UHCAdvancements.DREAM_LUCK)
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
     private fun onPlayerTick(event: PlayerTickEvent) {
         val player = event.player
         val stat = this.uhc.stats.getOrCreateStat(player, UHCStats.HALF_HEART_TIME)
@@ -161,7 +161,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING, during = During(phases = [GRACE_ID]))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(phases = [GRACE_ID]))
     private fun onPlayerDamage(event: PlayerDamageEvent) {
         if (this.uhc.uptime < 1200 && event.source.`is`(DamageTypes.FALL) && event.amount > 0.0F) {
             event.player.grantAdvancement(UHCAdvancements.BROKEN_ANKLES)
@@ -181,19 +181,19 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
     private fun onPlayerBlockCollision(event: PlayerBlockCollisionEvent) {
         if (event.state.`is`(Blocks.SWEET_BERRY_BUSH)) {
             event.player.grantAdvancement(UHCAdvancements.EMBARRASSING)
         }
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING)
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING)
     private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
         event.announce = event.announce && UHCAdvancements.isRegistered(event.advancement) && this.uhc.players.isPlaying(event.player)
     }
 
-    @Listener(flags = HAS_PLAYER_PLAYING)
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING)
     private fun onPlayerCheat(event: PlayerCheatEvent) {
         event.player.grantAdvancement(UHCAdvancements.BUSTED)
     }

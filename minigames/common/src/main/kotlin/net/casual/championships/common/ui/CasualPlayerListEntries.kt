@@ -30,7 +30,7 @@ class CasualPlayerListEntries(
     private val minigame: Minigame<*>
 ): TeamListEntries() {
     override fun getTeams(server: MinecraftServer): Collection<PlayerTeam> {
-        return this.minigame.teams.getAllNonSpectatorOrAdmin().sortedWith(NAME_ORDER)
+        return this.minigame.teams.getAllNonSpectatorOrAdminTeams().sortedWith(NAME_ORDER)
     }
 
     override fun formatTeamName(server: MinecraftServer, team: PlayerTeam): MutableComponent {

@@ -14,7 +14,7 @@ import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.Minigames
-import net.casual.arcade.minigame.annotation.NONE
+import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.events.MinigamesEvent
 import net.casual.arcade.minigame.events.SequentialMinigames
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
@@ -47,6 +47,7 @@ import net.casual.championships.common.util.PerformanceUtils
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.events.CasualConfigReloaded
+import net.casual.championships.missilewars.ExampleMinigame
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
@@ -86,6 +87,7 @@ object CasualMinigames {
     internal fun registerEvents() {
         Minigames.registerFactory(UHCMinigame.ID, this::createUHCMinigame)
         Minigames.registerFactory(DuelMinigame.ID, this::createDuelMinigame)
+        Minigames.registerFactory(ExampleMinigame.ID) { ExampleMinigame(it.server) }
 
         GlobalEventHandler.register<PlayerRequestLoginEvent> { event ->
             if (!floodgates && !event.server.playerList.isOp(event.profile)) {
@@ -199,7 +201,7 @@ object CasualMinigames {
             minigame.transferPlayersTo(this.minigame)
         }
         // If the lobby starts reading, we kick everyone back to the main minigame
-        minigame.events.register(MinigameSetPhaseEvent::class.java, flags = NONE) {
+        minigame.events.register(MinigameSetPhaseEvent::class.java, flags = ListenerFlags.NONE) {
             if (it.minigame is LobbyMinigame && this.minigame === it.minigame && it.phase == LobbyMinigame.LobbyPhase.Readying) {
                 minigame.close()
             }

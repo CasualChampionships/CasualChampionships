@@ -23,6 +23,8 @@ import net.casual.championships.common.util.CommonScreens
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import kotlin.random.Random
 
 open class CasualSettings(
     minigame: Minigame<*>,

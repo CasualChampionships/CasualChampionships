@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "missile-wars",
+  "id": "casual_missile_wars",
   "version": "${version}",
   "name": "CasualUHC",
   "description": "This is the implementation of the Missile Wars minigame for CasualChampionship.",
@@ -16,7 +16,7 @@
     "server": [
       {
         "adapter": "kotlin",
-        "value": "net.casual.championships.missilewars.MissileWars"
+        "value": "net.casual.championships.missilewars.MissileWarsMod"
       }
     ]
   },

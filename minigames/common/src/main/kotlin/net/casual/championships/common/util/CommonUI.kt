@@ -12,6 +12,7 @@ import net.casual.arcade.gui.predicate.PlayerObserverPredicate.Companion.toPlaye
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
+import net.casual.arcade.gui.tab.TeamListEntries
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.managers.MinigameChatManager
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
