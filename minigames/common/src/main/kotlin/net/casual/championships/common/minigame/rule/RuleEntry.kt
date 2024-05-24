@@ -6,19 +6,19 @@ import net.minecraft.network.chat.Component
 
 class RuleEntry(
     val lines: List<Component>,
-    val time: MinecraftTimeDuration
+    val duration: MinecraftTimeDuration
 ) {
     class Builder {
         private val lines = ArrayList<Component>()
 
-        var time: MinecraftTimeDuration = 4.Seconds
+        var duration: MinecraftTimeDuration = 6.Seconds
 
         fun line(component: Component) {
             this.lines.add(component)
         }
 
         fun build(): RuleEntry {
-            return RuleEntry(this.lines, this.time)
+            return RuleEntry(this.lines, this.duration)
         }
     }
 }

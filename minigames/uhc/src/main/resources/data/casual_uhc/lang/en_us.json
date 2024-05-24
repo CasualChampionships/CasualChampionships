@@ -79,39 +79,41 @@
   "uhc.broadcast.outsideBorder": "When you are outside the border an arrow will guide you back to safety. The world border will invert, allowing you to break and place blocks",
 
   "uhc.rules.announcement": "Next Minigame: UHC",
-  "uhc.rules.announcement.1": "Please take a moment to read the rules and information about the game.",
+  "uhc.rules.announcement.1": " Please take a moment to read the rules and information about the game.",
 
   "uhc.rules.mods": "Mods",
-  "uhc.rules.mods.1": "Keep mod usage minimal for fairness. You may not use any features from mods / hacks / resource packs that change the behavior of the client to give you an advantage, if you are unsure please ask an admin.",
+  "uhc.rules.mods.1": " Keep mod usage minimal for fairness.",
+  "uhc.rules.mods.2": " No use of mods that would give you an unfair advantage.",
+  "uhc.rules.mods.3": " If you are unsure please ask an admin.",
 
   "uhc.rules.exploits": "Exploits",
-  "uhc.rules.exploits.1": "Exploits are the use of a bug to gain an advantage and they are strictly prohibited! (TNT Duplication is the only exception to this)",
+  "uhc.rules.exploits.1": " Exploits are the use of a bug to gain an advantage and they are strictly prohibited! (TNT Duplication is the only exception to this)",
 
   "uhc.rules.gameplay": "Gameplay",
-  "uhc.rules.gameplay.1": "No portal trapping or camping.",
-  "uhc.rules.gameplay.2": "No sky-basing. If what you are doing is deemed to be sky-basing an admin will ask you to move.",
-  "uhc.rules.gameplay.3": "No Nether roof.",
-  "uhc.rules.gameplay.4": "Level 2 potions",
-  "uhc.rules.gameplay.5": "No cross teaming.",
+  "uhc.rules.gameplay.1": " No portal trapping or camping.",
+  "uhc.rules.gameplay.2": " No sky-basing. If what you are doing is deemed to be sky-basing an admin will ask you to move.",
+  "uhc.rules.gameplay.3": " No Nether roof.",
+  "uhc.rules.gameplay.4": " No level 2 potions or instant health potions.",
+  "uhc.rules.gameplay.5": " No cross teaming.",
 
   "uhc.rules.chat": "Chat",
-  "uhc.rules.chat.1": "Please be respectful of everyone in both text and voice chat. Be mindful that others may be streaming so avoid using profanity in public voice chats and remain family friendly! You may be muted if you are not respectful.",
+  "uhc.rules.chat.1": " Please be respectful of everyone in both text and voice chat. You may be muted if you are not respectful.",
+  "uhc.rules.chat.2": " Please remain family friendly in public chats.",
 
   "uhc.rules.spectators": "Spectators",
-  "uhc.rules.spectators.1": "Please be mindful thatyou do not share information that you team would not otherwise know.",
+  "uhc.rules.spectators.1": " Please be mindful that you do not share information that your team would not otherwise know.",
 
   "uhc.rules.gentlemansRules": "Gentleman's Rules",
-  "uhc.rules.gentlemansRules.1": "These rules do not cover everything. Do not try to find loopholes or work around the rules. Be sure to check discord for the complete rule list and information on UHC.",
+  "uhc.rules.gentlemansRules.1": " These rules do not cover everything. Do not try to find loopholes or work around the rules.",
 
   "uhc.rules.reminders": "Reminders",
-  "uhc.rules.reminders.1": "You can toggle your teammates glowing with the command /uhc teamglow",
-  "uhc.rules.reminders.2": "You can toggle night vision with the command /uhc fullbright",
-  "uhc.rules.reminders.3": "Once the game has started if you type in chat you will automatically send it to your team chat. If you want to send messages in global chat, prefix your message with a !",
+  "uhc.rules.reminders.1": " You can toggle your teammates glowing with the command %s",
+  "uhc.rules.reminders.2": " You can toggle night vision with the command %s",
+  "uhc.rules.reminders.3": " Team chat will be enabled by default, to message in global chat, prefix your message with a %s",
 
   "uhc.rules.questions": "Questions",
-  "uhc.rules.questions.1": "If at anytime you have questions or concerns please message an Admin.",
+  "uhc.rules.questions.1": " If at anytime you have questions or concerns please message an Admin.",
 
-  "uhc.rules.finally": "Finally",
-  "uhc.rules.finally.1": "UHC is about to begin!",
-  "uhc.rules.finally.2": "Good Luck and Have Fun!"
+  "uhc.rules.finally": "UHC is about to begin!",
+  "uhc.rules.finally.1": " Good Luck and Have Fun!"
 }

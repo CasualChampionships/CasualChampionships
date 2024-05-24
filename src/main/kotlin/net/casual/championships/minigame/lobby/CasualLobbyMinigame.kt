@@ -12,7 +12,6 @@ import net.casual.arcade.gui.screen.SelectionGuiBuilder
 import net.casual.arcade.gui.screen.SelectionGuiStyle
 import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.Listener
-import net.casual.arcade.minigame.events.lobby.Lobby
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
 import net.casual.arcade.scheduler.MinecraftTimeDuration
 import net.casual.arcade.utils.CommandUtils.commandSuccess
@@ -34,6 +33,7 @@ import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonScreens
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI.broadcastGame
+import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.duel.DuelComponents
 import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
@@ -50,8 +50,13 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
 
-class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(server, lobby) {
+class CasualLobbyMinigame(
+    server: MinecraftServer,
+    private val casualLobby: CasualLobby
+): LobbyMinigame(server, casualLobby) {
     override val settings: MinigameSettings = CasualSettings(this)
+
+    private var fireworks = false
 
     override fun initialize() {
         super.initialize()
@@ -74,6 +79,20 @@ class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(
 
         val team = player.team
         event.spectating = team == null || this.teams.isTeamIgnored(team)
+
+        if (CasualMinigames.hasWinner()) {
+            player.sendSound(CommonSounds.GAME_WON)
+
+            if (!this.fireworks) {
+                this.fireworks = true
+                this.scheduler.schedule(10.Seconds) {
+                    this.casualLobby.spawnFireworks(this.scheduler)
+                }
+                this.scheduler.schedule(30.Seconds) {
+                    this.fireworks = false
+                }
+            }
+        }
     }
 
     @Listener
@@ -107,21 +126,25 @@ class CasualLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame(
             return
         }
 
+        this.settings.isChatMuted.set(true)
         val rules = minigame.getRules()
         var delay = MinecraftTimeDuration.ZERO
         for (rule in rules) {
             for (entry in rule.entries) {
                 val formatter = ChatFormatter.createAnnouncement(rule.title)
                 this.scheduler.schedulePhased(delay) {
-                    val message = entry.lines.fold(Component.empty()) { a, b -> a.append("\n").append(b) }
-                    this.chat.broadcast(message, formatter)
+                    val message = entry.lines.fold(Component.empty()) { a, b -> a.append("\n\n").append(b) }
+                    this.chat.broadcastWithSound(message, formatter = formatter)
                 }
-                delay += entry.time
+                delay += entry.duration
             }
         }
         this.scheduler.schedulePhased(delay) {
             super.startNextMinigame()
         }
+        this.scheduler.schedulePhasedCancellable(delay) {
+            this.settings.isChatMuted.set(false)
+        }.runIfCancelled()
     }
 
     private fun createDuelCommand(): LiteralArgumentBuilder<CommandSourceStack> {

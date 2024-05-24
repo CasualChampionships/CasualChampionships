@@ -11,6 +11,7 @@ import net.casual.arcade.resources.PackInfo
 import net.casual.arcade.utils.serialization.CodecProvider
 import net.casual.championships.CasualMod
 import net.casual.championships.common.CommonMod
+import net.casual.championships.minigame.lobby.CasualLobby
 import net.casual.championships.minigame.lobby.CasualLobbyMinigame
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.util.Config
@@ -34,7 +35,11 @@ class CasualChampionshipsEvent(
     }
 
     override fun createLobbyMinigame(server: MinecraftServer, lobby: Lobby): LobbyMinigame {
-        val minigame = CasualLobbyMinigame(server, lobby)
+        val minigame = if (lobby is CasualLobby) {
+            CasualLobbyMinigame(server, lobby)
+        } else {
+            super.createLobbyMinigame(server, lobby)
+        }
         CasualMinigames.setCasualUI(minigame)
         return minigame
     }
