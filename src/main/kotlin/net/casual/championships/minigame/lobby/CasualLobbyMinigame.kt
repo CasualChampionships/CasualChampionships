@@ -14,6 +14,7 @@ import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
 import net.casual.arcade.scheduler.MinecraftTimeDuration
+import net.casual.arcade.task.impl.PlayerTask
 import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.green
@@ -25,6 +26,7 @@ import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
+import net.casual.arcade.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.minigame.CasualSettings
@@ -56,7 +58,7 @@ class CasualLobbyMinigame(
 ): LobbyMinigame(server, casualLobby) {
     override val settings: MinigameSettings = CasualSettings(this)
 
-    private var fireworks = false
+    private var shouldWelcomePlayers = true
 
     override fun initialize() {
         super.initialize()
@@ -67,10 +69,13 @@ class CasualLobbyMinigame(
     @Listener
     private fun onMinigameAddPlayer(event: MinigameAddPlayerEvent) {
         val player = event.player
-        player.setTitleAnimation(stay = 5.Seconds)
-        player.sendTitle(
-            Component.empty().append(CommonComponents.Text.WELCOME_TO_CASUAL_CHAMPIONSHIPS.shadowless())
-        )
+        if (this.shouldWelcomePlayers) {
+            player.setTitleAnimation(stay = 5.Seconds)
+            player.sendTitle(
+                Component.empty().append(CommonComponents.Text.WELCOME_TO_CASUAL_CHAMPIONSHIPS.shadowless())
+            )
+        }
+
         if (!this.players.isAdmin(player)) {
             player.setGameMode(GameType.ADVENTURE)
         } else if (Config.dev) {
@@ -81,16 +86,11 @@ class CasualLobbyMinigame(
         event.spectating = team == null || this.teams.isTeamIgnored(team)
 
         if (CasualMinigames.hasWinner()) {
-            player.sendSound(CommonSounds.GAME_WON)
-
-            if (!this.fireworks) {
-                this.fireworks = true
-                this.scheduler.schedule(10.Seconds) {
-                    this.casualLobby.spawnFireworks(this.scheduler)
-                }
-                this.scheduler.schedule(30.Seconds) {
-                    this.fireworks = false
-                }
+            player.afterPacksLoad {
+                player.sendSound(CommonSounds.GAME_WON)
+                this.scheduler.schedule(10.Seconds, PlayerTask(player) {
+                    this.casualLobby.spawnFireworksFor(player, this.scheduler)
+                })
             }
         }
     }
@@ -108,6 +108,7 @@ class CasualLobbyMinigame(
     @Listener
     private fun onMoveToNextMinigame(event: LobbyMoveToNextMinigameEvent) {
         event.delay = 3.Seconds
+        this.shouldWelcomePlayers = false
     }
 
     @Listener

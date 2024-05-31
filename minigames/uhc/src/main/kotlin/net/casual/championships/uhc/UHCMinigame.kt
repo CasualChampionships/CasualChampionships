@@ -53,8 +53,8 @@ import net.casual.arcade.utils.StatUtils.increment
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
-import net.casual.arcade.utils.impl.Location
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.location.Location
 import net.casual.championships.common.event.border.BorderPortalWithinBoundsEvent
 import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.task.GlowingBossBarTask

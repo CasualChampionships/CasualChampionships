@@ -29,7 +29,7 @@ import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.arcade.utils.impl.Location
+import net.casual.arcade.utils.location.Location
 import net.casual.championships.common.util.CommonItems
 import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.HeadUtils

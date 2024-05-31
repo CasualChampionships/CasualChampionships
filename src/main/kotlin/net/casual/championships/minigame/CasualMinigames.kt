@@ -77,6 +77,11 @@ object CasualMinigames {
     @JvmField
     var floodgates = false
 
+    init {
+        // FIXME: REMOVE THIS!!!
+        winners.add("senseiwells")
+    }
+
     fun getMinigames(): SequentialMinigames {
         return this.minigames ?: throw IllegalArgumentException("Tried to access minigames too early!")
     }

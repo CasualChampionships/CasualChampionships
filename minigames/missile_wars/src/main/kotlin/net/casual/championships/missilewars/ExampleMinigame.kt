@@ -40,7 +40,7 @@ import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.arcade.utils.impl.Location
+import net.casual.arcade.utils.location.Location
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.chat.Component
