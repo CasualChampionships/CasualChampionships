@@ -18,9 +18,11 @@ import net.casual.arcade.task.impl.PlayerTask
 import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.green
+import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.shadowless
+import net.casual.arcade.utils.ComponentUtils.singleUseFunction
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
 import net.casual.arcade.utils.PlayerUtils.sendSound
@@ -162,8 +164,11 @@ class CasualLobbyMinigame(
 
     private fun duelWith(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
-        val settings = DuelSettings()
-        val builder = SelectionGuiBuilder(player, CommonScreens.named(DuelComponents.CONFIGURE_DUEL.mini()))
+        val settings = DuelSettings(this.casualLobby.duelArenaTemplates)
+        val builder = SelectionGuiBuilder(
+            player,
+            CommonScreens.named(Component.translatable("casual.gui.duel.configure").mini())
+        )
         builder.style = SelectionGuiStyle.centered(3)
         builder.element(GuiElement(Items.MAP.named(CommonComponents.CONFIGURE.mini())) { _, _, _, gui ->
             settings.gui(gui).open()
@@ -202,7 +207,7 @@ class CasualLobbyMinigame(
         val unready = requester.arePlayersReady(requesting) {
             started = startDuelWith(started, initiator, duelers, setOf(), requester, settings, false)
         }
-        val startAnyways = DuelComponents.START_NOW_MESSAGE.mini().green().function {
+        val startAnyways = Component.translatable("casual.duel.clickToStart").mini().green().function {
             started = startDuelWith(started, initiator, duelers, unready, requester, settings, true)
         }
         requester.broadcastTo(startAnyways, initiator)
@@ -219,7 +224,7 @@ class CasualLobbyMinigame(
     ): Boolean {
         if (started) {
             if (forced) {
-                requester.broadcastTo(DuelComponents.ALREADY_STARTED.mini().red(), initiator)
+                requester.broadcastTo(Component.translatable("casual.duel.alreadyStarted").mini().red(), initiator)
             }
             return true
         }
@@ -237,8 +242,33 @@ class CasualLobbyMinigame(
         val duel = CasualMinigames.createDuelMinigame(initiator.server, settings)
         this.transferPlayersTo(duel, ready, transferSpectatorStatus = false)
 
-        duel.chat.broadcastGame(DuelComponents.STARTING_DUEL.mini().green())
+        duel.chat.broadcastGame(Component.translatable("casual.duel.starting").mini().green())
         duel.start()
+
+        val players = if (ready.size > 4) {
+            ready.take(4).joinToString(" & ")
+        } else {
+            ready.joinToString(" & ")
+        }
+        val aboutToDuel = Component.translatable("casual.duel.aboutToDuel", players).mini()
+        for (player in this.players) {
+            if (ready.contains(player)) {
+                continue
+            }
+            requester.broadcastTo(aboutToDuel, player)
+
+            val clickToSpectate = Component.empty().append("[")
+                .append(Component.translatable("casual.duel.clickToSpectate"))
+                .append("]").singleUseFunction { player ->
+                    val wasAdmin = this.players.isAdmin(player)
+                    duel.players.add(player, true)
+                    if (wasAdmin) {
+                        duel.players.addAdmin(player)
+                    }
+                }.lime().mini()
+            requester.broadcastTo(clickToSpectate, player)
+        }
+
         return true
     }
 }

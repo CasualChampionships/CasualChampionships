@@ -1,19 +1,27 @@
 package net.casual.championships.duel
 
+import net.casual.arcade.gui.shapes.Regular2DPolygonShape
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
 import net.casual.arcade.utils.MinigameUtils.countdown
-import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.sendTitle
+import net.casual.arcade.utils.PlayerUtils.teleportTo
+import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.location.Location
+import net.casual.arcade.utils.location.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.championships.common.ui.ActiveBossBar
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.ChatFormatting
+import net.minecraft.commands.arguments.EntityAnchorArgument
+import net.minecraft.util.Mth
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
+import kotlin.math.atan2
+import kotlin.math.min
 
 const val INITIALIZING_ID = "initializing"
 const val COUNTDOWN_ID = "countdown"
@@ -25,8 +33,8 @@ enum class DuelPhase(
 ): Phase<DuelMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
-            // Un-lazy the minigame level
-            minigame.level
+            minigame.arena.area.replace()
+
             minigame.setGameRules {
                 resetToDefault()
                 if (!minigame.duelSettings.naturalRegen) {
@@ -36,18 +44,7 @@ enum class DuelPhase(
 
             minigame.ui.addBossbar(ActiveBossBar(minigame))
 
-            val borderRadius = minigame.duelSettings.borderRadius
-            minigame.level.worldBorder.size = borderRadius * 2
-
-            val playing = minigame.players.playing
-            PlayerUtils.spread(
-                minigame.level,
-                Vec2(0.0F, 0.0F),
-                borderRadius / playing.size,
-                borderRadius,
-                minigame.duelSettings.teams,
-                playing
-            )
+            minigame.arena.teleporter.teleport(minigame.level, minigame.players.playing, minigame.duelSettings.teams)
 
             GlobalTickedScheduler.later {
                 minigame.setPhase(Countdown)

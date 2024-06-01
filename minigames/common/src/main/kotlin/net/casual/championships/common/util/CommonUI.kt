@@ -4,7 +4,6 @@ import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.gui.elements.ComponentElements
 import net.casual.arcade.gui.elements.LevelSpecificElement
 import net.casual.arcade.gui.elements.SidebarElements
-import net.casual.arcade.gui.elements.UniversalElement
 import net.casual.arcade.gui.nametag.ArcadeNameTag
 import net.casual.arcade.gui.predicate.EntityObserverPredicate
 import net.casual.arcade.gui.predicate.PlayerObserverPredicate
@@ -12,10 +11,9 @@ import net.casual.arcade.gui.predicate.PlayerObserverPredicate.Companion.toPlaye
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
-import net.casual.arcade.gui.tab.TeamListEntries
+import net.casual.arcade.gui.tab.VanillaPlayerListEntries
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.managers.MinigameChatManager
-import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
@@ -25,9 +23,9 @@ import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.teal
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.sendSound
-import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.impl.Sound
 import net.casual.championships.common.ui.CasualPlayerListEntries
+import net.casual.championships.common.ui.SimpleCasualPlayerListEntries
 import net.casual.championships.common.ui.SpectatorAndAdminTeamsElement
 import net.casual.championships.common.ui.TeammateRow
 import net.casual.championships.common.util.CommonComponents.Text.CASUAL
@@ -36,7 +34,6 @@ import net.casual.championships.common.util.CommonComponents.Text.KIWITECH
 import net.casual.championships.common.util.CommonComponents.Text.SERVER_HOSTED_BY
 import net.minecraft.ChatFormatting.*
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.border.BorderStatus
 
@@ -133,15 +130,26 @@ object CommonUI {
         })
     }
 
-    fun createTabDisplay(minigame: Minigame<*>): ArcadePlayerListDisplay {
+    fun createCasualTabDisplay(minigame: Minigame<*>): ArcadePlayerListDisplay {
         val display = ArcadePlayerListDisplay(CasualPlayerListEntries(minigame))
+        addCasualFooterAndHeader(minigame, display)
+        return display
+    }
 
+    fun createSimpleTabDisplay(minigame: Minigame<*>): ArcadePlayerListDisplay {
+        val display = ArcadePlayerListDisplay(SimpleCasualPlayerListEntries(minigame))
+        addCasualFooterAndHeader(minigame, display)
+        return display
+    }
+
+    private fun addCasualFooterAndHeader(minigame: Minigame<*>, display: ArcadePlayerListDisplay) {
         val hostedByKiwiTech = ComponentElements.of(
             Component.empty()
                 .append(SERVER_HOSTED_BY)
                 .append(ComponentUtils.space())
                 .append(KIWITECH)
         )
+
         val spectatorAndAdmins = SpectatorAndAdminTeamsElement(minigame).cached()
         val footer = spectatorAndAdmins.merge<_, Component>(hostedByKiwiTech) { a, b ->
             a.map { Component.empty().append(it).append("\n\n") }.orElse(Component.empty()).append(b)
@@ -150,6 +158,5 @@ object CommonUI {
             ComponentElements.of("\n".literal().append(CASUAL).append(" ").append(CHAMPIONSHIPS).append("\n")),
             footer
         )
-        return display
     }
 }

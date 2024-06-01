@@ -541,7 +541,7 @@ class UHCMinigame(
                 val position = hit.blockPos
                 val rotation = atan2(vector.x, vector.z)
 
-                val arrow = ArrowShape.createCentred(position.x, hit.location.y + 0.1, position.z, 1.0, rotation)
+                val arrow = ArrowShape.createHorizontalCentred(position.x, hit.location.y + 0.1, position.z, 1.0, rotation)
 
                 for (point in arrow) {
                     player.sendParticles(ParticleTypes.END_ROD, point)

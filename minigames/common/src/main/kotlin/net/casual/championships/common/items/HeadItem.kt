@@ -21,7 +21,7 @@ abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerIte
     abstract fun addEffects(player: ServerPlayer)
 
     open fun getResolvableProfile(stack: ItemStack): ResolvableProfile? {
-        return null
+        return stack.get(DataComponents.PROFILE)
     }
 
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack> {

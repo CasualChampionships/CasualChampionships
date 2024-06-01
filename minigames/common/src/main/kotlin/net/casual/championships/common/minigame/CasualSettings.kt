@@ -30,7 +30,7 @@ open class CasualSettings(
     minigame: Minigame<*>,
     defaults: DisplayableSettingsDefaults = Defaults("Casual Minigame Settings".literal())
 ): MinigameSettings(minigame, defaults) {
-    class Defaults(title: Component): DisplayableSettingsDefaults() {
+    open class Defaults(title: Component): DisplayableSettingsDefaults() {
         private val components = CommonScreens.named(title)
 
         override fun createSettingsGuiBuilder(player: ServerPlayer): SelectionGuiBuilder {

@@ -8,9 +8,11 @@ import net.casual.arcade.gui.countdown.templates.CountdownTemplate
 import net.casual.arcade.minigame.events.lobby.Lobby
 import net.casual.arcade.minigame.events.lobby.templates.LobbyTemplate
 import net.casual.arcade.minigame.events.lobby.templates.SimpleLobbyTemplate
+import net.casual.arcade.utils.CodecUtils.encodedOptionalFieldOf
 import net.casual.arcade.utils.location.template.LocationTemplate
 import net.casual.arcade.utils.serialization.CodecProvider
 import net.casual.championships.CasualMod
+import net.casual.championships.duel.arena.DuelArenasTemplate
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerLevel
 
@@ -21,12 +23,20 @@ class CasualLobbyTemplate(
     bossbar: TimerBossBarTemplate,
     val podium: LocationTemplate,
     val podiumView: LocationTemplate,
-    val fireworkLocations: List<LocationTemplate>
+    val fireworkLocations: List<LocationTemplate>,
+    val duelArenas: List<DuelArenasTemplate>
 ): SimpleLobbyTemplate(area, spawn, countdown, bossbar) {
     override fun create(level: ServerLevel): Lobby {
-        val area = this.area.create(level)
-
-        return CasualLobby(area, level, this.spawn, this.bossbar, this.countdown, this.podium, this.podiumView, this.fireworkLocations)
+        return CasualLobby(
+            this.area.create(level),
+            this.spawn,
+            this.bossbar,
+            this.countdown,
+            this.podium,
+            this.podiumView,
+            this.fireworkLocations,
+            this.duelArenas
+        )
     }
 
     override fun codec(): MapCodec<out LobbyTemplate> {
@@ -44,7 +54,8 @@ class CasualLobbyTemplate(
                 TimerBossBarTemplate.CODEC.fieldOf("bossbar").forGetter(SimpleLobbyTemplate::bossbar),
                 LocationTemplate.CODEC.fieldOf("podium").forGetter(CasualLobbyTemplate::podium),
                 LocationTemplate.CODEC.fieldOf("podium_view").forGetter(CasualLobbyTemplate::podiumView),
-                LocationTemplate.CODEC.listOf().fieldOf("firework_locations").forGetter(CasualLobbyTemplate::fireworkLocations)
+                LocationTemplate.CODEC.listOf().fieldOf("firework_locations").forGetter(CasualLobbyTemplate::fireworkLocations),
+                DuelArenasTemplate.CODEC.listOf().encodedOptionalFieldOf("duel_arenas", listOf()).forGetter(CasualLobbyTemplate::duelArenas)
             ).apply(instance, ::CasualLobbyTemplate)
         }
     }

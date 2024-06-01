@@ -1,11 +1,12 @@
 package net.casual.championships.duel
 
+import net.casual.arcade.area.PlaceableArea
+import net.casual.arcade.events.level.LevelBlockChangedEvent
+import net.casual.arcade.events.level.LevelFluidTrySpreadEvent
 import net.casual.arcade.events.minigame.MinigameRemovePlayerEvent
 import net.casual.arcade.events.minigame.MinigameSetPlayingEvent
 import net.casual.arcade.events.minigame.MinigameSetSpectatingEvent
-import net.casual.arcade.events.player.PlayerAdvancementEvent
-import net.casual.arcade.events.player.PlayerDeathEvent
-import net.casual.arcade.events.player.PlayerRespawnEvent
+import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameSettings
@@ -13,7 +14,6 @@ import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.phase.Phase
-import net.casual.arcade.utils.FantasyUtils
 import net.casual.arcade.utils.LootTableUtils
 import net.casual.arcade.utils.LootTableUtils.addItem
 import net.casual.arcade.utils.LootTableUtils.between
@@ -30,13 +30,17 @@ import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.location.Location
-import net.casual.championships.common.util.CommonItems
+import net.casual.championships.common.arena.Arena
 import net.casual.championships.common.recipes.GoldenHeadRecipe
+import net.casual.championships.common.util.CommonItems
 import net.casual.championships.common.util.HeadUtils
+import net.minecraft.core.BlockPos
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.InteractionResult
 import net.minecraft.world.item.ArmorItem
+import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.storage.loot.LootParams
@@ -44,26 +48,34 @@ import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet
 import net.minecraft.world.phys.Vec3
 import xyz.nucleoid.fantasy.Fantasy
+import xyz.nucleoid.fantasy.RuntimeWorldConfig
+import xyz.nucleoid.fantasy.util.VoidChunkGenerator
 import kotlin.random.Random
 
+// TODO: 
+//   Fix afterPacksLoad???
+//   Add spectating duels for outsiders
 class DuelMinigame(
     server: MinecraftServer,
     val duelSettings: DuelSettings
 ): Minigame<DuelMinigame>(server) {
     override val id = ID
 
+    private val modifiableBlocks = HashSet<BlockPos>()
     private var emptyTicks = 0
 
-    val level by lazy { this.createRandomOverworld() }
+    internal val arena by lazy { this.createArena() }
+    val level: ServerLevel
+        get() = this.arena.area.level
 
     override val settings = MinigameSettings(this@DuelMinigame)
 
     init {
         this.settings.copyFrom(this.duelSettings)
-        this.recipes.add(listOf(GoldenHeadRecipe.create()))
+        this.recipes.add(GoldenHeadRecipe.create())
 
-        this.effects.setGlowingPredicate { _, _ ->
-            this.duelSettings.glowing
+        this.effects.setGlowingPredicate { observee, _ ->
+            observee is ServerPlayer && this.duelSettings.glowing
         }
     }
 
@@ -71,15 +83,13 @@ class DuelMinigame(
         return DuelPhase.entries
     }
 
-    private fun createRandomOverworld(): ServerLevel {
-        val seeds = listOf(
-            1246918500008390635
-        )
+    private fun createArena(): Arena {
         val handle = Fantasy.get(this.server).openTemporaryWorld(
-            FantasyUtils.createOverworldConfig(seeds.random())
+            RuntimeWorldConfig().setGenerator(VoidChunkGenerator(this.server))
         )
         this.levels.add(handle)
-        return handle.asWorld()
+        val level = handle.asWorld()
+        return this.duelSettings.getArenaTemplate().create(level)
     }
 
     @Listener
@@ -89,6 +99,37 @@ class DuelMinigame(
             if (this.emptyTicks.Ticks > 15.Seconds) {
                 this.close()
             }
+        }
+    }
+
+    @Listener(during = During(after = DUELING_ID))
+    private fun onLevelBlockChanged(event: LevelBlockChangedEvent) {
+        if (event.old.canBeReplaced() && !event.new.isAir) {
+            this.modifiableBlocks.add(event.pos)
+        }
+    }
+
+    @Listener
+    private fun onPlayerBlockMined(event: PlayerBlockMinedEvent) {
+        if (!this.modifiableBlocks.contains(event.pos)) {
+            event.cancel()
+        }
+    }
+
+    @Listener
+    private fun onPlayerBlockInteraction(event: PlayerBlockInteractionEvent) {
+        if (!this.modifiableBlocks.contains(event.result.blockPos)) {
+            event.preventUsingOnBlock()
+            if (event.stack.item !is BlockItem) {
+                event.cancel(InteractionResult.PASS)
+            }
+        }
+    }
+
+    @Listener
+    private fun onFluidTrySpread(event: LevelFluidTrySpreadEvent) {
+        if (!this.modifiableBlocks.contains(event.spreadPos) && !event.spreadBlockState.isAir) {
+            event.cancel(false)
         }
     }
 

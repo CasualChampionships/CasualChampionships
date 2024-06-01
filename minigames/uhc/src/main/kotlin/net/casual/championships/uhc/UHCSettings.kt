@@ -5,7 +5,7 @@ import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.bool
 import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.enumeration
 import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.float64
 import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.time
-import net.casual.arcade.utils.ItemUtils.hideTooltips
+import net.casual.arcade.utils.ItemUtils.hideAttributeTooltips
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.TimeUtils.Minutes
@@ -98,7 +98,7 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
 
     var health by this.register(float64 {
         name = "health"
-        display = Items.POTION.named("Health").potion(Potions.HEALING).hideTooltips()
+        display = Items.POTION.named("Health").potion(Potions.HEALING).hideAttributeTooltips()
         value = 1.0
         option("triple", Items.GREEN_STAINED_GLASS_PANE.named("Triple"), 2.0)
         option("double", Items.YELLOW_STAINED_GLASS_PANE.named("Double"), 1.0)
@@ -135,7 +135,7 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
 
     var opPotions by this.register(bool {
         name = "op_potions"
-        display = Items.SPLASH_POTION.named("OP Potions").potion(Potions.STRONG_HARMING).hideTooltips()
+        display = Items.SPLASH_POTION.named("OP Potions").potion(Potions.STRONG_HARMING).hideAttributeTooltips()
         value = false
         defaults.options(this)
     })
@@ -149,14 +149,14 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
 
     var soloBuff by this.register(bool {
         name = "solo_buff"
-        display = Items.LINGERING_POTION.named("Solo Buff").potion(Potions.REGENERATION).hideTooltips()
+        display = Items.LINGERING_POTION.named("Solo Buff").potion(Potions.REGENERATION).hideAttributeTooltips()
         value = true
         defaults.options(this)
     })
 
     var borderSize by this.register(enumeration<UHCBorderSize> {
         name = "border_size"
-        display = Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.named("World Border Size").hideTooltips()
+        display = Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.named("World Border Size").hideAttributeTooltips()
         value = UHCBorderSize.START
         defaults.options(this, UHCBorderSize::class.java)
     })

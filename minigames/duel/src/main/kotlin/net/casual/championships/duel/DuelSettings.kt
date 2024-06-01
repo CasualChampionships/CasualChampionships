@@ -1,17 +1,27 @@
 package net.casual.championships.duel
 
+import net.casual.arcade.area.templates.PlaceableAreaTemplate
 import net.casual.arcade.settings.display.DisplayableSettings
 import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.bool
+import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.enumeration
 import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.float64
-import net.casual.arcade.utils.ComponentUtils.literal
-import net.casual.arcade.utils.ItemUtils.hideTooltips
+import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.string
+import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.utils.ItemUtils.hideAttributeTooltips
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
+import net.casual.championships.common.arena.ArenaTemplate
 import net.casual.championships.common.minigame.CasualSettings
+import net.casual.championships.duel.arena.ArenaSize
+import net.casual.championships.duel.arena.DuelArenasTemplate
+import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
+import kotlin.enums.enumEntries
 
-class DuelSettings: DisplayableSettings(CasualSettings.Defaults("Duel Settings".literal())) {
+class DuelSettings(
+    private val arenas: List<DuelArenasTemplate>
+): DisplayableSettings(CasualSettings.Defaults(Component.translatable("casual.gui.duel.settings").mini())) {
     var teams by this.register(bool {
         name = "teams"
         display = Items.GREEN_BANNER.named("Teams")
@@ -21,7 +31,7 @@ class DuelSettings: DisplayableSettings(CasualSettings.Defaults("Duel Settings".
 
     var health by this.register(float64 {
         name = "health"
-        display = Items.POTION.named("Health").potion(Potions.HEALING).hideTooltips()
+        display = Items.POTION.named("Health").potion(Potions.HEALING).hideAttributeTooltips()
         value = 1.0
         option("normal", Items.RED_STAINED_GLASS_PANE.named("Normal"), 0.0)
         option("double", Items.YELLOW_STAINED_GLASS_PANE.named("Double"), 1.0)
@@ -33,15 +43,6 @@ class DuelSettings: DisplayableSettings(CasualSettings.Defaults("Duel Settings".
         display = Items.GOLDEN_APPLE.named("Natural Regeneration")
         value = false
         defaults.options(this)
-    })
-
-    val borderRadius by this.register(float64 {
-        name = "border_radius"
-        display = Items.BARRIER.named("Border Radius")
-        value = 10.0
-        option("ten", Items.GREEN_STAINED_GLASS_PANE.named("Ten"), 10.0)
-        option("twenty", Items.YELLOW_STAINED_GLASS_PANE.named("Twenty"), 20.0)
-        option("thirty", Items.RED_STAINED_GLASS_PANE.named("Thirty"), 30.0)
     })
 
     val glowing by this.register(bool {
@@ -57,4 +58,25 @@ class DuelSettings: DisplayableSettings(CasualSettings.Defaults("Duel Settings".
         value = true
         defaults.options(this)
     })
+
+    var arena by this.register(string {
+        name = "arena"
+        display = Items.DEEPSLATE_TILES.named("Arena")
+        value = arenas.randomOrNull()?.name ?: ""
+        for (arena in arenas) {
+            option(arena.name, arena.display, arena.name)
+        }
+    })
+
+    var arenaSize by this.register(enumeration<ArenaSize> {
+        name = "arena_size"
+        display = Items.POLISHED_DEEPSLATE_STAIRS.named("Arena Size")
+        value = enumEntries<ArenaSize>().random()
+        defaults.options(this, ArenaSize::class.java, ArenaSize::display)
+    })
+
+    fun getArenaTemplate(): ArenaTemplate {
+        val arena = this.arenas.find { it.name == this.arena } ?: return ArenaTemplate.DEFAULT
+        return arena.getArenaTemplateFor(this.arenaSize)
+    }
 }

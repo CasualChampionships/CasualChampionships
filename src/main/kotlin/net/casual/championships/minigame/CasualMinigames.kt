@@ -10,7 +10,6 @@ import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.player.PlayerTeamLeaveEvent
 import net.casual.arcade.events.server.ServerLoadedEvent
 import net.casual.arcade.events.server.ServerSaveEvent
-import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.Minigames
@@ -77,11 +76,6 @@ object CasualMinigames {
     @JvmField
     var floodgates = false
 
-    init {
-        // FIXME: REMOVE THIS!!!
-        winners.add("senseiwells")
-    }
-
     fun getMinigames(): SequentialMinigames {
         return this.minigames ?: throw IllegalArgumentException("Tried to access minigames too early!")
     }
@@ -131,9 +125,9 @@ object CasualMinigames {
         GlobalEventHandler.register<ServerSaveEvent> {
             this.writeMinigameEventData(this.getMinigames().getData())
         }
-        GlobalEventHandler.register<ServerStoppingEvent> {
-            this.writeMinigameEvent(this.getMinigames().event)
-        }
+        // GlobalEventHandler.register<ServerStoppingEvent> {
+        //     this.writeMinigameEvent(this.getMinigames().event)
+        // }
 
         GlobalEventHandler.register<CasualConfigReloaded> {
             val minigames = this.getMinigames()
@@ -204,7 +198,7 @@ object CasualMinigames {
     }
 
     fun createDuelMinigame(context: MinigameCreationContext): DuelMinigame {
-        return this.createDuelMinigame(context.server, DuelSettings())
+        return this.createDuelMinigame(context.server, DuelSettings(listOf()))
     }
 
     fun createDuelMinigame(server: MinecraftServer, settings: DuelSettings): DuelMinigame {
@@ -220,11 +214,12 @@ object CasualMinigames {
             }
         })
         this.setCasualUI(minigame)
+        minigame.ui.setPlayerListDisplay(CommonUI.createSimpleTabDisplay(minigame))
         return minigame
     }
 
     internal fun setCasualUI(minigame: Minigame<*>) {
-        minigame.ui.setPlayerListDisplay(CommonUI.createTabDisplay(minigame))
+        minigame.ui.setPlayerListDisplay(CommonUI.createCasualTabDisplay(minigame))
         minigame.ui.readier = CasualReadyChecker(minigame)
         minigame.ui.countdown = CasualCountdown
 
@@ -254,9 +249,17 @@ object CasualMinigames {
             val json = path.reader().use {
                 JsonUtils.decodeToJsonElement(it)
             }
-            val result = MinigamesEvent.CODEC.parse(JsonOps.INSTANCE, json).result()
-            if (result.isPresent) {
-                return result.get()
+            val result = MinigamesEvent.CODEC.parse(JsonOps.INSTANCE, json)
+            val event = result.resultOrPartial {
+                CasualMod.logger.error(it)
+            }
+            if (event.isPresent) {
+                return event.get()
+            } else {
+                val error = result.error()
+                if (error.isPresent) {
+                    CasualMod.logger.error(error.get().message())
+                }
             }
         }
         this.writeMinigameEvent(MinigamesEvent.DEFAULT)
