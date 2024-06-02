@@ -70,7 +70,7 @@
   "casual.game.insideBorder": "Travel %s to get to safety",
   "casual.game.grace.first": "The grace period will last %s minutes. Once it is over pvp will be enabled and the border will start moving!",
   "casual.game.grace.generic": "The grace period will end in %s minutes!",
-  "casual.game.grace.over": "The grace period is now over!",
+  "casual.game.grace.over": "The grace period is now over and the border has started to move!",
   "casual.game.eliminated": "%s has been ELIMINATED!",
   "casual.game.won": "%s has won!",
 
