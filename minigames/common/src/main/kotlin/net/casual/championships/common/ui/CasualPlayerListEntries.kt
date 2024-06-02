@@ -26,7 +26,7 @@ import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import kotlin.math.max
 
-class CasualPlayerListEntries(
+open class CasualPlayerListEntries(
     private val minigame: Minigame<*>
 ): TeamListEntries() {
     override fun getTeams(server: MinecraftServer): Collection<PlayerTeam> {

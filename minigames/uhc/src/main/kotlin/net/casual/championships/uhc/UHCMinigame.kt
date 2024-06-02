@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.border.MultiLevelBorderListener
 import net.casual.arcade.border.MultiLevelBorderTracker
 import net.casual.arcade.border.TrackedBorder
+import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.*
@@ -19,6 +20,9 @@ import net.casual.arcade.minigame.serialization.SavableMinigame
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.BorderUtils
+import net.casual.arcade.utils.CommandUtils
+import net.casual.arcade.utils.CommandUtils.argument
+import net.casual.arcade.utils.CommandUtils.literal
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.bold
@@ -49,6 +53,7 @@ import net.casual.arcade.utils.PlayerUtils.sendParticles
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
+import net.casual.arcade.utils.ShapeUtils.drawAsParticlesFor
 import net.casual.arcade.utils.StatUtils.increment
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
@@ -73,7 +78,6 @@ import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBorderSize
 import net.casual.championships.uhc.border.UHCBorderStage
 import net.minecraft.commands.CommandSourceStack
-import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.core.BlockPos
@@ -134,11 +138,9 @@ class UHCMinigame(
         super.initialize()
 
         this.addEventListener(this.uhcAdvancements)
-        this.recipes.add(listOf(GoldenHeadRecipe.create()))
+        this.recipes.add(GoldenHeadRecipe.create())
         this.advancements.addAll(UHCAdvancements.getAllAdvancements())
         this.initialiseBorderTracker()
-
-        this.commands.register(this.createUHCCommand())
     }
 
     private fun isRunning(): Boolean {
@@ -254,32 +256,32 @@ class UHCMinigame(
         json.add("dimensions", dimensions)
     }
 
-    private fun createUHCCommand(): LiteralArgumentBuilder<CommandSourceStack> {
-        return Commands.literal("uhc").then(
-            Commands.literal("player").requiresAdminOrPermission().then(
-                Commands.argument("player", EntityArgument.player()).then(
-                    Commands.literal("add").then(
-                        Commands.argument("team", TeamArgument.team()).then(
-                            Commands.argument("teleport", BoolArgumentType.bool()).executes(this::addPlayerToTeam)
-                        ).executes { this.addPlayerToTeam(it, false) }
-                    )
-                ).then(
-                    Commands.literal("resethealth").executes(this::resetPlayerHealth)
-                )
-            )
-        ).then(
-            Commands.literal("border").requiresAdminOrPermission().then(
-                Commands.literal("start").executes(this::startWorldBorders)
-            )
-        ).then(
-            Commands.literal("fullbright").executes { CommonCommands.toggleFullbright(this, it) }
-        ).then(
-            Commands.literal("teamglow").executes { CommonCommands.toggleTeamGlow(this, it) }
-        ).then(
-            Commands.literal("spectate").executes { CommonCommands.openSpectatingScreen(this, it) }
-        ).then(
-            Commands.literal("pos").executes { CommonCommands.broadcastPositionToTeammates(this, it) }
-        )
+    private fun registerCommands() {
+        this.commands.register(CommandUtils.buildLiteral("uhc") {
+            literal("player") {
+                requiresAdminOrPermission()
+                argument("player", EntityArgument.player()) {
+                    literal("add") {
+                        argument("team", TeamArgument.team()) {
+                            argument("teleport", BoolArgumentType.bool()).executes(::addPlayerToTeam)
+                            executes { addPlayerToTeam(it, false) }
+                        }
+                    }
+                    literal("reset-health").executes(::resetPlayerHealth)
+                }
+            }
+            literal("border") {
+                requiresAdminOrPermission()
+                literal("start").executes(::startWorldBorders)
+            }
+            literal("fullbright").executes { CommonCommands.toggleFullbright(this@UHCMinigame, it) }
+            literal("teamglow").executes { CommonCommands.toggleTeamGlow(this@UHCMinigame, it) }
+            literal("spectate").executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
+            literal("pos").executes { CommonCommands.broadcastPositionToTeammates(this@UHCMinigame, it) }
+        })
+        this.commands.register(CommandUtils.buildLiteral("s") {
+            executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
+        })
     }
 
     private fun addPlayerToTeam(
@@ -388,7 +390,7 @@ class UHCMinigame(
         )
     }
 
-    @Listener(during = During(before = BORDER_FINISHED_ID))
+    @Listener(during = During(before = GAME_OVER_ID))
     private fun onPlayerTick(event: PlayerTickEvent) {
         val (player) = event
 
@@ -399,9 +401,8 @@ class UHCMinigame(
         this.updateHUD(player)
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING)
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, phase = BuiltInEventPhases.POST)
     private fun onPlayerDeath(event: PlayerDeathEvent) {
-        event.invoke() // Post event
         val (player, source) = event
 
         // TODO: We can stop recording now...
@@ -473,16 +474,6 @@ class UHCMinigame(
     }
 
     @Listener
-    private fun onMinigameClose(event: MinigameCloseEvent) {
-        // Unload chunks
-        this.overworld.chunkSource.removeTicketsOnClosing()
-        this.overworld.chunkSource.tick({ true }, false)
-
-        // TODO:
-        // DataManager.database.update(this)
-    }
-
-    @Listener
     private fun onMinigameAddSpectator(event: MinigameSetSpectatingEvent) {
         val (_, player) = event
         player.setGameMode(GameType.SPECTATOR)
@@ -542,10 +533,7 @@ class UHCMinigame(
                 val rotation = atan2(vector.x, vector.z)
 
                 val arrow = ArrowShape.createHorizontalCentred(position.x, hit.location.y + 0.1, position.z, 1.0, rotation)
-
-                for (point in arrow) {
-                    player.sendParticles(ParticleTypes.END_ROD, point)
-                }
+                arrow.drawAsParticlesFor(player)
             }
         }
 
@@ -625,7 +613,6 @@ class UHCMinigame(
             )
         }
 
-        // TODO: Test this
         if (this.teams.getPlayingTeams().size <= 1) {
             this.setPhase(GameOver)
         }

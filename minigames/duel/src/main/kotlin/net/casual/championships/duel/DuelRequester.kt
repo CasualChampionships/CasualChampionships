@@ -48,6 +48,10 @@ class DuelRequester(
     }
 
     override fun broadcastTo(message: Component, player: ServerPlayer) {
-        player.sendSystemMessage(Component.empty().append("[⚔] ".literal().lime()).append(message))
+        player.sendSystemMessage(Component.empty().append(DUEL_PREFIX).append(message))
+    }
+
+    companion object {
+        val DUEL_PREFIX = "[⚔] ".literal().lime()
     }
 }

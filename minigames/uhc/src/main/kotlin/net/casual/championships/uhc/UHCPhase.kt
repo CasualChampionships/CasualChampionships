@@ -17,6 +17,7 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
 import net.casual.arcade.utils.PlayerUtils
+import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.revokeAllAdvancements
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
@@ -31,6 +32,7 @@ import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
+import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
@@ -53,6 +55,7 @@ enum class UHCPhase(
 
             for (player in minigame.players) {
                 player.revokeAllAdvancements()
+                player.grantAdvancement(UHCAdvancements.ROOT)
             }
 
             val stage = minigame.settings.borderStage

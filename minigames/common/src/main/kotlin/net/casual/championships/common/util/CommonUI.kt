@@ -11,7 +11,6 @@ import net.casual.arcade.gui.predicate.PlayerObserverPredicate.Companion.toPlaye
 import net.casual.arcade.gui.sidebar.ArcadeSidebar
 import net.casual.arcade.gui.sidebar.SidebarComponent
 import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
-import net.casual.arcade.gui.tab.VanillaPlayerListEntries
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.managers.MinigameChatManager
 import net.casual.arcade.utils.ComponentUtils
@@ -130,7 +129,7 @@ object CommonUI {
         })
     }
 
-    fun createCasualTabDisplay(minigame: Minigame<*>): ArcadePlayerListDisplay {
+    fun createTeamMinigameTabDisplay(minigame: Minigame<*>): ArcadePlayerListDisplay {
         val display = ArcadePlayerListDisplay(CasualPlayerListEntries(minigame))
         addCasualFooterAndHeader(minigame, display)
         return display
@@ -142,7 +141,7 @@ object CommonUI {
         return display
     }
 
-    private fun addCasualFooterAndHeader(minigame: Minigame<*>, display: ArcadePlayerListDisplay) {
+    fun addCasualFooterAndHeader(minigame: Minigame<*>, display: ArcadePlayerListDisplay) {
         val hostedByKiwiTech = ComponentElements.of(
             Component.empty()
                 .append(SERVER_HOSTED_BY)

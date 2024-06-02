@@ -13,10 +13,8 @@ import net.casual.arcade.events.server.ServerSaveEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.Minigames
-import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.events.MinigamesEvent
 import net.casual.arcade.minigame.events.SequentialMinigames
-import net.casual.arcade.minigame.events.lobby.LobbyMinigame
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.resources.PackInfo
 import net.casual.arcade.utils.ComponentUtils.bold
@@ -30,6 +28,7 @@ import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
+import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.arcade.utils.StringUtils.toSmallCaps
@@ -96,10 +95,7 @@ object CasualMinigames {
         GlobalEventHandler.register<PlayerRequestLoginEvent> { event ->
             if (!floodgates && !event.server.playerList.isOp(event.profile)) {
                 event.cancel("CasualChampionships isn't quite ready yet...".literal())
-                this.minigame.chat.broadcastTo(
-                    "${event.profile.name} tried to join, but floodgates are closed".literal(),
-                    this.minigame.players.admins
-                )
+                PlayerUtils.broadcastToOps("${event.profile.name} tried to join, but floodgates are closed".literal())
             }
         }
 
@@ -125,9 +121,6 @@ object CasualMinigames {
         GlobalEventHandler.register<ServerSaveEvent> {
             this.writeMinigameEventData(this.getMinigames().getData())
         }
-        // GlobalEventHandler.register<ServerStoppingEvent> {
-        //     this.writeMinigameEvent(this.getMinigames().event)
-        // }
 
         GlobalEventHandler.register<CasualConfigReloaded> {
             val minigames = this.getMinigames()
@@ -206,20 +199,13 @@ object CasualMinigames {
         minigame.events.register<MinigameCloseEvent> {
             minigame.transferPlayersTo(this.minigame)
         }
-        @Suppress("MoveLambdaOutsideParentheses")
-        // If the lobby starts reading, we kick everyone back to the main minigame
-        minigame.events.register(MinigameSetPhaseEvent::class.java, ListenerFlags.NONE, {
-            if (it.minigame is LobbyMinigame && this.minigame === it.minigame && it.phase == LobbyMinigame.LobbyPhase.Readying) {
-                minigame.close()
-            }
-        })
         this.setCasualUI(minigame)
         minigame.ui.setPlayerListDisplay(CommonUI.createSimpleTabDisplay(minigame))
         return minigame
     }
 
     internal fun setCasualUI(minigame: Minigame<*>) {
-        minigame.ui.setPlayerListDisplay(CommonUI.createCasualTabDisplay(minigame))
+        minigame.ui.setPlayerListDisplay(CommonUI.createTeamMinigameTabDisplay(minigame))
         minigame.ui.readier = CasualReadyChecker(minigame)
         minigame.ui.countdown = CasualCountdown
 

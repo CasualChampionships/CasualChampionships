@@ -6,16 +6,19 @@ import eu.pb4.sgui.api.elements.GuiElement
 import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.events.minigame.LobbyMoveToNextMinigameEvent
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
+import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.gui.screen.SelectionGuiBuilder
 import net.casual.arcade.gui.screen.SelectionGuiStyle
+import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
 import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
 import net.casual.arcade.scheduler.MinecraftTimeDuration
 import net.casual.arcade.task.impl.PlayerTask
 import net.casual.arcade.utils.CommandUtils.commandSuccess
+import net.casual.arcade.utils.CommandUtils.fail
 import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.green
 import net.casual.arcade.utils.ComponentUtils.lime
@@ -36,9 +39,11 @@ import net.casual.championships.common.minigame.rule.RulesProvider
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonScreens
 import net.casual.championships.common.util.CommonSounds
+import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.duel.DuelComponents
+import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.minigame.CasualMinigames
@@ -53,6 +58,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
+import java.util.UUID
 
 class CasualLobbyMinigame(
     server: MinecraftServer,
@@ -60,12 +66,27 @@ class CasualLobbyMinigame(
 ): LobbyMinigame(server, casualLobby) {
     override val settings: MinigameSettings = CasualSettings(this)
 
+    private val duels = ArrayList<DuelMinigame>()
+    private val hasSeenFireworks = HashSet<UUID>()
     private var shouldWelcomePlayers = true
+
+    fun isDueling(player: ServerPlayer): Boolean {
+        for (duel in this.duels) {
+            if (duel.players.has(player)) {
+                return true
+            }
+        }
+        return false
+    }
 
     override fun initialize() {
         super.initialize()
 
         this.commands.register(this.createDuelCommand())
+
+        val display = ArcadePlayerListDisplay(CasualLobbyPlayerListEntries(this))
+        CommonUI.addCasualFooterAndHeader(this, display)
+        this.ui.setPlayerListDisplay(display)
     }
 
     @Listener
@@ -87,8 +108,9 @@ class CasualLobbyMinigame(
         val team = player.team
         event.spectating = team == null || this.teams.isTeamIgnored(team)
 
-        if (CasualMinigames.hasWinner()) {
+        if (/*!this.hasSeenFireworks.contains(player.uuid) &&*/ CasualMinigames.hasWinner()) {
             player.afterPacksLoad {
+                this.hasSeenFireworks.add(player.uuid)
                 player.sendSound(CommonSounds.GAME_WON)
                 this.scheduler.schedule(10.Seconds, PlayerTask(player) {
                     this.casualLobby.spawnFireworksFor(player, this.scheduler)
@@ -118,6 +140,15 @@ class CasualLobbyMinigame(
         if (this.bossbar.getRemainingDuration() == 25.Seconds) {
             for (player in this.players) {
                 player.sendSound(CommonSounds.WAITING, SoundSource.MASTER)
+            }
+        }
+    }
+
+    @Listener
+    private fun onPhaseSet(event: MinigameSetPhaseEvent<LobbyMinigame>) {
+        if (event.phase >= LobbyPhase.Readying) {
+            for (duel in this.duels) {
+                duel.close()
             }
         }
     }
@@ -163,6 +194,10 @@ class CasualLobbyMinigame(
     }
 
     private fun duelWith(context: CommandContext<CommandSourceStack>): Int {
+        if (this.phase >= LobbyPhase.Readying) {
+            return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
+        }
+
         val player = context.source.playerOrException
         val settings = DuelSettings(this.casualLobby.duelArenaTemplates)
         val builder = SelectionGuiBuilder(
@@ -228,6 +263,11 @@ class CasualLobbyMinigame(
             }
             return true
         }
+        if (!this.players.has(initiator)) {
+            requester.broadcastTo(Component.translatable("casual.duel.cannotDuelNow"), initiator)
+            return false
+        }
+
         val ready = HashSet(duelers)
         if (!this.players.isAdmin(initiator)) {
             ready.removeAll(unready.toSet())
@@ -240,15 +280,16 @@ class CasualLobbyMinigame(
         }
 
         val duel = CasualMinigames.createDuelMinigame(initiator.server, settings)
+        this.duels.add(duel)
         this.transferPlayersTo(duel, ready, transferSpectatorStatus = false)
 
         duel.chat.broadcastGame(Component.translatable("casual.duel.starting").mini().green())
         duel.start()
 
         val players = if (ready.size > 4) {
-            ready.take(4).joinToString(" & ")
+            ready.take(4).joinToString(" & ") { it.scoreboardName }
         } else {
-            ready.joinToString(" & ")
+            ready.joinToString(" & ") { it.scoreboardName }
         }
         val aboutToDuel = Component.translatable("casual.duel.aboutToDuel", players).mini()
         for (player in this.players) {

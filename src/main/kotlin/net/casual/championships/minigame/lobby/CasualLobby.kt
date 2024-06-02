@@ -53,6 +53,9 @@ class CasualLobby(
 
     fun spawnFireworksFor(player: ServerPlayer, scheduler: MinecraftScheduler) {
         scheduler.scheduleInLoop(MinecraftTimeDuration.ZERO, 10.Ticks, 10.Seconds, PlayerTask(player) {
+            if (player.level() !== this.area.level) {
+                return@PlayerTask
+            }
             for (template in this.fireworksLocations) {
                 val firingLocation = template.get(this.area.level)
                 val firework = VirtualFirework.build {
