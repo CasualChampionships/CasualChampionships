@@ -197,7 +197,7 @@ object CasualMinigames {
     fun createDuelMinigame(server: MinecraftServer, settings: DuelSettings): DuelMinigame {
         val minigame = DuelMinigame(server, settings)
         minigame.events.register<MinigameCloseEvent> {
-            minigame.transferPlayersTo(this.minigame)
+            minigame.players.transferTo(this.minigame)
         }
         this.setCasualUI(minigame)
         minigame.ui.setPlayerListDisplay(CommonUI.createSimpleTabDisplay(minigame))

@@ -1,11 +1,13 @@
 package net.casual.championships.minigame.lobby
 
+import com.google.common.collect.ImmutableList
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.elements.GuiElement
 import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.events.minigame.LobbyMoveToNextMinigameEvent
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
+import net.casual.arcade.events.minigame.MinigameCloseEvent
 import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.ServerTickEvent
@@ -17,8 +19,13 @@ import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
 import net.casual.arcade.scheduler.MinecraftTimeDuration
 import net.casual.arcade.task.impl.PlayerTask
+import net.casual.arcade.utils.CommandUtils
+import net.casual.arcade.utils.CommandUtils.argument
 import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.CommandUtils.fail
+import net.casual.arcade.utils.CommandUtils.literal
+import net.casual.arcade.utils.CommandUtils.success
+import net.casual.arcade.utils.ComponentUtils.command
 import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.green
 import net.casual.arcade.utils.ComponentUtils.lime
@@ -27,10 +34,13 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.ComponentUtils.singleUseFunction
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
+import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
+import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.common.items.MenuItem
@@ -50,6 +60,7 @@ import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.util.Config
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
+import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.selector.EntitySelector
 import net.minecraft.network.chat.Component
@@ -58,6 +69,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
+import net.minecraft.world.scores.PlayerTeam
 import java.util.UUID
 
 class CasualLobbyMinigame(
@@ -79,10 +91,23 @@ class CasualLobbyMinigame(
         return false
     }
 
+    fun getAllTeams(): Collection<PlayerTeam> {
+        val teams = ArrayList<PlayerTeam>()
+        for (duel in this.duels) {
+            for (team in duel.teams.getAllNonSpectatorOrAdminTeams()) {
+                if (!this.teams.isTeamIgnored(team)) {
+                    teams.add(team)
+                }
+            }
+        }
+        teams.addAll(this.teams.getAllNonSpectatorOrAdminTeams())
+        return teams
+    }
+
     override fun initialize() {
         super.initialize()
 
-        this.commands.register(this.createDuelCommand())
+        this.registerCommands()
 
         val display = ArcadePlayerListDisplay(CasualLobbyPlayerListEntries(this))
         CommonUI.addCasualFooterAndHeader(this, display)
@@ -108,7 +133,7 @@ class CasualLobbyMinigame(
         val team = player.team
         event.spectating = team == null || this.teams.isTeamIgnored(team)
 
-        if (/*!this.hasSeenFireworks.contains(player.uuid) &&*/ CasualMinigames.hasWinner()) {
+        if (!this.hasSeenFireworks.contains(player.uuid) && CasualMinigames.hasWinner()) {
             player.afterPacksLoad {
                 this.hasSeenFireworks.add(player.uuid)
                 player.sendSound(CommonSounds.GAME_WON)
@@ -147,7 +172,7 @@ class CasualLobbyMinigame(
     @Listener
     private fun onPhaseSet(event: MinigameSetPhaseEvent<LobbyMinigame>) {
         if (event.phase >= LobbyPhase.Readying) {
-            for (duel in this.duels) {
+            for (duel in ImmutableList.copyOf(this.duels)) {
                 duel.close()
             }
         }
@@ -181,16 +206,46 @@ class CasualLobbyMinigame(
         }.runIfCancelled()
     }
 
-    private fun createDuelCommand(): LiteralArgumentBuilder<CommandSourceStack> {
-        val players = EntityArgument.players()
-        return Commands.literal("duel").then(
-            Commands.literal("with").then(
-                Commands.argument("players", players).suggests { context, builder ->
-                    val source = context.source.withPermission(2)
-                    players.listSuggestions(context.copyFor(source), builder)
-                }.executes(this::duelWith)
-            )
-        )
+    private fun registerCommands() {
+        this.commands.register(CommandUtils.buildLiteral("duel") {
+            literal("with") {
+                val players = EntityArgument.players()
+                argument("players", players) {
+                    suggests { context, builder ->
+                        val source = context.source.withPermission(2)
+                        players.listSuggestions(context.copyFor(source), builder)
+                    }
+                    executes(::duelWith)
+                }
+            }
+            literal("view") {
+                argument("player", EntityArgument.player()) {
+                    suggests { _, builder ->
+                        val players = duels.flatMap { it.players.playing }.map(ServerPlayer::getScoreboardName)
+                        SharedSuggestionProvider.suggest(players, builder)
+                    }
+                    executes(::viewDueler)
+                }
+            }
+        })
+    }
+
+    private fun viewDueler(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+
+        val dueler = EntityArgument.getPlayer(context, "player")
+        val minigame = dueler.getMinigame()
+        if (minigame !is DuelMinigame) {
+            return context.source.fail(Component.translatable("casual.duel.playerNotDueling"))
+        }
+
+        if (!this.duels.contains(minigame)) {
+            return context.source.fail("This shouldn't happen, please tell sensei!")
+        }
+
+        minigame.players.add(player, true, this.players.isAdmin(player))
+        player.teleportTo(dueler.location)
+        return context.source.success(Component.translatable("casual.duel.teleportingToDuel"))
     }
 
     private fun duelWith(context: CommandContext<CommandSourceStack>): Int {
@@ -281,8 +336,19 @@ class CasualLobbyMinigame(
 
         val duel = CasualMinigames.createDuelMinigame(initiator.server, settings)
         this.duels.add(duel)
-        this.transferPlayersTo(duel, ready, transferSpectatorStatus = false)
+        duel.events.register<MinigameCloseEvent> { this.duels.remove(duel) }
 
+        duel.commands.register(CommandUtils.buildLiteral("duel") {
+            literal("leave") {
+                executes { context ->
+                    val player = context.source.playerOrException
+                    duel.players.transferTo(this@CasualLobbyMinigame, player, keepSpectating = false)
+                    context.source.success("Returning to Lobby...")
+                }
+            }
+        })
+
+        this.players.transferTo(duel, ready, keepSpectating = false)
         duel.chat.broadcastGame(Component.translatable("casual.duel.starting").mini().green())
         duel.start()
 
@@ -300,13 +366,7 @@ class CasualLobbyMinigame(
 
             val clickToSpectate = Component.empty().append("[")
                 .append(Component.translatable("casual.duel.clickToSpectate"))
-                .append("]").singleUseFunction { player ->
-                    val wasAdmin = this.players.isAdmin(player)
-                    duel.players.add(player, true)
-                    if (wasAdmin) {
-                        duel.players.addAdmin(player)
-                    }
-                }.lime().mini()
+                .append("]").command("/duel view ${ready.first().scoreboardName}").lime().mini()
             requester.broadcastTo(clickToSpectate, player)
         }
 

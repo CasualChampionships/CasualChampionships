@@ -8,7 +8,6 @@ import net.casual.arcade.events.minigame.MinigameSetPlayingEvent
 import net.casual.arcade.events.minigame.MinigameSetSpectatingEvent
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerTickEvent
-import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.During
@@ -44,16 +43,13 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet
-import net.minecraft.world.scores.PlayerTeam
 import xyz.nucleoid.fantasy.Fantasy
 import xyz.nucleoid.fantasy.RuntimeWorldConfig
 import xyz.nucleoid.fantasy.util.VoidChunkGenerator
-import java.util.UUID
 import kotlin.random.Random
 
 // TODO:
 //   Fix afterPacksLoad???
-//   Add spectating duels for outsiders
 class DuelMinigame(
     server: MinecraftServer,
     val duelSettings: DuelSettings
@@ -78,8 +74,6 @@ class DuelMinigame(
         this.effects.setGlowingPredicate { observee, observer ->
             this.players.isSpectating(observer) || (observee is ServerPlayer && this.duelSettings.glowing)
         }
-
-        ArcadePlayerListDisplay()
     }
 
     override fun getPhases(): Collection<Phase<DuelMinigame>> {
@@ -102,6 +96,8 @@ class DuelMinigame(
             if (this.emptyTicks.Ticks > 15.Seconds) {
                 this.close()
             }
+        } else {
+            this.emptyTicks = 0
         }
     }
 
@@ -216,6 +212,14 @@ class DuelMinigame(
     @Listener
     private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
         event.announce = false
+    }
+
+    @Listener
+    private fun onPlayerVoidDamage(event: PlayerVoidDamageEvent) {
+        val (player) = event
+        if (player.isSpectator) {
+            event.cancel()
+        }
     }
 
     companion object {

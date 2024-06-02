@@ -8,6 +8,17 @@
   "casual.duel.alreadyStarted": "Duel has already started!",
   "casual.duel.aboutToDuel": "%s are about to duel",
   "casual.duel.clickToSpectate": "Click Here to Spectate",
+  "casual.duel.playerNotDueling": "That player is currently not dueling",
+  "casual.duel.teleportingToDuel": "Teleporting to duel!",
 
-  "casual.duel.starting": "Starting Duel!"
+  "casual.duel.starting": "Starting Duel!",
+
+  "casual.duel.alreadyNotReady": "You have already declined this duel!",
+  "casual.duel.alreadyReady": "You have already accepted this duel!",
+  "casual.duel.declined": "%s has declined the duel!",
+  "casual.duel.accepted": "%s has accepted the duel!",
+
+  "casual.duel.challenge": "%s has challenged you to a duel!",
+  "casual.duel.challenge.accept": "Accept",
+  "casual.duel.challenge.decline": "Decline"
 }

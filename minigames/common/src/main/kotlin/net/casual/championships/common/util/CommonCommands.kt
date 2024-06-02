@@ -89,8 +89,12 @@ object CommonCommands {
             throw NOT_SPECTATOR.create()
         }
 
+        val teams = minigame.teams.getOnlineTeams()
         val builder = SelectionGuiBuilder(player, CommonScreens.named(CommonComponents.SPECTATOR_TITLE))
-        builder.addSpectatableTeams(minigame.teams.getOnlineTeams()) { gui, team ->
+        if (teams.size < 54) {
+            builder.style(SelectionGuiStyle.centered(teams.size))
+        }
+        builder.addSpectatableTeams(teams) { gui, team ->
             SelectionGuiBuilder(gui, CommonScreens.named(team.displayName))
                 .style(SelectionGuiStyle.Companion.centered(5, 3))
         }

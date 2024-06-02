@@ -137,6 +137,7 @@ class UHCMinigame(
     override fun initialize() {
         super.initialize()
 
+        this.registerCommands()
         this.addEventListener(this.uhcAdvancements)
         this.recipes.add(GoldenHeadRecipe.create())
         this.advancements.addAll(UHCAdvancements.getAllAdvancements())
@@ -485,7 +486,7 @@ class UHCMinigame(
             player.teleportTo(Location.of(0.0, 128.0, 0.0, level = this.overworld))
         }
 
-        this.chat.broadcastInfo(UHCComponents.BROADCAST_SPECTATING, listOf(player))
+        this.chat.broadcastInfo(UHCComponents.BROADCAST_SPECTATING.mini(), listOf(player))
     }
 
     private fun shouldObserveeGlow(observee: Entity, observer: ServerPlayer): Boolean {
