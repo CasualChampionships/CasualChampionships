@@ -12,6 +12,7 @@ import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
+import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.utils.LootTableUtils
 import net.casual.arcade.utils.LootTableUtils.addItem
@@ -32,13 +33,17 @@ import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.CommonItems
 import net.casual.championships.common.util.HeadUtils
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.item.ArmorItem
 import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
+import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.item.context.DirectionalPlaceContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
@@ -48,8 +53,6 @@ import xyz.nucleoid.fantasy.RuntimeWorldConfig
 import xyz.nucleoid.fantasy.util.VoidChunkGenerator
 import kotlin.random.Random
 
-// TODO:
-//   Fix afterPacksLoad???
 class DuelMinigame(
     server: MinecraftServer,
     val duelSettings: DuelSettings
@@ -72,8 +75,10 @@ class DuelMinigame(
         this.recipes.add(GoldenHeadRecipe.create())
 
         this.effects.setGlowingPredicate { observee, observer ->
-            this.players.isSpectating(observer) || (observee is ServerPlayer && this.duelSettings.glowing)
+            (this.players.isSpectating(observer) || this.duelSettings.glowing) && observee is ServerPlayer
         }
+
+        this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.level, this.arena.area.getBoundingBox().center)
     }
 
     override fun getPhases(): Collection<Phase<DuelMinigame>> {
@@ -103,7 +108,8 @@ class DuelMinigame(
 
     @Listener(during = During(after = DUELING_ID))
     private fun onLevelBlockChanged(event: LevelBlockChangedEvent) {
-        if (event.old.canBeReplaced() && !event.new.isAir) {
+        val context = DirectionalPlaceContext(event.level, event.pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP)
+        if ((event.old.canBeReplaced() || event.old.canBeReplaced(context)) && !event.new.isAir) {
             this.modifiableBlocks.add(event.pos)
         }
     }

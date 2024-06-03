@@ -32,9 +32,13 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.withMiniShiftedDownFont
 import net.casual.arcade.utils.ItemUtils.isOf
+import net.casual.arcade.utils.JsonUtils.arrayOrDefault
 import net.casual.arcade.utils.JsonUtils.booleanOrDefault
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.set
+import net.casual.arcade.utils.JsonUtils.strings
+import net.casual.arcade.utils.JsonUtils.toJsonArray
+import net.casual.arcade.utils.JsonUtils.toJsonStringArray
 import net.casual.arcade.utils.MathUtils.opposite
 import net.casual.arcade.utils.MinigameUtils.addEventListener
 import net.casual.arcade.utils.MinigameUtils.requiresAdminOrPermission
@@ -77,15 +81,20 @@ import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBorderSize
 import net.casual.championships.uhc.border.UHCBorderStage
+import net.fabricmc.fabric.impl.biome.modification.BuiltInRegistryKeys
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -112,7 +121,7 @@ class UHCMinigame(
     server,
 ), MultiLevelBorderListener, RulesProvider {
     private val tracker = MultiLevelBorderTracker()
-    internal var bordersMoving = false
+    private var movingBorders = HashSet<ResourceKey<Level>>()
 
     override val id = ID
 
@@ -153,18 +162,25 @@ class UHCMinigame(
     }
 
     fun resetWorldBorders() {
-        this.bordersMoving = false
         val multiplier = this.settings.borderSizeMultiplier
         for ((border, level) in this.tracker.getAllTracking()) {
             border.setSizeUntracked(UHCBorderStage.FIRST.getStartSizeFor(level, multiplier))
         }
+        this.movingBorders.clear()
     }
 
     fun moveWorldBorders(stage: UHCBorderStage, size: UHCBorderSize = UHCBorderSize.END, instant: Boolean = false) {
-        this.bordersMoving = true
         for ((border, level) in this.tracker.getAllTracking()) {
             this.moveWorldBorder(border, level, stage, size, instant)
         }
+    }
+
+    override fun onSingleBorderActive(border: TrackedBorder, level: ServerLevel) {
+        this.movingBorders.add(level.dimension())
+    }
+
+    override fun onSingleBorderComplete(border: TrackedBorder, level: ServerLevel) {
+        this.movingBorders.remove(level.dimension())
     }
 
     override fun onAllBordersComplete(borders: Map<TrackedBorder, ServerLevel>) {
@@ -174,7 +190,6 @@ class UHCMinigame(
             UHCMod.logger.info("Border paused at stage $stage")
             return
         }
-        this.bordersMoving = false
 
         UHCMod.logger.info("Finished world border stage: $stage")
         if (!this.isRunning()) {
@@ -191,9 +206,7 @@ class UHCMinigame(
     }
 
     private fun pauseWorldBorders() {
-        for ((border, _) in tracker.getAllTracking()) {
-            this.moveWorldBorder(border, border.size)
-        }
+
     }
 
     private fun startNextBorders() {
@@ -244,12 +257,14 @@ class UHCMinigame(
 
     override fun readData(json: JsonObject) {
         this.uhcAdvancements.deserialize(json.obj("advancements"))
-        this.bordersMoving = json.booleanOrDefault("borders_moving")
+        this.movingBorders = HashSet(json.arrayOrDefault("moving_borders").strings().map {
+            ResourceKey.create(Registries.DIMENSION, ResourceLocation(it))
+        })
     }
 
     override fun writeData(json: JsonObject) {
         json.add("advancements", this.uhcAdvancements.serialize())
-        json.addProperty("borders_moving", this.bordersMoving)
+        json.add("moving_borders", this.movingBorders.toJsonStringArray { it.location().toString() })
         val dimensions = JsonObject()
         dimensions["overworld"] = this.overworld.dimension().location().toString()
         dimensions["nether"] = this.nether.dimension().location().toString()
@@ -273,7 +288,9 @@ class UHCMinigame(
             }
             literal("border") {
                 requiresAdminOrPermission()
-                literal("start").executes(::startWorldBorders)
+                literal("start") {
+                    executes(::startWorldBorders)
+                }
             }
             literal("fullbright").executes { CommonCommands.toggleFullbright(this@UHCMinigame, it) }
             literal("teamglow").executes { CommonCommands.toggleTeamGlow(this@UHCMinigame, it) }
@@ -326,15 +343,19 @@ class UHCMinigame(
 
     @Listener(during = During(before = BORDER_FINISHED_ID))
     private fun onPause(event: MinigamePauseEvent) {
-        if (this.bordersMoving) {
-            this.pauseWorldBorders()
+        for ((border, level) in tracker.getAllTracking()) {
+            if (this.movingBorders.contains(level.dimension())) {
+                this.moveWorldBorder(border, border.size)
+            }
         }
     }
 
     @Listener(during = During(before = BORDER_FINISHED_ID))
     private fun onUnpause(event: MinigameUnpauseEvent) {
-        if (this.bordersMoving) {
-            this.startWorldBorders()
+        for ((border, level) in tracker.getAllTracking()) {
+            if (this.movingBorders.contains(level.dimension())) {
+                this.moveWorldBorder(border, level, this.settings.borderStage, UHCBorderSize.END)
+            }
         }
     }
 
