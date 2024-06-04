@@ -2,7 +2,6 @@ package net.casual.championships.uhc
 
 import com.google.gson.JsonObject
 import com.mojang.brigadier.arguments.BoolArgumentType
-import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.border.MultiLevelBorderListener
 import net.casual.arcade.border.MultiLevelBorderTracker
@@ -33,11 +32,9 @@ import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.withMiniShiftedDownFont
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.arrayOrDefault
-import net.casual.arcade.utils.JsonUtils.booleanOrDefault
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.set
 import net.casual.arcade.utils.JsonUtils.strings
-import net.casual.arcade.utils.JsonUtils.toJsonArray
 import net.casual.arcade.utils.JsonUtils.toJsonStringArray
 import net.casual.arcade.utils.MathUtils.opposite
 import net.casual.arcade.utils.MinigameUtils.addEventListener
@@ -53,7 +50,6 @@ import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.resetExperience
 import net.casual.arcade.utils.PlayerUtils.resetHealth
 import net.casual.arcade.utils.PlayerUtils.resetHunger
-import net.casual.arcade.utils.PlayerUtils.sendParticles
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
@@ -64,7 +60,10 @@ import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.location.Location
+import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent
 import net.casual.championships.common.event.border.BorderPortalWithinBoundsEvent
+import net.casual.championships.common.minigame.rule.Rules
+import net.casual.championships.common.minigame.rule.RulesProvider
 import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.task.GlowingBossBarTask
 import net.casual.championships.common.task.GracePeriodBossBarTask
@@ -72,23 +71,17 @@ import net.casual.championships.common.ui.ActiveBossBar
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CommonUI.broadcastInfo
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
-import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent
-import net.casual.championships.common.minigame.rule.Rules
-import net.casual.championships.common.minigame.rule.RulesProvider
 import net.casual.championships.common.util.RuleUtils.addRule
 import net.casual.championships.uhc.UHCPhase.*
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBorderSize
 import net.casual.championships.uhc.border.UHCBorderStage
-import net.fabricmc.fabric.impl.biome.modification.BuiltInRegistryKeys
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
@@ -180,7 +173,9 @@ class UHCMinigame(
     }
 
     override fun onSingleBorderComplete(border: TrackedBorder, level: ServerLevel) {
-        this.movingBorders.remove(level.dimension())
+        if (!this.paused) {
+            this.movingBorders.remove(level.dimension())
+        }
     }
 
     override fun onAllBordersComplete(borders: Map<TrackedBorder, ServerLevel>) {
@@ -203,10 +198,6 @@ class UHCMinigame(
         }
 
         this.scheduler.schedulePhased(10.Seconds, MinigameTask(this, UHCMinigame::startNextBorders))
-    }
-
-    private fun pauseWorldBorders() {
-
     }
 
     private fun startNextBorders() {
@@ -664,16 +655,14 @@ class UHCMinigame(
     }
 
     private fun moveWorldBorder(border: TrackedBorder, level: Level, stage: UHCBorderStage, size: UHCBorderSize, instant: Boolean = false) {
-        if (level == this.end && stage >= UHCBorderStage.SIX) {
-            return
-        }
+        val modified =  if (level == this.end && stage >= UHCBorderStage.SIX) UHCBorderStage.FIFTH else stage
         val multiplier = this.settings.borderSizeMultiplier
         val dest = if (size == UHCBorderSize.END) {
-            stage.getEndSizeFor(level, multiplier)
+            modified.getEndSizeFor(level, multiplier)
         } else {
-            stage.getStartSizeFor(level, multiplier)
+            modified.getStartSizeFor(level, multiplier)
         }
-        val time = if (instant) -1.0 else stage.getRemainingTimeAsPercent(border.size, level, multiplier)
+        val time = if (instant) -1.0 else modified.getRemainingTimeAsPercent(border.size, level, multiplier)
 
         UHCMod.logger.info("Level ${level.dimension().location()} moving to $dest")
         moveWorldBorder(border, dest, time)
@@ -700,6 +689,7 @@ class UHCMinigame(
         player.resetHunger()
         player.resetExperience()
         player.clearPlayerInventory()
+        player.removeAllEffects()
 
         player.removeVehicle()
         player.setGlowingTag(false)

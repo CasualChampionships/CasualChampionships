@@ -60,10 +60,10 @@ enum class UHCPhase(
 
             val stage = minigame.settings.borderStage
 
-            val level = when (minigame.settings.startingDimension) {
-                VanillaDimension.Overworld -> minigame.overworld
-                VanillaDimension.Nether -> minigame.nether
-                VanillaDimension.End -> minigame.end
+            val (level, height) = when (minigame.settings.startingDimension) {
+                VanillaDimension.Overworld -> minigame.overworld to null
+                VanillaDimension.Nether -> minigame.nether to 120
+                VanillaDimension.End -> minigame.end to null
             }
             val range = stage.getStartSizeFor(level, minigame.settings.borderSizeMultiplier) * 0.45
             PlayerUtils.spread(
@@ -73,7 +73,7 @@ enum class UHCPhase(
                 range,
                 true,
                 minigame.players.playing,
-                120
+                height ?: level.maxBuildHeight
             )
 
             for (player in minigame.players.spectating) {

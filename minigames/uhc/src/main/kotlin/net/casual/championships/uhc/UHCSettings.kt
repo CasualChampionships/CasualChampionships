@@ -24,7 +24,7 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         display = Items.GLOWSTONE_DUST.named("Glowing")
         value = false
         defaults.options(this)
-        listener { _, _ ->
+        listener { _, _, _ ->
             for (player in uhc.players.playing) {
                 player.setGlowingTag(!player.hasGlowingTag())
                 player.setGlowingTag(!player.hasGlowingTag())
@@ -166,7 +166,8 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         display = Items.BARRIER.named("World Border Stage")
         value = UHCBorderStage.FIRST
         defaults.options(this, UHCBorderStage::class.java)
-        listener { _, value ->
+        listener { setting, _, value ->
+            setting.setQuietly(value)
             uhc.moveWorldBorders(value, borderSize, true)
         }
     })

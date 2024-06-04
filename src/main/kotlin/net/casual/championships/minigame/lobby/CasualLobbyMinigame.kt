@@ -1,7 +1,6 @@
 package net.casual.championships.minigame.lobby
 
 import com.google.common.collect.ImmutableList
-import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.elements.GuiElement
 import net.casual.arcade.chat.ChatFormatter
@@ -32,10 +31,8 @@ import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.shadowless
-import net.casual.arcade.utils.ComponentUtils.singleUseFunction
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.MinigameUtils.getMinigame
-import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
 import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
@@ -59,7 +56,6 @@ import net.casual.championships.duel.DuelSettings
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.util.Config
 import net.minecraft.commands.CommandSourceStack
-import net.minecraft.commands.Commands
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.selector.EntitySelector
@@ -70,7 +66,8 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
 import net.minecraft.world.scores.PlayerTeam
-import java.util.UUID
+import net.minecraft.world.scores.Team.CollisionRule
+import java.util.*
 
 class CasualLobbyMinigame(
     server: MinecraftServer,
@@ -158,6 +155,7 @@ class CasualLobbyMinigame(
     private fun onMoveToNextMinigame(event: LobbyMoveToNextMinigameEvent) {
         event.delay = 3.Seconds
         this.shouldWelcomePlayers = false
+        this.hasSeenFireworks.clear()
     }
 
     @Listener

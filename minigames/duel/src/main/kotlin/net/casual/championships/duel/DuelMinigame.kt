@@ -42,7 +42,6 @@ import net.minecraft.world.item.ArmorItem
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.item.context.DirectionalPlaceContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.storage.loot.LootParams
@@ -213,6 +212,7 @@ class DuelMinigame(
     @Listener
     private fun onMinigameRemovePlayer(event: MinigameRemovePlayerEvent) {
         event.player.unboostHealth()
+        event.player.removeAllEffects()
     }
 
     @Listener

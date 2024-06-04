@@ -27,6 +27,7 @@ import net.casual.arcade.utils.FantasyUtils
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.string
+import net.casual.arcade.utils.MinigameUtils.broadcastChangesToAdmin
 import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.ResourceUtils
@@ -205,6 +206,7 @@ object CasualMinigames {
     }
 
     internal fun setCasualUI(minigame: Minigame<*>) {
+        minigame.settings.broadcastChangesToAdmin()
         minigame.ui.setPlayerListDisplay(CommonUI.createTeamMinigameTabDisplay(minigame))
         minigame.ui.readier = CasualReadyChecker(minigame)
         minigame.ui.countdown = CasualCountdown
