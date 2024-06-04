@@ -1,6 +1,17 @@
 {
+  "casual.duel.size.small": "Small",
+  "casual.duel.size.medium": "Medium",
+  "casual.duel.size.large": "Large",
+
   "casual.gui.duel.configure": "Configure Duel",
   "casual.gui.duel.settings": "Duel Settings",
+  "casual.gui.duel.settings.teams": "Teams",
+  "casual.gui.duel.settings.health": "Health",
+  "casual.gui.duel.settings.naturalRegeneration": "Natural Regeneration",
+  "casual.gui.duel.settings.glowing": "Glowing",
+  "casual.gui.duel.settings.playerHeadDrops": "Player Head Drops",
+  "casual.gui.duel.settings.arena": "Arena",
+  "casual.gui.duel.settings.arenaSize": "Arena Size",
 
   "casual.duel.cannotDuelNow": "You cannot duel now!",
   "casual.duel.clickToStart": "Click here to start duel with accepted players",

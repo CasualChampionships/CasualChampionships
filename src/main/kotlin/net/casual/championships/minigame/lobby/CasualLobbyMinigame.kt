@@ -24,6 +24,7 @@ import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.CommandUtils.fail
 import net.casual.arcade.utils.CommandUtils.literal
 import net.casual.arcade.utils.CommandUtils.success
+import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.command
 import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.green
@@ -49,7 +50,6 @@ import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
-import net.casual.championships.duel.DuelComponents
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
@@ -288,7 +288,7 @@ class CasualLobbyMinigame(
 
         val requester = DuelRequester(initiator, duelers)
         if (requesting.isEmpty()) {
-            requester.broadcastTo(DuelComponents.NOT_ENOUGH_PLAYERS.mini().red(), initiator)
+            requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").mini().red(), initiator)
             return
         }
 
@@ -328,7 +328,7 @@ class CasualLobbyMinigame(
         ready.removeIf { !this.players.has(it) }
 
         if (ready.size <= 1) {
-            requester.broadcastTo(DuelComponents.NOT_ENOUGH_PLAYERS.mini().red(), initiator)
+            requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").mini().red(), initiator)
             return false
         }
 

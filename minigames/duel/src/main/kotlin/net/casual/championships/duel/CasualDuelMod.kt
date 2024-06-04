@@ -4,10 +4,8 @@ import net.minecraft.resources.ResourceLocation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-// TODO:
-//  - Translations
-object CasualDuelMod {
-    const val MOD_ID = "casual_duel"
+internal object CasualDuelMod {
+    private const val MOD_ID = "casual_duel"
 
     val logger: Logger = LoggerFactory.getLogger("Casual")
 

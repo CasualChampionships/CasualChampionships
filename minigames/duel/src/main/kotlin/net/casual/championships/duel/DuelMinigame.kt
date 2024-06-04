@@ -84,15 +84,6 @@ class DuelMinigame(
         return DuelPhase.entries
     }
 
-    private fun createArena(): Arena {
-        val handle = Fantasy.get(this.server).openTemporaryWorld(
-            RuntimeWorldConfig().setGenerator(VoidChunkGenerator(this.server))
-        )
-        this.levels.add(handle)
-        val level = handle.asWorld()
-        return this.duelSettings.getArenaTemplate().create(level)
-    }
-
     @Listener
     private fun onTick(event: ServerTickEvent) {
         if (this.players.playingPlayerCount <= 1) {
@@ -226,6 +217,15 @@ class DuelMinigame(
         if (player.isSpectator) {
             event.cancel()
         }
+    }
+
+    private fun createArena(): Arena {
+        val handle = Fantasy.get(this.server).openTemporaryWorld(
+            RuntimeWorldConfig().setGenerator(VoidChunkGenerator(this.server))
+        )
+        this.levels.add(handle)
+        val level = handle.asWorld()
+        return this.duelSettings.getArenaTemplate().create(level)
     }
 
     companion object {

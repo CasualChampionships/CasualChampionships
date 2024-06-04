@@ -24,14 +24,16 @@ class DuelSettings(
 ): DisplayableSettings(CasualSettings.Defaults(Component.translatable("casual.gui.duel.settings").mini())) {
     var teams by this.register(bool {
         name = "teams"
-        display = Items.GREEN_BANNER.named("Teams")
+        display = Items.GREEN_BANNER.named(Component.translatable("casual.gui.duel.settings.teams"))
         value = false
         defaults.options(this)
     })
 
     var health by this.register(float64 {
         name = "health"
-        display = Items.POTION.named("Health").potion(Potions.HEALING).hideAttributeTooltips()
+        display = Items.POTION.named(Component.translatable("casual.gui.duel.settings.health"))
+            .potion(Potions.HEALING)
+            .hideAttributeTooltips()
         value = 1.0
         option("normal", Items.RED_STAINED_GLASS_PANE.named("Normal"), 0.0)
         option("double", Items.YELLOW_STAINED_GLASS_PANE.named("Double"), 1.0)
@@ -40,28 +42,28 @@ class DuelSettings(
 
     var naturalRegen by this.register(bool {
         name = "natural_regeneration"
-        display = Items.GOLDEN_APPLE.named("Natural Regeneration")
+        display = Items.GOLDEN_APPLE.named(Component.translatable("casual.gui.duel.settings.naturalRegeneration"))
         value = false
         defaults.options(this)
     })
 
     val glowing by this.register(bool {
         name = "glowing"
-        display = Items.SPECTRAL_ARROW.named("Glowing")
+        display = Items.SPECTRAL_ARROW.named(Component.translatable("casual.gui.duel.settings.glowing"))
         value = false
         defaults.options(this)
     })
 
     var playerDropsHead by this.register(bool {
         name = "player_drops_head"
-        display = Items.PLAYER_HEAD.named("Player Drops Head")
+        display = Items.PLAYER_HEAD.named(Component.translatable("casual.gui.duel.settings.playerHeadDrops"))
         value = true
         defaults.options(this)
     })
 
     var arena by this.register(string {
         name = "arena"
-        display = Items.DEEPSLATE_TILES.named("Arena")
+        display = Items.DEEPSLATE_TILES.named(Component.translatable("casual.gui.duel.settings.arena"))
         value = arenas.randomOrNull()?.name ?: ""
         for (arena in arenas) {
             option(arena.name, arena.display, arena.name)
@@ -70,7 +72,7 @@ class DuelSettings(
 
     var arenaSize by this.register(enumeration<ArenaSize> {
         name = "arena_size"
-        display = Items.POLISHED_DEEPSLATE_STAIRS.named("Arena Size")
+        display = Items.POLISHED_DEEPSLATE_STAIRS.named(Component.translatable("casual.gui.duel.settings.arenaSize"))
         value = enumEntries<ArenaSize>().random()
         defaults.options(this, ArenaSize::class.java, ArenaSize::display)
     })
