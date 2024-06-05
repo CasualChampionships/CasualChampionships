@@ -4,7 +4,6 @@ import net.casual.arcade.events.GlobalEventHandler;
 import net.casual.championships.common.event.border.BorderPortalWithinBoundsEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.PortalForcer;
 import org.spongepowered.asm.mixin.Final;
@@ -12,9 +11,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 @Mixin(PortalForcer.class)
 public class PortalForcerMixin {

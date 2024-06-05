@@ -1,4 +1,4 @@
-package net.casual.championships.common.ui
+package net.casual.championships.common.ui.bossbar
 
 import net.casual.arcade.gui.bossbar.TimerBossBar
 import net.casual.arcade.utils.BossbarUtils
@@ -8,9 +8,9 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.BossEvent
 
-class GraceBossBar: TimerBossBar() {
+class GlowingBossBar: TimerBossBar() {
     override fun getTitle(player: ServerPlayer): Component {
-        return CommonComponents.GRACE_BACKGROUNDED.generate(this.getRemainingDuration().formatMMSS())
+        return CommonComponents.GLOWING_BACKGROUNDED.generate(this.getRemainingDuration().formatMMSS())
     }
 
     override fun getProgress(player: ServerPlayer): Float {

@@ -15,7 +15,6 @@ import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.scores.PlayerTeam
 
 class CasualReadyChecker(private val minigame: Minigame<*>): ReadyChecker {
     override fun getAlreadyNotReadyMessage(): Component {

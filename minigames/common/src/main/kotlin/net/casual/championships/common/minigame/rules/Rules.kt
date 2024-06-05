@@ -1,4 +1,4 @@
-package net.casual.championships.common.minigame.rule
+package net.casual.championships.common.minigame.rules
 
 class Rules(private val rules: List<Rule>): Iterable<Rule> {
     override fun iterator(): Iterator<Rule> {

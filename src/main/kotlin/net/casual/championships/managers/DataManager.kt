@@ -3,8 +3,8 @@ package net.casual.championships.managers
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.championships.database.MongoUHCDatabase
-import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.database.UHCDatabase
+import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.util.Config
 
 // TODO:

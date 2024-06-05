@@ -19,14 +19,13 @@ import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.teal
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.impl.Sound
-import net.casual.championships.common.ui.CasualPlayerListEntries
-import net.casual.championships.common.ui.SimpleCasualPlayerListEntries
-import net.casual.championships.common.ui.SpectatorAndAdminTeamsElement
-import net.casual.championships.common.ui.TeammateRow
+import net.casual.championships.common.ui.elements.SpectatorAndAdminTeamsElement
+import net.casual.championships.common.ui.elements.TeammateElement
+import net.casual.championships.common.ui.tab.CasualPlayerListEntries
+import net.casual.championships.common.ui.tab.SimpleCasualPlayerListEntries
 import net.casual.championships.common.util.CommonComponents.Text.CASUAL
 import net.casual.championships.common.util.CommonComponents.Text.CHAMPIONSHIPS
 import net.casual.championships.common.util.CommonComponents.Text.KIWITECH
@@ -39,7 +38,6 @@ import net.minecraft.world.level.border.BorderStatus
 object CommonUI {
     val INFO_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Info]").gold().bold().mini())
     val GAME_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Game]").lime().bold().mini())
-    val RULES_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Rules]").teal().bold().mini())
     val READY_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Ready]").lime().bold().mini())
 
     fun MinigameChatManager.broadcastInfo(
@@ -90,7 +88,7 @@ object CommonUI {
         val teammates = Component.empty().append(buffer).append(CommonComponents.TEAMMATES.mini())
         sidebar.addRow(SidebarElements.withNoScore(teammates))
         for (i in 0 until size) {
-            sidebar.addRow(TeammateRow(i, buffer))
+            sidebar.addRow(TeammateElement(i, buffer))
         }
         return sidebar
     }

@@ -8,6 +8,7 @@ import net.casual.arcade.minigame.events.lobby.Lobby
 import net.casual.arcade.minigame.events.lobby.LobbyMinigame
 import net.casual.arcade.minigame.events.lobby.templates.LobbyTemplate
 import net.casual.arcade.resources.PackInfo
+import net.casual.arcade.utils.CodecUtils.encodedOptionalFieldOf
 import net.casual.arcade.utils.serialization.CodecProvider
 import net.casual.championships.CasualMod
 import net.casual.championships.common.CommonMod
@@ -26,10 +27,21 @@ class CasualChampionshipsEvent(
     dimension: Optional<ResourceKey<Level>>,
     operators: List<String> = listOf(),
     minigames: List<ResourceLocation>,
-    repeat: Boolean = true
+    repeat: Boolean = true,
+    private val additionalPacks: List<String>
 ): SimpleMinigamesEvent(lobby, dimension, operators, minigames, repeat) {
     override fun getAdditionalPacks(): Iterable<PackInfo> {
-        return CommonMod.COMMON_PACKS.mapNotNull { creator ->
+        val packs = ArrayList<PackInfo>()
+        for (pack in this.additionalPacks) {
+            val hosted = CasualResourcePackHost.getHostedPack(pack)
+            if (hosted == null) {
+                CasualMod.logger.error("Failed to load additional pack $pack")
+                continue
+            }
+            packs.add(hosted.toPackInfo(!Config.dev))
+        }
+
+        return CommonMod.COMMON_PACKS.mapNotNullTo(packs) { creator ->
             CasualResourcePackHost.getHostedPack(creator.zippedName())?.toPackInfo(!Config.dev)
         }
     }
@@ -57,7 +69,8 @@ class CasualChampionshipsEvent(
                 Level.RESOURCE_KEY_CODEC.optionalFieldOf("lobby_dimension").forGetter(SimpleMinigamesEvent::dimension),
                 Codec.STRING.listOf().fieldOf("operators").forGetter(SimpleMinigamesEvent::operators),
                 ResourceLocation.CODEC.listOf().fieldOf("minigames").forGetter(SimpleMinigamesEvent::minigames),
-                Codec.BOOL.fieldOf("repeat").forGetter(SimpleMinigamesEvent::repeat)
+                Codec.BOOL.fieldOf("repeat").forGetter(SimpleMinigamesEvent::repeat),
+                Codec.STRING.listOf().encodedOptionalFieldOf("additional_packs", listOf()).forGetter(CasualChampionshipsEvent::additionalPacks)
             ).apply(instance, ::CasualChampionshipsEvent)
         }
     }

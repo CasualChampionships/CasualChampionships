@@ -1,4 +1,4 @@
-package net.casual.championships.common.ui
+package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.gui.elements.PlayerSpecificElement
 import net.casual.arcade.gui.sidebar.SidebarComponent
@@ -15,7 +15,7 @@ import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.Team
 
-class TeammateRow(private val index: Int, private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
+class TeammateElement(private val index: Int, private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
     private val none = SidebarComponent.withCustomScore(
         Component.empty().append(this.buffer).append(" - "),
         CommonComponents.Hud.UNAVAILABLE.append(this.buffer)

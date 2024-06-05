@@ -157,14 +157,14 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
     var borderSize by this.register(enumeration<UHCBorderSize> {
         name = "border_size"
         display = Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.named("World Border Size").hideAttributeTooltips()
-        value = UHCBorderSize.START
+        value = UHCBorderSize.Start
         defaults.options(this, UHCBorderSize::class.java)
     })
 
     var borderStageSetting = this.register(enumeration<UHCBorderStage> {
         name = "border_stage"
         display = Items.BARRIER.named("World Border Stage")
-        value = UHCBorderStage.FIRST
+        value = UHCBorderStage.First
         defaults.options(this, UHCBorderStage::class.java)
         listener { setting, _, value ->
             setting.setQuietly(value)

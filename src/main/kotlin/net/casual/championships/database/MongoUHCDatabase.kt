@@ -1,6 +1,5 @@
 package net.casual.championships.database
 
-import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.mongodb.MongoClient
 import com.mongodb.MongoClientURI
@@ -9,8 +8,6 @@ import net.casual.arcade.utils.JsonUtils
 import net.casual.championships.uhc.UHCMinigame
 import net.minecraft.world.scores.Team
 import org.bson.Document
-import org.bson.codecs.DecoderContext
-import org.bson.codecs.DocumentCodec
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors

@@ -1,4 +1,4 @@
-package net.casual.championships.common.minigame.rule
+package net.casual.championships.common.minigame.rules
 
 import net.minecraft.network.chat.Component
 

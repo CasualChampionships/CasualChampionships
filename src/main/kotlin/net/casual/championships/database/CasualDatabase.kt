@@ -1,7 +1,6 @@
 package net.casual.championships.database
 
 import com.google.gson.JsonArray
-import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import net.casual.arcade.minigame.serialization.MinigameDataTracker
 

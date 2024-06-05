@@ -7,11 +7,7 @@ import net.casual.arcade.utils.ResourcePackUtils.addFont
 import net.casual.arcade.utils.ResourcePackUtils.addLangsFrom
 import net.casual.arcade.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.utils.ResourcePackUtils.addSounds
-import net.casual.championships.common.util.CommonEntities
-import net.casual.championships.common.util.CommonItems
-import net.casual.championships.common.util.AntiCheat
-import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonSounds
+import net.casual.championships.common.util.*
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.resources.ResourceLocation

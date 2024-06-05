@@ -24,7 +24,6 @@ import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.CommandUtils.fail
 import net.casual.arcade.utils.CommandUtils.literal
 import net.casual.arcade.utils.CommandUtils.success
-import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.command
 import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.green
@@ -43,7 +42,7 @@ import net.casual.arcade.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.minigame.CasualSettings
-import net.casual.championships.common.minigame.rule.RulesProvider
+import net.casual.championships.common.minigame.rules.RulesProvider
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonScreens
 import net.casual.championships.common.util.CommonSounds
@@ -66,7 +65,6 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
 import net.minecraft.world.scores.PlayerTeam
-import net.minecraft.world.scores.Team.CollisionRule
 import java.util.*
 
 class CasualLobbyMinigame(

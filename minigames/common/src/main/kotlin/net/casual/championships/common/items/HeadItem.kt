@@ -30,9 +30,7 @@ abstract class HeadItem: BlockItem(Blocks.PLAYER_HEAD, Properties()), PolymerIte
             player.swing(usedHand, true)
             player.cooldowns.addCooldown(this, 20)
             val stack = player.getItemInHand(usedHand)
-            if (!player.abilities.instabuild) {
-                stack.shrink(1)
-            }
+            stack.consume(1, player)
             return InteractionResultHolder.consume(stack)
         }
         return super.use(level, player, usedHand)

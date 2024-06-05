@@ -9,15 +9,15 @@ import net.casual.arcade.utils.MinigameUtils.countdown
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.location.teleporter.EntityTeleporter.Companion.teleport
-import net.casual.championships.common.ui.ActiveBossBar
+import net.casual.championships.common.ui.bossbar.ActiveBossBar
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.ChatFormatting
 import net.minecraft.world.level.GameRules
 
-const val INITIALIZING_ID = "initializing"
-const val COUNTDOWN_ID = "countdown"
-const val DUELING_ID = "dueling"
-const val COMPLETE_ID = "complete"
+internal const val INITIALIZING_ID = "initializing"
+internal const val COUNTDOWN_ID = "countdown"
+internal const val DUELING_ID = "dueling"
+internal const val COMPLETE_ID = "complete"
 
 enum class DuelPhase(
     override val id: String

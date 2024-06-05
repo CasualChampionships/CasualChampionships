@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.state.BlockState
 
-class WorldBlockTrackerExtension: Extension {
+internal class WorldBlockTrackerExtension: Extension {
     private val tracker = Array(TICKS_TO_STORE_CHANGES) { Long2ObjectOpenHashMap<BlockState>() }
     private var blockChangesIndex = 0
 

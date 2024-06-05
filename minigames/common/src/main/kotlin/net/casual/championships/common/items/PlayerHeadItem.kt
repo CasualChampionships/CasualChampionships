@@ -9,6 +9,7 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
+import net.minecraft.world.item.component.ResolvableProfile
 import kotlin.jvm.optionals.getOrNull
 
 class PlayerHeadItem: HeadItem() {
@@ -26,5 +27,13 @@ class PlayerHeadItem: HeadItem() {
             }
         }
         return super.getName(stack)
+    }
+
+    companion object {
+        fun create(player: ServerPlayer): ItemStack {
+            val stack = ItemStack(CommonItems.PLAYER_HEAD)
+            stack.set(DataComponents.PROFILE, ResolvableProfile(player.gameProfile))
+            return stack
+        }
     }
 }

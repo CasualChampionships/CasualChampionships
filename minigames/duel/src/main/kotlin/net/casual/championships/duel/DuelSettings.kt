@@ -1,6 +1,5 @@
 package net.casual.championships.duel
 
-import net.casual.arcade.area.templates.PlaceableAreaTemplate
 import net.casual.arcade.settings.display.DisplayableSettings
 import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.bool
 import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.enumeration

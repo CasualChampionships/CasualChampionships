@@ -53,7 +53,7 @@ class CommonDatagen: ArcadeResourceGenerator {
                 CommonComponents.ADMINS.mini()
             ))
 
-            for (direction in Direction8.values()) {
+            for (direction in Direction8.entries) {
                 add(NegativeWidthGenerator(CommonComponents.direction(direction)))
             }
         }

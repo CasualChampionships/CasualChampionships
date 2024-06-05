@@ -30,9 +30,7 @@ class MysteriousPearlItem: Item(Properties()), PolymerItem {
         throwable.shootFromRotation(player, player.xRot, player.yRot, 0.0F, 1.5F, 1.0F)
         level.addFreshEntity(throwable)
 
-        if (!player.abilities.instabuild) {
-            stack.shrink(1)
-        }
+        stack.consume(1, player)
 
         return InteractionResultHolder.success(stack)
     }

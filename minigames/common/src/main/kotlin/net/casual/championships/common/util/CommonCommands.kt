@@ -10,7 +10,6 @@ import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
-import net.casual.arcade.utils.ScreenUtils
 import net.casual.arcade.utils.ScreenUtils.addSpectatableTeams
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.minecraft.commands.CommandSourceStack
@@ -51,7 +50,6 @@ object CommonCommands {
         if (team != null) {
             for (teammate in team.getOnlinePlayers()) {
                 minigame.effects.forceUpdate(teammate, player)
-                // minigame.effects.forceUpdate(player, teammate)
             }
         }
         return context.source.success(CommonComponents.TOGGLE_TEAMGLOW.generate(toggle))

@@ -3,7 +3,10 @@ package net.casual.championships.minigame
 import com.google.gson.JsonArray
 import com.mojang.serialization.JsonOps
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.minigame.*
+import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
+import net.casual.arcade.events.minigame.MinigameCloseEvent
+import net.casual.arcade.events.minigame.MinigameCompleteEvent
+import net.casual.arcade.events.minigame.MinigamePauseEvent
 import net.casual.arcade.events.player.PlayerJoinEvent
 import net.casual.arcade.events.player.PlayerRequestLoginEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
@@ -28,7 +31,6 @@ import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.MinigameUtils.broadcastChangesToAdmin
-import net.casual.arcade.utils.MinigameUtils.transferPlayersTo
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
@@ -47,7 +49,6 @@ import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.managers.TeamManager
-import net.casual.championships.missilewars.ExampleMinigame
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.Config
@@ -58,7 +59,6 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
-import java.util.HashSet
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.*
 
@@ -91,7 +91,7 @@ object CasualMinigames {
     internal fun registerEvents() {
         Minigames.registerFactory(UHCMinigame.ID, this::createUHCMinigame)
         Minigames.registerFactory(DuelMinigame.ID, this::createDuelMinigame)
-        Minigames.registerFactory(ExampleMinigame.ID) { ExampleMinigame(it.server) }
+        // Minigames.registerFactory(ExampleMinigame.ID) { ExampleMinigame(it.server) }
 
         GlobalEventHandler.register<PlayerRequestLoginEvent> { event ->
             if (!floodgates && !event.server.playerList.isOp(event.profile)) {

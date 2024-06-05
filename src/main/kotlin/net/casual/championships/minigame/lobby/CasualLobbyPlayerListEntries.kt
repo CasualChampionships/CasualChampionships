@@ -5,7 +5,7 @@ import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.PlayerUtils
-import net.casual.championships.common.ui.CasualPlayerListEntries
+import net.casual.championships.common.ui.tab.CasualPlayerListEntries
 import net.casual.championships.duel.DuelRequester
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent

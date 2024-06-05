@@ -1,6 +1,5 @@
 package net.casual.championships.minigame.lobby
 
-import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import net.casual.arcade.gui.countdown.Countdown
 import net.casual.arcade.gui.countdown.templates.CountdownTemplate

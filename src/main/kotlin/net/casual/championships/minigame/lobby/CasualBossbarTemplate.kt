@@ -5,7 +5,7 @@ import net.casual.arcade.gui.bossbar.TimerBossBar
 import net.casual.arcade.gui.bossbar.templates.TimerBossBarTemplate
 import net.casual.arcade.utils.serialization.CodecProvider
 import net.casual.championships.CasualMod
-import net.casual.championships.common.ui.LobbyBossBar
+import net.casual.championships.common.ui.bossbar.LobbyBossBar
 import net.minecraft.resources.ResourceLocation
 
 class CasualBossbarTemplate: TimerBossBarTemplate {

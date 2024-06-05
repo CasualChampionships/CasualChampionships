@@ -29,9 +29,9 @@ import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.common.arena.Arena
+import net.casual.championships.common.items.PlayerHeadItem
 import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.CommonItems
-import net.casual.championships.common.util.HeadUtils
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.server.MinecraftServer
@@ -71,7 +71,7 @@ class DuelMinigame(
         super.initialize()
 
         this.settings.copyFrom(this.duelSettings)
-        this.recipes.add(GoldenHeadRecipe.create())
+        this.recipes.add(GoldenHeadRecipe.INSTANCE)
 
         this.effects.setGlowingPredicate { observee, observer ->
             (this.players.isSpectating(observer) || this.duelSettings.glowing) && observee is ServerPlayer
@@ -151,7 +151,7 @@ class DuelMinigame(
         this.players.setSpectating(player)
 
         if (this.duelSettings.playerDropsHead) {
-            val head = HeadUtils.createConsumablePlayerHead(player)
+            val head = PlayerHeadItem.create(player)
             if (killer is ServerPlayer) {
                 if (!killer.inventory.add(head)) {
                     player.drop(head, true, false)

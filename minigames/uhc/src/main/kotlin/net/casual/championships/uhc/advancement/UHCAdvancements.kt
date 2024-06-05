@@ -1,8 +1,8 @@
 package net.casual.championships.uhc.advancement
 
 import net.casual.arcade.advancements.AdvancementBuilder
+import net.casual.arcade.utils.AdvancementUtils.setTitleAndDesc
 import net.casual.arcade.utils.ItemUtils.potion
-import net.casual.championships.uhc.UHCComponents
 import net.casual.championships.uhc.UHCMod.id
 import net.minecraft.advancements.AdvancementHolder
 import net.minecraft.advancements.AdvancementType
@@ -48,16 +48,14 @@ object UHCAdvancements {
         ROOT = register {
             id = id("root")
             display(Items.GOLDEN_APPLE)
-            title = UHCComponents.ADVANCEMENT_ROOT
-            description = UHCComponents.ADVANCEMENT_ROOT_DESC
+            setTitleAndDesc("uhc.advancements.root")
             background = ResourceLocation("textures/gui/advancements/backgrounds/adventure.png")
         }
         FIRST_BLOOD = register {
             parent(ROOT)
             id = id("first_blood")
             display(Items.IRON_SWORD)
-            title = UHCComponents.ADVANCEMENT_FIRST_BLOOD
-            description = UHCComponents.ADVANCEMENT_FIRST_BLOOD_DESC
+            setTitleAndDesc("uhc.advancements.firstBlood")
             toast()
             announce()
         }
@@ -65,8 +63,7 @@ object UHCAdvancements {
             parent(ROOT)
             id = id("early_exit")
             display(Items.POISONOUS_POTATO)
-            title = UHCComponents.ADVANCEMENT_EARLY_EXIT
-            description = UHCComponents.ADVANCEMENT_EARLY_EXIT_DESC
+            setTitleAndDesc("uhc.advancements.earlyExit")
             toast()
             announce()
         }
@@ -74,8 +71,7 @@ object UHCAdvancements {
             parent(EARLY_EXIT)
             id = id("mostly_harmless")
             display(Items.FEATHER)
-            title = UHCComponents.ADVANCEMENT_MOSTLY_HARMLESS
-            description = UHCComponents.ADVANCEMENT_MOSTLY_HARMLESS_DESC
+            setTitleAndDesc("uhc.advancements.mostlyHarmless")
             type = AdvancementType.CHALLENGE
             toast()
             announce()
@@ -84,8 +80,7 @@ object UHCAdvancements {
             parent(FIRST_BLOOD)
             id = id("heavy_hitter")
             display(Items.ANVIL)
-            title = UHCComponents.ADVANCEMENT_HEAVY_HITTER
-            description = UHCComponents.ADVANCEMENT_HEAVY_HITTER_DESC
+            setTitleAndDesc("uhc.advancements.heavyHitter")
             type = AdvancementType.CHALLENGE
             toast()
             announce()
@@ -94,8 +89,7 @@ object UHCAdvancements {
             parent(FIRST_BLOOD)
             id = id("winner")
             display(Items.TOTEM_OF_UNDYING)
-            title = UHCComponents.ADVANCEMENT_WINNER
-            description = UHCComponents.ADVANCEMENT_WINNER_DESC
+            setTitleAndDesc("uhc.advancements.winner")
             type = AdvancementType.CHALLENGE
             toast()
             announce()
@@ -104,8 +98,7 @@ object UHCAdvancements {
             parent(ROOT)
             id = id("combat_logger")
             display(Items.WOODEN_SWORD)
-            title = UHCComponents.ADVANCEMENT_COMBAT_LOGGER
-            description = UHCComponents.ADVANCEMENT_COMBAT_LOGGER_DESC
+            setTitleAndDesc("uhc.advancements.combatLogger")
             toast()
             announce()
         }
@@ -113,8 +106,7 @@ object UHCAdvancements {
             parent(ROOT)
             id = id("thats_not_dustless")
             display(Items.REDSTONE)
-            title = UHCComponents.ADVANCEMENT_NOT_DUSTLESS
-            description = UHCComponents.ADVANCEMENT_NOT_DUSTLESS_DESC
+            setTitleAndDesc("uhc.advancements.notDustless")
             toast()
             announce()
         }
@@ -122,8 +114,7 @@ object UHCAdvancements {
             parent(ROOT)
             id = id("parkour_master")
             display(Items.NETHERITE_BOOTS)
-            title = UHCComponents.ADVANCEMENT_PARKOUR_MASTER
-            description = UHCComponents.ADVANCEMENT_PARKOUR_MASTER_DESC
+            setTitleAndDesc("uhc.advancements.parkourMaster")
             type = AdvancementType.CHALLENGE
             toast()
             announce()
@@ -132,8 +123,7 @@ object UHCAdvancements {
             parent(ROOT)
             id = id("world_record_pace")
             display = Items.SPLASH_POTION.defaultInstance.potion(Potions.SWIFTNESS)
-            title = UHCComponents.ADVANCEMENT_WORLD_RECORD_PACE
-            description = UHCComponents.ADVANCEMENT_WORLD_RECORD_PACE_DESC
+            setTitleAndDesc("uhc.advancements.worldRecordPace")
             toast()
             announce()
         }
@@ -141,8 +131,7 @@ object UHCAdvancements {
             parent(ROOT)
             id = id("thats_embarrassing")
             display(Items.SWEET_BERRIES)
-            title = UHCComponents.ADVANCEMENT_EMBARRASSING
-            description = UHCComponents.ADVANCEMENT_EMBARRASSING_DESC
+            setTitleAndDesc("uhc.advancements.thatsEmbarrassing")
             toast()
             announce()
         }
@@ -150,8 +139,7 @@ object UHCAdvancements {
             parent(ROOT)
             id = id("busted")
             display(Items.BARRIER)
-            title = UHCComponents.ADVANCEMENT_BUSTED
-            description = UHCComponents.ADVANCEMENT_BUSTED_DESC
+            setTitleAndDesc("uhc.advancements.busted")
             toast()
             announce()
         }
@@ -159,8 +147,7 @@ object UHCAdvancements {
             parent(EARLY_EXIT)
             id = id("demolition_expert")
             display(Items.TNT)
-            title = UHCComponents.ADVANCEMENT_DEMOLITION_EXPERT
-            description = UHCComponents.ADVANCEMENT_DEMOLITION_EXPERT_DESC
+            setTitleAndDesc("uhc.advancements.demolitionExpert")
             toast()
             announce()
         }
@@ -168,8 +155,7 @@ object UHCAdvancements {
             parent(COMBAT_LOGGER)
             id = id("ok_we_believe_you_now")
             display(Items.WOODEN_HOE)
-            title = UHCComponents.ADVANCEMENT_WE_BELIEVE
-            description = UHCComponents.ADVANCEMENT_WE_BELIEVE_DESC
+            setTitleAndDesc("uhc.advancements.okWeBelieveYouNow")
             toast()
             announce()
         }
@@ -177,8 +163,7 @@ object UHCAdvancements {
             parent(NOT_DUSTLESS)
             id = id("falling_block")
             display(Items.SAND)
-            title = UHCComponents.ADVANCEMENT_FALLING_BLOCK
-            description = UHCComponents.ADVANCEMENT_FALLING_BLOCK_DESC
+            setTitleAndDesc("uhc.advancements.fallingBlock")
             toast()
             announce()
         }
@@ -186,8 +171,7 @@ object UHCAdvancements {
             parent(BUSTED)
             id = id("dream_luck")
             display(Items.ENCHANTED_GOLDEN_APPLE)
-            title = UHCComponents.ADVANCEMENT_DREAM_LUCK
-            description = UHCComponents.ADVANCEMENT_DREAM_LUCK_DESC
+            setTitleAndDesc("uhc.advancements.dreamLuck")
             toast()
             announce()
         }
@@ -195,8 +179,7 @@ object UHCAdvancements {
             parent(EMBARRASSING)
             id = id("broken_ankles")
             display(Items.LEATHER_BOOTS)
-            title = UHCComponents.ADVANCEMENT_BROKEN_ANKLES
-            description = UHCComponents.ADVANCEMENT_BROKEN_ANKLES_DESC
+            setTitleAndDesc("uhc.advancements.brokenAnkles")
             toast()
             announce()
         }
@@ -204,8 +187,7 @@ object UHCAdvancements {
             parent(BROKEN_ANKLES)
             id = id("on_the_edge")
             display = Items.SPLASH_POTION.defaultInstance.potion(Potions.STRONG_HARMING)
-            title = UHCComponents.ADVANCEMENT_ON_THE_EDGE
-            description = UHCComponents.ADVANCEMENT_ON_THE_EDGE_DESC
+            setTitleAndDesc("uhc.advancements.onTheEdge")
             toast()
             announce()
         }
@@ -213,8 +195,7 @@ object UHCAdvancements {
             parent(EARLY_EXIT)
             id = id("skill_issue")
             display(Items.BONE)
-            title = UHCComponents.ADVANCEMENT_SKILL_ISSUE
-            description = UHCComponents.ADVANCEMENT_SKILL_ISSUE_DESC
+            setTitleAndDesc("uhc.advancements.skillIssue")
             toast()
             announce()
         }
@@ -222,8 +203,7 @@ object UHCAdvancements {
             parent(ROOT)
             id = id("soloist")
             display(Items.PLAYER_HEAD)
-            title = UHCComponents.ADVANCEMENT_SOLOIST
-            description = UHCComponents.ADVANCEMENT_SOLOIST_DESC
+            setTitleAndDesc("uhc.advancements.soloist")
             toast()
             announce()
         }
@@ -231,8 +211,7 @@ object UHCAdvancements {
             parent(ROOT)
             id = id("not_now")
             display(Items.NETHERITE_SWORD)
-            title = UHCComponents.ADVANCEMENT_NOT_NOW
-            description = UHCComponents.ADVANCEMENT_NOT_NOW_DESC
+            setTitleAndDesc("uhc.advancements.notNow")
             toast()
             announce()
         }
@@ -240,8 +219,7 @@ object UHCAdvancements {
             parent(NOT_NOW)
             id = id("ldap")
             display(Items.EMERALD_BLOCK)
-            title = UHCComponents.ADVANCEMENT_KATIE
-            description = UHCComponents.ADVANCEMENT_KATIE_DESC
+            setTitleAndDesc("uhc.advancements.ldap")
             toast()
             announce()
         }
@@ -249,8 +227,7 @@ object UHCAdvancements {
             parent(WORLD_RECORD_PACE)
             id = id("officially_bored")
             display(Items.COMMAND_BLOCK)
-            title = UHCComponents.ADVANCEMENT_BORED
-            description = UHCComponents.ADVANCEMENT_BORED_DESC
+            setTitleAndDesc("uhc.advancements.officiallyBored")
             toast()
             announce()
         }
@@ -258,8 +235,7 @@ object UHCAdvancements {
             parent(OFFICIALLY_BORED)
             id = id("distracted")
             display(Items.CHAIN_COMMAND_BLOCK)
-            title = UHCComponents.ADVANCEMENT_DISTRACTED
-            description = UHCComponents.ADVANCEMENT_DISTRACTED_DESC
+            setTitleAndDesc("uhc.advancements.distracted")
             toast()
             announce()
         }
@@ -267,8 +243,7 @@ object UHCAdvancements {
             parent(LDAP)
             id = id("uh_oh")
             display(Items.BARRIER)
-            title = UHCComponents.ADVANCEMENT_UH_OH
-            description = UHCComponents.ADVANCEMENT_UH_OH_DESC
+            setTitleAndDesc("uhc.advancements.uhOh")
             toast()
             announce()
         }
@@ -276,8 +251,7 @@ object UHCAdvancements {
             parent(LDAP)
             id = id("basically")
             display(Items.WHITE_WOOL)
-            title = UHCComponents.ADVANCEMENT_BASICALLY
-            description = UHCComponents.ADVANCEMENT_BASICALLY_DESC
+            setTitleAndDesc("uhc.advancements.basically")
             toast()
             announce()
         }
@@ -285,8 +259,7 @@ object UHCAdvancements {
             parent(SOLOIST)
             id = id("team_player")
             display(Items.LIME_BANNER)
-            title = UHCComponents.ADVANCEMENT_TEAM_PLAYER
-            description = UHCComponents.ADVANCEMENT_TEAM_PLAYER_DESC
+            setTitleAndDesc("uhc.advancements.teamPlayer")
             toast()
             announce()
         }
@@ -294,8 +267,7 @@ object UHCAdvancements {
             parent(OFFICIALLY_BORED)
             id = id("find_the_button")
             display(Items.STONE_BUTTON)
-            title = UHCComponents.ADVANCEMENT_FIND_THE_BUTTON
-            description = UHCComponents.ADVANCEMENT_FIND_THE_BUTTON_DESC
+            setTitleAndDesc("uhc.advancements.findTheButton")
             type = AdvancementType.CHALLENGE
             toast()
             announce()
@@ -304,8 +276,7 @@ object UHCAdvancements {
             parent(SOLOIST)
             id = id("soloist")
             display(Items.ARROW)
-            title = UHCComponents.ADVANCEMENT_LAST_MAN
-            description = UHCComponents.ADVANCEMENT_LAST_MAN_DESC
+            setTitleAndDesc("uhc.advancements.lastManStanding")
             toast()
             announce()
         }
@@ -313,8 +284,7 @@ object UHCAdvancements {
             parent(EMBARRASSING)
             id = id("bear_cared")
             display(Items.SCULK_SENSOR)
-            title = UHCComponents.ADVANCEMENT_BEAR_CARED
-            description = UHCComponents.ADVANCEMENT_BEAR_CARED_DESC
+            setTitleAndDesc("uhc.advancements.bearCared")
             toast()
             announce()
         }

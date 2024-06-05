@@ -10,21 +10,18 @@ import net.casual.arcade.settings.display.MenuGameSetting
 import net.casual.arcade.settings.display.MenuGameSettingBuilder
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.utils.ScreenUtils.addSettings
 import net.casual.championships.common.items.MenuItem.Companion.CROSS
 import net.casual.championships.common.items.MenuItem.Companion.GREY_CROSS
 import net.casual.championships.common.items.MenuItem.Companion.GREY_TICK
 import net.casual.championships.common.items.MenuItem.Companion.TICK
-import net.casual.championships.common.util.CommonComponents.DISABLED
 import net.casual.championships.common.util.CommonComponents.DISABLE
-import net.casual.championships.common.util.CommonComponents.ENABLED
+import net.casual.championships.common.util.CommonComponents.DISABLED
 import net.casual.championships.common.util.CommonComponents.ENABLE
+import net.casual.championships.common.util.CommonComponents.ENABLED
 import net.casual.championships.common.util.CommonScreens
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
-import kotlin.random.Random
 
 open class CasualSettings(
     minigame: Minigame<*>,

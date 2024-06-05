@@ -2,7 +2,8 @@ package net.casual.championships.managers
 
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
-import net.casual.championships.commands.*
+import net.casual.championships.commands.CasualCommand
+import net.casual.championships.commands.MinesweeperCommand
 
 object CommandManager {
     internal fun registerEvents() {

@@ -8,6 +8,7 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.HitResult
@@ -18,7 +19,7 @@ class MysteriousPearl: ThrowableItemProjectile, PolymerEntity {
     constructor(level: Level, shooter: LivingEntity): super(CommonEntities.MYSTERIOUS_PEARL, shooter, level)
 
     init {
-        this.item = CommonItems.MYSTERIOUS_PEARL.defaultInstance
+        this.item = ItemStack(CommonItems.MYSTERIOUS_PEARL)
     }
 
     override fun getPolymerEntityType(player: ServerPlayer?): EntityType<*> {

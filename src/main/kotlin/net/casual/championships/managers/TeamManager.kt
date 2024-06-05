@@ -5,7 +5,6 @@ import net.casual.arcade.Arcade
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.championships.CasualMod
 import net.casual.championships.minigame.CasualMinigames
-import net.casual.championships.uhc.UHCMod
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.server.ServerScoreboard

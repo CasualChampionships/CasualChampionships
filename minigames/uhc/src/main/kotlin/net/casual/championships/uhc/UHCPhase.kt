@@ -37,11 +37,11 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec2
 
-const val INITIALIZING_ID = "initializing"
-const val GRACE_ID = "grace"
-const val BORDER_MOVING_ID = "border_moving"
-const val BORDER_FINISHED_ID = "border_finished"
-const val GAME_OVER_ID = "game_over"
+internal const val INITIALIZING_ID = "initializing"
+internal const val GRACE_ID = "grace"
+internal const val BORDER_MOVING_ID = "border_moving"
+internal const val BORDER_FINISHED_ID = "border_finished"
+internal const val GAME_OVER_ID = "game_over"
 
 enum class UHCPhase(
     override val id: String

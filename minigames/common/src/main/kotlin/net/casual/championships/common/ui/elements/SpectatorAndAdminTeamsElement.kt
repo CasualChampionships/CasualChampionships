@@ -1,10 +1,9 @@
-package net.casual.championships.common.ui
+package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.gui.elements.UniversalElement
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.managers.MinigameTeamManager
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
-import net.casual.arcade.resources.font.padding.PaddingNoSplitFontResources
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.TeamUtils.getOnlineCount

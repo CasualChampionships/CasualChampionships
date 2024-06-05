@@ -5,6 +5,7 @@ import net.casual.arcade.events.level.LevelBlockChangedEvent
 import net.casual.arcade.events.level.LevelExtensionEvent
 import net.casual.arcade.events.level.LevelTickEvent
 import net.casual.arcade.events.player.PlayerBlockPlacedEvent
+import net.casual.arcade.utils.EventUtils.broadcast
 import net.casual.arcade.utils.LevelUtils.addExtension
 import net.casual.arcade.utils.PlayerUtils
 import net.casual.championships.common.event.PlayerCheatEvent
@@ -41,7 +42,7 @@ object AntiCheat {
 
     private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
         if (detectFlexibleBlockPlacement(event.player, event.context)) {
-            PlayerCheatEvent(event.player, Type.FlexibleBlockPlacement)
+            PlayerCheatEvent(event.player, Type.FlexibleBlockPlacement).broadcast()
 
             val message = Component.literal("Player ").append(event.player.displayName!!).append(" used fbp")
             PlayerUtils.broadcastToOps(message)
@@ -92,7 +93,7 @@ object AntiCheat {
         }
 
         for (placedPos in possible) {
-            for (direction in Direction.values()) {
+            for (direction in Direction.entries) {
                 val neighbor = level.getBlockState(placedPos.relative(direction))
                 if (isSolidForPlacement(context, neighbor)) {
                     return false

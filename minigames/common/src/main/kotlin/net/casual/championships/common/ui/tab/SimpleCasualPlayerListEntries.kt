@@ -1,4 +1,4 @@
-package net.casual.championships.common.ui
+package net.casual.championships.common.ui.tab
 
 import net.casual.arcade.gui.tab.PlayerListEntries
 import net.casual.arcade.gui.tab.VanillaPlayerListEntries

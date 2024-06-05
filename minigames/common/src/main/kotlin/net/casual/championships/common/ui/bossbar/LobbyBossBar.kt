@@ -1,12 +1,10 @@
-package net.casual.championships.common.ui
+package net.casual.championships.common.ui.bossbar
 
 import net.casual.arcade.gui.bossbar.TimerBossBar
 import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.formatHHMMSS
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
-import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.BossEvent
 

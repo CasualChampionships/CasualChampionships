@@ -3,7 +3,6 @@ package net.casual.championships.common.util
 import net.casual.arcade.events.entity.EntityStartTrackingEvent
 import net.casual.arcade.events.entity.MobCategorySpawnEvent
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.minecraft.world.entity.EntityType.*
 import net.minecraft.world.entity.Mob
 import kotlin.math.max

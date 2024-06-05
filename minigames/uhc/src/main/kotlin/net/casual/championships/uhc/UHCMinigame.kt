@@ -45,7 +45,7 @@ import net.casual.arcade.utils.PlayerUtils.directionToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.directionVectorToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.arcade.utils.PlayerUtils.grantAllRecipes
+import net.casual.arcade.utils.PlayerUtils.grantAllRecipesSilently
 import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.resetExperience
 import net.casual.arcade.utils.PlayerUtils.resetHealth
@@ -62,12 +62,13 @@ import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.location.Location
 import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent
 import net.casual.championships.common.event.border.BorderPortalWithinBoundsEvent
-import net.casual.championships.common.minigame.rule.Rules
-import net.casual.championships.common.minigame.rule.RulesProvider
+import net.casual.championships.common.items.PlayerHeadItem
+import net.casual.championships.common.minigame.rules.Rules
+import net.casual.championships.common.minigame.rules.RulesProvider
 import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.task.GlowingBossBarTask
 import net.casual.championships.common.task.GracePeriodBossBarTask
-import net.casual.championships.common.ui.ActiveBossBar
+import net.casual.championships.common.ui.bossbar.ActiveBossBar
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CommonUI.broadcastInfo
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
@@ -141,105 +142,9 @@ class UHCMinigame(
 
         this.registerCommands()
         this.addEventListener(this.uhcAdvancements)
-        this.recipes.add(GoldenHeadRecipe.create())
+        this.recipes.add(GoldenHeadRecipe.INSTANCE)
         this.advancements.addAll(UHCAdvancements.getAllAdvancements())
         this.initialiseBorderTracker()
-    }
-
-    private fun isRunning(): Boolean {
-        return this.isPhase(Grace) || this.isPhase(BorderMoving) || this.isPhase(BorderFinished)
-    }
-
-    fun startWorldBorders() {
-        this.moveWorldBorders(this.settings.borderStage)
-    }
-
-    fun resetWorldBorders() {
-        val multiplier = this.settings.borderSizeMultiplier
-        for ((border, level) in this.tracker.getAllTracking()) {
-            border.setSizeUntracked(UHCBorderStage.FIRST.getStartSizeFor(level, multiplier))
-        }
-        this.movingBorders.clear()
-    }
-
-    fun moveWorldBorders(stage: UHCBorderStage, size: UHCBorderSize = UHCBorderSize.END, instant: Boolean = false) {
-        for ((border, level) in this.tracker.getAllTracking()) {
-            this.moveWorldBorder(border, level, stage, size, instant)
-        }
-    }
-
-    override fun onSingleBorderActive(border: TrackedBorder, level: ServerLevel) {
-        this.movingBorders.add(level.dimension())
-    }
-
-    override fun onSingleBorderComplete(border: TrackedBorder, level: ServerLevel) {
-        if (!this.paused) {
-            this.movingBorders.remove(level.dimension())
-        }
-    }
-
-    override fun onAllBordersComplete(borders: Map<TrackedBorder, ServerLevel>) {
-        val stage = this.settings.borderStage
-        val size = stage.getEndSizeFor(this.overworld, this.settings.borderSizeMultiplier)
-        if (this.overworld.worldBorder.size != size) {
-            UHCMod.logger.info("Border paused at stage $stage")
-            return
-        }
-
-        UHCMod.logger.info("Finished world border stage: $stage")
-        if (!this.isRunning()) {
-            return
-        }
-        val next = stage.getNextStage()
-
-        if (next == UHCBorderStage.END) {
-            this.setPhase(BorderFinished)
-            return
-        }
-
-        this.scheduler.schedulePhased(10.Seconds, MinigameTask(this, UHCMinigame::startNextBorders))
-    }
-
-    private fun startNextBorders() {
-        this.settings.borderStageSetting.setQuietly(this.settings.borderStage.getNextStage())
-        this.moveWorldBorders(this.settings.borderStage)
-    }
-
-    fun onBorderFinish() {
-        if (this.settings.endGameGlow) {
-            this.settings.glowing = true
-        }
-        if (this.settings.generatePortals) {
-            this.overworld.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
-            this.nether.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
-        }
-    }
-
-    override fun getRules(): Rules {
-        return Rules.build {
-            addRule("uhc.rules.announcement", 1 to 9.Seconds)
-            addRule("uhc.rules.mods", 3)
-            addRule("uhc.rules.exploits", 1)
-            addRule("uhc.rules.gameplay", 2, 5)
-            addRule("uhc.rules.chat", 2)
-            addRule("uhc.rules.spectators", 1)
-            addRule("uhc.rules.gentlemansRules", 1)
-            rule {
-                title = RuleUtils.formatTitle(Component.translatable("uhc.rules.reminders"))
-                entry {
-                    val teamglow = "/uhc teamglow".literal().mini().bold().colour(0x65b7db)
-                    val fullbright = "/uhc fullbright".literal().mini().bold().colour(0x65b7db)
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.1", teamglow)))
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.2", fullbright)))
-                }
-                entry {
-                    val prefix = "!".literal().mini().bold().colour(0x65b7db)
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.3", prefix)))
-                }
-            }
-            addRule("uhc.rules.questions", 1)
-            addRule("uhc.rules.finally", 1 to 9.Seconds)
-        }
     }
 
     override fun getPhases(): Collection<UHCPhase> {
@@ -263,75 +168,6 @@ class UHCMinigame(
         json.add("dimensions", dimensions)
     }
 
-    private fun registerCommands() {
-        this.commands.register(CommandUtils.buildLiteral("uhc") {
-            literal("player") {
-                requiresAdminOrPermission()
-                argument("player", EntityArgument.player()) {
-                    literal("add") {
-                        argument("team", TeamArgument.team()) {
-                            argument("teleport", BoolArgumentType.bool()).executes(::addPlayerToTeam)
-                            executes { addPlayerToTeam(it, false) }
-                        }
-                    }
-                    literal("reset-health").executes(::resetPlayerHealth)
-                }
-            }
-            literal("border") {
-                requiresAdminOrPermission()
-                literal("start") {
-                    executes(::startWorldBorders)
-                }
-            }
-            literal("fullbright").executes { CommonCommands.toggleFullbright(this@UHCMinigame, it) }
-            literal("teamglow").executes { CommonCommands.toggleTeamGlow(this@UHCMinigame, it) }
-            literal("spectate").executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
-            literal("pos").executes { CommonCommands.broadcastPositionToTeammates(this@UHCMinigame, it) }
-        })
-        this.commands.register(CommandUtils.buildLiteral("s") {
-            executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
-        })
-    }
-
-    private fun addPlayerToTeam(
-        context: CommandContext<CommandSourceStack>,
-        teleport: Boolean = BoolArgumentType.getBool(context, "teleport")
-    ): Int {
-        val target = EntityArgument.getPlayer(context, "player")
-        val team = TeamArgument.getTeam(context, "team")
-
-        val server = context.source.server
-        server.scoreboard.addPlayerToTeam(target.scoreboardName, team)
-        target.sendSystemMessage(CommonComponents.ADDED_TO_TEAM.generate(team.formattedDisplayName))
-
-        this.players.setPlaying(target)
-
-        if (teleport) {
-            for (player in this.players.playing) {
-                if (team.players.contains(player.scoreboardName) && target != player) {
-                    target.teleportTo(player.location)
-                    break
-                }
-            }
-        }
-
-        val message = "${target.scoreboardName} has joined team ".literal()
-            .append(team.formattedDisplayName)
-            .append(" and has ${if (teleport) "been teleported to a random teammate" else "not been teleported"}")
-        return context.source.success(message, true)
-    }
-
-    private fun resetPlayerHealth(context: CommandContext<CommandSourceStack>): Int {
-        val target = EntityArgument.getPlayer(context, "player")
-        this.resetPlayerHealth(target)
-        return context.source.success("Successfully reset ${target.scoreboardName}'s health")
-    }
-
-    private fun startWorldBorders(context: CommandContext<CommandSourceStack>): Int {
-        this.startWorldBorders()
-        return context.source.success("Successfully started world borders")
-    }
-
     @Listener(during = During(before = BORDER_FINISHED_ID))
     private fun onPause(event: MinigamePauseEvent) {
         for ((border, level) in tracker.getAllTracking()) {
@@ -345,7 +181,7 @@ class UHCMinigame(
     private fun onUnpause(event: MinigameUnpauseEvent) {
         for ((border, level) in tracker.getAllTracking()) {
             if (this.movingBorders.contains(level.dimension())) {
-                this.moveWorldBorder(border, level, this.settings.borderStage, UHCBorderSize.END)
+                this.moveWorldBorder(border, level, this.settings.borderStage, UHCBorderSize.End)
             }
         }
     }
@@ -423,9 +259,7 @@ class UHCMinigame(
         //     PlayerRecorders.get(player)?.stop()
         // }
 
-        if (this.isRunning()) {
-            this.onEliminated(player, player.getKillCreditWith(source))
-        }
+        this.onEliminated(player, player.getKillCreditWith(source))
     }
 
     @Listener
@@ -487,7 +321,42 @@ class UHCMinigame(
     }
 
     @Listener
-    private fun onMinigameAddSpectator(event: MinigameSetSpectatingEvent) {
+    private fun onSetPlaying(event: MinigameSetPlayingEvent) {
+        val player = event.player
+
+        player.grantAllRecipesSilently()
+
+        player.grantAdvancement(UHCAdvancements.ROOT)
+
+        this.resetPlayerHealth(player)
+        player.resetHunger()
+        player.resetExperience()
+        player.clearPlayerInventory()
+        player.removeAllEffects()
+
+        player.removeVehicle()
+        player.setGlowingTag(false)
+
+        this.effects.addFullbright(player)
+
+        val team = player.team
+        team?.nameTagVisibility = Team.Visibility.NEVER
+
+        this.tags.add(player, CommonTags.HAS_PARTICIPATED)
+        this.tags.add(player, CommonTags.HAS_TEAM_GLOW)
+
+        player.addEffect(
+            MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 200, 4, true, false)
+        )
+        player.setGameMode(GameType.SURVIVAL)
+
+        if (team != null && team.getOnlineCount() == 1) {
+            player.grantAdvancement(UHCAdvancements.SOLOIST)
+        }
+    }
+
+    @Listener
+    private fun onSetSpectating(event: MinigameSetSpectatingEvent) {
         val (_, player) = event
         player.setGameMode(GameType.SPECTATOR)
 
@@ -501,20 +370,180 @@ class UHCMinigame(
         this.chat.broadcastInfo(UHCComponents.BROADCAST_SPECTATING.mini(), listOf(player))
     }
 
-    private fun shouldObserveeGlow(observee: Entity, observer: ServerPlayer): Boolean {
-        if (observee !is ServerPlayer || this.players.isSpectating(observee)) {
-            return false
+    private fun onEliminated(player: ServerPlayer, killer: Entity?) {
+        player.setRespawnPosition(player.level().dimension(), player.blockPosition(), player.yRot, true, false)
+        this.players.setSpectating(player)
+
+        if (killer is ServerPlayer) {
+            this.onKilled(killer, player)
         }
-        if (this.settings.glowing) {
-            return true
+
+        if (this.settings.playerDropsGapple) {
+            player.drop(Items.GOLDEN_APPLE.defaultInstance, true, false)
         }
-        if (!this.settings.friendlyPlayerGlow) {
-            return false
+
+        if (this.settings.playerDropsHead) {
+            val head = PlayerHeadItem.create(player)
+            if (killer is ServerPlayer) {
+                if (!killer.inventory.add(head)) {
+                    player.drop(head, true, false)
+                }
+            } else {
+                player.drop(head, true, false)
+            }
         }
-        if (!this.tags.has(observer, CommonTags.HAS_TEAM_GLOW)) {
-            return false
+
+        val team = player.team
+        if (team !== null && !this.teams.isTeamEliminated(team) && team.getOnlinePlayers().none(this.players::isPlaying)) {
+            this.teams.addEliminatedTeam(team)
+            this.chat.broadcastWithSound(
+                CommonComponents.HAS_BEEN_ELIMINATED.generate(team.name).withStyle(team.color).bold().mini(),
+                Sound(CommonSounds.TEAM_ELIMINATION)
+            )
         }
-        return observee.team != null && observee.team === observer.team
+
+        if (this.teams.getPlayingTeams().size <= 1) {
+            this.setPhase(GameOver)
+        }
+    }
+
+    private fun onKilled(player: ServerPlayer, killed: ServerPlayer) {
+        val opposing = killed.team ?: return
+        if (this.settings.soloBuff) {
+            // Opposing team has many players
+            if (opposing.getOnlinePlayers().count(this.players::isPlaying) > 0) {
+                val team = player.team ?: return
+                // Killer is solo
+                if (team.getOnlinePlayers().count(this.players::isPlaying) == 1) {
+                    player.addEffect(MobEffectInstance(MobEffects.REGENERATION, 60, 2))
+                }
+            }
+        }
+    }
+
+    // Rules
+
+    override fun getRules(): Rules {
+        return Rules.build {
+            addRule("uhc.rules.announcement", 1 to 9.Seconds)
+            addRule("uhc.rules.mods", 3)
+            addRule("uhc.rules.exploits", 1)
+            addRule("uhc.rules.gameplay", 2, 5)
+            addRule("uhc.rules.chat", 2)
+            addRule("uhc.rules.spectators", 1)
+            addRule("uhc.rules.gentlemansRules", 1)
+            rule {
+                title = RuleUtils.formatTitle(Component.translatable("uhc.rules.reminders"))
+                entry {
+                    val teamglow = "/uhc teamglow".literal().mini().bold().colour(0x65b7db)
+                    val fullbright = "/uhc fullbright".literal().mini().bold().colour(0x65b7db)
+                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.1", teamglow)))
+                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.2", fullbright)))
+                }
+                entry {
+                    val prefix = "!".literal().mini().bold().colour(0x65b7db)
+                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.3", prefix)))
+                }
+            }
+            addRule("uhc.rules.questions", 1)
+            addRule("uhc.rules.finally", 1 to 9.Seconds)
+        }
+    }
+
+    // World Border
+
+    fun startWorldBorders() {
+        this.moveWorldBorders(this.settings.borderStage)
+    }
+
+    fun resetWorldBorders() {
+        val multiplier = this.settings.borderSizeMultiplier
+        for ((border, level) in this.tracker.getAllTracking()) {
+            border.setSizeUntracked(UHCBorderStage.First.getStartSizeFor(level, multiplier))
+        }
+        this.movingBorders.clear()
+    }
+
+    fun moveWorldBorders(stage: UHCBorderStage, size: UHCBorderSize = UHCBorderSize.End, instant: Boolean = false) {
+        for ((border, level) in this.tracker.getAllTracking()) {
+            this.moveWorldBorder(border, level, stage, size, instant)
+        }
+    }
+
+    override fun onSingleBorderActive(border: TrackedBorder, level: ServerLevel) {
+        this.movingBorders.add(level.dimension())
+    }
+
+    override fun onSingleBorderComplete(border: TrackedBorder, level: ServerLevel) {
+        if (!this.paused) {
+            this.movingBorders.remove(level.dimension())
+        }
+    }
+
+    override fun onAllBordersComplete(borders: Map<TrackedBorder, ServerLevel>) {
+        val stage = this.settings.borderStage
+        val size = stage.getEndSizeFor(this.overworld, this.settings.borderSizeMultiplier)
+        if (this.overworld.worldBorder.size != size) {
+            UHCMod.logger.info("Border paused at stage $stage")
+            return
+        }
+
+        UHCMod.logger.info("Finished world border stage: $stage")
+        val next = stage.getNextStage()
+
+        if (next == UHCBorderStage.End) {
+            this.setPhase(BorderFinished)
+            return
+        }
+
+        this.scheduler.schedulePhased(10.Seconds, MinigameTask(this, UHCMinigame::startNextBorders))
+    }
+
+    private fun startNextBorders() {
+        this.settings.borderStageSetting.setQuietly(this.settings.borderStage.getNextStage())
+        this.moveWorldBorders(this.settings.borderStage)
+    }
+
+    fun onBorderFinish() {
+        if (this.settings.endGameGlow) {
+            this.settings.glowing = true
+        }
+        if (this.settings.generatePortals) {
+            this.overworld.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
+            this.nether.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
+        }
+    }
+
+    private fun initialiseBorderTracker() {
+        this.tracker.addListener(this)
+        for (level in this.levels.all()) {
+            this.tracker.addLevelBorder(level)
+        }
+
+        BorderUtils.isolateWorldBorders()
+    }
+
+    private fun moveWorldBorder(border: TrackedBorder, level: Level, stage: UHCBorderStage, size: UHCBorderSize, instant: Boolean = false) {
+        val modified =  if (level == this.end && stage >= UHCBorderStage.Sixth) UHCBorderStage.Fifth else stage
+        val multiplier = this.settings.borderSizeMultiplier
+        val dest = if (size == UHCBorderSize.End) {
+            modified.getEndSizeFor(level, multiplier)
+        } else {
+            modified.getStartSizeFor(level, multiplier)
+        }
+        val time = if (instant) -1.0 else modified.getRemainingTimeAsPercent(border.size, level, multiplier)
+
+        UHCMod.logger.info("Level ${level.dimension().location()} moving to $dest")
+        moveWorldBorder(border, dest, time)
+    }
+
+    private fun moveWorldBorder(border: TrackedBorder, newSize: Double, percent: Double = -1.0) {
+        val duration = this.settings.borderTime * percent
+        if (!duration.isZero) {
+            border.lerpSizeBetween(border.size, newSize, duration)
+            return
+        }
+        border.size = newSize
     }
 
     private fun updateWorldBorder(player: ServerPlayer) {
@@ -594,127 +623,106 @@ class UHCMinigame(
         ))
     }
 
-    private fun onEliminated(player: ServerPlayer, killer: Entity?) {
-        player.setRespawnPosition(player.level().dimension(), player.blockPosition(), player.yRot, true, false)
-        this.players.setSpectating(player)
-
-        if (killer is ServerPlayer) {
-            this.onKilled(killer, player)
+    private fun shouldObserveeGlow(observee: Entity, observer: ServerPlayer): Boolean {
+        if (observee !is ServerPlayer || this.players.isSpectating(observee)) {
+            return false
         }
-
-        if (this.settings.playerDropsGapple) {
-            player.drop(Items.GOLDEN_APPLE.defaultInstance, true, false)
+        if (this.settings.glowing) {
+            return true
         }
-
-        if (this.settings.playerDropsHead) {
-            val head = HeadUtils.createConsumablePlayerHead(player)
-            if (killer is ServerPlayer) {
-                if (!killer.inventory.add(head)) {
-                    player.drop(head, true, false)
-                }
-            } else {
-                player.drop(head, true, false)
-            }
+        if (!this.settings.friendlyPlayerGlow) {
+            return false
         }
-
-        val team = player.team
-        if (team !== null && !this.teams.isTeamEliminated(team) && team.getOnlinePlayers().none(this.players::isPlaying)) {
-            this.teams.addEliminatedTeam(team)
-            this.chat.broadcastWithSound(
-                CommonComponents.HAS_BEEN_ELIMINATED.generate(team.name).withStyle(team.color).bold().mini(),
-                Sound(CommonSounds.TEAM_ELIMINATION)
-            )
+        if (!this.tags.has(observer, CommonTags.HAS_TEAM_GLOW)) {
+            return false
         }
-
-        if (this.teams.getPlayingTeams().size <= 1) {
-            this.setPhase(GameOver)
-        }
-    }
-
-    private fun onKilled(player: ServerPlayer, killed: ServerPlayer) {
-        val opposing = killed.team ?: return
-        if (this.settings.soloBuff) {
-            // Opposing team has many players
-            if (opposing.getOnlinePlayers().count(this.players::isPlaying) > 0) {
-                val team = player.team ?: return
-                // Killer is solo
-                if (team.getOnlinePlayers().count(this.players::isPlaying) == 1) {
-                    player.addEffect(MobEffectInstance(MobEffects.REGENERATION, 60, 2))
-                }
-            }
-        }
-    }
-
-    private fun initialiseBorderTracker() {
-        this.tracker.addListener(this)
-        for (level in this.levels.all()) {
-            this.tracker.addLevelBorder(level)
-        }
-
-        BorderUtils.isolateWorldBorders()
-    }
-
-    private fun moveWorldBorder(border: TrackedBorder, level: Level, stage: UHCBorderStage, size: UHCBorderSize, instant: Boolean = false) {
-        val modified =  if (level == this.end && stage >= UHCBorderStage.SIX) UHCBorderStage.FIFTH else stage
-        val multiplier = this.settings.borderSizeMultiplier
-        val dest = if (size == UHCBorderSize.END) {
-            modified.getEndSizeFor(level, multiplier)
-        } else {
-            modified.getStartSizeFor(level, multiplier)
-        }
-        val time = if (instant) -1.0 else modified.getRemainingTimeAsPercent(border.size, level, multiplier)
-
-        UHCMod.logger.info("Level ${level.dimension().location()} moving to $dest")
-        moveWorldBorder(border, dest, time)
-    }
-
-    private fun moveWorldBorder(border: TrackedBorder, newSize: Double, percent: Double = -1.0) {
-        val duration = this.settings.borderTime * percent
-        if (!duration.isZero) {
-            border.lerpSizeBetween(border.size, newSize, duration)
-            return
-        }
-        border.size = newSize
-    }
-
-    @Listener
-    private fun setAsPlaying(event: MinigameSetPlayingEvent) {
-        val player = event.player
-
-        player.grantAllRecipes()
-
-        player.grantAdvancement(UHCAdvancements.ROOT)
-
-        this.resetPlayerHealth(player)
-        player.resetHunger()
-        player.resetExperience()
-        player.clearPlayerInventory()
-        player.removeAllEffects()
-
-        player.removeVehicle()
-        player.setGlowingTag(false)
-
-        this.effects.addFullbright(player)
-
-        val team = player.team
-        team?.nameTagVisibility = Team.Visibility.NEVER
-
-        this.tags.add(player, CommonTags.HAS_PARTICIPATED)
-        this.tags.add(player, CommonTags.HAS_TEAM_GLOW)
-
-        player.addEffect(
-            MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 200, 4, true, false)
-        )
-        player.setGameMode(GameType.SURVIVAL)
-
-        if (team != null && team.getOnlineCount() == 1) {
-            player.grantAdvancement(UHCAdvancements.SOLOIST)
-        }
+        return observee.team != null && observee.team === observer.team
     }
 
     private fun resetPlayerHealth(player: ServerPlayer) {
         player.boostHealth(this.settings.health)
         player.resetHealth()
+    }
+
+    // Commands
+
+    private fun registerCommands() {
+        this.commands.register(CommandUtils.buildLiteral("uhc") {
+            literal("player") {
+                requiresAdminOrPermission()
+                argument("player", EntityArgument.player()) {
+                    literal("add") {
+                        argument("team", TeamArgument.team()) {
+                            argument("teleport", BoolArgumentType.bool()).executes(::addPlayerToTeam)
+                            executes { addPlayerToTeam(it, false) }
+                        }
+                    }
+                    literal("reset-health") {
+                        executes(::resetPlayerHealth)
+                    }
+                }
+            }
+            literal("border") {
+                requiresAdminOrPermission()
+                literal("start") {
+                    executes(::startWorldBorders)
+                }
+            }
+            literal("fullbright") {
+                executes { CommonCommands.toggleFullbright(this@UHCMinigame, it) }
+            }
+            literal("teamglow") {
+                executes { CommonCommands.toggleTeamGlow(this@UHCMinigame, it) }
+            }
+            literal("spectate") {
+                executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
+            }
+            literal("pos") {
+                executes { CommonCommands.broadcastPositionToTeammates(this@UHCMinigame, it) }
+            }
+        })
+        this.commands.register(CommandUtils.buildLiteral("s") {
+            executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
+        })
+    }
+
+    private fun addPlayerToTeam(
+        context: CommandContext<CommandSourceStack>,
+        teleport: Boolean = BoolArgumentType.getBool(context, "teleport")
+    ): Int {
+        val target = EntityArgument.getPlayer(context, "player")
+        val team = TeamArgument.getTeam(context, "team")
+
+        val server = context.source.server
+        server.scoreboard.addPlayerToTeam(target.scoreboardName, team)
+        target.sendSystemMessage(CommonComponents.ADDED_TO_TEAM.generate(team.formattedDisplayName))
+
+        this.players.setPlaying(target)
+
+        if (teleport) {
+            for (player in this.players.playing) {
+                if (team.players.contains(player.scoreboardName) && target != player) {
+                    target.teleportTo(player.location)
+                    break
+                }
+            }
+        }
+
+        val message = "${target.scoreboardName} has joined team ".literal()
+            .append(team.formattedDisplayName)
+            .append(" and has ${if (teleport) "been teleported to a random teammate" else "not been teleported"}")
+        return context.source.success(message, true)
+    }
+
+    private fun resetPlayerHealth(context: CommandContext<CommandSourceStack>): Int {
+        val target = EntityArgument.getPlayer(context, "player")
+        this.resetPlayerHealth(target)
+        return context.source.success("Successfully reset ${target.scoreboardName}'s health")
+    }
+
+    private fun startWorldBorders(context: CommandContext<CommandSourceStack>): Int {
+        this.startWorldBorders()
+        return context.source.success("Successfully started world borders")
     }
 
     companion object {
