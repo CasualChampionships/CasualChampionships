@@ -155,8 +155,6 @@ enum class UHCPhase(
     },
     GameOver(GAME_OVER_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
-            minigame.stats.freeze()
-
             minigame.settings.isChatGlobal = true
             minigame.settings.canTakeDamage.set(false)
 
@@ -196,6 +194,8 @@ enum class UHCPhase(
             minigame.scheduler.schedulePhased(20.Seconds, MinigameTask(minigame) {
                 minigame.complete()
             })
+
+            minigame.stats.freeze()
         }
     }
 }

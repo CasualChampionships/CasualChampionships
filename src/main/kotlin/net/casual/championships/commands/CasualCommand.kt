@@ -6,11 +6,10 @@ import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.utils.CommandUtils.fail
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.MinigameUtils.requiresAdminOrPermission
-import net.casual.championships.managers.TeamManager
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost
-import net.casual.championships.util.Config
+import net.casual.championships.util.CasualConfig
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
@@ -20,9 +19,7 @@ object CasualCommand: Command {
         dispatcher.register(
             Commands.literal("casual").requiresAdminOrPermission().then(
                 Commands.literal("team").then(
-                    Commands.literal("reload").executes {
-                        reloadTeams()
-                    }
+                    Commands.literal("reload").executes(this::reloadTeams)
                 )
             ).then(
                 Commands.literal("config").then(
@@ -48,13 +45,13 @@ object CasualCommand: Command {
         )
     }
 
-    private fun reloadTeams(): Int {
-        TeamManager.createTeams()
+    private fun reloadTeams(context: CommandContext<CommandSourceStack>): Int {
+        CasualMinigames.reloadTeams(context.source.server)
         return 1
     }
 
     private fun reloadConfig(context: CommandContext<CommandSourceStack>): Int {
-        Config.reload()
+        CasualConfig.reload()
         return context.source.success("Successfully reloaded config", true)
     }
 

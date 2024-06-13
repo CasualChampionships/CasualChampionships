@@ -88,7 +88,7 @@ class DuelMinigame(
     private fun onTick(event: ServerTickEvent) {
         if (this.players.playingPlayerCount <= 1) {
             this.emptyTicks++
-            if (this.emptyTicks.Ticks > 15.Seconds) {
+            if (this.emptyTicks.Ticks > 30.Seconds) {
                 this.close()
             }
         } else {
@@ -180,6 +180,7 @@ class DuelMinigame(
     private fun onMinigameSetPlaying(event: MinigameSetPlayingEvent) {
         val player = event.player
 
+        this.recipes.grantSilently(player, listOf(GoldenHeadRecipe.INSTANCE))
         player.setGameMode(GameType.SURVIVAL)
         player.boostHealth(this.duelSettings.health)
         player.resetHealth()

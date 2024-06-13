@@ -1,6 +1,7 @@
 package net.casual.championships.uhc.advancement
 
 import com.google.gson.JsonObject
+import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.player.*
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
@@ -17,6 +18,8 @@ import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.StatUtils.increment
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.common.event.PlayerCheatEvent
+import net.casual.championships.common.util.CommonStats
+import net.casual.championships.common.util.CommonTags
 import net.casual.championships.uhc.BORDER_FINISHED_ID
 import net.casual.championships.uhc.GRACE_ID
 import net.casual.championships.uhc.UHCMinigame
@@ -41,18 +44,19 @@ class UHCAdvancementManager(
 
         for (player in winners) {
             player.grantAdvancement(UHCAdvancements.WINNER)
+            this.uhc.stats.getOrCreateStat(player, CommonStats.WON).modify { true }
         }
 
         var lowest: PlayerAttacker? = null
         var highest: PlayerAttacker? = null
         for (player in this.uhc.players) {
-            val team = player.team
-            if (team != null && this.uhc.teams.isTeamIgnored(team)) {
+            if (this.uhc.tags.has(player, CommonTags.HAS_PARTICIPATED)) {
                 val current = this.uhc.stats.getOrCreateStat(player, ArcadeStats.DAMAGE_DEALT).value
                 if (lowest === null) {
                     val first = PlayerAttacker(player, current)
                     lowest = first
                     highest = first
+                    continue
                 }
                 if (lowest.damage > current) {
                     lowest = PlayerAttacker(player, current)
@@ -98,7 +102,11 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(
+        phase = BuiltInEventPhases.POST,
+        flags = ListenerFlags.HAS_PLAYER_PLAYING,
+        during = During(before = BORDER_FINISHED_ID)
+    )
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         if (this.claimed.add(UHCRaceAdvancement.Death)) {
             event.player.grantAdvancement(UHCAdvancements.EARLY_EXIT)

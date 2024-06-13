@@ -13,12 +13,7 @@
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-    "server": [
-      {
-        "adapter": "kotlin",
-        "value": "net.casual.championships.uhc.UHCMod"
-      }
-    ]
+
   },
   "mixins": [
 

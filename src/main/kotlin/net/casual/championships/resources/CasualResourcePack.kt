@@ -4,7 +4,7 @@ import net.casual.arcade.utils.impl.ConcatenatedList.Companion.concat
 import net.casual.championships.CasualMod
 import net.casual.championships.common.CommonMod
 import net.casual.championships.uhc.UHCMod
-import net.casual.championships.util.Config
+import net.casual.championships.util.CasualConfig
 import java.nio.file.Path
 
 object CasualResourcePack {
@@ -13,7 +13,7 @@ object CasualResourcePack {
     // TODO: make this autogen
     private val all = default.concat(listOf(UHCMod.UHC_PACK))
 
-    fun generateAll(location: Path = Config.resolve("packs")) {
+    fun generateAll(location: Path = CasualConfig.resolve("packs")) {
         for (pack in this.all) {
             try {
                 pack.buildTo(location)

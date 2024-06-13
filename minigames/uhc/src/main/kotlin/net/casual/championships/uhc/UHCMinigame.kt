@@ -245,9 +245,24 @@ class UHCMinigame(
 
         if (!this.players.isSpectating(player)) {
             this.updateWorldBorder(player)
+
+            this.stats.getOrCreateStat(player, CommonStats.ALIVE_TIME).increment()
+            if (player.isShiftKeyDown) {
+                this.stats.getOrCreateStat(player, CommonStats.CROUCH_TIME).increment()
+            }
         }
 
         this.updateHUD(player)
+    }
+
+    @Listener
+    private fun onPlayerBlockMined(event: PlayerBlockMinedEvent) {
+        this.stats.getOrCreateStat(event.player, CommonStats.BLOCKS_MINED).increment()
+    }
+
+    @Listener(phase = BuiltInEventPhases.POST)
+    private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
+        this.stats.getOrCreateStat(event.player, CommonStats.BLOCKS_PLACED).increment()
     }
 
     @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, phase = BuiltInEventPhases.POST)
@@ -292,6 +307,18 @@ class UHCMinigame(
         val (player) = event
         if (player.isSpectator) {
             event.cancel()
+        }
+    }
+
+    @Listener(phase = BuiltInEventPhases.POST)
+    private fun onPlayerJump(event: PlayerJumpEvent) {
+        this.stats.getOrCreateStat(event.player, CommonStats.JUMPS).increment()
+    }
+
+    @Listener
+    private fun onPlayerUseItem(event: PlayerItemUseEvent) {
+        if (event.stack.isOf(CommonItems.PLAYER_HEAD) || event.stack.isOf(CommonItems.GOLDEN_HEAD)) {
+            this.stats.getOrCreateStat(event.player, UHCStats.HEADS_CONSUMED).increment()
         }
     }
 

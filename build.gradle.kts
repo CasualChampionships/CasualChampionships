@@ -101,7 +101,7 @@ dependencies {
         }
     }
 
-    include(implementation("org.mongodb:mongo-java-driver:3.12.11")!!)
+    include(implementation("com.github.CasualChampionships:casual-database-core:895c3fa3a264055d41106457886b1299d302eab6")!!)
 }
 
 fun getGitHash(): String {

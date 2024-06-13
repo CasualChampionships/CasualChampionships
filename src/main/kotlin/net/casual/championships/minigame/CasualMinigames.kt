@@ -12,12 +12,15 @@ import net.casual.arcade.events.player.PlayerRequestLoginEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.player.PlayerTeamLeaveEvent
 import net.casual.arcade.events.server.ServerLoadedEvent
+import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerSaveEvent
+import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.Minigames
 import net.casual.arcade.minigame.events.MinigamesEvent
 import net.casual.arcade.minigame.events.SequentialMinigames
+import net.casual.arcade.minigame.events.lobby.LobbyMinigame
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.resources.PackInfo
 import net.casual.arcade.utils.ComponentUtils.bold
@@ -28,6 +31,7 @@ import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.FantasyUtils
 import net.casual.arcade.utils.JsonUtils
+import net.casual.arcade.utils.JsonUtils.booleanOrDefault
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.MinigameUtils.broadcastChangesToAdmin
@@ -39,19 +43,29 @@ import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.json.LongSerializer
 import net.casual.championships.CasualMod
+import net.casual.championships.commands.CasualCommand
+import net.casual.championships.commands.MinesweeperCommand
 import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualReadyChecker
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.common.util.PerformanceUtils
+import net.casual.championships.database.CasualDataManager
+import net.casual.championships.database.CasualDatabaseManager
+import net.casual.championships.database.EmptyDataManager
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.events.CasualConfigReloaded
-import net.casual.championships.managers.TeamManager
+import net.casual.championships.minigame.lobby.CasualLobbyMinigame
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.uhc.UHCMinigame
-import net.casual.championships.util.Config
+import net.casual.championships.util.CasualConfig
+import net.casual.championships.util.CasualTeamUtils.getOrCreateAdminTeam
+import net.casual.championships.util.CasualTeamUtils.getOrCreateSpectatorTeam
+import net.casual.championships.util.DatabaseLogin
+import net.casual.championships.util.DatabaseLoginSerializer
+import net.casual.database.CasualDatabase
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
@@ -62,13 +76,17 @@ import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.*
 
+// TODO: Float.MAX_VALUE breaking database
 @Suppress("UnstableApiUsage")
 object CasualMinigames {
-    private val seed by Config.any(default = WorldOptions.randomSeed(), serializer = LongSerializer)
-    private val path: Path = Config.resolve("event")
+    private val login by CasualConfig.any("database_login", DatabaseLogin(), DatabaseLoginSerializer)
+    private val seed by CasualConfig.any(default = WorldOptions.randomSeed(), serializer = LongSerializer)
+    private val path: Path = CasualConfig.resolve("event")
     private val winners = HashSet<String>()
 
     private var minigames: SequentialMinigames? = null
+
+    private var dataManager: CasualDataManager? = null
 
     val minigame: Minigame<*>
         get() = this.getMinigames().getCurrent()
@@ -78,6 +96,10 @@ object CasualMinigames {
 
     fun getMinigames(): SequentialMinigames {
         return this.minigames ?: throw IllegalArgumentException("Tried to access minigames too early!")
+    }
+
+    fun getDataManager(): CasualDataManager {
+        return this.dataManager ?: throw IllegalArgumentException("Tried to access data manager too early!")
     }
 
     fun isWinner(player: ServerPlayer): Boolean {
@@ -91,7 +113,13 @@ object CasualMinigames {
     internal fun registerEvents() {
         Minigames.registerFactory(UHCMinigame.ID, this::createUHCMinigame)
         Minigames.registerFactory(DuelMinigame.ID, this::createDuelMinigame)
+        Minigames.registerFactory(CasualLobbyMinigame.ID, this::createLobbyMinigame)
         // Minigames.registerFactory(ExampleMinigame.ID) { ExampleMinigame(it.server) }
+
+        GlobalEventHandler.register<ServerRegisterCommandEvent> { (dispatcher, context) ->
+            MinesweeperCommand.register(dispatcher, context)
+            CasualCommand.register(dispatcher, context)
+        }
 
         GlobalEventHandler.register<PlayerRequestLoginEvent> { event ->
             if (!floodgates && !event.server.playerList.isOp(event.profile)) {
@@ -100,18 +128,23 @@ object CasualMinigames {
             }
         }
 
-        GlobalEventHandler.register<ServerLoadedEvent>(Int.MAX_VALUE) {
-            TeamManager.createTeams()
-
+        // This must happen before minigames are loaded
+        GlobalEventHandler.register<ServerLoadedEvent>(0) {
             val minigames = SequentialMinigames(this.readMinigameEvent(), it.server)
             this.minigames = minigames
 
+            it.server.setMessageOfTheDay(this.getMOTD())
+
+            this.dataManager = createDataManager()
+
+        }
+        GlobalEventHandler.register<ServerLoadedEvent>(Int.MAX_VALUE) {
             val data = this.loadMinigameEventData()
             if (data != null) {
-                minigames.setData(data)
+                this.getMinigames().setData(data)
             }
 
-            it.server.setMessageOfTheDay(this.getMOTD())
+            this.reloadTeams(it.server)
         }
 
         GlobalEventHandler.register<PlayerJoinEvent> {
@@ -127,22 +160,36 @@ object CasualMinigames {
             val minigames = this.getMinigames()
             minigames.event = this.readMinigameEvent()
             minigames.reloadLobby()
+
+            this.getDataManager().close()
+            this.dataManager = createDataManager()
         }
+
+        GlobalEventHandler.register<ServerStoppingEvent> {
+            this.getDataManager().close()
+        }
+    }
+
+    fun createLobbyMinigame(context: MinigameCreationContext): LobbyMinigame {
+        return this.getMinigames().event.createLobby(context.server)
     }
 
     fun createUHCMinigame(context: MinigameCreationContext): UHCMinigame {
         val overworldId: ResourceLocation
         val netherId: ResourceLocation
         val endId: ResourceLocation
+        val permanent: Boolean
         if (context.hasCustomData()) {
             val dimensions = context.getCustomData().obj("dimensions")
             overworldId = ResourceLocation(dimensions.string("overworld"))
             netherId = ResourceLocation(dimensions.string("nether"))
             endId = ResourceLocation(dimensions.string("end"))
+            permanent = context.getCustomData().booleanOrDefault("permanent")
         } else {
             overworldId = ResourceUtils.random { "overworld_$it" }
             netherId = ResourceUtils.random { "nether_$it" }
             endId = ResourceUtils.random { "end_$it" }
+            permanent = false
         }
 
         val server = context.server
@@ -154,6 +201,11 @@ object CasualMinigames {
             FantasyUtils.PersistentConfig(endId, FantasyUtils.createEndConfig(seed))
         )
         val minigame = UHCMinigame.of(server, overworld, nether, end)
+
+        if (permanent) {
+            minigame.settings.shouldDeleteLevels = false
+        }
+
         PerformanceUtils.reduceMinigameMobcap(minigame)
         PerformanceUtils.disableEntityAI(minigame)
         this.setCasualUI(minigame)
@@ -161,12 +213,11 @@ object CasualMinigames {
         minigame.addResources(object: MinigameResources {
             override fun getPacks(): Collection<PackInfo> {
                 val pack = CasualResourcePackHost.getHostedPack("uhc") ?: return listOf()
-                return listOf(pack.toPackInfo(!Config.dev))
+                return listOf(pack.toPackInfo(!CasualConfig.dev))
             }
         })
 
         minigame.events.register<MinigameCloseEvent> {
-            this.updateDatabase(minigame)
             this.getMinigames().returnToLobby()
         }
         minigame.events.register<PlayerTeamJoinEvent> {
@@ -184,9 +235,10 @@ object CasualMinigames {
         minigame.events.register<MinigameCompleteEvent> {
             this.winners.clear()
             this.winners.addAll(minigame.winners)
+            this.getDataManager().syncUHCData(minigame)
         }
 
-        minigame.settings.replay = !Config.dev
+        minigame.settings.replay = !CasualConfig.dev
 
         return minigame
     }
@@ -199,6 +251,9 @@ object CasualMinigames {
         val minigame = DuelMinigame(server, settings)
         minigame.events.register<MinigameCloseEvent> {
             minigame.players.transferTo(this.minigame)
+        }
+        minigame.events.register<MinigameCompleteEvent> {
+            this.getDataManager().syncDuelData(minigame)
         }
         this.setCasualUI(minigame)
         minigame.ui.setPlayerListDisplay(CommonUI.createSimpleTabDisplay(minigame))
@@ -329,12 +384,45 @@ object CasualMinigames {
         }
     }
 
+    fun reloadTeams(server: MinecraftServer) {
+        this.getDataManager().createTeams(server)
+
+        val scoreboard = server.scoreboard
+        this.minigame.teams.setAdminTeam(scoreboard.getOrCreateAdminTeam())
+        this.minigame.teams.setSpectatorTeam(scoreboard.getOrCreateSpectatorTeam())
+        val minigames = this.getMinigames()
+        for (player in PlayerUtils.players()) {
+            if (minigames.event.isAdmin(player)) {
+                this.minigame.players.addAdmin(player)
+                val team = player.team
+                if (team == null || team == this.minigame.teams.getAdminTeam()) {
+                    this.minigame.players.setSpectating(player)
+                }
+            }
+        }
+        for (player in this.minigame.players) {
+            if (player.team == null) {
+                this.minigame.players.setSpectating(player)
+            }
+        }
+    }
+
+    private fun createDataManager(): CasualDataManager {
+        if (login.url.isEmpty()) {
+            return EmptyDataManager()
+        }
+        val location = if (CasualConfig.dev) "casual_championships_debug" else "casual_championships"
+        val database = CasualDatabase(login.url + "/$location", login.username, login.password)
+        database.initialize()
+        return CasualDatabaseManager(this.getMinigames().event.name, database)
+    }
+
     // TODO: Use a proper database
     private fun updateDatabase(minigame: Minigame<*>) {
         val serialized = minigame.data.toJson()
         CompletableFuture.runAsync {
             try {
-                val stats = Config.resolve("stats.json")
+                val stats = CasualConfig.resolve("stats.json")
                 val existing = if (stats.exists()) {
                     stats.bufferedReader().use {
                         JsonUtils.decodeToJsonElement(it).asJsonArray

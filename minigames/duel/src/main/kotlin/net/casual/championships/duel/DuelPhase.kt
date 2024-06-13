@@ -7,10 +7,12 @@ import net.casual.arcade.utils.GameRuleUtils.resetToDefault
 import net.casual.arcade.utils.GameRuleUtils.set
 import net.casual.arcade.utils.MinigameUtils.countdown
 import net.casual.arcade.utils.PlayerUtils.sendTitle
+import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.location.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.championships.common.ui.bossbar.ActiveBossBar
 import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.util.CommonStats
 import net.minecraft.ChatFormatting
 import net.minecraft.world.level.GameRules
 
@@ -57,10 +59,21 @@ enum class DuelPhase(
     },
     Complete(COMPLETE_ID) {
         override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
+
             var winner = if (minigame.duelSettings.teams) {
-                minigame.teams.getPlayingTeams().firstOrNull()?.formattedDisplayName
+                val winners = minigame.teams.getPlayingTeams().firstOrNull()
+                if (winners != null) {
+                    for (winner in winners.getOnlinePlayers()) {
+                        minigame.stats.getOrCreateStat(winner, CommonStats.WON).modify { true }
+                    }
+                }
+                winners?.formattedDisplayName
             } else {
-                minigame.players.playing.firstOrNull()?.displayName
+                val winner = minigame.players.playing.firstOrNull()
+                if (winner != null) {
+                    minigame.stats.getOrCreateStat(winner, CommonStats.WON).modify { true }
+                }
+                winner?.displayName
             }
             if (winner == null) {
                 CasualDuelMod.logger.warn("Couldn't find winner for duel!")
@@ -72,9 +85,11 @@ enum class DuelPhase(
                 player.sendTitle(title)
             }
 
-            minigame.scheduler.schedule(20.Seconds) {
+            minigame.scheduler.schedule(10.Seconds) {
                 minigame.complete()
             }
+
+            minigame.stats.freeze()
         }
     }
 }

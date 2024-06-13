@@ -40,6 +40,7 @@ import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.championships.CasualMod
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.minigame.rules.RulesProvider
@@ -53,12 +54,13 @@ import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.minigame.CasualMinigames
-import net.casual.championships.util.Config
+import net.casual.championships.util.CasualConfig
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.selector.EntitySelector
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
@@ -76,6 +78,8 @@ class CasualLobbyMinigame(
     private val duels = ArrayList<DuelMinigame>()
     private val hasSeenFireworks = HashSet<UUID>()
     private var shouldWelcomePlayers = true
+
+    override val id: ResourceLocation = ID
 
     fun isDueling(player: ServerPlayer): Boolean {
         for (duel in this.duels) {
@@ -121,7 +125,7 @@ class CasualLobbyMinigame(
 
         if (!this.players.isAdmin(player)) {
             player.setGameMode(GameType.ADVENTURE)
-        } else if (Config.dev) {
+        } else if (CasualConfig.dev) {
             player.sendSystemMessage(Component.literal("Minigames are in dev mode!").red())
         }
 
@@ -175,7 +179,7 @@ class CasualLobbyMinigame(
     }
 
     override fun startNextMinigame() {
-        val minigame = this.getNextMinigame()
+        val minigame = this.nextMinigame
         if (minigame !is RulesProvider) {
             super.startNextMinigame()
             return
@@ -367,5 +371,9 @@ class CasualLobbyMinigame(
         }
 
         return true
+    }
+
+    companion object {
+        val ID = CasualMod.id("lobby")
     }
 }

@@ -9,7 +9,7 @@ import java.nio.file.Path
 
 private val root = FabricLoader.getInstance().configDir.resolve("CasualChampionships")
 
-object Config: CustomisableConfig(root.resolve("config.json")) {
+object CasualConfig: CustomisableConfig(root.resolve("config.json")) {
     val dev by this.boolean("dev")
 
     fun resolve(next: String): Path {
