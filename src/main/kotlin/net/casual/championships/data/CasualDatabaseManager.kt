@@ -1,4 +1,4 @@
-package net.casual.championships.database
+package net.casual.championships.data
 
 import kotlinx.coroutines.*
 import net.casual.arcade.minigame.Minigame

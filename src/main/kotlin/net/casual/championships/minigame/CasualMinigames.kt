@@ -51,9 +51,9 @@ import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.common.util.PerformanceUtils
-import net.casual.championships.database.CasualDataManager
-import net.casual.championships.database.CasualDatabaseManager
-import net.casual.championships.database.EmptyDataManager
+import net.casual.championships.data.CasualDataManager
+import net.casual.championships.data.CasualDatabaseManager
+import net.casual.championships.data.EmptyDataManager
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.events.CasualConfigReloaded
@@ -76,7 +76,6 @@ import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.*
 
-// TODO: Float.MAX_VALUE breaking database
 @Suppress("UnstableApiUsage")
 object CasualMinigames {
     private val login by CasualConfig.any("database_login", DatabaseLogin(), DatabaseLoginSerializer)
