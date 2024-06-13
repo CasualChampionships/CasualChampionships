@@ -29,10 +29,10 @@ import java.util.*
 import kotlin.jvm.optionals.getOrNull
 import net.casual.database.Minigame as DatabaseMinigame
 
-class CasualDatabaseManager(
+class DatabaseDataManager(
     eventName: String,
     private val database: CasualDatabase
-): CasualDataManager {
+): DataManager {
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val currentEvent = this.database.transaction { createEvent(eventName) }
 

@@ -1,6 +1,5 @@
 package net.casual.championships.minigame
 
-import com.google.gson.JsonArray
 import com.mojang.serialization.JsonOps
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
@@ -51,9 +50,10 @@ import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.common.util.PerformanceUtils
-import net.casual.championships.data.CasualDataManager
-import net.casual.championships.data.CasualDatabaseManager
-import net.casual.championships.data.EmptyDataManager
+import net.casual.championships.data.DataManager
+import net.casual.championships.data.DatabaseDataManager
+import net.casual.championships.data.JsonDataManager
+import net.casual.championships.data.MultiDataManager
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.events.CasualConfigReloaded
@@ -73,8 +73,10 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
-import java.util.concurrent.CompletableFuture
-import kotlin.io.path.*
+import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
+import kotlin.io.path.reader
+import kotlin.io.path.writer
 
 @Suppress("UnstableApiUsage")
 object CasualMinigames {
@@ -85,7 +87,7 @@ object CasualMinigames {
 
     private var minigames: SequentialMinigames? = null
 
-    private var dataManager: CasualDataManager? = null
+    private var dataManager: DataManager? = null
 
     val minigame: Minigame<*>
         get() = this.getMinigames().getCurrent()
@@ -97,7 +99,7 @@ object CasualMinigames {
         return this.minigames ?: throw IllegalArgumentException("Tried to access minigames too early!")
     }
 
-    fun getDataManager(): CasualDataManager {
+    fun getDataManager(): DataManager {
         return this.dataManager ?: throw IllegalArgumentException("Tried to access data manager too early!")
     }
 
@@ -406,36 +408,16 @@ object CasualMinigames {
         }
     }
 
-    private fun createDataManager(): CasualDataManager {
+    private fun createDataManager(): DataManager {
         if (login.url.isEmpty()) {
-            return EmptyDataManager()
+            return JsonDataManager()
         }
         val location = if (CasualConfig.dev) "casual_championships_debug" else "casual_championships"
         val database = CasualDatabase(login.url + "/$location", login.username, login.password)
         database.initialize()
-        return CasualDatabaseManager(this.getMinigames().event.name, database)
-    }
-
-    // TODO: Use a proper database
-    private fun updateDatabase(minigame: Minigame<*>) {
-        val serialized = minigame.data.toJson()
-        CompletableFuture.runAsync {
-            try {
-                val stats = CasualConfig.resolve("stats.json")
-                val existing = if (stats.exists()) {
-                    stats.bufferedReader().use {
-                        JsonUtils.decodeToJsonElement(it).asJsonArray
-                    }
-                } else JsonArray()
-                existing.add(serialized)
-                stats.bufferedWriter().use {
-                    JsonUtils.encode(existing, it)
-                }
-            } catch (e: Exception) {
-                CasualMod.logger.error("Failed to write stats!", e)
-                // So we have it somewhere!
-                CasualMod.logger.error(JsonUtils.GSON.toJson(serialized))
-            }
-        }
+        return MultiDataManager.of(
+            DatabaseDataManager(this.getMinigames().event.name, database),
+            JsonDataManager()
+        )
     }
 }
