@@ -53,7 +53,7 @@ class CasualLobby(
 
     fun spawnFireworksFor(player: ServerPlayer, scheduler: MinecraftScheduler) {
         scheduler.scheduleInLoop(MinecraftTimeDuration.ZERO, 10.Ticks, 10.Seconds, PlayerTask(player) {
-            if (player.level() !== this.area.level) {
+            if (it.level() !== this.area.level) {
                 return@PlayerTask
             }
             for (template in this.fireworksLocations) {
@@ -73,7 +73,7 @@ class CasualLobby(
                         }
                     }
                 }
-                firework.sendTo(player)
+                firework.sendTo(it)
             }
         })
     }
