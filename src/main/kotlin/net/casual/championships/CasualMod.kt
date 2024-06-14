@@ -3,8 +3,8 @@ package net.casual.championships
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost
-import net.casual.championships.util.CasualRegistration
 import net.casual.championships.util.CasualConfig
+import net.casual.championships.util.CasualRegistration
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.ModContainer

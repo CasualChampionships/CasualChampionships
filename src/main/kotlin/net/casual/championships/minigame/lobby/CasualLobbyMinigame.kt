@@ -8,6 +8,7 @@ import net.casual.arcade.events.minigame.LobbyMoveToNextMinigameEvent
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.minigame.MinigameCloseEvent
 import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
+import net.casual.arcade.events.player.PlayerFallEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.gui.screen.SelectionGuiBuilder
@@ -33,6 +34,7 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.MinigameUtils.getMinigame
+import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
@@ -41,6 +43,7 @@ import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.CasualMod
+import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.minigame.rules.RulesProvider
@@ -66,8 +69,11 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.scores.PlayerTeam
+import net.minecraft.world.scores.Team
 import java.util.*
+import kotlin.time.Duration.Companion.seconds
 
 class CasualLobbyMinigame(
     server: MinecraftServer,
@@ -111,6 +117,8 @@ class CasualLobbyMinigame(
         val display = ArcadePlayerListDisplay(CasualLobbyPlayerListEntries(this))
         CommonUI.addCasualFooterAndHeader(this, display)
         this.ui.setPlayerListDisplay(display)
+
+        this.advancements.addAll(LobbyAdvancements.getAllAdvancements())
     }
 
     @Listener
@@ -129,8 +137,13 @@ class CasualLobbyMinigame(
             player.sendSystemMessage(Component.literal("Minigames are in dev mode!").red())
         }
 
+        player.grantAdvancement(LobbyAdvancements.ROOT)
+
         val team = player.team
         event.spectating = team == null || this.teams.isTeamIgnored(team)
+        if (team != null) {
+            team.collisionRule = Team.CollisionRule.NEVER
+        }
 
         if (!this.hasSeenFireworks.contains(player.uuid) && CasualMinigames.hasWinner()) {
             player.afterPacksLoad {
@@ -175,6 +188,20 @@ class CasualLobbyMinigame(
             for (duel in ImmutableList.copyOf(this.duels)) {
                 duel.close()
             }
+        }
+    }
+
+    @Listener
+    private fun onPlayerFall(event: PlayerFallEvent) {
+        if (!AABB.of(this.lobby.area.getBoundingBox()).intersects(event.player.boundingBox)) {
+            event.player.grantAdvancement(LobbyAdvancements.UH_OH)
+        }
+    }
+
+    @Listener
+    private fun onMinesweeperWon(event: MinesweeperWonEvent) {
+        if (event.time < 40.seconds) {
+            event.player.grantAdvancement(LobbyAdvancements.OFFICIALLY_BORED)
         }
     }
 
@@ -249,11 +276,12 @@ class CasualLobbyMinigame(
     }
 
     private fun duelWith(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
         if (this.phase >= LobbyPhase.Readying) {
+            player.grantAdvancement(LobbyAdvancements.NOT_NOW)
             return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
         }
 
-        val player = context.source.playerOrException
         val settings = DuelSettings(this.casualLobby.duelArenaTemplates)
         val builder = SelectionGuiBuilder(
             player,

@@ -17,10 +17,17 @@ import net.casual.championships.minigame.lobby.CasualLobby
 import net.casual.championships.minigame.lobby.CasualLobbyMinigame
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.util.CasualConfig
+import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.biome.Biomes
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes
+import xyz.nucleoid.fantasy.Fantasy
+import xyz.nucleoid.fantasy.RuntimeWorldConfig
+import xyz.nucleoid.fantasy.RuntimeWorldHandle
+import xyz.nucleoid.fantasy.util.VoidChunkGenerator
 import java.util.*
 
 class CasualChampionshipsEvent(
@@ -30,6 +37,7 @@ class CasualChampionshipsEvent(
     operators: List<String> = listOf(),
     minigames: List<MinigameData>,
     repeat: Boolean = true,
+    private val lobbyBiome: ResourceLocation,
     private val additionalPacks: List<String>
 ): SimpleMinigamesEvent(name, lobby, dimension, operators, minigames, repeat) {
     override fun getAdditionalPacks(): Iterable<PackInfo> {
@@ -58,6 +66,14 @@ class CasualChampionshipsEvent(
         return minigame
     }
 
+    override fun createTemporaryLobbyLevel(server: MinecraftServer): RuntimeWorldHandle {
+        val config = RuntimeWorldConfig()
+            .setDimensionType(BuiltinDimensionTypes.OVERWORLD)
+            .setGenerator(VoidChunkGenerator(server, this.lobbyBiome))
+            .setShouldTickTime(true)
+        return Fantasy.get(server).openTemporaryWorld(config)
+    }
+
     override fun codec(): MapCodec<out CasualChampionshipsEvent> {
         return CODEC
     }
@@ -73,6 +89,7 @@ class CasualChampionshipsEvent(
                 Codec.STRING.listOf().fieldOf("operators").forGetter(SimpleMinigamesEvent::operators),
                 MinigameData.CODEC.listOf().fieldOf("minigames").forGetter(SimpleMinigamesEvent::minigames),
                 Codec.BOOL.fieldOf("repeat").forGetter(SimpleMinigamesEvent::repeat),
+                ResourceLocation.CODEC.encodedOptionalFieldOf("lobby_biome", Biomes.PLAINS.location()).forGetter(CasualChampionshipsEvent::lobbyBiome),
                 Codec.STRING.listOf().encodedOptionalFieldOf("additional_packs", listOf()).forGetter(CasualChampionshipsEvent::additionalPacks)
             ).apply(instance, ::CasualChampionshipsEvent)
         }

@@ -53,11 +53,6 @@ enum class UHCPhase(
             minigame.levels.all().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
 
-            for (player in minigame.players) {
-                player.revokeAllAdvancements()
-                player.grantAdvancement(UHCAdvancements.ROOT)
-            }
-
             val stage = minigame.settings.borderStage
 
             val (level, height) = when (minigame.settings.startingDimension) {

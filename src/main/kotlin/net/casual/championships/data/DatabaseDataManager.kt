@@ -224,6 +224,10 @@ class DatabaseDataManager(
         if (team == null) {
             team = scoreboard.addPlayerTeam(discordTeam.name)!!
         }
+        for (player in team.players.toList()) {
+            scoreboard.removePlayerFromTeam(player, team)
+        }
+
         team.playerPrefix = Component.literal("[${discordTeam.prefix}] ")
         team.color = discordTeam.color.toChatFormatting()
 

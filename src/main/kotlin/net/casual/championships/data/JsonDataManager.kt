@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.bufferedWriter
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 
 class JsonDataManager: DataManager {
@@ -36,6 +37,9 @@ class JsonDataManager: DataManager {
             try {
                 val format = SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
                 val currentDate = format.format(Date())
+                if (!stats.exists()) {
+                    stats.createDirectories()
+                }
                 var path = stats.resolve("${minigame.id} $currentDate.json")
                 if (path.exists()) {
                     path = stats.resolve("${minigame.id} (${minigame.uuid}) $currentDate.json")

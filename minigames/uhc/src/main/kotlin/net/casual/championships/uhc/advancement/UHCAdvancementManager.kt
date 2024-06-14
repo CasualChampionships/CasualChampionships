@@ -47,27 +47,33 @@ class UHCAdvancementManager(
             this.uhc.stats.getOrCreateStat(player, CommonStats.WON).modify { true }
         }
 
-        var lowest: PlayerAttacker? = null
-        var highest: PlayerAttacker? = null
+        val lowest = DamageCounter(Float.POSITIVE_INFINITY)
+        val highest = DamageCounter(Float.NEGATIVE_INFINITY)
         for (player in this.uhc.players) {
             if (this.uhc.tags.has(player, CommonTags.HAS_PARTICIPATED)) {
                 val current = this.uhc.stats.getOrCreateStat(player, ArcadeStats.DAMAGE_DEALT).value
-                if (lowest === null) {
-                    val first = PlayerAttacker(player, current)
-                    lowest = first
-                    highest = first
-                    continue
-                }
                 if (lowest.damage > current) {
-                    lowest = PlayerAttacker(player, current)
-                } else if (highest!!.damage < current) {
-                    highest = PlayerAttacker(player, current)
+                    lowest.players.clear()
+                    lowest.players.add(player)
+                    lowest.damage = current
+                } else if (lowest.damage == current) {
+                    lowest.players.add(player)
+                }
+
+                if (highest.damage < current) {
+                    highest.players.clear()
+                    highest.players.add(player)
+                    highest.damage = current
+                } else if (highest.damage == current) {
+                    highest.players.add(player)
                 }
             }
         }
-        if (lowest != null) {
-            lowest.player.grantAdvancement(UHCAdvancements.MOSTLY_HARMLESS)
-            highest!!.player.grantAdvancement(UHCAdvancements.HEAVY_HITTER)
+        for (player in lowest.players) {
+            player.grantAdvancement(UHCAdvancements.MOSTLY_HARMLESS)
+        }
+        for (player in highest.players) {
+            player.grantAdvancement(UHCAdvancements.HEAVY_HITTER)
         }
     }
 
@@ -206,8 +212,8 @@ class UHCAdvancementManager(
         event.player.grantAdvancement(UHCAdvancements.BUSTED)
     }
 
-    private class PlayerAttacker(
-        val player: ServerPlayer,
-        val damage: Float
+    private class DamageCounter(
+        var damage: Float,
+        val players: MutableList<ServerPlayer> = ArrayList(),
     )
 }

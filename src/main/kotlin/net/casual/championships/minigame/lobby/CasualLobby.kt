@@ -60,7 +60,7 @@ class CasualLobby(
                 val firingLocation = template.get(this.area.level)
                 val firework = VirtualFirework.build {
                     location = firingLocation
-                    duration = Random.nextInt(20, 25).Ticks
+                    duration = Random.nextInt(20, 30).Ticks
 
                     SHAPES.asSequence().shuffled().take(Random.nextInt(1, 4)).forEach { shape ->
                         val index = Random.nextInt(PRIMARY.size)
@@ -79,8 +79,8 @@ class CasualLobby(
     }
 
     companion object {
-        private val PRIMARY = IntList.of(0xFFE577, 0x7ABDE5)
-        private val FADE = IntList.of(0xFDA63A, 0x688FE5)
+        private val PRIMARY = IntList.of(0xea3323, 0xff8b00, 0xfebb26, 0x1eb253, 0x017cf3, 0x9c78fe)
+        private val FADE = IntList.of(0xde324c, 0xf4895f, 0xf8e16f, 0x95cf92, 0x369acc, 0x9656a2)
 
         private val SHAPES = listOf(Shape.LARGE_BALL, Shape.STAR, Shape.BURST)
     }

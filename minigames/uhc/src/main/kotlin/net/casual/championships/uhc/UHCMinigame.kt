@@ -50,6 +50,8 @@ import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.resetExperience
 import net.casual.arcade.utils.PlayerUtils.resetHealth
 import net.casual.arcade.utils.PlayerUtils.resetHunger
+import net.casual.arcade.utils.PlayerUtils.revokeAllAdvancements
+import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
@@ -125,11 +127,6 @@ class UHCMinigame(
     override val settings = UHCSettings(this)
 
     init {
-        this.levels.add(this.overworld)
-        this.levels.add(this.nether)
-        this.levels.add(this.end)
-        this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.overworld)
-
         this.addTaskFactory(GlowingBossBarTask.cast())
         this.addTaskFactory(GracePeriodBossBarTask.cast())
 
@@ -145,6 +142,11 @@ class UHCMinigame(
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
         this.advancements.addAll(UHCAdvancements.getAllAdvancements())
         this.initialiseBorderTracker()
+
+        this.levels.add(this.overworld)
+        this.levels.add(this.nether)
+        this.levels.add(this.end)
+        this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.overworld)
     }
 
     override fun getPhases(): Collection<UHCPhase> {
@@ -353,6 +355,7 @@ class UHCMinigame(
 
         player.grantAllRecipesSilently()
 
+        player.revokeAllAdvancements()
         player.grantAdvancement(UHCAdvancements.ROOT)
 
         this.resetPlayerHealth(player)
@@ -368,6 +371,7 @@ class UHCMinigame(
 
         val team = player.team
         team?.nameTagVisibility = Team.Visibility.NEVER
+        team?.collisionRule = Team.CollisionRule.ALWAYS
 
         this.tags.add(player, CommonTags.HAS_PARTICIPATED)
         this.tags.add(player, CommonTags.HAS_TEAM_GLOW)
@@ -532,12 +536,15 @@ class UHCMinigame(
     }
 
     fun onBorderFinish() {
+        for (player in this.players) {
+            player.sendSound(CommonSounds.GAME_GRACE_END)
+        }
         if (this.settings.endGameGlow) {
             this.settings.glowing = true
         }
         if (this.settings.generatePortals) {
-            this.overworld.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
-            this.nether.portalForcer.createPortal(BlockPos.ZERO, Direction.Axis.X)
+            this.overworld.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
+            this.nether.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
         }
     }
 

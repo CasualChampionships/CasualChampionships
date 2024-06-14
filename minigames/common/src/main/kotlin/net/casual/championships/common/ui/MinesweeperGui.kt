@@ -8,15 +8,15 @@ import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
+import net.casual.arcade.utils.EventUtils.broadcast
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.PlayerUtils
+import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.items.MinesweeperItem
 import net.casual.championships.common.items.MinesweeperItem.Companion.MINE
 import net.casual.championships.common.items.MinesweeperItem.Companion.UNKNOWN
 import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonStats
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
@@ -25,6 +25,8 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import java.util.*
 import kotlin.math.floor
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
 import net.minecraft.world.inventory.ClickType as ClickAction
 
 class MinesweeperGui(
@@ -139,21 +141,13 @@ class MinesweeperGui(
 
     private fun onWin(player: ServerPlayer) {
         this.complete = true
-        val seconds = (System.nanoTime() - grid.startTime) / 1000000000.0
-        if (seconds <= 40) {
+        val time = (System.nanoTime() - grid.startTime).nanoseconds
+        MinesweeperWonEvent(player, time).broadcast()
 
-        }
-        val time = String.format("%.2f", seconds)
-        player.sendSystemMessage(CommonComponents.MINESWEEPER_WON.generate(time))
-        if (seconds < record) {
-            record = seconds
-            PlayerUtils.broadcast(CommonComponents.MINESWEEPER_RECORD.generate(player.scoreboardName, time))
-        }
-
-        val minigame = player.getMinigame() ?: return
-        val stat = minigame.stats.getOrCreateStat(player, CommonStats.MINESWEEPER_RECORD)
-        if (stat.value.isNaN() || stat.value > seconds) {
-            stat.modify { seconds }
+        player.sendSystemMessage(CommonComponents.MINESWEEPER_WON.generate(time.toString()))
+        if (time < record) {
+            record = time
+            PlayerUtils.broadcast(CommonComponents.MINESWEEPER_RECORD.generate(player.scoreboardName, time.toString()))
         }
     }
 
@@ -286,6 +280,6 @@ class MinesweeperGui(
         private val DESC_TILE_4 = Items.OAK_SIGN.named(CommonComponents.MINESWEEPER_DESC_4)
         private val PLAY_AGAIN_TILE = MenuItem.GREEN_LONG_RIGHT.named(CommonComponents.MINESWEEPER_PLAY_AGAIN)
 
-        private var record = 127.0
+        private var record = 127.0.seconds
     }
 }

@@ -83,6 +83,17 @@
   "casual.item.goldenHead": "Golden Head",
   "casual.item.head.tooltip": "Eat Me!",
 
+  "lobby.advancements.root": "Lobby Advancements",
+  "lobby.advancements.root.desc": "Advancements to achieve during the Lobby!",
+  "lobby.advancements.notNow": "Not Now",
+  "lobby.advancements.notNow.desc": "Sensei's words echoed... There's a time and a place for everything, but not now.",
+  "lobby.advancements.officiallyBored": "Officially Bored",
+  "lobby.advancements.officiallyBored.desc": "Beat Minesweeper in less than 40 seconds",
+  "lobby.advancements.uhOh": "Uh Oh",
+  "lobby.advancements.uhOh.desc": "Oops, I forgot to add barriers!",
+  "lobby.advancements.parkourMaster": "Parkour Master",
+  "lobby.advancements.parkourMaster.desc": "Complete the parkour in the lobby",
+
   "casual.game.startingIn.space.1": "\uDAFF\uDFDD",
   "casual.game.startingIn.space.2": "\uDAFF\uDF6F",
   "casual.game.timeElapsed.space.1": "\uDAFF\uDFE0",

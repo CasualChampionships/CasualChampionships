@@ -22,7 +22,7 @@ object UHCAdvancements {
     val COMBAT_LOGGER: AdvancementHolder
     val ON_THE_EDGE: AdvancementHolder
     val NOT_DUSTLESS: AdvancementHolder
-    val PARKOUR_MASTER: AdvancementHolder
+
     val WORLD_RECORD_PACE: AdvancementHolder
     val EMBARRASSING: AdvancementHolder
     val BUSTED: AdvancementHolder
@@ -34,11 +34,6 @@ object UHCAdvancements {
     val SKILL_ISSUE: AdvancementHolder
     val SOLOIST: AdvancementHolder
     val LDAP: AdvancementHolder
-    val NOT_NOW: AdvancementHolder
-    val OFFICIALLY_BORED: AdvancementHolder
-    val FIND_THE_BUTTON: AdvancementHolder
-    val DISTRACTED: AdvancementHolder
-    val UH_OH: AdvancementHolder
     val BASICALLY: AdvancementHolder
     val TEAM_PLAYER: AdvancementHolder
     val LAST_MAN_STANDING: AdvancementHolder
@@ -107,15 +102,6 @@ object UHCAdvancements {
             id = id("thats_not_dustless")
             display(Items.REDSTONE)
             setTitleAndDesc("uhc.advancements.notDustless")
-            toast()
-            announce()
-        }
-        PARKOUR_MASTER = register {
-            parent(ROOT)
-            id = id("parkour_master")
-            display(Items.NETHERITE_BOOTS)
-            setTitleAndDesc("uhc.advancements.parkourMaster")
-            type = AdvancementType.CHALLENGE
             toast()
             announce()
         }
@@ -207,43 +193,11 @@ object UHCAdvancements {
             toast()
             announce()
         }
-        NOT_NOW = register {
-            parent(ROOT)
-            id = id("not_now")
-            display(Items.NETHERITE_SWORD)
-            setTitleAndDesc("uhc.advancements.notNow")
-            toast()
-            announce()
-        }
         LDAP = register {
-            parent(NOT_NOW)
+            parent(ROOT)
             id = id("ldap")
             display(Items.EMERALD_BLOCK)
             setTitleAndDesc("uhc.advancements.ldap")
-            toast()
-            announce()
-        }
-        OFFICIALLY_BORED = register {
-            parent(WORLD_RECORD_PACE)
-            id = id("officially_bored")
-            display(Items.COMMAND_BLOCK)
-            setTitleAndDesc("uhc.advancements.officiallyBored")
-            toast()
-            announce()
-        }
-        DISTRACTED = register {
-            parent(OFFICIALLY_BORED)
-            id = id("distracted")
-            display(Items.CHAIN_COMMAND_BLOCK)
-            setTitleAndDesc("uhc.advancements.distracted")
-            toast()
-            announce()
-        }
-        UH_OH = register {
-            parent(LDAP)
-            id = id("uh_oh")
-            display(Items.BARRIER)
-            setTitleAndDesc("uhc.advancements.uhOh")
             toast()
             announce()
         }
@@ -260,15 +214,6 @@ object UHCAdvancements {
             id = id("team_player")
             display(Items.LIME_BANNER)
             setTitleAndDesc("uhc.advancements.teamPlayer")
-            toast()
-            announce()
-        }
-        FIND_THE_BUTTON = register {
-            parent(OFFICIALLY_BORED)
-            id = id("find_the_button")
-            display(Items.STONE_BUTTON)
-            setTitleAndDesc("uhc.advancements.findTheButton")
-            type = AdvancementType.CHALLENGE
             toast()
             announce()
         }
