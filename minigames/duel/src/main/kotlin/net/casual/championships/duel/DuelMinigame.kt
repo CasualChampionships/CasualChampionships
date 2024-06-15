@@ -12,6 +12,7 @@ import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
+import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.utils.LootTableUtils
@@ -25,9 +26,11 @@ import net.casual.arcade.utils.LootTableUtils.exactly
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.resetHealth
+import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.arcade.utils.location.Location
 import net.casual.championships.common.arena.Arena
 import net.casual.championships.common.items.PlayerHeadItem
 import net.casual.championships.common.recipes.GoldenHeadRecipe
@@ -164,6 +167,19 @@ class DuelMinigame(
         val remaining = if (!this.duelSettings.teams) this.players.playing else this.teams.getPlayingTeams()
         if (remaining.size <= 1) {
             this.setPhase(DuelPhase.Complete)
+        }
+    }
+
+    @Listener(flags = ListenerFlags.HAS_PLAYER)
+    private fun onPlayerRespawn(event: PlayerRespawnEvent) {
+        val player = event.player
+
+        player.lastDeathLocation.ifPresent { location ->
+            val level = player.server.getLevel(location.dimension)
+            if (level != null && this.levels.has(level) && player.isSpectator) {
+                val pos = location.pos
+                player.teleportTo(Location.of(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), level = level))
+            }
         }
     }
 

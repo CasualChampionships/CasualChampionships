@@ -83,7 +83,7 @@ object CasualMinigames {
     private val login by CasualConfig.any("database_login", DatabaseLogin(), DatabaseLoginSerializer)
     private val seed by CasualConfig.any(default = WorldOptions.randomSeed(), serializer = LongSerializer)
     private val path: Path = CasualConfig.resolve("event")
-    private val winners = HashSet<String>()
+    internal val winners = HashSet<String>()
 
     private var minigames: SequentialMinigames? = null
 

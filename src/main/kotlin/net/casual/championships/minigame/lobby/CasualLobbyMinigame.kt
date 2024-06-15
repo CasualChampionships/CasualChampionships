@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.elements.GuiElement
 import net.casual.arcade.chat.ChatFormatter
-import net.casual.arcade.events.minigame.LobbyMoveToNextMinigameEvent
-import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
-import net.casual.arcade.events.minigame.MinigameCloseEvent
-import net.casual.arcade.events.minigame.MinigameSetPhaseEvent
+import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.PlayerFallEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.ServerTickEvent
@@ -122,6 +119,11 @@ class CasualLobbyMinigame(
     }
 
     @Listener
+    private fun onMinigameAddNewPlayer(event: MinigameAddNewPlayerEvent) {
+        this.casualLobby.forceTeleportToSpawn(event.player)
+    }
+
+    @Listener
     private fun onMinigameAddPlayer(event: MinigameAddPlayerEvent) {
         val player = event.player
         if (this.shouldWelcomePlayers) {
@@ -203,6 +205,15 @@ class CasualLobbyMinigame(
         if (event.time < 40.seconds) {
             event.player.grantAdvancement(LobbyAdvancements.OFFICIALLY_BORED)
         }
+    }
+
+    @Listener
+    private fun onSequentialMinigameStart(event: SequentialMinigameStartEvent) {
+        this.resetLobbyTime()
+    }
+
+    private fun resetLobbyTime() {
+        this.casualLobby.area.level.dayTime = 12_500L
     }
 
     override fun startNextMinigame() {

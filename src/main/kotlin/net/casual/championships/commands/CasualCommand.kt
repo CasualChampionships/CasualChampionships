@@ -3,6 +3,7 @@ package net.casual.championships.commands
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
+import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.CommandUtils.fail
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.MinigameUtils.requiresAdminOrPermission
@@ -13,6 +14,7 @@ import net.casual.championships.util.CasualConfig
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
+import net.minecraft.commands.arguments.EntityArgument
 
 object CasualCommand: Command {
     override fun register(dispatcher: CommandDispatcher<CommandSourceStack>, context: CommandBuildContext) {
@@ -40,6 +42,22 @@ object CasualCommand: Command {
                     Commands.literal("open").executes { this.floodgates(it, true) }
                 ).then(
                     Commands.literal("close").executes { this.floodgates(it, false) }
+                )
+            ).then(
+                Commands.literal("winners").then(
+                    Commands.literal("clear").executes {
+                        CasualMinigames.winners.clear().commandSuccess()
+                    }
+                ).then(
+                    Commands.literal("add").then(
+                        Commands.argument("players", EntityArgument.players()).executes {
+                            val players = EntityArgument.getPlayers(it, "players")
+                            for (player in players) {
+                                CasualMinigames.winners.add(player.scoreboardName)
+                            }
+                            1
+                        }
+                    )
                 )
             )
         )

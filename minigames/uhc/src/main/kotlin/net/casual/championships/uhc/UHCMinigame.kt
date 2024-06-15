@@ -279,11 +279,19 @@ class UHCMinigame(
         this.onEliminated(player, player.getKillCreditWith(source))
     }
 
-    @Listener
+    @Listener(flags = ListenerFlags.HAS_PLAYER)
     private fun onPlayerRespawn(event: PlayerRespawnEvent) {
         val player = event.player
 
         player.setGameMode(GameType.SPECTATOR)
+
+        player.lastDeathLocation.ifPresent { location ->
+            val level = player.server.getLevel(location.dimension)
+            if (level != null && this.levels.has(level)) {
+                val pos = location.pos
+                player.teleportTo(Location.of(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), level = level))
+            }
+        }
     }
 
     @Listener
@@ -402,9 +410,6 @@ class UHCMinigame(
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
-        player.setRespawnPosition(player.level().dimension(), player.blockPosition(), player.yRot, true, false)
-        this.players.setSpectating(player)
-
         if (killer is ServerPlayer) {
             this.onKilled(killer, player)
         }
@@ -423,6 +428,8 @@ class UHCMinigame(
                 player.drop(head, true, false)
             }
         }
+
+        this.players.setSpectating(player)
 
         val team = player.team
         if (team !== null && !this.teams.isTeamEliminated(team) && team.getOnlinePlayers().none(this.players::isPlaying)) {
