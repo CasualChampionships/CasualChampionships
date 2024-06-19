@@ -182,9 +182,9 @@ object CasualMinigames {
         val permanent: Boolean
         if (context.hasCustomData()) {
             val dimensions = context.getCustomData().obj("dimensions")
-            overworldId = ResourceLocation(dimensions.string("overworld"))
-            netherId = ResourceLocation(dimensions.string("nether"))
-            endId = ResourceLocation(dimensions.string("end"))
+            overworldId = ResourceLocation.parse(dimensions.string("overworld"))
+            netherId = ResourceLocation.parse(dimensions.string("nether"))
+            endId = ResourceLocation.parse(dimensions.string("end"))
             permanent = context.getCustomData().booleanOrDefault("permanent")
         } else {
             overworldId = ResourceUtils.random { "overworld_$it" }

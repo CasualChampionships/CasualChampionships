@@ -15,7 +15,7 @@ object LobbyAdvancements {
         id = CasualMod.id("root")
         display(Items.GOLDEN_APPLE)
         setTitleAndDesc("lobby.advancements.root")
-        background = ResourceLocation("textures/gui/advancements/backgrounds/adventure.png")
+        background = ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/adventure.png")
     }
 
     val UH_OH = register {

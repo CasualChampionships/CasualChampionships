@@ -37,6 +37,7 @@ import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.CommonItems
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.HolderLookup
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -201,7 +202,7 @@ class DuelMinigame(
         player.boostHealth(this.duelSettings.health)
         player.resetHealth()
 
-        val stacks = duelLoot.getRandomItems(
+        val stacks = getOrCreateLootTable(this.server.registryAccess()).getRandomItems(
             LootParams.Builder(player.serverLevel()).create(LootContextParamSet.builder().build()),
             Random.nextLong()
         )
@@ -246,20 +247,24 @@ class DuelMinigame(
     }
 
     companion object {
-        private val duelLoot = createToolTable()
+        private var table: LootTable? = null
         val ID = CasualDuelMod.id("duel_minigame")
 
-        private fun createToolTable(): LootTable {
-            return LootTableUtils.create {
+        private fun getOrCreateLootTable(provider: HolderLookup.Provider): LootTable {
+            var table = this.table
+            if (table != null) {
+                return table
+            }
+            table = LootTableUtils.create {
                 createPool {
                     createPool {
                         addItem(Items.IRON_SWORD) {
-                            enchant(exactly(10))
+                            enchant(provider, exactly(10))
                             durability(between(0.8, 0.99F))
                             setWeight(4)
                         }
                         addItem(Items.DIAMOND_SWORD) {
-                            enchant(exactly(10))
+                            enchant(provider, exactly(10))
                             durability(between(0.8, 0.99F))
                             setWeight(2)
                         }
@@ -298,7 +303,7 @@ class DuelMinigame(
                         setWeight(2)
                     }
                     addItem(Items.BOW) {
-                        enchant(exactly(10))
+                        enchant(provider, exactly(10))
                         setWeight(4)
                     }
                 }
@@ -356,42 +361,42 @@ class DuelMinigame(
                 createPool {
                     addItem(Items.IRON_HELMET) {
                         durability(between(0.8, 0.99F))
-                        enchant(between(8, 10))
+                        enchant(provider, between(8, 10))
                         setWeight(4)
                     }
                     addItem(Items.DIAMOND_HELMET) {
                         durability(between(0.8, 0.99F))
-                        enchant(exactly(8))
+                        enchant(provider, exactly(8))
                         setWeight(1)
                     }
                 }
                 createPool {
                     addItem(Items.IRON_CHESTPLATE) {
                         durability(between(0.8, 0.99F))
-                        enchant(between(8, 10))
+                        enchant(provider, between(8, 10))
                         setWeight(2)
                     }
                     addItem(Items.CHAINMAIL_CHESTPLATE) {
                         durability(between(0.8, 0.99F))
-                        enchant(between(10, 12))
+                        enchant(provider, between(10, 12))
                         setWeight(1)
                     }
                 }
                 createPool {
                     addItem(Items.IRON_LEGGINGS) {
                         durability(between(0.8, 0.99F))
-                        enchant(between(8, 10))
+                        enchant(provider, between(8, 10))
                     }
                 }
                 createPool {
                     addItem(Items.IRON_BOOTS) {
                         durability(between(0.8, 0.99F))
-                        enchant(between(8, 10))
+                        enchant(provider, between(8, 10))
                         setWeight(3)
                     }
                     addItem(Items.GOLDEN_BOOTS) {
                         durability(between(0.9, 0.99F))
-                        enchant(between(14, 18))
+                        enchant(provider, between(14, 18))
                         setWeight(1)
                     }
                 }
@@ -427,6 +432,8 @@ class DuelMinigame(
                     }
                 }
             }
+            this.table = table
+            return table
         }
     }
 }

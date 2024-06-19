@@ -10,6 +10,7 @@ import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.stats.ArcadeStats
 import net.casual.arcade.task.impl.PlayerTask
+import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.array
 import net.casual.arcade.utils.JsonUtils.toJsonStringArray
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
@@ -149,14 +150,14 @@ class UHCAdvancementManager(
 
     @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
     private fun onPlayerCraft(event: PlayerCraftEvent) {
-        if (event.stack.`is`(Items.CRAFTING_TABLE) && this.claimed.add(UHCRaceAdvancement.Craft)) {
+        if (event.stack.isOf(Items.CRAFTING_TABLE) && this.claimed.add(UHCRaceAdvancement.Craft)) {
             event.player.grantAdvancement(UHCAdvancements.WORLD_RECORD_PACE)
         }
     }
 
     @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
     private fun onPlayerLoot(event: PlayerLootEvent) {
-        if (event.items.any { it.`is`(Items.ENCHANTED_GOLDEN_APPLE) }) {
+        if (event.items.any { it.isOf(Items.ENCHANTED_GOLDEN_APPLE) }) {
             event.player.grantAdvancement(UHCAdvancements.DREAM_LUCK)
         }
     }
@@ -202,7 +203,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING)
+    @Listener(flags = ListenerFlags.HAS_PLAYER)
     private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
         event.announce = event.announce && UHCAdvancements.isRegistered(event.advancement) && this.uhc.players.isPlaying(event.player)
     }

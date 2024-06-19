@@ -21,6 +21,7 @@ import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.BorderUtils
 import net.casual.arcade.utils.CommandUtils
 import net.casual.arcade.utils.CommandUtils.argument
+import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.CommandUtils.literal
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.ComponentUtils
@@ -62,6 +63,7 @@ import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.location.Location
+import net.casual.championships.common.event.TippedArrowTradeOfferEvent
 import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent
 import net.casual.championships.common.event.border.BorderPortalWithinBoundsEvent
 import net.casual.championships.common.items.PlayerHeadItem
@@ -99,6 +101,7 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.item.Items
+import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
@@ -156,7 +159,7 @@ class UHCMinigame(
     override fun readData(json: JsonObject) {
         this.uhcAdvancements.deserialize(json.obj("advancements"))
         this.movingBorders = HashSet(json.arrayOrDefault("moving_borders").strings().map {
-            ResourceKey.create(Registries.DIMENSION, ResourceLocation(it))
+            ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(it))
         })
     }
 
@@ -290,6 +293,15 @@ class UHCMinigame(
             if (level != null && this.levels.has(level)) {
                 val pos = location.pos
                 player.teleportTo(Location.of(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), level = level))
+            }
+        }
+    }
+
+    @Listener
+    private fun onTippedArrowTradeOffer(event: TippedArrowTradeOfferEvent) {
+        when (event.potion.value()) {
+            Potions.HEALING.value(), Potions.STRONG_HEALING.value() -> {
+                event.potion = Potions.REGENERATION
             }
         }
     }
@@ -717,6 +729,7 @@ class UHCMinigame(
             }
             literal("spectate") {
                 executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
+                argument("player", EntityArgument.player()).executes(::teleportToPlayer)
             }
             literal("pos") {
                 executes { CommonCommands.broadcastPositionToTeammates(this@UHCMinigame, it) }
@@ -724,6 +737,7 @@ class UHCMinigame(
         })
         this.commands.register(CommandUtils.buildLiteral("s") {
             executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
+            argument("player", EntityArgument.player()).executes(::teleportToPlayer)
         })
     }
 
@@ -764,6 +778,11 @@ class UHCMinigame(
     private fun startWorldBorders(context: CommandContext<CommandSourceStack>): Int {
         this.startWorldBorders()
         return context.source.success("Successfully started world borders")
+    }
+
+    private fun teleportToPlayer(context: CommandContext<CommandSourceStack>): Int {
+        val target = EntityArgument.getPlayer(context, "player")
+        return context.source.playerOrException.teleportTo(target.location).commandSuccess()
     }
 
     companion object {

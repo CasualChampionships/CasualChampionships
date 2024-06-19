@@ -10,6 +10,6 @@ internal object CasualDuelMod {
     val logger: Logger = LoggerFactory.getLogger("Casual")
 
     fun id(path: String): ResourceLocation {
-        return ResourceLocation(MOD_ID, path)
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path)
     }
 }

@@ -4,8 +4,9 @@
   "package": "net.casual.championships.common.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "event.EntityMixin",
-    "event.PortalForcerMixin"
+    "event.NetherPortalBlockMixin",
+    "event.PortalForcerMixin",
+    "event.TippedArrowForItemsAndEmeraldsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

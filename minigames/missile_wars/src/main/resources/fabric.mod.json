@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "id": "casual_missile_wars",
   "version": "${version}",
-  "name": "CasualUHC",
+  "name": "Casual Missile Wars",
   "description": "This is the implementation of the Missile Wars minigame for CasualChampionship.",
   "authors": [
     "Sensei"
   ],
   "contact": {
-    "repo": "https://github.com/CasualChampionships/CasualMissileWars"
+
   },
   "license": "MIT",
   "environment": "*",
@@ -24,9 +24,6 @@
 
   ],
   "depends": {
-    "fabricloader": ">=0.14.12",
-    "minecraft": "1.20.x",
-    "java": ">=17",
-    "fabric-language-kotlin": ">=1.9.0+kotlin.1.8.0"
+
   }
 }

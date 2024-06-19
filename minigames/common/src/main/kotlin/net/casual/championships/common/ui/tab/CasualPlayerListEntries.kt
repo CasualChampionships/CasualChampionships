@@ -2,6 +2,7 @@ package net.casual.championships.common.ui.tab
 
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
+import net.casual.arcade.gui.tab.PlayerListEntries
 import net.casual.arcade.gui.tab.TeamListEntries
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
@@ -11,10 +12,10 @@ import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.greyscale
 import net.casual.arcade.utils.ComponentUtils.italicise
 import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.PlayerUtils
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.PlayerTeam
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
@@ -30,32 +31,26 @@ open class CasualPlayerListEntries(
         return super.formatTeamName(server, team).mini()
     }
 
-    override fun formatPlayerName(server: MinecraftServer, username: String, team: PlayerTeam): MutableComponent {
-        val playing = this.isPlayerPlaying(username)
+    override fun createPlayerEntry(
+        server: MinecraftServer,
+        username: String,
+        team: PlayerTeam,
+        player: ServerPlayer?
+    ): PlayerListEntries.Entry {
         val name = Component.literal(username)
-        val head = when (playing) {
-            true -> {
-                name.withStyle(team.color)
-                PlayerHeadComponents.getHeadOrDefault(username)
+        val head = if (player != null) {
+            if (this.minigame.players.isPlaying(player)) {
+                return PlayerListEntries.Entry.fromComponent(name.withStyle(team.color).mini(), player)
             }
-            false -> {
-                name.italicise().colour(0x919191)
-                GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
-            }
-            else -> {
-                name.colour(0x808080)
-                GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
-            }
+            name.italicise().colour(0x919191)
+            GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
+        } else {
+            name.colour(0x808080)
+            GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
         }
-        return Component.empty().append(head).append(ComponentUtils.space(2)).append(name.mini())
-    }
-
-    private fun isPlayerPlaying(username: String): Boolean? {
-        val player = PlayerUtils.player(username)
-        if (player != null) {
-            return this.minigame.players.isPlaying(player)
-        }
-        return null
+        return PlayerListEntries.Entry.fromComponent(
+            Component.empty().append(head).append(ComponentUtils.space(2)).append(name.mini())
+        )
     }
 
     companion object {

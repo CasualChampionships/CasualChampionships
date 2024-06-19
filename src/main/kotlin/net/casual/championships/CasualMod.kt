@@ -19,7 +19,7 @@ object CasualMod: DedicatedServerModInitializer {
     val container: ModContainer = FabricLoader.getInstance().getModContainer(ID).get()
 
     fun id(name: String): ResourceLocation {
-        return ResourceLocation(ID, name)
+        return ResourceLocation.fromNamespaceAndPath(ID, name)
     }
 
     override fun onInitializeServer() {

@@ -59,7 +59,6 @@ enum class DuelPhase(
     },
     Complete(COMPLETE_ID) {
         override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
-
             var winner = if (minigame.duelSettings.teams) {
                 val winners = minigame.teams.getPlayingTeams().firstOrNull()
                 if (winners != null) {
@@ -72,8 +71,10 @@ enum class DuelPhase(
                 val winner = minigame.players.playing.firstOrNull()
                 if (winner != null) {
                     minigame.stats.getOrCreateStat(winner, CommonStats.WON).modify { true }
+                    winner.scoreboardName.literal().withStyle(winner.team?.color ?: ChatFormatting.RESET)
+                } else {
+                    null
                 }
-                winner?.displayName
             }
             if (winner == null) {
                 CasualDuelMod.logger.warn("Couldn't find winner for duel!")

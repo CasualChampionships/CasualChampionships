@@ -44,7 +44,7 @@ object UHCAdvancements {
             id = id("root")
             display(Items.GOLDEN_APPLE)
             setTitleAndDesc("uhc.advancements.root")
-            background = ResourceLocation("textures/gui/advancements/backgrounds/adventure.png")
+            background = ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/adventure.png")
         }
         FIRST_BLOOD = register {
             parent(ROOT)

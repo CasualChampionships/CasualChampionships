@@ -70,6 +70,7 @@ import net.minecraft.world.phys.AABB
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import java.util.*
+import kotlin.collections.HashSet
 import kotlin.time.Duration.Companion.seconds
 
 class CasualLobbyMinigame(
@@ -94,7 +95,7 @@ class CasualLobbyMinigame(
     }
 
     fun getAllTeams(): Collection<PlayerTeam> {
-        val teams = ArrayList<PlayerTeam>()
+        val teams = HashSet<PlayerTeam>()
         for (duel in this.duels) {
             for (team in duel.teams.getAllNonSpectatorOrAdminTeams()) {
                 if (!this.teams.isTeamIgnored(team)) {

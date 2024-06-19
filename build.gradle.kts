@@ -22,7 +22,6 @@ val fabricKotlinVersion: String by project
 val arcadeVersion: String by project
 val arcadeDatagenVersion: String by project
 // val serverReplayVersion: String by project
-val serverTranslationsVersion: String by project
 
 allprojects {
     apply(plugin = "fabric-loom")
@@ -59,7 +58,6 @@ allprojects {
         modImplementation("com.github.CasualChampionships:arcade:$arcadeVersion")
         modImplementation("com.github.CasualChampionships:arcade-datagen:$arcadeDatagenVersion")
         // modImplementation("com.github.senseiwells:ServerReplay:$serverReplayVersion")
-        modImplementation("xyz.nucleoid:server-translations-api:$serverTranslationsVersion")
     }
 
     java {
@@ -93,7 +91,6 @@ allprojects {
 dependencies {
     include("com.github.CasualChampionships:arcade:$arcadeVersion")
     // include("com.github.senseiwells:ServerReplay:$serverReplayVersion")
-    include("xyz.nucleoid:server-translations-api:$serverTranslationsVersion")
 
     for (subproject in project.subprojects) {
         if (subproject.path != ":minigames") {

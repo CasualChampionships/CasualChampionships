@@ -55,6 +55,6 @@ object CommonMod: ModInitializer {
     }
 
     fun id(path: String): ResourceLocation {
-        return ResourceLocation(MOD_ID, path)
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path)
     }
 }
