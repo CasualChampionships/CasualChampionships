@@ -1,6 +1,7 @@
 package net.casual.championships.minigame
 
 import com.mojang.serialization.JsonOps
+import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
 import net.casual.arcade.events.minigame.MinigameCloseEvent
@@ -26,6 +27,7 @@ import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.FantasyUtils
@@ -273,6 +275,9 @@ object CasualMinigames {
         }
         minigame.events.register<PlayerTeamJoinEvent> {
             it.team.nameTagVisibility = Team.Visibility.NEVER
+        }
+        minigame.chat.systemChatFormatter = ChatFormatter {
+            ChatFormatter.SYSTEM.format(Component.empty().append(it).mini())
         }
 
         this.setPauseNotification(minigame)

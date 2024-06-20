@@ -22,6 +22,7 @@ import net.casual.arcade.utils.BorderUtils
 import net.casual.arcade.utils.CommandUtils
 import net.casual.arcade.utils.CommandUtils.argument
 import net.casual.arcade.utils.CommandUtils.commandSuccess
+import net.casual.arcade.utils.CommandUtils.fail
 import net.casual.arcade.utils.CommandUtils.literal
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.ComponentUtils
@@ -299,10 +300,15 @@ class UHCMinigame(
 
     @Listener
     private fun onTippedArrowTradeOffer(event: TippedArrowTradeOfferEvent) {
-        when (event.potion.value()) {
-            Potions.HEALING.value(), Potions.STRONG_HEALING.value() -> {
-                event.potion = Potions.REGENERATION
-            }
+        event.potion = when (event.potion.value()) {
+            Potions.HEALING.value(), Potions.STRONG_HEALING.value(), Potions.STRONG_REGENERATION -> Potions.REGENERATION
+            Potions.STRONG_POISON -> Potions.POISON
+            Potions.STRONG_HARMING -> Potions.HARMING
+            Potions.STRONG_LEAPING -> Potions.LEAPING
+            Potions.STRONG_SLOWNESS -> Potions.SLOWNESS
+            Potions.STRONG_STRENGTH -> Potions.STRENGTH
+            Potions.STRONG_TURTLE_MASTER -> Potions.TURTLE_MASTER
+            else -> return
         }
     }
 
@@ -706,7 +712,9 @@ class UHCMinigame(
                 argument("player", EntityArgument.player()) {
                     literal("add") {
                         argument("team", TeamArgument.team()) {
-                            argument("teleport", BoolArgumentType.bool()).executes(::addPlayerToTeam)
+                            argument("teleport", BoolArgumentType.bool()) {
+                                executes(::addPlayerToTeam)
+                            }
                             executes { addPlayerToTeam(it, false) }
                         }
                     }
@@ -729,7 +737,9 @@ class UHCMinigame(
             }
             literal("spectate") {
                 executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
-                argument("player", EntityArgument.player()).executes(::teleportToPlayer)
+                argument("player", EntityArgument.player()) {
+                    executes(::teleportToPlayer)
+                }
             }
             literal("pos") {
                 executes { CommonCommands.broadcastPositionToTeammates(this@UHCMinigame, it) }
@@ -737,7 +747,9 @@ class UHCMinigame(
         })
         this.commands.register(CommandUtils.buildLiteral("s") {
             executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
-            argument("player", EntityArgument.player()).executes(::teleportToPlayer)
+            argument("player", EntityArgument.player()) {
+                executes(::teleportToPlayer)
+            }
         })
     }
 
@@ -782,7 +794,11 @@ class UHCMinigame(
 
     private fun teleportToPlayer(context: CommandContext<CommandSourceStack>): Int {
         val target = EntityArgument.getPlayer(context, "player")
-        return context.source.playerOrException.teleportTo(target.location).commandSuccess()
+        val player = context.source.playerOrException
+        if (!this.players.isSpectating(player)) {
+            return context.source.fail(CommonComponents.NOT_SPECTATING)
+        }
+        return player.teleportTo(target.location).commandSuccess()
     }
 
     companion object {

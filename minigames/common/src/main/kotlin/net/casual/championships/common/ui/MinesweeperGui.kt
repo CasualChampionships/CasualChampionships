@@ -10,7 +10,6 @@ import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.EventUtils.broadcast
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.utils.PlayerUtils
 import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.items.MinesweeperItem
@@ -150,7 +149,8 @@ class MinesweeperGui(
         player.sendSystemMessage(CommonComponents.MINESWEEPER_WON.generate(formatted))
         if (time < record) {
             record = time
-            PlayerUtils.broadcast(CommonComponents.MINESWEEPER_RECORD.generate(player.scoreboardName, formatted))
+            val message = CommonComponents.MINESWEEPER_RECORD.generate(player.scoreboardName, formatted)
+            player.server.playerList.broadcastSystemMessage(message, false)
         }
     }
 

@@ -40,10 +40,12 @@ open class CasualPlayerListEntries(
         val name = Component.literal(username)
         val head = if (player != null) {
             if (this.minigame.players.isPlaying(player)) {
-                return PlayerListEntries.Entry.fromComponent(name.withStyle(team.color).mini(), player)
+                name.withStyle(team.color)
+                PlayerHeadComponents.getHeadOrDefault(player)
+            } else {
+                name.italicise().colour(0x919191)
+                GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
             }
-            name.italicise().colour(0x919191)
-            GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
         } else {
             name.colour(0x808080)
             GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
