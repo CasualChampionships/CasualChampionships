@@ -301,13 +301,13 @@ class UHCMinigame(
     @Listener
     private fun onTippedArrowTradeOffer(event: TippedArrowTradeOfferEvent) {
         event.potion = when (event.potion.value()) {
-            Potions.HEALING.value(), Potions.STRONG_HEALING.value(), Potions.STRONG_REGENERATION -> Potions.REGENERATION
-            Potions.STRONG_POISON -> Potions.POISON
-            Potions.STRONG_HARMING -> Potions.HARMING
-            Potions.STRONG_LEAPING -> Potions.LEAPING
-            Potions.STRONG_SLOWNESS -> Potions.SLOWNESS
-            Potions.STRONG_STRENGTH -> Potions.STRENGTH
-            Potions.STRONG_TURTLE_MASTER -> Potions.TURTLE_MASTER
+            Potions.HEALING.value(), Potions.STRONG_HEALING.value(), Potions.STRONG_REGENERATION.value() -> Potions.REGENERATION
+            Potions.STRONG_POISON.value() -> Potions.POISON
+            Potions.STRONG_HARMING.value() -> Potions.HARMING
+            Potions.STRONG_LEAPING.value() -> Potions.LEAPING
+            Potions.STRONG_SLOWNESS.value() -> Potions.SLOWNESS
+            Potions.STRONG_STRENGTH.value() -> Potions.STRENGTH
+            Potions.STRONG_TURTLE_MASTER.value() -> Potions.TURTLE_MASTER
             else -> return
         }
     }
@@ -325,7 +325,7 @@ class UHCMinigame(
     @Listener
     private fun onPlayerItemRelease(event: PlayerItemReleaseEvent) {
         val (player, stack) = event
-        if (stack.`is`(Items.BOW)) {
+        if (stack.isOf(Items.BOW)) {
             player.cooldowns.addCooldown(Items.BOW, this.settings.bowCooldown.ticks)
         }
     }
