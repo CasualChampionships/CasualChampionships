@@ -110,9 +110,7 @@ class DuelMinigame(
 
     @Listener(priority = Int.MAX_VALUE, phase = BuiltInEventPhases.POST)
     private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
-        if (event.successful.get()) {
-            this.modifiableBlocks.add(event.context.clickedPos)
-        }
+        this.modifiableBlocks.add(event.context.clickedPos)
     }
 
     @Listener

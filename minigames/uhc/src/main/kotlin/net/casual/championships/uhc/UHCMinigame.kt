@@ -148,7 +148,7 @@ class UHCMinigame(
         this.registerCommands()
         this.addEventListener(this.uhcAdvancements)
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
-        this.advancements.addAll(UHCAdvancements.getAllAdvancements())
+        this.advancements.addAll(UHCAdvancements)
         this.initialiseBorderTracker()
 
         this.levels.add(this.overworld)
@@ -255,24 +255,9 @@ class UHCMinigame(
 
         if (!this.players.isSpectating(player)) {
             this.updateWorldBorder(player)
-
-            this.stats.getOrCreateStat(player, CommonStats.ALIVE_TIME).increment()
-            if (player.isShiftKeyDown) {
-                this.stats.getOrCreateStat(player, CommonStats.CROUCH_TIME).increment()
-            }
         }
 
         this.updateHUD(player)
-    }
-
-    @Listener
-    private fun onPlayerBlockMined(event: PlayerBlockMinedEvent) {
-        this.stats.getOrCreateStat(event.player, CommonStats.BLOCKS_MINED).increment()
-    }
-
-    @Listener(phase = BuiltInEventPhases.POST)
-    private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
-        this.stats.getOrCreateStat(event.player, CommonStats.BLOCKS_PLACED).increment()
     }
 
     @Listener
