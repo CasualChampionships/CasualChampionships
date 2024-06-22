@@ -8,6 +8,7 @@ import net.casual.arcade.border.MultiLevelBorderTracker
 import net.casual.arcade.border.TrackedBorder
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.block.BrewingStandBrewEvent
+import net.casual.arcade.events.level.LevelLootEvent
 import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.*
 import net.casual.arcade.gui.shapes.ArrowShape
@@ -31,6 +32,7 @@ import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.withMiniShiftedDownFont
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.arrayOrDefault
@@ -75,6 +77,7 @@ import net.casual.championships.common.task.GlowingBossBarTask
 import net.casual.championships.common.task.GracePeriodBossBarTask
 import net.casual.championships.common.ui.bossbar.ActiveBossBar
 import net.casual.championships.common.util.*
+import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.common.util.CommonUI.broadcastInfo
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.common.util.RuleUtils.addRule
@@ -88,6 +91,7 @@ import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
@@ -269,6 +273,18 @@ class UHCMinigame(
     @Listener(phase = BuiltInEventPhases.POST)
     private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
         this.stats.getOrCreateStat(event.player, CommonStats.BLOCKS_PLACED).increment()
+    }
+
+    @Listener
+    private fun onLevelLoot(event: LevelLootEvent) {
+        for (item in event.items) {
+            val contents = item.get(DataComponents.POTION_CONTENTS) ?: continue
+            val potion = contents.potion
+            if (potion.isPresent && potion.get().value() == Potions.HEALING.value()) {
+                val newContents = contents.withPotion(Potions.REGENERATION)
+                item.set(DataComponents.POTION_CONTENTS, newContents)
+            }
+        }
     }
 
     @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, phase = BuiltInEventPhases.POST)
@@ -545,19 +561,23 @@ class UHCMinigame(
         }
 
         UHCMod.logger.info("Finished world border stage: $stage")
-        val next = stage.getNextStage()
-
-        if (next == UHCBorderStage.End) {
+        if (stage == UHCBorderStage.Fifth) {
             this.setPhase(BorderFinished)
             return
         }
 
-        this.scheduler.schedulePhased(10.Seconds, MinigameTask(this, UHCMinigame::startNextBorders))
+        val delay = this.settings.borderTime * stage.getPausedTimeAsPercent()
+        this.scheduler.schedulePhased(delay, MinigameTask(this, UHCMinigame::startNextBorders))
     }
 
     private fun startNextBorders() {
         this.settings.borderStageSetting.setQuietly(this.settings.borderStage.getNextStage())
         this.moveWorldBorders(this.settings.borderStage)
+
+        this.chat.broadcastGame(
+            component = CommonComponents.BORDER_RESUMED.mini().red(),
+            sound = Sound(CommonSounds.GAME_BORDER_MOVING)
+        )
     }
 
     fun onBorderFinish() {
@@ -583,14 +603,14 @@ class UHCMinigame(
     }
 
     private fun moveWorldBorder(border: TrackedBorder, level: Level, stage: UHCBorderStage, size: UHCBorderSize, instant: Boolean = false) {
-        val modified =  if (level == this.end && stage >= UHCBorderStage.Sixth) UHCBorderStage.Fifth else stage
+        val modified =  if (level == this.end && stage >= UHCBorderStage.Fifth) UHCBorderStage.Fourth else stage
         val multiplier = this.settings.borderSizeMultiplier
         val dest = if (size == UHCBorderSize.End) {
             modified.getEndSizeFor(level, multiplier)
         } else {
             modified.getStartSizeFor(level, multiplier)
         }
-        val time = if (instant) -1.0 else modified.getRemainingTimeAsPercent(border.size, level, multiplier)
+        val time = if (instant) -1.0 else modified.getRemainingMovingTimeAsPercent(border.size, level, multiplier)
 
         UHCMod.logger.info("Level ${level.dimension().location()} moving to $dest")
         moveWorldBorder(border, dest, time)
@@ -646,7 +666,7 @@ class UHCMinigame(
 
         val scale = level.dimensionType().coordinateScale
 
-        FAKE_BORDER.size = border.size + 0.5
+        FAKE_BORDER.size = border.size + 0.6
         FAKE_BORDER.lerpSizeBetween(FAKE_BORDER.size, FAKE_BORDER.size - 0.5, Long.MAX_VALUE)
         // Foolish Minecraft uses scale for the centre, even on the client,
         // so we need to reproduce.

@@ -90,6 +90,7 @@ object CommonComponents {
     val BORDER_INITIAL_GRACE = translatableWithArgs("casual.game.grace.first")
     val BORDER_GENERIC_GRACE = translatableWithArgs("casual.game.grace.generic")
     val BORDER_GRACE_OVER by translatable("casual.game.grace.over")
+    val BORDER_RESUMED by translatable("casual.game.borderResumed")
     val HAS_BEEN_ELIMINATED = translatableWithArgs("casual.game.eliminated")
     val GAME_WON = translatableWithArgs("casual.game.won")
 

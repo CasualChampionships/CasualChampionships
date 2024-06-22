@@ -47,7 +47,7 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
     var borderTime by this.register(time {
         name = "border_completion_time"
         display = BorderItem.BORDER_DISTANCE.named("Border Completion Time")
-        value = 150.Minutes
+        value = 120.Minutes
         option("ten_minutes", Items.CAKE.named("10 Minutes"), 10.Minutes)
         option("thirty_minutes", Items.SCULK_SENSOR.named("30 Minutes"), 30.Minutes)
         option("two_hours", Items.GREEN_STAINED_GLASS_PANE.named("2 Hours"), 120.Minutes)
