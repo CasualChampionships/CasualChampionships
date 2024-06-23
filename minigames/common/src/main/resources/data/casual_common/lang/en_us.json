@@ -23,6 +23,8 @@
   "casual.gui.spectators": "Spectators",
   "casual.gui.admins": "Admins",
 
+  "casual.tab.ping": "Ping: %s ms",
+
   "casual.ready.question": "Are you ready?",
   "casual.ready.notReady": "%s is not ready!",
   "casual.ready.isReady": "%s is ready!",

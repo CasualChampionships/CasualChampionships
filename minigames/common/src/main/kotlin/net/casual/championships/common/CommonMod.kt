@@ -26,6 +26,7 @@ object CommonMod: ModInitializer {
         addLangsFromData(MOD_ID)
         addLangsFrom("minecraft", container.findPath("data/minecraft/lang").get())
         addFont(CommonComponents.Hud)
+        addFont(CommonComponents.Gui)
         addFont(CommonComponents.Text)
         addFont(CommonComponents.Border)
         addSounds(CommonSounds)

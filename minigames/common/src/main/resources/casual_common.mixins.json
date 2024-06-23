@@ -6,7 +6,9 @@
   "mixins": [
     "event.NetherPortalBlockMixin",
     "event.PortalForcerMixin",
-    "event.TippedArrowForItemsAndEmeraldsMixin"
+    "event.TippedArrowForItemsAndEmeraldsMixin",
+    "gui.ChestBlockMixin",
+    "gui.ChestMenuMixin"
   ],
   "injectors": {
     "defaultRequire": 1

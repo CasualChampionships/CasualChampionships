@@ -3,6 +3,7 @@ package net.casual.championships.common.util
 import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.gui.elements.ComponentElements
 import net.casual.arcade.gui.elements.LevelSpecificElement
+import net.casual.arcade.gui.elements.PlayerSpecificElement
 import net.casual.arcade.gui.elements.SidebarElements
 import net.casual.arcade.gui.nametag.ArcadeNameTag
 import net.casual.arcade.gui.predicate.EntityObserverPredicate
@@ -140,15 +141,29 @@ object CommonUI {
     }
 
     fun addCasualFooterAndHeader(minigame: Minigame<*>, display: ArcadePlayerListDisplay) {
-        val hostedByKiwiTech = ComponentElements.of(
+        val hostedByKiwiTech = Component.empty()
+            .append(SERVER_HOSTED_BY)
+            .append(ComponentUtils.space())
+            .append(KIWITECH)
+
+        val baseFooter = PlayerSpecificElement<Component> { player ->
+            val ping = player.connection.latency()
+            val colour = when {
+                ping < 80 -> DARK_GREEN
+                ping < 120 -> GREEN
+                ping < 180 -> YELLOW
+                ping < 240 -> RED
+                else -> DARK_RED
+            }
+            val formatted = Component.literal("$ping").withStyle(colour)
             Component.empty()
-                .append(SERVER_HOSTED_BY)
-                .append(ComponentUtils.space())
-                .append(KIWITECH)
-        )
+                .append(Component.translatable("casual.tab.ping", formatted).mini())
+                .append("\n")
+                .append(hostedByKiwiTech)
+        }
 
         val spectatorAndAdmins = SpectatorAndAdminTeamsElement(minigame).cached()
-        val footer = spectatorAndAdmins.merge<_, Component>(hostedByKiwiTech) { a, b ->
+        val footer = spectatorAndAdmins.merge<_, Component>(baseFooter) { a, b ->
             a.map { Component.empty().append(it).append("\n\n") }.orElse(Component.empty()).append(b)
         }
         display.setDisplay(

@@ -9,6 +9,7 @@ import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.ComponentUtils.translatable
 import net.casual.arcade.utils.ComponentUtils.translatableWithArgs
+import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ComponentUtils.withSpacesFont
 import net.casual.championships.common.CommonMod
 import net.minecraft.core.Direction
@@ -147,6 +148,21 @@ object CommonComponents {
             Direction8.SOUTH_WEST -> SOUTH_WEST
             Direction8.WEST -> WEST
             Direction8.NORTH_WEST -> NORTH_WEST
+        }
+    }
+
+    object Gui: FontResources(CommonMod.id("gui_font")) {
+        val GENERIC_54 by bitmap(at("gui/generic_54.png"), 13, 256)
+        val TEAM_SELECTOR by bitmap(at("gui/team_selector.png"), 13, 256)
+        val TEAMMATE_SELECTOR by bitmap(at("gui/teammate_selector.png"), 13, 256)
+
+        @JvmStatic
+        fun createDoubleChestGui(title: Component): MutableComponent {
+            return Component.empty()
+                .append(ComponentUtils.space(-8))
+                .append(GENERIC_54.white())
+                .append(ComponentUtils.space(-169))
+                .append(title)
         }
     }
 
