@@ -2,18 +2,19 @@ package net.casual.championships.common.util
 
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
-import net.casual.arcade.gui.screen.SelectionGuiBuilder
-import net.casual.arcade.gui.screen.SelectionGuiStyle
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.CommandUtils.success
 import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
-import net.casual.arcade.utils.ScreenUtils.addSpectatableTeams
+import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.championships.common.ui.game.TeamSelectorGui
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityAnchorArgument
+import net.minecraft.core.component.DataComponents
 
 object CommonCommands {
     private val NOT_SPECTATOR = SimpleCommandExceptionType(CommonComponents.NOT_SPECTATING)
@@ -87,15 +88,11 @@ object CommonCommands {
             throw NOT_SPECTATOR.create()
         }
 
-        val teams = minigame.teams.getOnlineTeams()
-        val builder = SelectionGuiBuilder(player, CommonScreens.named(CommonComponents.SPECTATOR_TITLE))
-        if (teams.size < 54) {
-            builder.style(SelectionGuiStyle.centered(teams.size))
+        val selections = minigame.teams.getOnlineTeams().map {
+            val head = ItemUtils.colouredHeadForFormatting(it.color, CommonItems.FORWARD_FACING_PLAYER_HEAD)
+            head.set(DataComponents.CUSTOM_NAME, it.formattedDisplayName.mini())
+            TeamSelectorGui.Selection(it, head)
         }
-        builder.addSpectatableTeams(teams) { gui, team ->
-            SelectionGuiBuilder(gui, CommonScreens.named(team.displayName))
-                .style(SelectionGuiStyle.Companion.centered(5, 3))
-        }
-        return builder.build().open().commandSuccess()
+        return TeamSelectorGui(player, selections).open().commandSuccess()
     }
 }

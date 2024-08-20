@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @SuppressWarnings("MixinAnnotationTarget")
 @Mixin(targets = "net.minecraft.world.level.block.ChestBlock$2$1")
 public class ChestBlockMixin {
+	@SuppressWarnings("UnresolvedMixinReference")
 	@ModifyReturnValue(
 		method = "getDisplayName()Lnet/minecraft/network/chat/Component",
 		at = @At("RETURN")

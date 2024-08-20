@@ -20,7 +20,7 @@ class MinesweeperItem private constructor(): Item(Properties()), ArcadeModelledI
     }
 
     companion object {
-        val MODELLER = ResourcePackItemModeller(MinesweeperItem(), CommonItems.CUSTOM_MODEL_PACK.getCreator())
+        val MODELLER = ResourcePackItemModeller(MinesweeperItem(), CommonMod.CUSTOM_MODEL_PACK.getCreator())
         val UNKNOWN by MODELLER.model(CommonMod.id("minesweeper/unknown"))
         val ONE by MODELLER.model(CommonMod.id("minesweeper/1"))
         val TWO by MODELLER.model(CommonMod.id("minesweeper/2"))

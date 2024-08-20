@@ -154,7 +154,9 @@ object CommonComponents {
     object Gui: FontResources(CommonMod.id("gui_font")) {
         val GENERIC_54 by bitmap(at("gui/generic_54.png"), 13, 256)
         val TEAM_SELECTOR by bitmap(at("gui/team_selector.png"), 13, 256)
-        val TEAMMATE_SELECTOR by bitmap(at("gui/teammate_selector.png"), 13, 256)
+        val PLAYER_SELECTOR by bitmap(at("gui/player_selector.png"), 13, 256)
+
+        val MINESWEEPER_MENU by bitmap(at("gui/minesweeper_menu.png"), 19, 227)
 
         @JvmStatic
         fun createDoubleChestGui(title: Component): MutableComponent {
@@ -176,8 +178,6 @@ object CommonComponents {
         val UNAVAILABLE by bitmap(at("hud/cross.png"), 7, 7)
         val KILLS_COUNT by bitmap(at("hud/kills.png"), 10, 12)
         val PLAYER_COUNT by bitmap(at("hud/players.png"), 10, 11)
-
-        val MINESWEEPER_MENU by bitmap(at("hud/minesweeper_menu.png"), 19, 227)
     }
 
     object Text: FontResources(CommonMod.id("text_font")) {

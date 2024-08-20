@@ -56,7 +56,7 @@ class MinesweeperGui(
         this.setSlot(89, GuiElement(PLAY_AGAIN_TILE) { _, _, _, gui -> MinesweeperGui(gui.player).open() })
 
         this.title = Component.empty().append(ComponentUtils.space(-8))
-            .append(CommonComponents.Hud.MINESWEEPER_MENU.white())
+            .append(CommonComponents.Gui.MINESWEEPER_MENU.white())
     }
 
     override fun onTick() {

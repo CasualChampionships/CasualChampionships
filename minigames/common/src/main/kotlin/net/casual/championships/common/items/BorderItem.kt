@@ -20,7 +20,7 @@ class BorderItem private constructor(): Item(Properties()), ArcadeModelledItem {
     }
 
     companion object {
-        val MODELLER = ResourcePackItemModeller(BorderItem(), CommonItems.CUSTOM_MODEL_PACK.getCreator())
+        val MODELLER = ResourcePackItemModeller(BorderItem(), CommonMod.CUSTOM_MODEL_PACK.getCreator())
         val BORDER_DISTANCE by MODELLER.model(CommonMod.id("border/border_distance"))
         val BORDER_RADIUS by MODELLER.model(CommonMod.id("border/border_radius"))
     }
