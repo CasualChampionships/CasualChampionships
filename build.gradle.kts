@@ -21,7 +21,8 @@ val fabricKotlinVersion: String by project
 
 val arcadeVersion: String by project
 val arcadeDatagenVersion: String by project
-// val serverReplayVersion: String by project
+val casualDatabaseVersion: String by project
+val serverReplayVersion: String by project
 
 allprojects {
     apply(plugin = "fabric-loom")
@@ -30,6 +31,7 @@ allprojects {
 
     repositories {
         mavenLocal()
+        maven("https://maven.maxhenkel.de/repository/public")
         maven("https://maven.parchmentmc.org/")
         maven("https://jitpack.io")
         maven("https://maven.nucleoid.xyz")
@@ -57,7 +59,7 @@ allprojects {
 
         modImplementation("com.github.CasualChampionships:arcade:$arcadeVersion")
         modImplementation("com.github.CasualChampionships:arcade-datagen:$arcadeDatagenVersion")
-        // modImplementation("com.github.senseiwells:ServerReplay:$serverReplayVersion")
+        modImplementation("com.github.senseiwells:ServerReplay:$serverReplayVersion")
     }
 
     java {
@@ -98,7 +100,7 @@ dependencies {
         }
     }
 
-    include(implementation("com.github.CasualChampionships:casual-database-core:895c3fa3a264055d41106457886b1299d302eab6")!!)
+    include(implementation("com.github.CasualChampionships:casual-database-core:$casualDatabaseVersion")!!)
 }
 
 fun getGitHash(): String {

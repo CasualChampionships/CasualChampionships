@@ -1,5 +1,6 @@
 package net.casual.championships.data
 
+import com.mojang.authlib.GameProfile
 import kotlinx.coroutines.*
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.stats.ArcadeStats
@@ -26,6 +27,8 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 import kotlin.jvm.optionals.getOrNull
 import net.casual.database.Minigame as DatabaseMinigame
 
@@ -35,6 +38,16 @@ class DatabaseDataManager(
 ): DataManager {
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val currentEvent = this.database.transaction { createEvent(eventName) }
+
+    override fun getParticipants(): Set<GameProfile> {
+        val profiles = HashSet<GameProfile>()
+        this.transaction {
+            for (player in this.database.getDiscordPlayers()) {
+                profiles.add(GameProfile(player.id.value, player.name))
+            }
+        }
+        return profiles
+    }
 
     override fun createTeams(server: MinecraftServer) {
         val scoreboard = server.scoreboard

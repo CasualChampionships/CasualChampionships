@@ -28,6 +28,7 @@ object CasualTeamUtils {
             admins.color = ChatFormatting.WHITE
             admins.playerPrefix = Component.literal("§c[Admin] §r")
             admins.collisionRule = Team.CollisionRule.NEVER
+            admins.nameTagVisibility = Team.Visibility.NEVER
         }
         return admins!!
     }

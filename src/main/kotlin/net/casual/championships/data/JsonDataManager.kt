@@ -1,5 +1,6 @@
 package net.casual.championships.data
 
+import com.mojang.authlib.GameProfile
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.utils.JsonUtils
 import net.casual.championships.CasualMod
@@ -15,6 +16,10 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 
 class JsonDataManager: DataManager {
+    override fun getParticipants(): Set<GameProfile> {
+        return hashSetOf()
+    }
+
     override fun createTeams(server: MinecraftServer) {
 
     }

@@ -1,5 +1,6 @@
 package net.casual.championships.minigame
 
+import com.mojang.authlib.GameProfile
 import com.mojang.serialization.JsonOps
 import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.events.GlobalEventHandler
@@ -72,6 +73,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.players.UserWhiteListEntry
 import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
@@ -147,6 +149,7 @@ object CasualMinigames {
                 this.getMinigames().setData(data)
             }
 
+            it.server.playerList.setUsingWhiteList(true)
             this.reloadTeams(it.server)
         }
 
@@ -410,6 +413,14 @@ object CasualMinigames {
             if (player.team == null) {
                 this.minigame.players.setSpectating(player)
             }
+        }
+
+        val whitelist = server.playerList.whiteList
+        for (entry in whitelist.entries.toList()) {
+            server.playerList.whiteList.remove(entry)
+        }
+        for (participant in this.getDataManager().getParticipants()) {
+            whitelist.add(UserWhiteListEntry(participant))
         }
     }
 
