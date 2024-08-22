@@ -44,5 +44,23 @@ class MenuItem private constructor(): Item(Properties()), ArcadeModelledItem {
         val GREY_RED_LONG_LEFT by MODELLER.model(id("gui/greyed_red_long_left_arrow"))
 
         val RED_BACK by MODELLER.model(id("gui/red_back_button"))
+
+        val GEAR by MODELLER.model(id("gui/gear"))
+
+        val LARGE by MODELLER.model(id("gui/large_icon"))
+        val LARGE_SELECTED by MODELLER.model(id("gui/large_icon_selected"))
+        val MEDIUM by MODELLER.model(id("gui/medium_icon"))
+        val MEDIUM_SELECTED by MODELLER.model(id("gui/medium_icon_selected"))
+        val SMALL by MODELLER.model(id("gui/small_icon"))
+        val SMALL_SELECTED by MODELLER.model(id("gui/small_icon_selected"))
+
+        val ONE_TIMES by MODELLER.model(id("gui/one_times"))
+        val ONE_TIMES_SELECTED by MODELLER.model(id("gui/one_times_selected"))
+        val TWO_TIMES by MODELLER.model(id("gui/two_times"))
+        val TWO_TIMES_SELECTED by MODELLER.model(id("gui/two_times_selected"))
+        val THREE_TIMES by MODELLER.model(id("gui/three_times"))
+        val THREE_TIMES_SELECTED by MODELLER.model(id("gui/three_times_selected"))
+
+        val GREEN_HIGHLIGHT by MODELLER.model(id("gui/green_highlight"))
     }
 }

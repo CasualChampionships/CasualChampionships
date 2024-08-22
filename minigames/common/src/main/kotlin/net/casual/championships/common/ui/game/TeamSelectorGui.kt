@@ -5,6 +5,7 @@ import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
+import net.casual.arcade.utils.ScreenUtils.setSlot
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.CommonComponents
@@ -27,12 +28,11 @@ class TeamSelectorGui(
         var column = 1
         for (selection in selections.take(12)) {
             val slot = row * 9 + column
-            this.setSlot(slot, selection.display) { _, _, _, _ ->
-                PlayerSelectorGui(
-                    this.player,
-                    selection.team.getOnlinePlayers().map(ServerPlayer::getGameProfile),
-                    this
-                ).open()
+            this.setSlot(slot, selection.display) { ->
+                val profiles = selection.team.getOnlinePlayers().map(ServerPlayer::getGameProfile)
+                val gui = PlayerSelectorGui(this.player, profiles)
+                gui.setParent(this)
+                gui.open()
             }
             column += 2
             if (column > 7) {
@@ -41,7 +41,7 @@ class TeamSelectorGui(
             }
         }
 
-        this.setSlot(58, MenuItem.RED_BACK.hideTooltip()) { _, _, _, _ ->
+        this.setSlot(58, MenuItem.RED_BACK.hideTooltip()) { ->
             this.close()
         }
     }

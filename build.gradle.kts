@@ -23,6 +23,7 @@ val arcadeVersion: String by project
 val arcadeDatagenVersion: String by project
 val casualDatabaseVersion: String by project
 val serverReplayVersion: String by project
+val mapCanvasVersion: String by project
 
 allprojects {
     apply(plugin = "fabric-loom")
@@ -60,6 +61,8 @@ allprojects {
         modImplementation("com.github.CasualChampionships:arcade:$arcadeVersion")
         modImplementation("com.github.CasualChampionships:arcade-datagen:$arcadeDatagenVersion")
         modImplementation("com.github.senseiwells:ServerReplay:$serverReplayVersion")
+
+        modImplementation("eu.pb4:map-canvas-api:$mapCanvasVersion")
     }
 
     java {
@@ -92,7 +95,8 @@ allprojects {
 
 dependencies {
     include("com.github.CasualChampionships:arcade:$arcadeVersion")
-    // include("com.github.senseiwells:ServerReplay:$serverReplayVersion")
+    include("com.github.senseiwells:ServerReplay:$serverReplayVersion")
+    include("eu.pb4:map-canvas-api:$mapCanvasVersion")
 
     for (subproject in project.subprojects) {
         if (subproject.path != ":minigames") {

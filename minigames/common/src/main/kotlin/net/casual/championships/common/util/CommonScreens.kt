@@ -1,6 +1,8 @@
 package net.casual.championships.common.util
 
 import net.casual.arcade.gui.screen.SelectionGuiComponents
+import net.casual.arcade.utils.ComponentUtils
+import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.CommonComponents.BACK
@@ -17,6 +19,6 @@ object CommonScreens {
     }
 
     fun named(title: Component): SelectionGuiComponents {
-        return SelectionGuiComponents.Builder(COMPONENTS).title(title)
+        return SelectionGuiComponents.Builder(COMPONENTS).title(CommonComponents.Gui.createDoubleChestGui(title))
     }
 }

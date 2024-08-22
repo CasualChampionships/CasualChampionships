@@ -154,6 +154,7 @@ object CommonComponents {
     object Gui: FontResources(CommonMod.id("gui_font")) {
         val GENERIC_54 by bitmap(at("gui/generic_54.png"), 13, 256)
         val TEAM_SELECTOR by bitmap(at("gui/team_selector.png"), 13, 256)
+        val TEAM_PLAYER_SELECTOR by bitmap(at("gui/team_player_selector.png"), 13, 256)
         val PLAYER_SELECTOR by bitmap(at("gui/player_selector.png"), 13, 256)
 
         val MINESWEEPER_MENU by bitmap(at("gui/minesweeper_menu.png"), 19, 227)

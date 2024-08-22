@@ -53,6 +53,7 @@ import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
+import net.casual.championships.duel.ui.DuelConfigurationGui
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.util.CasualConfig
 import net.minecraft.commands.CommandSourceStack
@@ -70,7 +71,6 @@ import net.minecraft.world.phys.AABB
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import java.util.*
-import kotlin.collections.HashSet
 import kotlin.time.Duration.Companion.seconds
 
 class CasualLobbyMinigame(
@@ -247,15 +247,8 @@ class CasualLobbyMinigame(
 
     private fun registerCommands() {
         this.commands.register(CommandUtils.buildLiteral("duel") {
-            literal("with") {
-                val players = EntityArgument.players()
-                argument("players", players) {
-                    suggests { context, builder ->
-                        val source = context.source.withPermission(2)
-                        players.listSuggestions(context.copyFor(source), builder)
-                    }
-                    executes(::duelWith)
-                }
+            literal("start") {
+                executes(::startDuel)
             }
             literal("view") {
                 argument("player", EntityArgument.player()) {
@@ -267,6 +260,13 @@ class CasualLobbyMinigame(
                 }
             }
         })
+    }
+
+    private fun startDuel(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+        val settings = DuelSettings(this.casualLobby.duelArenaTemplates)
+        val gui = DuelConfigurationGui(player, settings, this.players::all, this::requestDuelWith)
+        return gui.open().commandSuccess()
     }
 
     private fun viewDueler(context: CommandContext<CommandSourceStack>): Int {
@@ -285,34 +285,6 @@ class CasualLobbyMinigame(
         minigame.players.add(player, true, this.players.isAdmin(player))
         player.teleportTo(dueler.location)
         return context.source.success(Component.translatable("casual.duel.teleportingToDuel"))
-    }
-
-    private fun duelWith(context: CommandContext<CommandSourceStack>): Int {
-        val player = context.source.playerOrException
-        if (this.phase >= LobbyPhase.Readying) {
-            player.grantAdvancement(LobbyAdvancements.NOT_NOW)
-            return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
-        }
-
-        val settings = DuelSettings(this.casualLobby.duelArenaTemplates)
-        val builder = SelectionGuiBuilder(
-            player,
-            CommonScreens.named(Component.translatable("casual.gui.duel.configure").mini())
-        )
-        builder.style = SelectionGuiStyle.centered(3)
-        builder.element(GuiElement(Items.MAP.named(CommonComponents.CONFIGURE.mini())) { _, _, _, gui ->
-            settings.gui(gui).open()
-        })
-        builder.element(GuiElement(MenuItem.TICK.named(CommonComponents.CONFIRM.mini())) { _, _, _, gui ->
-            gui.close()
-            val selector = context.getArgument("players", EntitySelector::class.java)
-            val players = selector.findPlayers(context.source.withPermission(2))
-            requestDuelWith(player, players, settings)
-        })
-        builder.element(GuiElement(MenuItem.CROSS.named(CommonComponents.CANCEL.mini())) { _, _, _, gui ->
-            gui.close()
-        })
-        return builder.build().open().commandSuccess()
     }
 
     private fun requestDuelWith(

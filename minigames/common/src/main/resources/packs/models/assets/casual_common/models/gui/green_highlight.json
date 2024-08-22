@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "casual_common:item/gui/green_highlight"
+  },
+  "display": {
+    "gui": {
+      "translation": [
+        0.0,
+        -18.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.6,
+        1.6,
+        1.6
+      ]
+    }
+  }
+}
