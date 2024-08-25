@@ -11,10 +11,12 @@ import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.level.LevelLootEvent
 import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.*
+import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.gui.shapes.ArrowShape
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.ListenerFlags
+import net.casual.arcade.minigame.annotation.ListenerFlags.IS_PLAYING
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.serialization.SavableMinigame
 import net.casual.arcade.minigame.task.impl.MinigameTask
@@ -129,6 +131,7 @@ class UHCMinigame(
 
     override val id = ID
 
+    val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)
     val winners = HashSet<String>()
 
@@ -249,6 +252,13 @@ class UHCMinigame(
         )
     }
 
+    @Listener
+    private fun onServerTick(event: ServerTickEvent) {
+        this.mapRenderer.update(this.overworld)
+        this.mapRenderer.update(this.nether)
+        this.mapRenderer.update(this.end)
+    }
+
     @Listener(during = During(before = GAME_OVER_ID))
     private fun onPlayerTick(event: PlayerTickEvent) {
         val (player) = event
@@ -272,7 +282,7 @@ class UHCMinigame(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, phase = BuiltInEventPhases.POST)
+    @Listener(flags = IS_PLAYING, phase = BuiltInEventPhases.POST)
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         val (player, source) = event
 
@@ -374,6 +384,12 @@ class UHCMinigame(
 
         // Needed for updating the player's health
         GlobalTickedScheduler.schedule(1.Seconds, player::resetSentInfo)
+
+        if (this.players.isSpectating(player)) {
+            this.mapRenderer.startWatching(player)
+        } else {
+            this.mapRenderer.stopWatching(player)
+        }
     }
 
     @Listener
@@ -411,6 +427,8 @@ class UHCMinigame(
         if (team != null && team.getOnlineCount() == 1) {
             player.grantAdvancement(UHCAdvancements.SOLOIST)
         }
+
+        this.mapRenderer.stopWatching(player)
     }
 
     @Listener
@@ -426,6 +444,8 @@ class UHCMinigame(
         }
 
         this.chat.broadcastInfo(UHCComponents.BROADCAST_SPECTATING.mini(), listOf(player))
+
+        this.mapRenderer.startWatching(player)
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
@@ -575,6 +595,17 @@ class UHCMinigame(
         if (this.settings.generatePortals) {
             this.overworld.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
             this.nether.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
+        }
+    }
+
+    fun getCurrentBorderSizeFor(level: Level, size: UHCBorderSize): Double {
+        val stage = this.settings.borderStage
+        val modified =  if (level == this.end && stage >= UHCBorderStage.Fifth) UHCBorderStage.Fourth else stage
+        val multiplier = this.settings.borderSizeMultiplier
+        return if (size == UHCBorderSize.End) {
+            modified.getEndSizeFor(level, multiplier)
+        } else {
+            modified.getStartSizeFor(level, multiplier)
         }
     }
 
@@ -732,6 +763,15 @@ class UHCMinigame(
                 requiresAdminOrPermission()
                 literal("start") {
                     executes(::startWorldBorders)
+                }
+            }
+            literal("map") {
+                requiresAdminOrPermission()
+                literal("give") {
+                    executes { mapRenderer.getMaps().forEach(it.source.playerOrException::addItem).commandSuccess() }
+                }
+                literal("clear") {
+                    executes { mapRenderer.clear().commandSuccess() }
                 }
             }
             literal("fullbright") {
