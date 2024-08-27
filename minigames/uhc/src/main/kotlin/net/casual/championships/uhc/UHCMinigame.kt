@@ -3,11 +3,12 @@ package net.casual.championships.uhc
 import com.google.gson.JsonObject
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
-import eu.pb4.sgui.virtual.inventory.VirtualScreenHandler
 import me.senseiwells.replay.player.PlayerRecorders
 import net.casual.arcade.border.MultiLevelBorderListener
 import net.casual.arcade.border.MultiLevelBorderTracker
 import net.casual.arcade.border.TrackedBorder
+import net.casual.arcade.entity.player.ExtendedGameMode
+import net.casual.arcade.entity.player.ExtendedGameMode.Companion.extendedGameMode
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.level.LevelLootEvent
@@ -99,7 +100,6 @@ import net.minecraft.core.Direction
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundGameEventPacket
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket
 import net.minecraft.resources.ResourceKey
@@ -120,6 +120,7 @@ import net.minecraft.world.level.border.WorldBorder
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.scores.Team
 import xyz.nucleoid.fantasy.RuntimeWorldHandle
+import kotlin.math.abs
 import kotlin.math.atan2
 
 class UHCMinigame(
@@ -380,17 +381,6 @@ class UHCMinigame(
             event.spectating = true
         }
 
-        GlobalTickedScheduler.later {
-            if (!PlayerRecorders.has(player) && this.players.isPlaying(player) && this.settings.replay) {
-                PlayerRecorders.create(player).start()
-            }
-            if (this.players.isSpectating(player)) {
-                this.mapRenderer.startWatching(player)
-            } else {
-                this.mapRenderer.stopWatching(player)
-            }
-        }
-
         // Needed for updating the player's health
         GlobalTickedScheduler.schedule(1.Seconds, player::resetSentInfo)
     }
@@ -405,6 +395,7 @@ class UHCMinigame(
     private fun onSetPlaying(event: MinigameSetPlayingEvent) {
         val player = event.player
         player.isInvisible = false
+        player.closeContainer()
 
         player.grantAllRecipesSilently()
 
@@ -437,19 +428,22 @@ class UHCMinigame(
         if (team != null && team.getOnlineCount() == 1) {
             player.grantAdvancement(UHCAdvancements.SOLOIST)
         }
+    }
 
+    @Listener
+    private fun onLoadPlaying(event: MinigameLoadPlayingEvent) {
+        val player = event.player
         this.mapRenderer.stopWatching(player)
+
+        if (!PlayerRecorders.has(player) && this.settings.replay) {
+            PlayerRecorders.create(player).start()
+        }
     }
 
     @Listener
     private fun onSetSpectating(event: MinigameSetSpectatingEvent) {
         val (_, player) = event
-        player.setGameMode(GameType.ADVENTURE)
-        player.abilities.mayfly = true
-        player.abilities.invulnerable = true
-        player.isInvisible = true
-
-        this.mapRenderer.getMaps().forEach(player.inventory::add)
+        player.extendedGameMode = ExtendedGameMode.AdventureSpectator
 
         this.effects.addFullbright(player)
         this.tags.remove(player, CommonTags.HAS_TEAM_GLOW)
@@ -459,8 +453,29 @@ class UHCMinigame(
         }
 
         this.chat.broadcastInfo(UHCComponents.BROADCAST_SPECTATING.mini(), listOf(player))
+    }
 
-        this.mapRenderer.startWatching(player)
+    @Listener
+    private fun onLoadSpectating(event: MinigameLoadSpectatingEvent) {
+        UHCSpectatorHotbar(event.player, this).open()
+        this.mapRenderer.startWatching(event.player)
+    }
+
+    @Listener(flags = ListenerFlags.IS_SPECTATOR)
+    private fun onPlayerSneak(event: PlayerSetSneakingEvent) {
+        val (player, sneaking) = event
+        if (sneaking) {
+            val last = this.stats.getOrCreateStat(player, UHCStats.LAST_SNEAK_TIME)
+            if (abs(this.server.tickCount - last.value) < 7) {
+                val mode = when (player.extendedGameMode) {
+                    ExtendedGameMode.AdventureSpectator -> ExtendedGameMode.NoClipSpectator
+                    else -> ExtendedGameMode.AdventureSpectator
+                }
+                player.extendedGameMode = mode
+            } else {
+                last.modify { this.server.tickCount }
+            }
+        }
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {

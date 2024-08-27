@@ -20,11 +20,13 @@ import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.impl.Sound
 import net.casual.championships.common.ui.elements.SpectatorAndAdminTeamsElement
 import net.casual.championships.common.ui.elements.TeammateElement
+import net.casual.championships.common.ui.game.TeamSelectorGui
 import net.casual.championships.common.ui.tab.CasualPlayerListEntries
 import net.casual.championships.common.ui.tab.SimpleCasualPlayerListEntries
 import net.casual.championships.common.util.CommonComponents.Text.CASUAL
@@ -32,6 +34,7 @@ import net.casual.championships.common.util.CommonComponents.Text.CHAMPIONSHIPS
 import net.casual.championships.common.util.CommonComponents.Text.KIWITECH
 import net.casual.championships.common.util.CommonComponents.Text.SERVER_HOSTED_BY
 import net.minecraft.ChatFormatting.*
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.border.BorderStatus
@@ -170,5 +173,14 @@ object CommonUI {
             ComponentElements.of("\n".literal().append(CASUAL).append(" ").append(CHAMPIONSHIPS).append("\n")),
             footer
         )
+    }
+
+    fun createTeamSelectionGui(minigame: Minigame<*>, player: ServerPlayer): TeamSelectorGui {
+        val selections = minigame.teams.getOnlineTeams().map {
+            val head = ItemUtils.colouredHeadForFormatting(it.color, CommonItems.FORWARD_FACING_PLAYER_HEAD)
+            head.set(DataComponents.CUSTOM_NAME, it.formattedDisplayName.mini())
+            TeamSelectorGui.Selection(it, head)
+        }
+        return TeamSelectorGui(player, selections)
     }
 }

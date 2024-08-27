@@ -1,6 +1,6 @@
 package net.casual.championships.common.ui.game
 
-import eu.pb4.sgui.api.gui.SimpleGui
+import net.casual.arcade.gui.screen.SimpleNestedGui
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils
@@ -18,7 +18,7 @@ import net.minecraft.world.scores.PlayerTeam
 class TeamSelectorGui(
     player: ServerPlayer,
     selections: List<Selection>
-): SimpleGui(MenuType.GENERIC_9x6, player, true) {
+): SimpleNestedGui(MenuType.GENERIC_9x6, player, true) {
     init {
         this.title = Component.empty()
             .append(ComponentUtils.space(-8))
