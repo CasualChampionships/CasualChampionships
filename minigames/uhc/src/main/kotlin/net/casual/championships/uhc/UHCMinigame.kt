@@ -3,6 +3,8 @@ package net.casual.championships.uhc
 import com.google.gson.JsonObject
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
+import eu.pb4.sgui.virtual.inventory.VirtualScreenHandler
+import me.senseiwells.replay.player.PlayerRecorders
 import net.casual.arcade.border.MultiLevelBorderListener
 import net.casual.arcade.border.MultiLevelBorderTracker
 import net.casual.arcade.border.TrackedBorder
@@ -12,6 +14,7 @@ import net.casual.arcade.events.level.LevelLootEvent
 import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerTickEvent
+import net.casual.arcade.gui.predicate.PlayerObserverPredicate
 import net.casual.arcade.gui.shapes.ArrowShape
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
@@ -96,6 +99,7 @@ import net.minecraft.core.Direction
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundGameEventPacket
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket
 import net.minecraft.resources.ResourceKey
@@ -142,7 +146,8 @@ class UHCMinigame(
         this.addTaskFactory(GracePeriodBossBarTask.cast())
 
         this.ui.addBossbar(ActiveBossBar(this))
-        this.effects.setGlowingPredicate(this::shouldObserveeGlow)
+        this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
+        this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
     }
 
     override fun initialize() {
@@ -286,10 +291,9 @@ class UHCMinigame(
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         val (player, source) = event
 
-        // TODO: We can stop recording now...
-        // GlobalTickedScheduler.schedule(1.Seconds) {
-        //     PlayerRecorders.get(player)?.stop()
-        // }
+        GlobalTickedScheduler.schedule(1.Seconds) {
+            PlayerRecorders.get(player)?.stop()
+        }
 
         this.onEliminated(player, player.getKillCreditWith(source))
     }
@@ -330,7 +334,7 @@ class UHCMinigame(
         player.resetHunger()
         player.resetExperience()
         player.clearPlayerInventory()
-        // PlayerRecorders.get(player)?.stop()
+        PlayerRecorders.get(player)?.stop()
     }
 
     @Listener
@@ -374,27 +378,33 @@ class UHCMinigame(
 
         if (player.team == null) {
             event.spectating = true
-        } else {
-            // GlobalTickedScheduler.later {
-            //     if (!PlayerRecorders.has(player) && this.players.isPlaying(player) && this.settings.replay) {
-            //         PlayerRecorders.create(player).start()
-            //     }
-            // }
+        }
+
+        GlobalTickedScheduler.later {
+            if (!PlayerRecorders.has(player) && this.players.isPlaying(player) && this.settings.replay) {
+                PlayerRecorders.create(player).start()
+            }
+            if (this.players.isSpectating(player)) {
+                this.mapRenderer.startWatching(player)
+            } else {
+                this.mapRenderer.stopWatching(player)
+            }
         }
 
         // Needed for updating the player's health
         GlobalTickedScheduler.schedule(1.Seconds, player::resetSentInfo)
+    }
 
-        if (this.players.isSpectating(player)) {
-            this.mapRenderer.startWatching(player)
-        } else {
-            this.mapRenderer.stopWatching(player)
-        }
+    @Listener
+    private fun onMinigameRemovePlayer(event: MinigameRemovePlayerEvent) {
+        val player = event.player
+        player.isInvisible = false
     }
 
     @Listener
     private fun onSetPlaying(event: MinigameSetPlayingEvent) {
         val player = event.player
+        player.isInvisible = false
 
         player.grantAllRecipesSilently()
 
@@ -434,7 +444,12 @@ class UHCMinigame(
     @Listener
     private fun onSetSpectating(event: MinigameSetSpectatingEvent) {
         val (_, player) = event
-        player.setGameMode(GameType.SPECTATOR)
+        player.setGameMode(GameType.ADVENTURE)
+        player.abilities.mayfly = true
+        player.abilities.invulnerable = true
+        player.isInvisible = true
+
+        this.mapRenderer.getMaps().forEach(player.inventory::add)
 
         this.effects.addFullbright(player)
         this.tags.remove(player, CommonTags.HAS_TEAM_GLOW)
@@ -718,8 +733,8 @@ class UHCMinigame(
         ))
     }
 
-    private fun shouldObserveeGlow(observee: Entity, observer: ServerPlayer): Boolean {
-        if (observee !is ServerPlayer || this.players.isSpectating(observee)) {
+    private fun shouldObserveeGlow(observee: ServerPlayer, observer: ServerPlayer): Boolean {
+        if (this.players.isSpectating(observee)) {
             return false
         }
         if (this.settings.glowing) {
@@ -732,6 +747,10 @@ class UHCMinigame(
             return false
         }
         return observee.team != null && observee.team === observer.team
+    }
+
+    private fun shouldObserveeBeInvisible(observee: ServerPlayer, observer: ServerPlayer): Boolean {
+        return this.players.isSpectating(observee) && observee !== observer
     }
 
     private fun resetPlayerHealth(player: ServerPlayer) {

@@ -26,6 +26,7 @@ import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.location.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.championships.common.task.GlowingBossBarTask
 import net.casual.championships.common.task.GracePeriodBossBarTask
 import net.casual.championships.common.util.CommonComponents
@@ -53,23 +54,12 @@ enum class UHCPhase(
             minigame.levels.all().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
 
-            val stage = minigame.settings.borderStage
-
             val (level, height) = when (minigame.settings.startingDimension) {
                 VanillaDimension.Overworld -> minigame.overworld to null
                 VanillaDimension.Nether -> minigame.nether to 120
                 VanillaDimension.End -> minigame.end to null
             }
-            val range = stage.getStartSizeFor(level, minigame.settings.borderSizeMultiplier) * 0.45
-            PlayerUtils.spread(
-                level,
-                Vec2(0.0F, 0.0F),
-                500.0,
-                range,
-                true,
-                minigame.players.playing,
-                height ?: level.maxBuildHeight
-            )
+            UHCSpreadTeleporter.teleport(level, minigame.players.playing, true)
 
             for (player in minigame.players.spectating) {
                 if (player.level() != level) {

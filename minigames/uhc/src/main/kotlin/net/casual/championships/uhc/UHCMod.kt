@@ -4,12 +4,15 @@ import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ResourcePackUtils.addFont
 import net.casual.arcade.utils.ResourcePackUtils.addLangsFromData
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.resources.ResourceLocation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 object UHCMod {
     private const val MOD_ID = "casual_uhc"
+
+    internal val container = FabricLoader.getInstance().getModContainer(MOD_ID).get()
 
     internal val logger: Logger = LoggerFactory.getLogger("CasualUHC")
 

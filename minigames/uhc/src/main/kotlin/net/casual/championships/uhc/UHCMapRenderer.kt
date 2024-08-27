@@ -1,22 +1,18 @@
 package net.casual.championships.uhc
 
-import eu.pb4.mapcanvas.api.core.CanvasColor
-import eu.pb4.mapcanvas.api.core.CanvasIcon
-import eu.pb4.mapcanvas.api.core.CanvasImage
-import eu.pb4.mapcanvas.api.core.DrawableCanvas
-import eu.pb4.mapcanvas.api.core.PlayerCanvas
+import eu.pb4.mapcanvas.api.core.*
+import it.unimi.dsi.fastutil.doubles.Double2ObjectFunction
 import it.unimi.dsi.fastutil.doubles.Double2ObjectLinkedOpenHashMap
 import it.unimi.dsi.fastutil.doubles.Double2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.withSpacesFont
 import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.LevelUtils
 import net.casual.championships.uhc.border.UHCBorderSize
-import net.casual.championships.uhc.border.UHCBorderStage
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
@@ -37,15 +33,13 @@ import net.minecraft.world.level.material.MapColor
 import net.minecraft.world.level.saveddata.maps.MapDecorationType
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes
 import java.util.*
-import kotlin.collections.HashMap
-import kotlin.collections.LinkedHashMap
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
 class UHCMapRenderer(private val uhc: UHCMinigame) {
     private val canvases = LinkedHashMap<ResourceKey<Level>, CanvasData>()
-    private val maps = HashMap<ResourceKey<Level>, Double2ObjectMap<CanvasImage>>()
+    private val maps = Object2ObjectOpenHashMap<ResourceKey<Level>, Double2ObjectMap<CanvasImage>>(3)
 
     fun startWatching(player: ServerPlayer) {
         for (data in this.canvases.values) {
@@ -88,7 +82,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
                 canvas,
                 canvas.createIcon(MapDecorationTypes.TARGET_X, true, 26, 220, 0, formattedDimension),
                 canvas.createIcon(MapDecorationTypes.TARGET_X, true, 26, 236, 0, null),
-                HashMap()
+                Object2ObjectOpenHashMap()
             )
         }
 
@@ -207,7 +201,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         size: Double
     ): CanvasImage {
         val canvases = this.maps.getOrPut(level.dimension()) { Double2ObjectLinkedOpenHashMap() }
-        return canvases.getOrPut(size) {
+        return canvases.computeIfAbsent(size, Double2ObjectFunction {
             val corner = BlockPos.containing(
                 centerX - size / 2,
                 level.seaLevel.toDouble() + 20,
@@ -218,7 +212,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
             } else {
                 this.createBlockMap(level, corner, size / 128)
             }
-        }
+        })
     }
 
     private fun createBlockMap(
@@ -352,6 +346,6 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         val canvas: PlayerCanvas,
         val dimensionIcon: CanvasIcon,
         val sizeIcon: CanvasIcon,
-        val playerIcons: HashMap<UUID, CanvasIcon>
+        val playerIcons: MutableMap<UUID, CanvasIcon>
     )
 }
