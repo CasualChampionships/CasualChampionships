@@ -19,8 +19,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
-import java.util.UUID
+import java.util.*
 
 class DuelConfigurationGui(
     player: ServerPlayer,
@@ -35,13 +34,13 @@ class DuelConfigurationGui(
     init {
         val settings = MenuItem.GEAR
         settings.named("Settings".literal().mini())
-        this.setSlot(38, settings) { ->
-            this.settings.gui(this).open()
+        this.setSlot(47, settings) { ->
+            DuelSettingsGui(this.player, this.settings, this).open()
         }
 
         val players = ItemStack(CommonItems.FORWARD_FACING_PLAYER_HEAD)
         players.named("Select Players".literal().mini())
-        this.setSlot(42, players) { ->
+        this.setSlot(51, players) { ->
             DuelPlayerSelectionGui(this.player, this).open()
         }
 
@@ -57,7 +56,7 @@ class DuelConfigurationGui(
         waiting.lore("Select players to start!".literal().grey().mini())
         this.waiting = GuiElement(waiting, GuiElement.EMPTY_CALLBACK)
 
-        this.setSlot(40, this.waiting)
+        this.setSlot(49, this.waiting)
 
         this.setSlot(58, MenuItem.RED_BACK.hideTooltip()) { ->
             this.close()
@@ -65,7 +64,7 @@ class DuelConfigurationGui(
 
         this.title = Component.empty()
             .append(ComponentUtils.space(-8))
-            .append(CommonComponents.Gui.GENERIC_54.white())
+            .append(CommonComponents.Gui.DUELS.white())
     }
 
     fun getAvailablePlayers(): List<ServerPlayer> {

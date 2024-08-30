@@ -157,6 +157,9 @@ object CommonComponents {
         val TEAM_PLAYER_SELECTOR by bitmap(at("gui/team_player_selector.png"), 13, 256)
         val PLAYER_SELECTOR by bitmap(at("gui/player_selector.png"), 13, 256)
 
+        val DUELS by bitmap(at("gui/duels_menu.png"), 13, 256)
+        val DUEL_SETTINGS by bitmap(at("gui/duels_settings_menu.png"), 13, 256)
+
         val MINESWEEPER_MENU by bitmap(at("gui/minesweeper_menu.png"), 19, 227)
 
         @JvmStatic
@@ -177,8 +180,8 @@ object CommonComponents {
         val HARDCORE_HEART by bitmap(at("hud/hardcore_heart.png"), 7, 7)
         val NO_CONNECTION by bitmap(at("hud/no_connection.png"), 7, 7)
         val UNAVAILABLE by bitmap(at("hud/cross.png"), 7, 7)
-        val KILLS_COUNT by bitmap(at("hud/kills.png"), 10, 12)
-        val PLAYER_COUNT by bitmap(at("hud/players.png"), 10, 11)
+        val KILLS_COUNT by bitmap(at("hud/kills.png"), 8, 8)
+        val PLAYER_COUNT by bitmap(at("hud/players.png"), 8, 8)
     }
 
     object Text: FontResources(CommonMod.id("text_font")) {

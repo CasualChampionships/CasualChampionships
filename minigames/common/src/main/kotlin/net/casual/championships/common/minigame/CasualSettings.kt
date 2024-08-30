@@ -9,11 +9,14 @@ import net.casual.arcade.settings.display.DisplayableSettingsDefaults
 import net.casual.arcade.settings.display.MenuGameSetting
 import net.casual.arcade.settings.display.MenuGameSettingBuilder
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.championships.common.items.MenuItem.Companion.CROSS
+import net.casual.championships.common.items.MenuItem.Companion.CROSS_SELECTED
 import net.casual.championships.common.items.MenuItem.Companion.GREY_CROSS
 import net.casual.championships.common.items.MenuItem.Companion.GREY_TICK
 import net.casual.championships.common.items.MenuItem.Companion.TICK
+import net.casual.championships.common.items.MenuItem.Companion.TICK_SELECTED
 import net.casual.championships.common.util.CommonComponents.DISABLE
 import net.casual.championships.common.util.CommonComponents.DISABLED
 import net.casual.championships.common.util.CommonComponents.ENABLE
@@ -41,11 +44,11 @@ open class CasualSettings(
         }
 
         override fun options(builder: MenuGameSettingBuilder<Boolean>, enabled: ItemStack, disabled: ItemStack) {
-            builder.option("enabled", TICK.named(ENABLED), true) { setting, _, _ ->
-                if (setting.get()) TICK.named(ENABLED) else GREY_TICK.named(ENABLE)
+            builder.option("enabled", TICK_SELECTED.named(ENABLED.mini()), true) { setting, _, _ ->
+                if (setting.get()) TICK_SELECTED.named(ENABLED.mini()) else TICK.named(ENABLE.mini())
             }
-            builder.option("disabled", CROSS.named(DISABLED), false) { setting, _, _ ->
-                if (setting.get()) GREY_CROSS.named(DISABLE) else CROSS.named(DISABLED)
+            builder.option("disabled", CROSS_SELECTED.named(DISABLED.mini()), false) { setting, _, _ ->
+                if (setting.get()) CROSS.named(DISABLE.mini()) else CROSS_SELECTED.named(DISABLED.mini())
             }
         }
     }

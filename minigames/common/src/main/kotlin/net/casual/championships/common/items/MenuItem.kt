@@ -23,8 +23,10 @@ class MenuItem private constructor(): Item(Properties()), ArcadeModelledItem {
     companion object {
         val MODELLER = ResourcePackItemModeller(MenuItem(), CommonMod.CUSTOM_MODEL_PACK.getCreator())
         val TICK by MODELLER.model(id("gui/green_tick"))
+        val TICK_SELECTED by MODELLER.model(id("gui/green_tick_selected"))
         val GREY_TICK by MODELLER.model(id("gui/greyed_green_tick"))
         val CROSS by MODELLER.model(id("gui/red_cross"))
+        val CROSS_SELECTED by MODELLER.model(id("gui/red_cross_selected"))
         val GREY_CROSS by MODELLER.model(id("gui/greyed_red_cross"))
         val GREEN_RIGHT by MODELLER.model(id("gui/green_right_arrow"))
         val GREEN_LEFT by MODELLER.model(id("gui/green_left_arrow"))
@@ -46,6 +48,7 @@ class MenuItem private constructor(): Item(Properties()), ArcadeModelledItem {
         val RED_BACK by MODELLER.model(id("gui/red_back_button"))
 
         val GEAR by MODELLER.model(id("gui/gear"))
+        val ARENA by MODELLER.model(id("gui/arena"))
 
         val LARGE by MODELLER.model(id("gui/large_icon"))
         val LARGE_SELECTED by MODELLER.model(id("gui/large_icon_selected"))

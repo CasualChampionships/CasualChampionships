@@ -93,7 +93,8 @@ dependencies {
 
     for (subproject in project.subprojects) {
         if (subproject.path != ":minigames") {
-            include(implementation(project(mapOf("path" to subproject.path, "configuration" to "namedElements")))!!)
+            implementation(project(mapOf("path" to subproject.path, "configuration" to "namedElements")))
+            include(subproject)
         }
     }
 

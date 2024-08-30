@@ -1,5 +1,9 @@
 package net.casual.championships.duel
 
+import net.casual.arcade.resources.creator.NamedResourcePackCreator
+import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.arcade.utils.ResourcePackUtils.addFont
+import net.casual.arcade.utils.ResourcePackUtils.addLangsFromData
 import net.minecraft.resources.ResourceLocation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
