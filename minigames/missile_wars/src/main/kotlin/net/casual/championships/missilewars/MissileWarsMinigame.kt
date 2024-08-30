@@ -7,21 +7,21 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 
 class MissileWarsMinigame(server: MinecraftServer): SavableMinigame<MissileWarsMinigame>(server) {
-    override val id: ResourceLocation = MissileWarsMod.id("missile_wars_minigame")
+    override val id: ResourceLocation = ID
 
     override fun getPhases(): Collection<Phase<MissileWarsMinigame>> {
         TODO("Not yet implemented")
     }
 
-    override fun readData(json: JsonObject) {
+    override fun loadData(json: JsonObject) {
         TODO("Not yet implemented")
     }
 
-    override fun writeData(json: JsonObject) {
+    override fun saveData(json: JsonObject) {
         TODO("Not yet implemented")
     }
 
     companion object {
-        val ID = MissileWarsMod.id("uhc_minigame")
+        val ID = MissileWarsMod.id("missile_wars_minigame")
     }
 }

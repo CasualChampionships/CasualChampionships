@@ -1,0 +1,28 @@
+[versions]
+fabric-loom          = "1.7-SNAPSHOT"
+kotlin-serialization = "1.9.21"
+minecraft            = "1.21.1"
+fabric-loader        = "0.16.3"
+parchment            = "1.21:2024.07.28"
+fabric-api           = "0.103.0+1.21.1"
+fabric-kotlin        = "1.11.0+kotlin.2.0.0"
+map-canvas           = "0.4.1+1.21"
+arcade               = "6a65e30cea14e052d24a92c624682edefb2a7fe2"
+arcade-datagen       = "1.0.14"
+casual-database      = "a70b766ff9fd03702542c62d13a49fbc2d630733"
+server-replay        = "a82ce79bdc"
+
+[libraries]
+minecraft       = { module = "com.mojang:minecraft"                               , version.ref = "minecraft" }
+fabric-loader   = { module = "net.fabricmc:fabric-loader"                         , version.ref = "fabric-loader" }
+fabric-api      = { module = "net.fabricmc.fabric-api:fabric-api"                 , version.ref = "fabric-api" }
+fabric-kotlin   = { module = "net.fabricmc:fabric-language-kotlin"                , version.ref = "fabric-kotlin" }
+map-canvas      = { module = "eu.pb4:map-canvas-api"                              , version.ref = "map-canvas" }
+arcade          = { module = "com.github.CasualChampionships:arcade"              , version.ref = "arcade" }
+arcade-datagen  = { module = "com.github.CasualChampionships:arcade-datagen"      , version.ref = "arcade-datagen" }
+casual-database = { module = "com.github.CasualChampionships:casual-database-core", version.ref = "casual-database" }
+server-replay   = { module = "com.github.senseiwells:ServerReplay"                , version.ref = "server-replay" }
+
+[plugins]
+fabric-loom   = { id = "fabric-loom", version.ref = "fabric-loom" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-serialization" }

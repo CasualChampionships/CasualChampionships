@@ -2,14 +2,11 @@ package net.casual.championships.minigame.lobby
 
 import com.google.common.collect.ImmutableList
 import com.mojang.brigadier.context.CommandContext
-import eu.pb4.sgui.api.elements.GuiElement
 import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.PlayerFallEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.ServerTickEvent
-import net.casual.arcade.gui.screen.SelectionGuiBuilder
-import net.casual.arcade.gui.screen.SelectionGuiStyle
 import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
 import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.Listener
@@ -29,7 +26,6 @@ import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.shadowless
-import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.location
@@ -41,11 +37,9 @@ import net.casual.arcade.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.championships.CasualMod
 import net.casual.championships.common.event.MinesweeperWonEvent
-import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.minigame.rules.RulesProvider
 import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonScreens
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
@@ -59,13 +53,11 @@ import net.casual.championships.util.CasualConfig
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.EntityArgument
-import net.minecraft.commands.arguments.selector.EntitySelector
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.item.Items
 import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.scores.PlayerTeam

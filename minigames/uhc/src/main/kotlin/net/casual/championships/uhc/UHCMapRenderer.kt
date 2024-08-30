@@ -53,11 +53,6 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         }
     }
 
-    fun getMap(level: ServerLevel): ItemStack {
-        val data = this.canvases[level.dimension()] ?: return ItemStack.EMPTY
-        return data.canvas.asStack()
-    }
-
     fun getMaps(): List<ItemStack> {
         return this.canvases.values.map { it.canvas.asStack() }
     }

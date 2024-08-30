@@ -85,7 +85,6 @@ import kotlin.io.path.writer
 @Suppress("UnstableApiUsage")
 object CasualMinigames {
     private val login by CasualConfig.any("database_login", DatabaseLogin(), DatabaseLoginSerializer)
-    private val seed by CasualConfig.any(default = WorldOptions.randomSeed(), serializer = LongSerializer)
     private val path: Path = CasualConfig.resolve("event")
     internal val winners = HashSet<String>()
 
@@ -181,36 +180,7 @@ object CasualMinigames {
     }
 
     fun createUHCMinigame(context: MinigameCreationContext): UHCMinigame {
-        val overworldId: ResourceLocation
-        val netherId: ResourceLocation
-        val endId: ResourceLocation
-        val permanent: Boolean
-        if (context.hasCustomData()) {
-            val dimensions = context.getCustomData().obj("dimensions")
-            overworldId = ResourceLocation.parse(dimensions.string("overworld"))
-            netherId = ResourceLocation.parse(dimensions.string("nether"))
-            endId = ResourceLocation.parse(dimensions.string("end"))
-            permanent = context.getCustomData().booleanOrDefault("permanent")
-        } else {
-            overworldId = ResourceUtils.random { "overworld_$it" }
-            netherId = ResourceUtils.random { "nether_$it" }
-            endId = ResourceUtils.random { "end_$it" }
-            permanent = false
-        }
-
-        val server = context.server
-        val seed = CasualMinigames.seed
-        val (overworld, nether, end) = FantasyUtils.createPersistentVanillaLikeLevels(
-            server,
-            FantasyUtils.PersistentConfig(overworldId, FantasyUtils.createOverworldConfig(seed)),
-            FantasyUtils.PersistentConfig(netherId, FantasyUtils.createNetherConfig(seed)),
-            FantasyUtils.PersistentConfig(endId, FantasyUtils.createEndConfig(seed))
-        )
-        val minigame = UHCMinigame.of(server, overworld, nether, end)
-
-        if (permanent) {
-            minigame.settings.shouldDeleteLevels = false
-        }
+        val minigame = UHCMinigame.create(context)
 
         PerformanceUtils.reduceMinigameMobcap(minigame)
         PerformanceUtils.disableEntityAI(minigame)

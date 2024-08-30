@@ -22,17 +22,16 @@ import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.annotation.ListenerFlags.IS_PLAYING
 import net.casual.arcade.minigame.managers.MinigameLevelManager
+import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.SavableMinigame
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.utils.BorderUtils
-import net.casual.arcade.utils.CommandUtils
+import net.casual.arcade.utils.*
 import net.casual.arcade.utils.CommandUtils.argument
 import net.casual.arcade.utils.CommandUtils.commandSuccess
 import net.casual.arcade.utils.CommandUtils.fail
 import net.casual.arcade.utils.CommandUtils.literal
 import net.casual.arcade.utils.CommandUtils.success
-import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.lime
@@ -40,10 +39,14 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.withMiniShiftedDownFont
+import net.casual.arcade.utils.FantasyUtils.PersistentConfig
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.arrayOrDefault
+import net.casual.arcade.utils.JsonUtils.booleanOrDefault
+import net.casual.arcade.utils.JsonUtils.longOrNull
 import net.casual.arcade.utils.JsonUtils.obj
-import net.casual.arcade.utils.JsonUtils.set
+import net.casual.arcade.utils.JsonUtils.objOrNull
+import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.JsonUtils.strings
 import net.casual.arcade.utils.JsonUtils.toJsonStringArray
 import net.casual.arcade.utils.MathUtils.opposite
@@ -117,9 +120,9 @@ import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.border.WorldBorder
+import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.scores.Team
-import xyz.nucleoid.fantasy.RuntimeWorldHandle
 import kotlin.math.abs
 import kotlin.math.atan2
 
@@ -128,9 +131,7 @@ class UHCMinigame(
     val overworld: ServerLevel,
     val nether: ServerLevel,
     val end: ServerLevel
-): SavableMinigame<UHCMinigame>(
-    server,
-), MultiLevelBorderListener, RulesProvider {
+): SavableMinigame<UHCMinigame>(server), MultiLevelBorderListener, RulesProvider {
     private val tracker = MultiLevelBorderTracker()
     private var movingBorders = HashSet<ResourceKey<Level>>()
 
@@ -170,21 +171,27 @@ class UHCMinigame(
         return entries
     }
 
-    override fun readData(json: JsonObject) {
-        this.uhcAdvancements.deserialize(json.obj("advancements"))
+    override fun loadData(json: JsonObject) {
         this.movingBorders = HashSet(json.arrayOrDefault("moving_borders").strings().map {
             ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(it))
         })
+        if (json.has("advancements")) {
+            this.uhcAdvancements.deserialize(json.obj("advancements"))
+        }
     }
 
-    override fun writeData(json: JsonObject) {
+    override fun saveData(json: JsonObject) {
         json.add("advancements", this.uhcAdvancements.serialize())
         json.add("moving_borders", this.movingBorders.toJsonStringArray { it.location().toString() })
+    }
+
+    override fun saveParameters(json: JsonObject) {
         val dimensions = JsonObject()
-        dimensions["overworld"] = this.overworld.dimension().location().toString()
-        dimensions["nether"] = this.nether.dimension().location().toString()
-        dimensions["end"] = this.end.dimension().location().toString()
+        dimensions.addProperty("overworld", this.overworld.dimension().location().toString())
+        dimensions.addProperty("nether", this.nether.dimension().location().toString())
+        dimensions.addProperty("end", this.end.dimension().location().toString())
         json.add("dimensions", dimensions)
+        json.addProperty("seed", this.overworld.seed)
     }
 
     @Listener(during = During(before = BORDER_FINISHED_ID))
@@ -884,17 +891,36 @@ class UHCMinigame(
         private val FAKE_BORDER = WorldBorder()
         val ID = UHCMod.id("uhc_minigame")
 
-        fun of(
-            server: MinecraftServer,
-            overworld: RuntimeWorldHandle,
-            nether: RuntimeWorldHandle,
-            end: RuntimeWorldHandle
-        ): UHCMinigame {
-            return UHCMinigame(server, overworld.asWorld(), nether.asWorld(), end.asWorld()).apply {
-                levels.add(overworld)
-                levels.add(nether)
-                levels.add(end)
+        fun create(context: MinigameCreationContext): UHCMinigame {
+            val parameters = context.parameters
+            val dimensions = parameters.objOrNull("dimensions")
+            val seed = parameters.longOrNull("seed") ?: WorldOptions.randomSeed()
+            val permanent = parameters.booleanOrDefault("permanent")
+            val levels = if (dimensions != null) {
+                FantasyUtils.createPersistentVanillaLikeLevels(
+                    context.server,
+                    ResourceLocation.parse(dimensions.string("overworld")),
+                    ResourceLocation.parse(dimensions.string("nether")),
+                    ResourceLocation.parse(dimensions.string("end")),
+                    seed
+                )
+            } else {
+                FantasyUtils.createPersistentVanillaLikeLevels(
+                    context.server,
+                    ResourceUtils.random { "overworld_$it" },
+                    ResourceUtils.random { "nether_$it" },
+                    ResourceUtils.random { "end_$it" },
+                    seed
+                )
             }
+            val uhc = UHCMinigame(context.server, levels.overworld, levels.nether, levels.end)
+            uhc.levels.add(levels.overworldHandle)
+            uhc.levels.add(levels.netherHandle)
+            uhc.levels.add(levels.endHandle)
+            if (permanent) {
+                uhc.settings.shouldDeleteLevels = false
+            }
+            return uhc
         }
     }
 }

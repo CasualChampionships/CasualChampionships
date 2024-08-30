@@ -2,28 +2,19 @@ import org.apache.commons.io.output.ByteArrayOutputStream
 import java.nio.charset.Charset
 
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization") version "1.9.21"
-    id("fabric-loom")
+    val jvmVersion = libs.versions.fabric.kotlin.get()
+        .split("+kotlin.")[1]
+        .split("+")[0]
+
+    kotlin("jvm").version(jvmVersion)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.fabric.loom)
     `maven-publish`
     java
 }
 
-val modVersion: String by project
 group = "net.casual"
 version = this.getGitHash().substring(0, 6)
-
-val minecraftVersion: String by project
-val parchmentVersion: String by project
-val loaderVersion: String by project
-val fabricVersion: String by project
-val fabricKotlinVersion: String by project
-
-val arcadeVersion: String by project
-val arcadeDatagenVersion: String by project
-val casualDatabaseVersion: String by project
-val serverReplayVersion: String by project
-val mapCanvasVersion: String by project
 
 allprojects {
     apply(plugin = "fabric-loom")
@@ -43,26 +34,28 @@ allprojects {
     configurations.all {
         // This is to resolve any conflicts with arcade-datagen
         resolutionStrategy {
-            force("com.github.CasualChampionships:arcade:$arcadeVersion")
+            force(rootProject.libs.arcade)
         }
     }
 
     dependencies {
-        minecraft("com.mojang:minecraft:$minecraftVersion")
+        val libs = rootProject.libs
+
+        minecraft(libs.minecraft)
         @Suppress("UnstableApiUsage")
         mappings(loom.layered {
             officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-$parchmentVersion@zip")
+            parchment("org.parchmentmc.data:parchment-${libs.versions.parchment.get()}@zip")
         })
-        modImplementation("net.fabricmc:fabric-loader:$loaderVersion")
-        modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricVersion")
-        modImplementation("net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion")
+        modImplementation(libs.fabric.loader)
+        modImplementation(libs.fabric.api)
+        modImplementation(libs.fabric.kotlin)
 
-        modImplementation("com.github.CasualChampionships:arcade:$arcadeVersion")
-        modImplementation("com.github.CasualChampionships:arcade-datagen:$arcadeDatagenVersion")
-        modImplementation("com.github.senseiwells:ServerReplay:$serverReplayVersion")
+        modImplementation(libs.arcade)
+        modImplementation(libs.arcade.datagen)
+        modImplementation(libs.server.replay)
 
-        modImplementation("eu.pb4:map-canvas-api:$mapCanvasVersion")
+        modImplementation(libs.map.canvas)
     }
 
     java {
@@ -94,9 +87,9 @@ allprojects {
 }
 
 dependencies {
-    include("com.github.CasualChampionships:arcade:$arcadeVersion")
-    include("com.github.senseiwells:ServerReplay:$serverReplayVersion")
-    include("eu.pb4:map-canvas-api:$mapCanvasVersion")
+    include(libs.arcade)
+    include(libs.server.replay)
+    include(libs.map.canvas)
 
     for (subproject in project.subprojects) {
         if (subproject.path != ":minigames") {
@@ -104,7 +97,7 @@ dependencies {
         }
     }
 
-    include(implementation("com.github.CasualChampionships:casual-database-core:$casualDatabaseVersion")!!)
+    includeImplementation(libs.casual.database)
 }
 
 fun getGitHash(): String {
@@ -114,4 +107,9 @@ fun getGitHash(): String {
         standardOutput = out
     }
     return out.toString(Charset.defaultCharset()).trim()
+}
+
+private fun DependencyHandler.includeImplementation(dependencyNotation: Any) {
+    include(dependencyNotation)
+    implementation(dependencyNotation)
 }
