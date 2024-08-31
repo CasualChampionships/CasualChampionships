@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class ChestBlockMixin {
 	@SuppressWarnings("UnresolvedMixinReference")
 	@ModifyReturnValue(
-		method = "getDisplayName()Lnet/minecraft/network/chat/Component",
+		method = "getDisplayName*",
 		at = @At("RETURN")
 	)
 	private Component onGetChestTitle(Component title) {
