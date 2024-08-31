@@ -41,10 +41,8 @@ class DatabaseDataManager(
 
     override fun getParticipants(): Set<GameProfile> {
         val profiles = HashSet<GameProfile>()
-        this.transaction {
-            for (player in this.database.getDiscordPlayers()) {
-                profiles.add(GameProfile(player.id.value, player.name))
-            }
+        for (player in this.database.getDiscordPlayers()) {
+            profiles.add(GameProfile(player.id.value, player.name))
         }
         return profiles
     }
