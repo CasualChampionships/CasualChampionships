@@ -130,6 +130,8 @@ class CasualLobbyMinigame(
             player.setGameMode(GameType.ADVENTURE)
         } else if (CasualConfig.dev) {
             player.sendSystemMessage(Component.literal("Minigames are in dev mode!").red())
+        } else {
+            player.sendSystemMessage(Component.literal("Minigames are NOT in dev mode!").red())
         }
 
         player.grantAdvancement(LobbyAdvancements.ROOT)

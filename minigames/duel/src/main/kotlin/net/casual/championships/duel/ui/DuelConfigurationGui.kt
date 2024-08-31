@@ -81,7 +81,7 @@ class DuelConfigurationGui(
             this.selectedPlayers.remove(uuid)
         }
         val element = if (this.selectedPlayers.isEmpty()) this.waiting else this.confirm
-        this.setSlot(40, element)
+        this.setSlot(49, element)
         return !wasSelected
     }
 }

@@ -105,7 +105,7 @@ class DuelSettings(
 
     val displayableArenaSize = enumeration<ArenaSize> {
         name = "arena_size"
-        display = Items.POLISHED_DEEPSLATE_STAIRS.named(Component.translatable("casual.gui.duel.settings.arenaSize").mini())
+        display = MenuItem.GREEN_DIAGONAL.named(Component.translatable("casual.gui.duel.settings.arenaSize").mini())
         value = enumEntries<ArenaSize>().random()
         option("small", ONE_TIMES.named("Small"), Small) { setting, _, _ ->
             (if (setting.get() == Small) SMALL_SELECTED else SMALL).named("Small")

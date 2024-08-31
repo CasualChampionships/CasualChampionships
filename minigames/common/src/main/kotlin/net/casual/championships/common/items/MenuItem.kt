@@ -45,6 +45,8 @@ class MenuItem private constructor(): Item(Properties()), ArcadeModelledItem {
         val GREY_RED_LONG_RIGHT by MODELLER.model(id("gui/greyed_red_long_right_arrow"))
         val GREY_RED_LONG_LEFT by MODELLER.model(id("gui/greyed_red_long_left_arrow"))
 
+        val GREEN_DIAGONAL by MODELLER.model(id("gui/green_diagonal_arrow"))
+
         val RED_BACK by MODELLER.model(id("gui/red_back_button"))
 
         val GEAR by MODELLER.model(id("gui/gear"))

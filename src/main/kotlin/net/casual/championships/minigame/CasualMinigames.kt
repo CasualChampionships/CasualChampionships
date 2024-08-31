@@ -389,6 +389,7 @@ object CasualMinigames {
         for (entry in whitelist.entries.toList()) {
             server.playerList.whiteList.remove(entry)
         }
+        println(this.getDataManager().getParticipants())
         for (participant in this.getDataManager().getParticipants()) {
             whitelist.add(UserWhiteListEntry(participant))
         }
