@@ -4,11 +4,18 @@ import eu.pb4.sgui.api.ClickType
 import eu.pb4.sgui.api.elements.GuiElement
 import eu.pb4.sgui.api.gui.HotbarGui
 import net.casual.arcade.scheduler.GlobalTickedScheduler
+import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ScreenUtils.setSlot
+import net.casual.championships.common.items.ForwardFacingPlayerHead
+import net.casual.championships.common.items.MenuItem
+import net.casual.championships.common.util.CommonItems
 import net.casual.championships.common.util.CommonUI
+import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
+import net.minecraft.world.item.component.ResolvableProfile
 
 class UHCSpectatorHotbar(
     player: ServerPlayer,
@@ -22,7 +29,10 @@ class UHCSpectatorHotbar(
             this.maps.add(i, element)
             this.addSlot(element)
         }
-        this.setSlot(8, ItemStack(Items.PLAYER_HEAD)) { ->
+        val players = ItemStack(CommonItems.FORWARD_FACING_PLAYER_HEAD)
+            .named(Component.translatable("casual.spectator.teleport"))
+        players.set(DataComponents.PROFILE, ResolvableProfile(player.gameProfile))
+        this.setSlot(8, players) { ->
             val gui = CommonUI.createTeamSelectionGui(this.uhc, this.player)
             gui.setParent(this)
             gui.open()

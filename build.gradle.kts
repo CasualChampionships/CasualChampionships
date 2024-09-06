@@ -90,6 +90,7 @@ dependencies {
     include(libs.arcade)
     include(libs.server.replay)
     include(libs.map.canvas)
+    includeModImplementation(libs.glide)
 
     for (subproject in project.subprojects) {
         if (subproject.path != ":minigames") {
@@ -108,6 +109,11 @@ fun getGitHash(): String {
         standardOutput = out
     }
     return out.toString(Charset.defaultCharset()).trim()
+}
+
+private fun DependencyHandler.includeModImplementation(dependencyNotation: Any) {
+    include(dependencyNotation)
+    modImplementation(dependencyNotation)
 }
 
 private fun DependencyHandler.includeImplementation(dependencyNotation: Any) {

@@ -58,8 +58,8 @@ class UHCAdvancementManager(
             this.uhc.stats.getOrCreateStat(player, CommonStats.WON).modify { true }
         }
 
-        val lowest = DamageCounter(Float.POSITIVE_INFINITY)
-        val highest = DamageCounter(Float.NEGATIVE_INFINITY)
+        val lowest = DamageCounter(Float.MAX_VALUE)
+        val highest = DamageCounter(Float.MIN_VALUE)
         for (player in this.uhc.players) {
             if (this.uhc.tags.has(player, CommonTags.HAS_PARTICIPATED)) {
                 val current = this.uhc.stats.getOrCreateStat(player, ArcadeStats.DAMAGE_DEALT).value
@@ -100,7 +100,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, priority = 2000, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, priority = 2000, during = During(before = GAME_OVER_ID))
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val relogs = this.uhc.stats.getOrCreateStat(event.player, ArcadeStats.RELOGS)
 
@@ -122,7 +122,7 @@ class UHCAdvancementManager(
     @Listener(
         phase = BuiltInEventPhases.POST,
         flags = ListenerFlags.HAS_PLAYER_PLAYING,
-        during = During(before = BORDER_FINISHED_ID)
+        during = During(before = GAME_OVER_ID)
     )
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         if (this.claimed.add(UHCRaceAdvancement.Death)) {
@@ -156,7 +156,7 @@ class UHCAdvancementManager(
 
     @Listener(
         flags = ListenerFlags.HAS_PLAYER_PLAYING,
-        during = During(before = BORDER_FINISHED_ID),
+        during = During(before = GAME_OVER_ID),
         phase = BuiltInEventPhases.POST
     )
     private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
@@ -189,7 +189,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerBlockMined(event: PlayerBlockMinedEvent) {
         val blocksMined = this.uhc.stats.getOrCreateStat(event.player, CommonStats.BLOCKS_MINED)
         blocksMined.increment()
@@ -202,7 +202,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onEntityDeath(event: EntityDeathEvent) {
         val (entity, source) = event
         val attacker = source.entity
@@ -215,7 +215,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerCraft(event: PlayerCraftEvent) {
         if (event.stack.isOf(Items.CRAFTING_TABLE)) {
             if (this.claimed.add(UHCRaceAdvancement.Craft)) {
@@ -226,7 +226,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerLoot(event: PlayerLootEvent) {
         if (event.items.any { it.isOf(Items.ENCHANTED_GOLDEN_APPLE) }) {
             event.player.grantAdvancement(UHCAdvancements.DREAM_LUCK)
@@ -235,7 +235,7 @@ class UHCAdvancementManager(
 
     @Listener(
         flags = ListenerFlags.HAS_PLAYER_PLAYING,
-        during = During(before = BORDER_FINISHED_ID),
+        during = During(before = GAME_OVER_ID),
         phase = BuiltInEventPhases.POST
     )
     private fun onPlayerSlotClick(event: PlayerSlotClickEvent) {
@@ -248,7 +248,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerTick(event: PlayerTickEvent) {
         val player = event.player
         val stat = this.uhc.stats.getOrCreateStat(player, UHCStats.HALF_HEART_TIME)
@@ -295,7 +295,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(during = During(before = BORDER_FINISHED_ID))
+    @Listener(during = During(before = GAME_OVER_ID))
     private fun onPlayerChat(event: PlayerChatEvent) {
         val message = event.message.signedContent().lowercase()
         if (this.uhc.chat.isMessageGlobal(event.player, message)) {
@@ -308,7 +308,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = BORDER_FINISHED_ID))
+    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerBlockCollision(event: PlayerBlockCollisionEvent) {
         if (event.state.`is`(Blocks.SWEET_BERRY_BUSH)) {
             event.player.grantAdvancement(UHCAdvancements.EMBARRASSING)

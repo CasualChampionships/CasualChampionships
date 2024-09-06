@@ -1,6 +1,5 @@
 package net.casual.championships
 
-import eu.pb4.mapcanvas.api.core.CanvasImage
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost

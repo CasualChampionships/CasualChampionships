@@ -120,14 +120,32 @@
   "uhc.rules.mods.3": " If you are unsure please ask an admin.",
 
   "uhc.rules.exploits": "Exploits",
-  "uhc.rules.exploits.1": " Exploits are the use of a bug to gain an advantage and they are strictly prohibited! (TNT Duplication is the only exception to this)",
+  "uhc.rules.exploits.1": " Exploits are the use of a bug to gain an §bunfair advantage§r, and they are strictly prohibited! (TNT Duplication is the only exception to this)",
+
+  "uhc.rules.border": "World Border",
+  "uhc.rules.border.1": " The World Border shrinks in 6 stages.",
+  "uhc.rules.border.2": " The Nether World Border is 1/8th the size and speed.",
+  "uhc.rules.border.3": " The End World Border will always be big enough to fight the dragon.",
+
+  "uhc.rules.pvp": "PvP",
+  "uhc.rules.pvp.1": " No portal trapping or camping.",
+  "uhc.rules.pvp.2": " No sky-basing.",
+  "uhc.rules.pvp.3": " No hiding outside of the world border.",
+  "uhc.rules.pvp.4": " No Nether roof.",
+  "uhc.rules.pvp.5": " No level 2 potions or instant health potions.",
+  "uhc.rules.pvp.6": " No cross teaming.",
 
   "uhc.rules.gameplay": "Gameplay",
-  "uhc.rules.gameplay.1": " No portal trapping or camping.",
-  "uhc.rules.gameplay.2": " No sky-basing. If what you are doing is deemed to be sky-basing an admin will ask you to move.",
-  "uhc.rules.gameplay.3": " No Nether roof.",
-  "uhc.rules.gameplay.4": " No level 2 potions or instant health potions.",
-  "uhc.rules.gameplay.5": " No cross teaming.",
+  "uhc.rules.gameplay.1": " Full bright is automatically given.",
+  "uhc.rules.gameplay.2": " Apples have an increased drop rate from leaves.",
+  "uhc.rules.gameplay.3": " Most passive mobs will not have AI.",
+
+  "uhc.rules.glowing": "Glowing",
+  "uhc.rules.glowing.1": " Once the border reaches its final size, a two-minute countdown will begin. After the countdown finishes, all remaining players will receive the glowing effect",
+
+  "uhc.rules.heads": "Player Heads",
+  "uhc.rules.heads.1": " Players will §balways§r drop their heads on death which can be eaten for some buffs.",
+  "uhc.rules.heads.2": " Surrounding the player head in gold ingots will yield a golden head, which gives better buffs.",
 
   "uhc.rules.chat": "Chat",
   "uhc.rules.chat.1": " Please be respectful of everyone in both text and voice chat. You may be muted if you are not respectful.",
@@ -135,14 +153,17 @@
 
   "uhc.rules.spectators": "Spectators",
   "uhc.rules.spectators.1": " Please be mindful that you do not share information that your team would not otherwise know.",
+  "uhc.rules.spectators.2": " You can use the %s command to teleport, or use the gui.",
+  "uhc.rules.spectators.3": " Double tap %s to toggle between no-clip spectator mode.",
 
-  "uhc.rules.gentlemansRules": "Gentleman's Rules",
-  "uhc.rules.gentlemansRules.1": " These rules do not cover everything. Do not try to find loopholes or work around the rules.",
+  "uhc.rules.gentleman": "Gentleman's Rules",
+  "uhc.rules.gentleman.1": " These rules do not cover everything. Do not try to find loopholes or work around the rules.",
 
   "uhc.rules.reminders": "Reminders",
-  "uhc.rules.reminders.1": " You can toggle your teammates glowing with the command %s",
-  "uhc.rules.reminders.2": " You can toggle night vision with the command %s",
-  "uhc.rules.reminders.3": " Team chat will be enabled by default, to message in global chat, prefix your message with a %s",
+  "uhc.rules.reminders.1": " Toggle your team glowing with %s",
+  "uhc.rules.reminders.2": " Toggle night vision with %s",
+  "uhc.rules.reminders.3": " Send your coords in team chat with %s",
+  "uhc.rules.reminders.4": " Team chat will be enabled by default, to message in global chat, prefix your message with a %s, or toggle your default chat with the command %s",
 
   "uhc.rules.questions": "Questions",
   "uhc.rules.questions.1": " If at anytime you have questions or concerns please message an Admin.",

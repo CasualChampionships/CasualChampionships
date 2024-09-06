@@ -15,6 +15,7 @@ import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.phase.Phase
+import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.LootTableUtils
 import net.casual.arcade.utils.LootTableUtils.addItem
 import net.casual.arcade.utils.LootTableUtils.between
@@ -41,7 +42,9 @@ import net.minecraft.core.HolderLookup
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.tags.ItemTags
 import net.minecraft.world.InteractionResult
+import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.item.ArmorItem
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
@@ -77,9 +80,9 @@ class DuelMinigame(
         this.settings.copyFrom(this.duelSettings)
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
 
-        this.effects.setGlowingPredicate { observee, observer ->
-            (this.players.isSpectating(observer) || this.duelSettings.glowing) && observee is ServerPlayer
-        }
+        this.effects.setGlowingPredicate({ observee, observer ->
+            this.players.isPlaying(observee) && (this.players.isSpectating(observer) || this.duelSettings.glowing)
+        }, false)
 
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.level, this.arena.area.getBoundingBox().center)
     }
@@ -127,6 +130,13 @@ class DuelMinigame(
             if (event.stack.item !is BlockItem) {
                 event.cancel(InteractionResult.PASS)
             }
+        }
+    }
+
+    @Listener
+    private fun onPlayerItemUse(event: PlayerItemUseEvent) {
+        if (event.stack.isOf(ItemTags.BOATS)) {
+            event.cancel(InteractionResultHolder.pass(event.stack))
         }
     }
 

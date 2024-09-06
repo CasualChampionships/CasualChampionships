@@ -39,6 +39,7 @@
 
   "casual.team.noTeam": "You are not on a team!",
   "casual.spectator.notSpectating": "You are not spectating!",
+  "casual.spectator.teleport": "Teleport To Players",
 
   "casual.position.broadcast": "My position is %s",
 
@@ -72,6 +73,7 @@
   "casual.game.insideBorder": "Travel %s to get to safety",
   "casual.game.grace.first": "The grace period will last %s minutes. Once it is over pvp will be enabled and the border will start moving!",
   "casual.game.grace.generic": "The grace period will end in %s minutes!",
+  "casual.game.borderPaused": "The border has paused shrinking",
   "casual.game.borderResumed": "The border has resumed shrinking",
   "casual.game.grace.over": "The grace period is now over and the border has started to move!",
   "casual.game.eliminated": "%s has been ELIMINATED!",

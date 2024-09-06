@@ -4,6 +4,7 @@
   "package": "net.casual.championships.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "feature.RandomCommandMixin",
     "feature.ServerGamePacketListenerImplMixin",
     "feature.ServerLevelMixin"
   ],

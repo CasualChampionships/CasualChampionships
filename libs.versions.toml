@@ -7,10 +7,11 @@ parchment            = "1.21:2024.07.28"
 fabric-api           = "0.103.0+1.21.1"
 fabric-kotlin        = "1.11.0+kotlin.2.0.0"
 map-canvas           = "0.4.1+1.21"
-arcade               = "6a65e30cea14e052d24a92c624682edefb2a7fe2"
+arcade               = "4c00c2d292e0f8b80aacd421bc37fc8b8b384c4c"
 arcade-datagen       = "1.0.14"
 casual-database      = "a70b766ff9fd03702542c62d13a49fbc2d630733"
-server-replay        = "a82ce79bdc"
+server-replay        = "8867e45f83"
+glide                = "0.1.1+1.21"
 
 [libraries]
 minecraft       = { module = "com.mojang:minecraft"                               , version.ref = "minecraft" }
@@ -22,6 +23,7 @@ arcade          = { module = "com.github.CasualChampionships:arcade"            
 arcade-datagen  = { module = "com.github.CasualChampionships:arcade-datagen"      , version.ref = "arcade-datagen" }
 casual-database = { module = "com.github.CasualChampionships:casual-database-core", version.ref = "casual-database" }
 server-replay   = { module = "com.github.senseiwells:ServerReplay"                , version.ref = "server-replay" }
+glide           = { module = "me.senseiwells:Glide"                               , version.ref = "glide" }
 
 [plugins]
 fabric-loom   = { id = "fabric-loom", version.ref = "fabric-loom" }

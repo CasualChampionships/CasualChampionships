@@ -2,6 +2,7 @@ package net.casual.championships.minigame
 
 import com.mojang.authlib.GameProfile
 import com.mojang.serialization.JsonOps
+import me.senseiwells.glide.minigame.GlideMinigame
 import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
@@ -118,7 +119,16 @@ object CasualMinigames {
         Minigames.registerFactory(UHCMinigame.ID, this::createUHCMinigame)
         Minigames.registerFactory(DuelMinigame.ID, this::createDuelMinigame)
         Minigames.registerFactory(CasualLobbyMinigame.ID, this::createLobbyMinigame)
-        // Minigames.registerFactory(ExampleMinigame.ID) { ExampleMinigame(it.server) }
+        Minigames.registerFactory(GlideMinigame.ID) { context ->
+            val glide = GlideMinigame.create(context)
+            glide.addResources(object: MinigameResources {
+                override fun getPacks(): Collection<PackInfo> {
+                    val pack = CasualResourcePackHost.getHostedPack("glide_pack") ?: return listOf()
+                    return listOf(pack.toPackInfo(!CasualConfig.dev))
+                }
+            })
+            glide
+        }
 
         GlobalEventHandler.register<ServerRegisterCommandEvent> { (dispatcher, context) ->
             MinesweeperCommand.register(dispatcher, context)
@@ -389,7 +399,6 @@ object CasualMinigames {
         for (entry in whitelist.entries.toList()) {
             server.playerList.whiteList.remove(entry)
         }
-        println(this.getDataManager().getParticipants())
         for (participant in this.getDataManager().getParticipants()) {
             whitelist.add(UserWhiteListEntry(participant))
         }

@@ -257,6 +257,9 @@ class CasualLobbyMinigame(
     }
 
     private fun startDuel(context: CommandContext<CommandSourceStack>): Int {
+        if (this.phase >= LobbyPhase.Readying) {
+            return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
+        }
         val player = context.source.playerOrException
         val settings = DuelSettings(this.casualLobby.duelArenaTemplates)
         val gui = DuelConfigurationGui(player, settings, this.players::all, this::requestDuelWith)
@@ -324,8 +327,8 @@ class CasualLobbyMinigame(
             }
             return true
         }
-        if (!this.players.has(initiator)) {
-            requester.broadcastTo(Component.translatable("casual.duel.cannotDuelNow"), initiator)
+        if (!this.players.has(initiator) || this.phase >= LobbyPhase.Readying) {
+            requester.broadcastTo(Component.translatable("casual.duel.cannotDuelNow").mini().red(), initiator)
             return false
         }
 
