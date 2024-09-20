@@ -1,16 +1,13 @@
 package net.casual.championships.minigame.lobby
 
-import net.casual.arcade.advancements.AdvancementBuilder
 import net.casual.arcade.utils.AdvancementUtils.setTitleAndDesc
+import net.casual.arcade.utils.advancement.AdvancementCollection
 import net.casual.championships.CasualMod
-import net.minecraft.advancements.AdvancementHolder
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Items
 
-object LobbyAdvancements {
-    private val ALL = LinkedHashSet<AdvancementHolder>()
-
+object LobbyAdvancements: AdvancementCollection() {
     val ROOT = register {
         id = CasualMod.id("root")
         display(Items.GOLDEN_APPLE)
@@ -53,15 +50,5 @@ object LobbyAdvancements {
         setTitleAndDesc("lobby.advancements.officiallyBored")
         toast()
         announce()
-    }
-
-    fun register(builder: AdvancementBuilder.() -> Unit): AdvancementHolder {
-        val advancement = AdvancementBuilder.create(builder).build()
-        ALL.add(advancement)
-        return advancement
-    }
-
-    fun getAllAdvancements(): Collection<AdvancementHolder> {
-        return ALL
     }
 }

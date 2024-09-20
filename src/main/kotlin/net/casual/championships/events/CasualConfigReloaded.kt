@@ -1,5 +1,6 @@
 package net.casual.championships.events
 
 import net.casual.arcade.events.core.Event
+import net.casual.championships.util.CasualConfig
 
-class CasualConfigReloaded: Event
+data class CasualConfigReloaded(val config: CasualConfig): Event

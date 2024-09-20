@@ -5,34 +5,34 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.GuiHelpers
 import me.senseiwells.replay.player.PlayerRecorders
-import net.casual.arcade.border.MultiLevelBorderListener
-import net.casual.arcade.border.MultiLevelBorderTracker
-import net.casual.arcade.border.TrackedBorder
-import net.casual.arcade.entity.player.ExtendedGameMode
-import net.casual.arcade.entity.player.ExtendedGameMode.Companion.extendedGameMode
+import net.casual.arcade.commands.*
+import net.casual.arcade.dimensions.border.MultiLevelBorderListener
+import net.casual.arcade.dimensions.border.MultiLevelBorderTracker
+import net.casual.arcade.dimensions.border.TrackedBorder
+import net.casual.arcade.dimensions.utils.FantasyUtils
+import net.casual.arcade.dimensions.utils.FantasyUtils.PersistentConfig
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.level.LevelLootEvent
-import net.casual.arcade.events.minigame.*
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.gui.predicate.PlayerObserverPredicate
-import net.casual.arcade.gui.shapes.ArrowShape
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.annotation.ListenerFlags.IS_PLAYING
+import net.casual.arcade.minigame.events.*
+import net.casual.arcade.minigame.gamemode.ExtendedGameMode
+import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGameMode
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.SavableMinigame
+import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.task.impl.MinigameTask
+import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
+import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.utils.*
-import net.casual.arcade.utils.CommandUtils.argument
-import net.casual.arcade.utils.CommandUtils.commandSuccess
-import net.casual.arcade.utils.CommandUtils.fail
-import net.casual.arcade.utils.CommandUtils.literal
-import net.casual.arcade.utils.CommandUtils.success
+import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.lime
@@ -40,7 +40,6 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.withMiniShiftedDownFont
-import net.casual.arcade.utils.FantasyUtils.PersistentConfig
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.arrayOrDefault
 import net.casual.arcade.utils.JsonUtils.booleanOrDefault
@@ -52,8 +51,6 @@ import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.JsonUtils.strings
 import net.casual.arcade.utils.JsonUtils.toJsonStringArray
 import net.casual.arcade.utils.MathUtils.opposite
-import net.casual.arcade.utils.MinigameUtils.addEventListener
-import net.casual.arcade.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.directionToNearestBorder
@@ -70,13 +67,14 @@ import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
-import net.casual.arcade.utils.ShapeUtils.drawAsParticlesFor
-import net.casual.arcade.utils.StatUtils.increment
+import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.impl.Location
 import net.casual.arcade.utils.impl.Sound
-import net.casual.arcade.utils.location.Location
+import net.casual.arcade.visuals.shapes.ArrowShape
+import net.casual.arcade.visuals.shapes.ShapePoints.Companion.drawAsParticlesFor
 import net.casual.championships.common.event.TippedArrowTradeOfferEvent
 import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent
 import net.casual.championships.common.event.border.BorderPortalWithinBoundsEvent
@@ -84,9 +82,9 @@ import net.casual.championships.common.items.PlayerHeadItem
 import net.casual.championships.common.minigame.rules.Rules
 import net.casual.championships.common.minigame.rules.RulesProvider
 import net.casual.championships.common.recipes.GoldenHeadRecipe
-import net.casual.championships.common.task.GlowingBossBarTask
-import net.casual.championships.common.task.GracePeriodBossBarTask
-import net.casual.championships.common.ui.bossbar.ActiveBossBar
+import net.casual.championships.common.task.GlowingBossbarTask
+import net.casual.championships.common.task.GracePeriodBossbarTask
+import net.casual.championships.common.ui.bossbar.ActiveBossbar
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.common.util.CommonUI.broadcastInfo
@@ -127,6 +125,18 @@ import net.minecraft.world.level.border.WorldBorder
 import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.scores.Team
+import kotlin.collections.Collection
+import kotlin.collections.HashSet
+import kotlin.collections.Map
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.count
+import kotlin.collections.filter
+import kotlin.collections.forEach
+import kotlin.collections.iterator
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.none
 import kotlin.math.abs
 import kotlin.math.atan2
 
@@ -148,10 +158,10 @@ class UHCMinigame(
     override val settings = UHCSettings(this)
 
     init {
-        this.addTaskFactory(GlowingBossBarTask.cast())
-        this.addTaskFactory(GracePeriodBossBarTask.cast())
+        this.addTaskFactory(GlowingBossbarTask.cast())
+        this.addTaskFactory(GracePeriodBossbarTask.cast())
 
-        this.ui.addBossbar(ActiveBossBar(this))
+        this.ui.addBossbar(ActiveBossbar(this))
         this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
     }
@@ -405,6 +415,7 @@ class UHCMinigame(
         player.closeContainer()
 
         player.grantAllRecipesSilently()
+        this.recipes.grantAll(player)
 
         player.revokeAllAdvancements()
         player.grantAdvancement(UHCAdvancements.ROOT)
@@ -672,8 +683,6 @@ class UHCMinigame(
         for (level in this.levels.all()) {
             this.tracker.addLevelBorder(level)
         }
-
-        BorderUtils.isolateWorldBorders()
     }
 
     private fun moveWorldBorder(border: TrackedBorder, level: Level, stage: UHCBorderStage, size: UHCBorderSize, instant: Boolean = false) {
@@ -817,7 +826,7 @@ class UHCMinigame(
     // Commands
 
     private fun registerCommands() {
-        this.commands.register(CommandUtils.buildLiteral("uhc") {
+        this.commands.register(CommandTree.buildLiteral("uhc") {
             literal("player") {
                 requiresAdminOrPermission()
                 argument("player", EntityArgument.player()) {
@@ -865,7 +874,7 @@ class UHCMinigame(
                 executes { CommonCommands.broadcastPositionToTeammates(this@UHCMinigame, it) }
             }
         })
-        this.commands.register(CommandUtils.buildLiteral("s") {
+        this.commands.register(CommandTree.buildLiteral("s") {
             executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
             argument("player", EntityArgument.player()) {
                 executes(::teleportToPlayer)
@@ -946,13 +955,14 @@ class UHCMinigame(
                     ResourceUtils.random { "end_$it" },
                 )
             }
+            val server = context.server
             val levels = FantasyUtils.createPersistentVanillaLikeLevels(
                 context.server,
-                PersistentConfig(overworld, FantasyUtils.createOverworldConfig(overworldSeed)),
-                PersistentConfig(nether, FantasyUtils.createNetherConfig(netherSeed)),
-                PersistentConfig(end, FantasyUtils.createEndConfig(endSeed))
+                PersistentConfig(overworld, FantasyUtils.createOverworldConfig(server, overworldSeed)),
+                PersistentConfig(nether, FantasyUtils.createNetherConfig(server, netherSeed)),
+                PersistentConfig(end, FantasyUtils.createEndConfig(server, endSeed))
             )
-            val uhc = UHCMinigame(context.server, levels.overworld, levels.nether, levels.end)
+            val uhc = UHCMinigame(server, levels.overworld, levels.nether, levels.end)
             uhc.levels.add(levels.overworldHandle)
             uhc.levels.add(levels.netherHandle)
             uhc.levels.add(levels.endHandle)

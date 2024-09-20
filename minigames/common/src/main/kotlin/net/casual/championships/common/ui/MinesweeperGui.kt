@@ -6,9 +6,9 @@ import eu.pb4.sgui.api.elements.GuiElementInterface
 import eu.pb4.sgui.api.gui.SimpleGui
 import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
+import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
-import net.casual.arcade.utils.EventUtils.broadcast
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.items.MenuItem
@@ -143,7 +143,7 @@ class MinesweeperGui(
     private fun onWin(player: ServerPlayer) {
         this.complete = true
         val time = (System.nanoTime() - grid.startTime).nanoseconds
-        MinesweeperWonEvent(player, time).broadcast()
+        GlobalEventHandler.broadcast(MinesweeperWonEvent(player, time))
 
         val formatted = FORMAT.format(time.toDouble(DurationUnit.SECONDS))
         player.sendSystemMessage(CommonComponents.MINESWEEPER_WON.generate(formatted))

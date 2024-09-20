@@ -1,18 +1,9 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.chat.ChatFormatter
-import net.casual.arcade.gui.elements.ComponentElements
-import net.casual.arcade.gui.elements.LevelSpecificElement
-import net.casual.arcade.gui.elements.PlayerSpecificElement
-import net.casual.arcade.gui.elements.SidebarElements
-import net.casual.arcade.gui.nametag.ArcadeNameTag
-import net.casual.arcade.gui.predicate.EntityObserverPredicate
 import net.casual.arcade.gui.predicate.PlayerObserverPredicate
 import net.casual.arcade.gui.predicate.PlayerObserverPredicate.Companion.toPlayer
-import net.casual.arcade.gui.sidebar.ArcadeSidebar
-import net.casual.arcade.gui.sidebar.SidebarComponent
-import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
 import net.casual.arcade.minigame.Minigame
+import net.casual.arcade.minigame.chat.ChatFormatter
 import net.casual.arcade.minigame.managers.MinigameChatManager
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.bold
@@ -24,6 +15,15 @@ import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.visuals.elements.ComponentElements
+import net.casual.arcade.visuals.elements.LevelSpecificElement
+import net.casual.arcade.visuals.elements.PlayerSpecificElement
+import net.casual.arcade.visuals.elements.SidebarElements
+import net.casual.arcade.visuals.nametag.PlayerNameTag
+import net.casual.arcade.visuals.predicate.EntityObserverPredicate
+import net.casual.arcade.visuals.sidebar.Sidebar
+import net.casual.arcade.visuals.sidebar.SidebarComponent
+import net.casual.arcade.visuals.tab.PlayerListDisplay
 import net.casual.championships.common.ui.elements.SpectatorAndAdminTeamsElement
 import net.casual.championships.common.ui.elements.TeammateElement
 import net.casual.championships.common.ui.game.TeamSelectorGui
@@ -74,20 +74,20 @@ object CommonUI {
 
     fun createPlayingNameTag(
         predicate: PlayerObserverPredicate = EntityObserverPredicate.visibleObservee().toPlayer()
-    ): ArcadeNameTag {
-        return ArcadeNameTag({ it.displayName!! }, predicate)
+    ): PlayerNameTag {
+        return PlayerNameTag({ it.displayName!! }, predicate)
     }
 
     fun createPlayingHealthTag(
         predicate: PlayerObserverPredicate = CommonPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
-    ): ArcadeNameTag {
-        return ArcadeNameTag(
+    ): PlayerNameTag {
+        return PlayerNameTag(
             { String.format("%.1f ", it.health / 2).literal().append(CommonComponents.Hud.HARDCORE_HEART) },
             predicate
         )
     }
 
-    fun addTeammates(sidebar: ArcadeSidebar, size: Int): ArcadeSidebar {
+    fun addTeammates(sidebar: Sidebar, size: Int): Sidebar {
         val buffer = ComponentUtils.space()
         val teammates = Component.empty().append(buffer).append(CommonComponents.TEAMMATES.mini())
         sidebar.addRow(SidebarElements.withNoScore(teammates))
@@ -97,7 +97,7 @@ object CommonUI {
         return sidebar
     }
 
-    fun addBorderDistanceAndRadius(sidebar: ArcadeSidebar) {
+    fun addBorderDistanceAndRadius(sidebar: Sidebar) {
         val buffer = ComponentUtils.space()
         sidebar.addRow(LevelSpecificElement.cached { level ->
             val phase = ((level.server.tickCount / 3) % 5) + 1
@@ -131,19 +131,19 @@ object CommonUI {
         })
     }
 
-    fun createTeamMinigameTabDisplay(minigame: Minigame<*>): ArcadePlayerListDisplay {
-        val display = ArcadePlayerListDisplay(CasualPlayerListEntries(minigame))
+    fun createTeamMinigameTabDisplay(minigame: Minigame<*>): PlayerListDisplay {
+        val display = PlayerListDisplay(CasualPlayerListEntries(minigame))
         addCasualFooterAndHeader(minigame, display)
         return display
     }
 
-    fun createSimpleTabDisplay(minigame: Minigame<*>): ArcadePlayerListDisplay {
-        val display = ArcadePlayerListDisplay(SimpleCasualPlayerListEntries(minigame))
+    fun createSimpleTabDisplay(minigame: Minigame<*>): PlayerListDisplay {
+        val display = PlayerListDisplay(SimpleCasualPlayerListEntries(minigame))
         addCasualFooterAndHeader(minigame, display)
         return display
     }
 
-    fun addCasualFooterAndHeader(minigame: Minigame<*>, display: ArcadePlayerListDisplay) {
+    fun addCasualFooterAndHeader(minigame: Minigame<*>, display: PlayerListDisplay) {
         val hostedByKiwiTech = Component.empty()
             .append(SERVER_HOSTED_BY)
             .append(ComponentUtils.space())

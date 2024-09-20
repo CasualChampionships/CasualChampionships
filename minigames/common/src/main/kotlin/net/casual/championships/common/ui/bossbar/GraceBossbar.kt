@@ -1,24 +1,24 @@
 package net.casual.championships.common.ui.bossbar
 
-import net.casual.arcade.gui.bossbar.TimerBossBar
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.TimeUtils.formatHHMMSS
+import net.casual.arcade.utils.MathUtils
+import net.casual.arcade.utils.TimeUtils.formatMMSS
+import net.casual.arcade.visuals.bossbar.TimerBossbar
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.BossEvent
 
-class LobbyBossBar: TimerBossBar() {
+class GraceBossbar: TimerBossbar() {
     override fun getTitle(player: ServerPlayer): Component {
-        if (this.complete || !this.hasDuration) {
-            return CommonComponents.STARTING_SOON_BACKGROUNDED.generate().mini()
-        }
-        val time = this.getRemainingDuration().formatHHMMSS()
-        return CommonComponents.STARTING_IN_BACKGROUNDED.generate(time).mini()
+        return CommonComponents.GRACE_BACKGROUNDED.generate(this.getRemainingDuration().formatMMSS())
+    }
+
+    override fun getProgress(player: ServerPlayer): Float {
+        return MathUtils.centeredScale(super.getProgress(player), 0.75F)
     }
 
     override fun getColour(player: ServerPlayer): BossEvent.BossBarColor {
-        return BossEvent.BossBarColor.YELLOW
+        return BossEvent.BossBarColor.GREEN
     }
 
     override fun getOverlay(player: ServerPlayer): BossEvent.BossBarOverlay {

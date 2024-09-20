@@ -5,13 +5,13 @@ import it.unimi.dsi.fastutil.doubles.Double2ObjectFunction
 import it.unimi.dsi.fastutil.doubles.Double2ObjectLinkedOpenHashMap
 import it.unimi.dsi.fastutil.doubles.Double2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import net.casual.arcade.dimensions.vanilla.VanillaLikeLevel
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.yellow
-import net.casual.arcade.utils.LevelUtils
 import net.casual.championships.uhc.border.UHCBorderSize
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
@@ -62,7 +62,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
     }
 
     fun update(level: ServerLevel) {
-        val dimension = LevelUtils.getLikeDimension(level)
+        val dimension = VanillaLikeLevel.getLikeDimension(level)
         val (canvas, _, sizeIcon, playerIcons) = this.canvases.getOrPut(level.dimension()) {
             val dimensionName = when (dimension) {
                 Level.OVERWORLD -> "overworld"

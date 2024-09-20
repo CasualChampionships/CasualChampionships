@@ -1,10 +1,10 @@
 package net.casual.championships.uhc
 
-import net.casual.arcade.level.VanillaDimension
-import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.bool
-import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.enumeration
-import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.float64
-import net.casual.arcade.settings.display.MenuGameSettingBuilder.Companion.time
+import net.casual.arcade.dimensions.vanilla.VanillaDimension
+import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.bool
+import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.enumeration
+import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64
+import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.time
 import net.casual.arcade.utils.ItemUtils.hideAttributeTooltips
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion

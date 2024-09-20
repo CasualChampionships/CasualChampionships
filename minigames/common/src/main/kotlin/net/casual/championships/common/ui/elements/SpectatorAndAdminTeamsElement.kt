@@ -1,6 +1,5 @@
 package net.casual.championships.common.ui.elements
 
-import net.casual.arcade.gui.elements.UniversalElement
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.managers.MinigameTeamManager
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
@@ -8,6 +7,7 @@ import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.arcade.visuals.elements.UniversalElement
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer

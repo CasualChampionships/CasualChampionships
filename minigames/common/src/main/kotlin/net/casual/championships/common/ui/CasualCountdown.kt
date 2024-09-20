@@ -1,6 +1,5 @@
 package net.casual.championships.common.ui
 
-import net.casual.arcade.gui.countdown.TitledCountdown
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
@@ -12,6 +11,7 @@ import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.visuals.countdown.TitledCountdown
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonSounds
 import net.minecraft.network.chat.Component

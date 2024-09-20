@@ -2,16 +2,16 @@ package net.casual.championships.common.ui.tab
 
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
-import net.casual.arcade.gui.tab.PlayerListEntries
-import net.casual.arcade.gui.tab.TeamListEntries
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
-import net.casual.arcade.resources.font.heads.PlayerHeadFont
+import net.casual.arcade.rp.font.heads.PlayerHeadFont
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.greyscale
 import net.casual.arcade.utils.ComponentUtils.italicise
 import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.visuals.tab.PlayerListEntries
+import net.casual.arcade.visuals.tab.TeamListEntries
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.MinecraftServer

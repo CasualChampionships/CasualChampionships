@@ -1,22 +1,24 @@
 package net.casual.championships.minigame.lobby
 
 import it.unimi.dsi.fastutil.ints.IntList
-import net.casual.arcade.area.PlaceableArea
-import net.casual.arcade.entity.firework.VirtualFirework
-import net.casual.arcade.gui.bossbar.TimerBossBar
-import net.casual.arcade.gui.bossbar.templates.TimerBossBarTemplate
-import net.casual.arcade.gui.countdown.Countdown
-import net.casual.arcade.gui.countdown.templates.CountdownTemplate
-import net.casual.arcade.minigame.events.lobby.Lobby
+import net.casual.arcade.minigame.area.PlaceableArea
+import net.casual.arcade.minigame.lobby.Lobby
+import net.casual.arcade.minigame.lobby.LobbyMinigame
+import net.casual.arcade.minigame.template.bossbar.TimerBossbarTemplate
+import net.casual.arcade.minigame.template.countdown.CountdownTemplate
+import net.casual.arcade.minigame.template.location.LocationTemplate
 import net.casual.arcade.scheduler.MinecraftScheduler
-import net.casual.arcade.scheduler.MinecraftTimeDuration
-import net.casual.arcade.task.impl.PlayerTask
+import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.arcade.utils.location.Location
-import net.casual.arcade.utils.location.template.LocationTemplate
+import net.casual.arcade.utils.impl.Location
+import net.casual.arcade.utils.time.MinecraftTimeDuration
+import net.casual.arcade.visuals.bossbar.TimerBossbar
+import net.casual.arcade.visuals.countdown.Countdown
+import net.casual.arcade.visuals.firework.VirtualFirework
 import net.casual.championships.duel.arena.DuelArenasTemplate
 import net.casual.championships.minigame.CasualMinigames
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.component.FireworkExplosion.Shape
 import kotlin.random.Random
@@ -24,13 +26,19 @@ import kotlin.random.Random
 class CasualLobby(
     override val area: PlaceableArea,
     private val spawnTemplate: LocationTemplate,
-    private val bossbarTemplate: TimerBossBarTemplate,
+    private val bossbarTemplate: TimerBossbarTemplate,
     private val countdownTemplate: CountdownTemplate,
     private val podiumTemplate: LocationTemplate,
     private val podiumViewTemplate: LocationTemplate,
     private val fireworksLocations: List<LocationTemplate>,
     val duelArenaTemplates: List<DuelArenasTemplate>
 ): Lobby {
+    override fun createMinigame(server: MinecraftServer): LobbyMinigame {
+        val minigame = CasualLobbyMinigame(server, this)
+        CasualMinigames.setCasualUI(minigame)
+        return minigame
+    }
+
     override val spawn: Location
         get() = this.spawnTemplate.get(this.area.level)
 
@@ -43,7 +51,7 @@ class CasualLobby(
         return super.getSpawn(player)
     }
 
-    override fun createBossbar(): TimerBossBar {
+    override fun createBossbar(): TimerBossbar {
         return this.bossbarTemplate.create()
     }
 

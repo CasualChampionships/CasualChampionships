@@ -1,20 +1,18 @@
 package net.casual.championships.common.minigame
 
 import eu.pb4.sgui.api.gui.GuiInterface
-import net.casual.arcade.gui.screen.SelectionGuiBuilder
-import net.casual.arcade.gui.screen.SelectionGuiStyle
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.minigame.MinigameSettings
-import net.casual.arcade.settings.display.DisplayableSettingsDefaults
-import net.casual.arcade.settings.display.MenuGameSetting
-import net.casual.arcade.settings.display.MenuGameSettingBuilder
+import net.casual.arcade.minigame.settings.MinigameSettings
+import net.casual.arcade.minigame.settings.display.DisplayableSettingsDefaults
+import net.casual.arcade.minigame.settings.display.MenuGameSetting
+import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.visuals.screen.SelectionGuiBuilder
+import net.casual.arcade.visuals.screen.SelectionGuiStyle
 import net.casual.championships.common.items.MenuItem.Companion.CROSS
 import net.casual.championships.common.items.MenuItem.Companion.CROSS_SELECTED
-import net.casual.championships.common.items.MenuItem.Companion.GREY_CROSS
-import net.casual.championships.common.items.MenuItem.Companion.GREY_TICK
 import net.casual.championships.common.items.MenuItem.Companion.TICK
 import net.casual.championships.common.items.MenuItem.Companion.TICK_SELECTED
 import net.casual.championships.common.util.CommonComponents.DISABLE

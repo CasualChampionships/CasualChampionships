@@ -3,7 +3,7 @@ package net.casual.championships.data
 import com.mojang.authlib.GameProfile
 import kotlinx.coroutines.*
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.stats.ArcadeStats
+import net.casual.arcade.minigame.stats.ArcadeStats
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CommonStats

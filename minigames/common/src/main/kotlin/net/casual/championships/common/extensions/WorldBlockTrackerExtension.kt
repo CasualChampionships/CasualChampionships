@@ -2,7 +2,7 @@ package net.casual.championships.common.extensions
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 import net.casual.arcade.extensions.Extension
-import net.casual.arcade.utils.LevelUtils.getExtension
+import net.casual.arcade.extensions.event.LevelExtensionEvent.Companion.getExtension
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.state.BlockState
@@ -40,6 +40,6 @@ internal class WorldBlockTrackerExtension: Extension {
         private const val TICKS_TO_STORE_CHANGES = 20
 
         val ServerLevel.blockTracker
-            get() = this.getExtension(WorldBlockTrackerExtension::class.java)
+            get() = this.getExtension<WorldBlockTrackerExtension>()
     }
 }

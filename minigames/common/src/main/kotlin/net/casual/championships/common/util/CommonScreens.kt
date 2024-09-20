@@ -1,9 +1,7 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.gui.screen.SelectionGuiComponents
-import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.visuals.screen.SelectionGuiComponents
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.CommonComponents.BACK
 import net.casual.championships.common.util.CommonComponents.EXIT

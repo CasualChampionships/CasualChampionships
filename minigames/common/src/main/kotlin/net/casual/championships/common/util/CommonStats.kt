@@ -1,6 +1,6 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.stats.StatType
+import net.casual.arcade.minigame.stats.StatType
 import net.casual.championships.common.CommonMod
 
 object CommonStats {

@@ -1,16 +1,16 @@
 package net.casual.championships.duel
 
 import net.casual.arcade.minigame.phase.Phase
+import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
+import net.casual.arcade.minigame.utils.MinigameUtils.countdown
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.literal
-import net.casual.arcade.utils.GameRuleUtils.resetToDefault
-import net.casual.arcade.utils.GameRuleUtils.set
-import net.casual.arcade.utils.MinigameUtils.countdown
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
-import net.casual.arcade.utils.location.teleporter.EntityTeleporter.Companion.teleport
-import net.casual.championships.common.ui.bossbar.ActiveBossBar
+import net.casual.arcade.utils.resetToDefault
+import net.casual.arcade.utils.set
+import net.casual.championships.common.ui.bossbar.ActiveBossbar
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonStats
 import net.minecraft.ChatFormatting
@@ -35,7 +35,7 @@ enum class DuelPhase(
                 }
             }
 
-            minigame.ui.addBossbar(ActiveBossBar(minigame))
+            minigame.ui.addBossbar(ActiveBossbar(minigame))
 
             minigame.arena.teleporter.teleport(minigame.level, minigame.players.playing, minigame.duelSettings.teams)
 

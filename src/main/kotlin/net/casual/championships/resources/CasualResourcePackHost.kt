@@ -2,42 +2,60 @@ package net.casual.championships.resources
 
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.server.ServerStoppingEvent
-import net.casual.arcade.resources.hosting.DirectoryPackSupplier
-import net.casual.arcade.resources.hosting.HostedPack
-import net.casual.arcade.resources.hosting.PackHost
-import net.casual.arcade.scheduler.GlobalTickedScheduler
+import net.casual.arcade.host.HostedPack
+import net.casual.arcade.host.PackHost
+import net.casual.arcade.host.PackHost.HostedPackRef
+import net.casual.arcade.host.pack.DirectoryPackSupplier
+import net.casual.arcade.resources.creator.NamedResourcePackCreator
+import net.casual.arcade.resources.utils.ResourcePackUtils.addPack
+import net.casual.championships.CasualMod
+import net.casual.championships.common.CommonMod
 import net.casual.championships.events.CasualConfigReloaded
+import net.casual.championships.uhc.UHCMod
 import net.casual.championships.util.CasualConfig
 import java.util.concurrent.CompletableFuture
-import kotlin.io.path.createDirectories
 
 object CasualResourcePackHost {
     private val packs = CasualConfig.resolve("packs")
-    // Note to self: if resource packs don't work, press F3 + T before
-    // you waste 2 hours trying to debug a non-existent issue
-    private val host = PackHost(1)
+    private val generated = this.packs.resolve("generated")
 
-    private val ip by CasualConfig.string("resource_host_ip", "0.0.0.0")
-    private val port by CasualConfig.int("resource_host_port", 24464)
+    private val host = PackHost(CasualMod.config.packHostIp, CasualMod.config.packHostPort)
+    private val common = ArrayList<HostedPackRef>()
+
+    val uhc: HostedPack by this.host(UHCMod.UHC_PACK)
 
     init {
-        host.addPacks(DirectoryPackSupplier(packs))
-        packs.createDirectories()
-        GlobalTickedScheduler.later {
-            reload()
+        this.host.addSupplier(DirectoryPackSupplier(this.packs))
+        for (creator in CommonMod.COMMON_PACKS) {
+            this.common.add(this.host(creator))
         }
     }
 
-    fun getHostedPack(name: String): HostedPack? {
-        return host.getHostedPack(name)
+    fun getCommonPacks(): List<HostedPack> {
+        return this.common.map(HostedPackRef::value)
     }
 
-    internal fun reload(): CompletableFuture<Boolean> {
-        return host.start(ip, port)
+    @Deprecated("")
+    fun getHostedPack(name: String): HostedPack? {
+        return this.host.getHostedPack(name)
+    }
+
+    internal fun reload(): CompletableFuture<Void> {
+        return this.host.reload()
     }
 
     internal fun registerEvents() {
-        GlobalEventHandler.register<ServerStoppingEvent> { host.shutdown() }
-        GlobalEventHandler.register<CasualConfigReloaded> { reload() }
+        this.host.start()
+
+        GlobalEventHandler.register<ServerStoppingEvent> {
+            this.host.stop()
+        }
+        GlobalEventHandler.register<CasualConfigReloaded> {
+            this.reload()
+        }
+    }
+
+    private fun host(creator: NamedResourcePackCreator): HostedPackRef {
+        return this.host.addPack(this.generated, creator)
     }
 }

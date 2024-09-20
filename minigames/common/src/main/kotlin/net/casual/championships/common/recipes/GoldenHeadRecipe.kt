@@ -1,6 +1,6 @@
 package net.casual.championships.common.recipes
 
-import net.casual.arcade.recipes.CraftingRecipeBuilder
+import net.casual.arcade.utils.recipe.CraftingRecipeBuilder
 import net.casual.championships.common.CommonMod
 import net.casual.championships.common.util.CommonItems
 import net.minecraft.world.item.ItemStack

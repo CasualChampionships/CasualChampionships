@@ -1,11 +1,11 @@
 package net.casual.championships.duel.ui
 
-import net.casual.arcade.gui.screen.SimpleNestedGui
-import net.casual.arcade.settings.display.MenuGameSetting
+import net.casual.arcade.minigame.settings.display.MenuGameSetting
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.hideTooltip
-import net.casual.arcade.utils.ScreenUtils.setSlot
+import net.casual.arcade.visuals.screen.SimpleNestedGui
+import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.duel.DuelSettings

@@ -1,7 +1,7 @@
 package net.casual.championships.uhc.border
 
-import net.casual.arcade.scheduler.MinecraftTimeDuration
 import net.casual.arcade.utils.TimeUtils.Minutes
+import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.minecraft.world.level.Level
 
 enum class UHCBorderStage(

@@ -1,8 +1,8 @@
 package net.casual.championships.missilewars
 
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
+import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.utils.ComponentUtils.literal
-import net.casual.arcade.utils.ResourcePackUtils.addLangsFromData
 import net.casual.championships.missilewars.items.MissileWarsItems
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.minecraft.resources.ResourceLocation

@@ -10,7 +10,7 @@ import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.lore
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.utils.ScreenUtils.setSlot
+import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonItems

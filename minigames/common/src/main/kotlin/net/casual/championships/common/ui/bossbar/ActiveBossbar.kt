@@ -1,22 +1,22 @@
 package net.casual.championships.common.ui.bossbar
 
-import net.casual.arcade.gui.bossbar.CustomBossBar
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.stats.ArcadeStats
+import net.casual.arcade.minigame.stats.ArcadeStats
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatHHMMSS
+import net.casual.arcade.visuals.bossbar.CustomBossbar
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.BossEvent
 
-class ActiveBossBar(
+class ActiveBossbar(
     private val owner: Minigame<*>
-): CustomBossBar() {
+): CustomBossbar() {
     override fun getTitle(player: ServerPlayer): Component {
         val start = Component.empty()
             .append(ComponentUtils.space(-5))

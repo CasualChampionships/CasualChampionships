@@ -1,12 +1,7 @@
 package net.casual.championships.minigame
 
 import com.mojang.serialization.JsonOps
-import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
-import net.casual.arcade.events.minigame.MinigameCloseEvent
-import net.casual.arcade.events.minigame.MinigameCompleteEvent
-import net.casual.arcade.events.minigame.MinigamePauseEvent
 import net.casual.arcade.events.player.PlayerJoinEvent
 import net.casual.arcade.events.player.PlayerRequestLoginEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
@@ -16,13 +11,20 @@ import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerSaveEvent
 import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.minigame.MinigameResources
 import net.casual.arcade.minigame.Minigames
-import net.casual.arcade.minigame.events.MinigamesEvent
-import net.casual.arcade.minigame.events.SequentialMinigames
-import net.casual.arcade.minigame.events.lobby.LobbyMinigame
+import net.casual.arcade.minigame.chat.ChatFormatter
+import net.casual.arcade.minigame.events.MinigameAddPlayerEvent
+import net.casual.arcade.minigame.events.MinigameCloseEvent
+import net.casual.arcade.minigame.events.MinigameCompleteEvent
+import net.casual.arcade.minigame.events.MinigamePauseEvent
+import net.casual.arcade.minigame.lobby.LobbyMinigame
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
-import net.casual.arcade.resources.PackInfo
+import net.casual.arcade.minigame.template.minigame.MinigamesTemplate
+import net.casual.arcade.minigame.template.minigame.SequentialMinigames
+import net.casual.arcade.minigame.utils.MinigameResources
+import net.casual.arcade.minigame.utils.MinigameUtils.broadcastChangesToAdmin
+import net.casual.arcade.resources.pack.PackInfo
+import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.lime
@@ -31,12 +33,11 @@ import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.JsonUtils
-import net.casual.arcade.utils.MinigameUtils.broadcastChangesToAdmin
-import net.casual.arcade.utils.PlayerUtils
+import net.casual.arcade.utils.PlayerUtils.broadcastToOps
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
-import net.casual.arcade.utils.StringUtils.toSmallCaps
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.toSmallCaps
 import net.casual.championships.CasualMod
 import net.casual.championships.commands.CasualCommand
 import net.casual.championships.commands.MinesweeperCommand
@@ -59,8 +60,6 @@ import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.CasualConfig
 import net.casual.championships.util.CasualTeamUtils.getOrCreateAdminTeam
 import net.casual.championships.util.CasualTeamUtils.getOrCreateSpectatorTeam
-import net.casual.championships.util.DatabaseLogin
-import net.casual.championships.util.DatabaseLoginSerializer
 import net.casual.database.CasualDatabase
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
@@ -75,7 +74,6 @@ import kotlin.io.path.writer
 
 @Suppress("UnstableApiUsage")
 object CasualMinigames {
-    private val login by CasualConfig.any("database_login", DatabaseLogin(), DatabaseLoginSerializer)
     private val path: Path = CasualConfig.resolve("event")
     internal val winners = HashSet<String>()
 
@@ -118,7 +116,9 @@ object CasualMinigames {
         GlobalEventHandler.register<PlayerRequestLoginEvent> { event ->
             if (!floodgates && !event.server.playerList.isOp(event.profile)) {
                 event.cancel("CasualChampionships isn't quite ready yet...".literal())
-                PlayerUtils.broadcastToOps("${event.profile.name} tried to join, but floodgates are closed".literal())
+                event.server.playerList.players.broadcastToOps(
+                    "${event.profile.name} tried to join, but floodgates are closed".literal()
+                )
             }
         }
 
@@ -129,7 +129,7 @@ object CasualMinigames {
 
             it.server.setMessageOfTheDay(this.getMOTD())
 
-            this.dataManager = createDataManager()
+            this.dataManager = createDataManager(CasualMod.config)
 
         }
         GlobalEventHandler.register<ServerLoadedEvent>(Int.MAX_VALUE) {
@@ -151,13 +151,13 @@ object CasualMinigames {
             this.writeMinigameEventData(this.getMinigames().getData())
         }
 
-        GlobalEventHandler.register<CasualConfigReloaded> {
+        GlobalEventHandler.register<CasualConfigReloaded> { (config) ->
             val minigames = this.getMinigames()
             minigames.event = this.readMinigameEvent()
             minigames.reloadLobby()
 
             this.getDataManager().close()
-            this.dataManager = createDataManager()
+            this.dataManager = this.createDataManager(config)
         }
 
         GlobalEventHandler.register<ServerStoppingEvent> {
@@ -178,8 +178,7 @@ object CasualMinigames {
 
         minigame.addResources(object: MinigameResources {
             override fun getPacks(): Collection<PackInfo> {
-                val pack = CasualResourcePackHost.getHostedPack("uhc") ?: return listOf()
-                return listOf(pack.toPackInfo(!CasualConfig.dev))
+                return listOf(CasualResourcePackHost.uhc.toPackInfo(!CasualMod.config.dev))
             }
         })
 
@@ -204,7 +203,7 @@ object CasualMinigames {
             this.getDataManager().syncUHCData(minigame)
         }
 
-        minigame.settings.replay = !CasualConfig.dev
+        minigame.settings.replay = !CasualMod.config.dev
 
         return minigame
     }
@@ -255,13 +254,13 @@ object CasualMinigames {
         }
     }
 
-    private fun readMinigameEvent(): MinigamesEvent {
+    private fun readMinigameEvent(): MinigamesTemplate {
         val path = this.path.resolve("event.json")
         if (path.exists()) {
             val json = path.reader().use {
                 JsonUtils.decodeToJsonElement(it)
             }
-            val result = MinigamesEvent.CODEC.parse(JsonOps.INSTANCE, json)
+            val result = MinigamesTemplate.CODEC.parse(JsonOps.INSTANCE, json)
             val event = result.resultOrPartial {
                 CasualMod.logger.error(it)
             }
@@ -274,14 +273,14 @@ object CasualMinigames {
                 }
             }
         }
-        this.writeMinigameEvent(MinigamesEvent.DEFAULT)
-        return MinigamesEvent.DEFAULT
+        this.writeMinigameEvent(MinigamesTemplate.DEFAULT)
+        return MinigamesTemplate.DEFAULT
     }
 
-    private fun writeMinigameEvent(config: MinigamesEvent) {
+    private fun writeMinigameEvent(config: MinigamesTemplate) {
         val path = this.path.resolve("event.json")
         path.parent.createDirectories()
-        val json = MinigamesEvent.CODEC.encodeStart(JsonOps.INSTANCE, config).result()
+        val json = MinigamesTemplate.CODEC.encodeStart(JsonOps.INSTANCE, config).result()
         if (json.isPresent) {
             path.writer().use {
                 JsonUtils.encode(json.get(), it)
@@ -360,7 +359,7 @@ object CasualMinigames {
         this.minigame.teams.setAdminTeam(scoreboard.getOrCreateAdminTeam())
         this.minigame.teams.setSpectatorTeam(scoreboard.getOrCreateSpectatorTeam())
         val minigames = this.getMinigames()
-        for (player in PlayerUtils.players()) {
+        for (player in server.playerList.players) {
             if (minigames.event.isAdmin(player)) {
                 this.minigame.players.addAdmin(player)
                 val team = player.team
@@ -384,11 +383,12 @@ object CasualMinigames {
         }
     }
 
-    private fun createDataManager(): DataManager {
+    private fun createDataManager(config: CasualConfig): DataManager {
+        val login = config.database
         if (login.url.isEmpty()) {
             return JsonDataManager()
         }
-        val location = if (CasualConfig.dev) "casual_championships_debug" else "casual_championships"
+        val location = if (config.dev) "casual_championships_debug" else "casual_championships"
         val database = CasualDatabase(login.url + "/$location", login.username, login.password)
         database.initialize()
         return MultiDataManager.of(

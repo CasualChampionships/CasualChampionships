@@ -1,12 +1,12 @@
 package net.casual.championships.common.ui.tab
 
-import net.casual.arcade.gui.tab.PlayerListEntries
-import net.casual.arcade.gui.tab.VanillaPlayerListEntries
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.italicise
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.visuals.tab.PlayerListEntries
+import net.casual.arcade.visuals.tab.VanillaPlayerListEntries
 import net.minecraft.network.chat.Component
 
 class SimpleCasualPlayerListEntries(

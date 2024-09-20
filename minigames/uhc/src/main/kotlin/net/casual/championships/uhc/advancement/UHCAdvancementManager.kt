@@ -7,31 +7,34 @@ import net.casual.arcade.events.player.*
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.ListenerFlags
+import net.casual.arcade.minigame.annotation.ListenerFlags.IS_PLAYING
 import net.casual.arcade.minigame.annotation.MinigameEventListener
+import net.casual.arcade.minigame.stats.ArcadeStats
+import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.stats.ArcadeStats
-import net.casual.arcade.task.impl.PlayerTask
-import net.casual.arcade.utils.EntityUtils.isInStructure
+import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.array
 import net.casual.arcade.utils.JsonUtils.toJsonStringArray
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.isSurvival
-import net.casual.arcade.utils.StatUtils.increment
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.isInStructure
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.util.CommonStats
 import net.casual.championships.common.util.CommonTags
-import net.casual.championships.uhc.*
+import net.casual.championships.uhc.GAME_OVER_ID
+import net.casual.championships.uhc.UHCMinigame
+import net.casual.championships.uhc.UHCPhase
+import net.casual.championships.uhc.UHCStats
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.animal.IronGolem
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.monster.warden.Warden
 import net.minecraft.world.entity.npc.Villager
-import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.inventory.FurnaceMenu
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Items
@@ -100,7 +103,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, priority = 2000, during = During(before = GAME_OVER_ID))
+    @Listener(flags = IS_PLAYING, priority = 2000, during = During(before = GAME_OVER_ID))
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val relogs = this.uhc.stats.getOrCreateStat(event.player, ArcadeStats.RELOGS)
 
@@ -121,7 +124,7 @@ class UHCAdvancementManager(
 
     @Listener(
         phase = BuiltInEventPhases.POST,
-        flags = ListenerFlags.HAS_PLAYER_PLAYING,
+        flags = IS_PLAYING,
         during = During(before = GAME_OVER_ID)
     )
     private fun onPlayerDeath(event: PlayerDeathEvent) {
@@ -155,7 +158,7 @@ class UHCAdvancementManager(
     }
 
     @Listener(
-        flags = ListenerFlags.HAS_PLAYER_PLAYING,
+        flags = IS_PLAYING,
         during = During(before = GAME_OVER_ID),
         phase = BuiltInEventPhases.POST
     )
@@ -189,7 +192,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
+    @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerBlockMined(event: PlayerBlockMinedEvent) {
         val blocksMined = this.uhc.stats.getOrCreateStat(event.player, CommonStats.BLOCKS_MINED)
         blocksMined.increment()
@@ -202,7 +205,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
+    @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onEntityDeath(event: EntityDeathEvent) {
         val (entity, source) = event
         val attacker = source.entity
@@ -215,7 +218,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
+    @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerCraft(event: PlayerCraftEvent) {
         if (event.stack.isOf(Items.CRAFTING_TABLE)) {
             if (this.claimed.add(UHCRaceAdvancement.Craft)) {
@@ -226,7 +229,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
+    @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerLoot(event: PlayerLootEvent) {
         if (event.items.any { it.isOf(Items.ENCHANTED_GOLDEN_APPLE) }) {
             event.player.grantAdvancement(UHCAdvancements.DREAM_LUCK)
@@ -234,7 +237,7 @@ class UHCAdvancementManager(
     }
 
     @Listener(
-        flags = ListenerFlags.HAS_PLAYER_PLAYING,
+        flags = IS_PLAYING,
         during = During(before = GAME_OVER_ID),
         phase = BuiltInEventPhases.POST
     )
@@ -248,7 +251,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
+    @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerTick(event: PlayerTickEvent) {
         val player = event.player
         val stat = this.uhc.stats.getOrCreateStat(player, UHCStats.HALF_HEART_TIME)
@@ -286,7 +289,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING)
+    @Listener(flags = IS_PLAYING)
     private fun onPlayerDamage(event: PlayerDamageEvent) {
         if (this.uhc.uptime < 1200 && event.source.`is`(DamageTypes.FALL) && event.amount > 0.0F) {
             event.player.grantAdvancement(UHCAdvancements.BROKEN_ANKLES)
@@ -308,7 +311,7 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING, during = During(before = GAME_OVER_ID))
+    @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerBlockCollision(event: PlayerBlockCollisionEvent) {
         if (event.state.`is`(Blocks.SWEET_BERRY_BUSH)) {
             event.player.grantAdvancement(UHCAdvancements.EMBARRASSING)
@@ -328,22 +331,22 @@ class UHCAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING)
+    @Listener(flags = IS_PLAYING)
     private fun onPlayerCheat(event: PlayerCheatEvent) {
         event.player.grantAdvancement(UHCAdvancements.BUSTED)
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING)
+    @Listener(flags = IS_PLAYING)
     private fun onPlayerTotem(event: PlayerTotemEvent) {
         event.player.grantAdvancement(UHCAdvancements.PERFECTLY_BALANCED)
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING)
+    @Listener(flags = IS_PLAYING)
     private fun onPlayerSleep(event: PlayerSleepEvent) {
         event.player.grantAdvancement(UHCAdvancements.NO_ONE_ASKED)
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER_PLAYING)
+    @Listener(flags = IS_PLAYING)
     private fun onPlayerDimensionChange(event: PlayerDimensionChangeEvent) {
         if (event.destination.dimension() == this.uhc.end.dimension()) {
             event.player.grantAdvancement(UHCAdvancements.BRAVE_CHOICE)

@@ -5,7 +5,7 @@ import eu.pb4.sgui.api.elements.GuiElement
 import eu.pb4.sgui.api.gui.HotbarGui
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.utils.ScreenUtils.setSlot
+import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.util.CommonItems
 import net.casual.championships.common.util.CommonUI
 import net.minecraft.core.component.DataComponents

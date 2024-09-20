@@ -1,24 +1,17 @@
 package net.casual.championships.uhc
 
-import net.casual.arcade.gui.elements.ComponentElements
-import net.casual.arcade.gui.elements.SidebarElements
-import net.casual.arcade.gui.sidebar.ArcadeSidebar
-import net.casual.arcade.level.VanillaDimension
+import net.casual.arcade.dimensions.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
+import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
+import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.task.impl.PhaseChangeTask
+import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.utils.BossbarUtils.then
-import net.casual.arcade.utils.BossbarUtils.withDuration
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
-import net.casual.arcade.utils.GameRuleUtils.resetToDefault
-import net.casual.arcade.utils.GameRuleUtils.set
-import net.casual.arcade.utils.PlayerUtils
-import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.arcade.utils.PlayerUtils.revokeAllAdvancements
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
@@ -26,17 +19,19 @@ import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.impl.Sound
-import net.casual.arcade.utils.location.teleporter.EntityTeleporter.Companion.teleport
-import net.casual.championships.common.task.GlowingBossBarTask
-import net.casual.championships.common.task.GracePeriodBossBarTask
+import net.casual.arcade.utils.resetToDefault
+import net.casual.arcade.utils.set
+import net.casual.arcade.visuals.elements.ComponentElements
+import net.casual.arcade.visuals.elements.SidebarElements
+import net.casual.arcade.visuals.sidebar.Sidebar
+import net.casual.championships.common.task.GlowingBossbarTask
+import net.casual.championships.common.task.GracePeriodBossbarTask
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
-import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
-import net.minecraft.world.phys.Vec2
 
 internal const val INITIALIZING_ID = "initializing"
 internal const val GRACE_ID = "grace"
@@ -86,7 +81,7 @@ enum class UHCPhase(
             minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
             minigame.ui.addNameTag(CommonUI.createPlayingHealthTag())
 
-            val sidebar = ArcadeSidebar(ComponentElements.of(UHCComponents.Bitmap.TITLE))
+            val sidebar = Sidebar(ComponentElements.of(UHCComponents.Bitmap.TITLE))
             // TODO: Configure team sizes
             CommonUI.addTeammates(sidebar, 5)
             sidebar.addRow(SidebarElements.empty())
@@ -100,7 +95,7 @@ enum class UHCPhase(
             minigame.settings.isChatGlobal = false
             minigame.settings.mobsWithNoAIAreFlammable = true
             val duration = minigame.settings.gracePeriod
-            val task = GracePeriodBossBarTask(minigame)
+            val task = GracePeriodBossbarTask(minigame)
                 .withDuration(duration - 1.Ticks)
                 .then(PhaseChangeTask(minigame, BorderMoving))
             minigame.scheduler.schedulePhasedCancellable(duration, task).runIfCancelled()
@@ -126,7 +121,7 @@ enum class UHCPhase(
     },
     BorderFinished(BORDER_FINISHED_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
-            val task = GlowingBossBarTask(minigame)
+            val task = GlowingBossbarTask(minigame)
                 .withDuration(2.Minutes)
                 .then(MinigameTask(minigame, UHCMinigame::onBorderFinish))
             minigame.scheduler.schedulePhasedCancellable(2.Minutes, task).runIfCancelled()
@@ -146,7 +141,7 @@ enum class UHCPhase(
             val teams = minigame.teams.getPlayingTeams()
             if (teams.size != 1) {
                 val message = "Expected to have one team remaining on game over!"
-                PlayerUtils.broadcastToOps(message.literal())
+                minigame.chat.broadcastTo(message.literal(), minigame.players.admins)
                 return
             }
             val team = teams.first()

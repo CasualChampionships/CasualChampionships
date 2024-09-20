@@ -1,9 +1,9 @@
 package net.casual.championships.minigame.lobby
 
 import com.mojang.serialization.MapCodec
-import net.casual.arcade.gui.countdown.Countdown
-import net.casual.arcade.gui.countdown.templates.CountdownTemplate
-import net.casual.arcade.utils.serialization.CodecProvider
+import net.casual.arcade.minigame.template.countdown.CountdownTemplate
+import net.casual.arcade.utils.codec.CodecProvider
+import net.casual.arcade.visuals.countdown.Countdown
 import net.casual.championships.CasualMod
 import net.casual.championships.common.ui.CasualCountdown
 import net.minecraft.resources.ResourceLocation

@@ -3,7 +3,7 @@ package net.casual.championships.common.items
 import com.mojang.serialization.Codec
 import eu.pb4.polymer.core.api.item.PolymerItem
 import eu.pb4.polymer.core.api.other.PolymerComponent
-import net.casual.arcade.utils.ResourcePackUtils.registerNextModel
+import net.casual.arcade.items.ItemModeller.Companion.registerNextModel
 import net.casual.championships.common.CommonMod
 import net.casual.championships.common.CommonMod.CUSTOM_MODEL_PACK
 import net.minecraft.core.HolderLookup

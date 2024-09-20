@@ -3,21 +3,22 @@ package net.casual.championships.commands
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
-import net.casual.arcade.utils.CommandUtils.commandSuccess
-import net.casual.arcade.utils.CommandUtils.fail
-import net.casual.arcade.utils.CommandUtils.success
-import net.casual.arcade.utils.MinigameUtils.requiresAdminOrPermission
+import net.casual.arcade.commands.CommandTree
+import net.casual.arcade.commands.commandSuccess
+import net.casual.arcade.commands.success
+import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
+import net.casual.championships.CasualMod
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost
-import net.casual.championships.util.CasualConfig
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
 
-object CasualCommand: Command {
-    override fun register(dispatcher: CommandDispatcher<CommandSourceStack>, context: CommandBuildContext) {
+@Suppress("UnstableApiUsage")
+object CasualCommand: CommandTree {
+    override fun register(dispatcher: CommandDispatcher<CommandSourceStack>, buildContext: CommandBuildContext) {
         dispatcher.register(
             Commands.literal("casual").requiresAdminOrPermission().then(
                 Commands.literal("team").then(
@@ -69,7 +70,7 @@ object CasualCommand: Command {
     }
 
     private fun reloadConfig(context: CommandContext<CommandSourceStack>): Int {
-        CasualConfig.reload()
+        CasualMod.reload()
         return context.source.success("Successfully reloaded config", true)
     }
 
@@ -87,13 +88,9 @@ object CasualCommand: Command {
 
     private fun reloadResources(context: CommandContext<CommandSourceStack>): Int {
         CasualResourcePackHost.reload().thenAcceptAsync({
-            if (it) {
-                context.source.success("Successfully reloaded resources, resending pack...")
-                for (player in CasualMinigames.minigame.players) {
-                    CasualMinigames.getMinigames().sendResourcesTo(player)
-                }
-            } else {
-                context.source.fail("Failed to reload resources...")
+            context.source.success("Successfully reloaded resources, resending pack...")
+            for (player in CasualMinigames.minigame.players) {
+                CasualMinigames.getMinigames().sendResourcesTo(player)
             }
         }, context.source.server)
         return context.source.success("Reloading resources...")

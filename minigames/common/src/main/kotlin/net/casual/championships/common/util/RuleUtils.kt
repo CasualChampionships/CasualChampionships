@@ -1,11 +1,11 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.scheduler.MinecraftTimeDuration
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.championships.common.minigame.rules.Rules
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent

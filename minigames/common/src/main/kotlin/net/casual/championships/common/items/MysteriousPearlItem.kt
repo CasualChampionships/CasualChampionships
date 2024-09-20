@@ -1,7 +1,7 @@
 package net.casual.championships.common.items
 
 import eu.pb4.polymer.core.api.item.PolymerItem
-import net.casual.arcade.utils.ResourcePackUtils.registerNextModel
+import net.casual.arcade.items.ItemModeller.Companion.registerNextModel
 import net.casual.championships.common.CommonMod.CUSTOM_MODEL_PACK
 import net.casual.championships.common.CommonMod.id
 import net.casual.championships.common.entities.MysteriousPearl

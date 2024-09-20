@@ -1,5 +1,8 @@
 package net.casual.championships
 
+import net.casual.arcade.events.GlobalEventHandler
+import net.casual.arcade.host.PackHost
+import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePack
 import net.casual.championships.resources.CasualResourcePackHost
@@ -18,6 +21,9 @@ object CasualMod: DedicatedServerModInitializer {
     val logger: Logger = LoggerFactory.getLogger("Casual")
     val container: ModContainer = FabricLoader.getInstance().getModContainer(ID).get()
 
+    var config = CasualConfig.read()
+        private set
+
     fun id(name: String): ResourceLocation {
         return ResourceLocation.fromNamespaceAndPath(ID, name)
     }
@@ -27,14 +33,17 @@ object CasualMod: DedicatedServerModInitializer {
 
         CasualRegistration.register()
 
-        CasualConfig.registerEvents()
         CasualResourcePackHost.registerEvents()
         CasualMinigames.registerEvents()
 
         CasualResourcePack.generateAll()
     }
 
+    fun reload() {
+        this.config = CasualConfig.read()
+        GlobalEventHandler.broadcast(CasualConfigReloaded(this.config))
+    }
+
     // TODO:
-    //   SpreadPlayers
     //   Minesweeper AI - Make sure all maps are non-luck based
 }

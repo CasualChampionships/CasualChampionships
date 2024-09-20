@@ -2,15 +2,13 @@ package net.casual.championships.common.util
 
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
+import net.casual.arcade.commands.commandSuccess
+import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.utils.CommandUtils.commandSuccess
-import net.casual.arcade.utils.CommandUtils.success
-import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.minecraft.commands.CommandSourceStack
-import net.minecraft.commands.arguments.EntityAnchorArgument
 
 object CommonCommands {
     private val NOT_SPECTATOR = SimpleCommandExceptionType(CommonComponents.NOT_SPECTATING)
@@ -64,9 +62,9 @@ object CommonCommands {
         }
 
         val position = player.position()
-        val location = "[%.0f, %.0f, %.0f]".format(position.x, position.y, position.z).literal().lime().function {
+        val location = "[%.0f, %.0f, %.0f]".format(position.x, position.y, position.z).literal().lime()/*.function {
             it.player.lookAt(EntityAnchorArgument.Anchor.EYES, position)
-        }
+        }*/
         return minigame.chat.broadcastAsPlayerTo(
             player,
             CommonComponents.BROADCAST_POSITION.generate(location),

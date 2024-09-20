@@ -1,9 +1,9 @@
 package net.casual.championships.uhc
 
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
+import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
+import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.utils.ComponentUtils.literal
-import net.casual.arcade.utils.ResourcePackUtils.addFont
-import net.casual.arcade.utils.ResourcePackUtils.addLangsFromData
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.resources.ResourceLocation
 import org.slf4j.Logger

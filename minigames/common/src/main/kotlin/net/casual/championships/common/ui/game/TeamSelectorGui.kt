@@ -1,12 +1,12 @@
 package net.casual.championships.common.ui.game
 
-import net.casual.arcade.gui.screen.SimpleNestedGui
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
-import net.casual.arcade.utils.ScreenUtils.setSlot
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.arcade.visuals.screen.SimpleNestedGui
+import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component

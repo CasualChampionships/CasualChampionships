@@ -2,12 +2,10 @@ package net.casual.championships.common.util
 
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.level.LevelBlockChangedEvent
-import net.casual.arcade.events.level.LevelExtensionEvent
 import net.casual.arcade.events.level.LevelTickEvent
 import net.casual.arcade.events.player.PlayerBlockPlacedEvent
-import net.casual.arcade.utils.EventUtils.broadcast
-import net.casual.arcade.utils.LevelUtils.addExtension
-import net.casual.arcade.utils.PlayerUtils
+import net.casual.arcade.extensions.event.LevelExtensionEvent
+import net.casual.arcade.utils.PlayerUtils.broadcastToOps
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.extensions.WorldBlockTrackerExtension
 import net.casual.championships.common.extensions.WorldBlockTrackerExtension.Companion.blockTracker
@@ -28,7 +26,7 @@ object AntiCheat {
     }
 
     internal fun registerEvents() {
-        GlobalEventHandler.register<LevelExtensionEvent> { it.level.addExtension(WorldBlockTrackerExtension()) }
+        GlobalEventHandler.register<LevelExtensionEvent> { it.addExtension(WorldBlockTrackerExtension()) }
         GlobalEventHandler.register<LevelTickEvent> { it.level.blockTracker.tick() }
         GlobalEventHandler.register<LevelBlockChangedEvent> { onBlockChanged(it) }
         GlobalEventHandler.register<PlayerBlockPlacedEvent> { onPlayerBlockPlaced(it) }
@@ -42,10 +40,10 @@ object AntiCheat {
 
     private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
         if (detectFlexibleBlockPlacement(event.player, event.context)) {
-            PlayerCheatEvent(event.player, Type.FlexibleBlockPlacement).broadcast()
+            GlobalEventHandler.broadcast(PlayerCheatEvent(event.player, Type.FlexibleBlockPlacement))
 
             val message = Component.literal("Player ").append(event.player.displayName!!).append(" used fbp")
-            PlayerUtils.broadcastToOps(message)
+            event.player.server.playerList.players.broadcastToOps(message)
 
             event.cancel()
         }

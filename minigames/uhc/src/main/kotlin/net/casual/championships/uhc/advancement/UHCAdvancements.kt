@@ -1,9 +1,9 @@
 package net.casual.championships.uhc.advancement
 
-import net.casual.arcade.advancements.AdvancementCollection
 import net.casual.arcade.utils.AdvancementUtils.setTitleAndDesc
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.potion
+import net.casual.arcade.utils.advancement.AdvancementCollection
 import net.casual.championships.uhc.UHCMod.id
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.resources.ResourceLocation

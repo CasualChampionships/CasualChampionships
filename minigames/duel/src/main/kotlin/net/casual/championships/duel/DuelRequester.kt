@@ -1,10 +1,9 @@
 package net.casual.championships.duel
 
 import net.casual.arcade.commands.hidden.HiddenCommand
-import net.casual.arcade.minigame.events.lobby.ReadyChecker
+import net.casual.arcade.minigame.lobby.ReadyChecker
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.crimson
-import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
@@ -24,7 +23,7 @@ class DuelRequester(
                 Component.literal("[")
                     .append(Component.translatable("casual.duel.challenge.accept"))
                     .append("]")
-                    .function(command = ready)
+                    // .function(command = ready)
                     .lime()
             )
             .append(ComponentUtils.space(4))
@@ -32,7 +31,7 @@ class DuelRequester(
                 Component.literal("[")
                     .append(Component.translatable("casual.duel.challenge.decline"))
                     .append("]")
-                    .function(command = notReady)
+                    // .function(command = notReady)
                     .red()
             ).mini()
     }

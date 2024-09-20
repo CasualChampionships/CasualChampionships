@@ -1,15 +1,15 @@
 package net.casual.championships.uhc
 
 import com.mojang.serialization.MapCodec
-import net.casual.arcade.gui.shapes.LevelSurfaceShape
-import net.casual.arcade.gui.shapes.Regular2DPolygonShape
-import net.casual.arcade.gui.shapes.ShapePoints
-import net.casual.arcade.utils.BiomeUtils.isOceanOrRiver
-import net.casual.arcade.utils.LevelUtils
+import net.casual.arcade.dimensions.vanilla.VanillaLikeLevel
+import net.casual.arcade.minigame.template.teleporter.EntityTeleporter
+import net.casual.arcade.minigame.template.teleporter.ShapedTeleporter
 import net.casual.arcade.utils.StructureUtils
-import net.casual.arcade.utils.location.Location
-import net.casual.arcade.utils.location.teleporter.EntityTeleporter
-import net.casual.arcade.utils.location.teleporter.ShapedTeleporter
+import net.casual.arcade.utils.impl.Location
+import net.casual.arcade.utils.isOceanOrRiver
+import net.casual.arcade.visuals.shapes.LevelSurfaceShape
+import net.casual.arcade.visuals.shapes.Regular2DPolygonShape
+import net.casual.arcade.visuals.shapes.ShapePoints
 import net.minecraft.core.BlockPos
 import net.minecraft.core.BlockPos.MutableBlockPos
 import net.minecraft.core.Direction
@@ -42,7 +42,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
             return
         }
 
-        val spawn = when (LevelUtils.getLikeDimension(level)) {
+        val spawn = when (VanillaLikeLevel.getLikeDimension(level)) {
             Level.NETHER -> this.netherSpawn
             Level.END -> this.endSpawn
             else -> this.overworldSpawn

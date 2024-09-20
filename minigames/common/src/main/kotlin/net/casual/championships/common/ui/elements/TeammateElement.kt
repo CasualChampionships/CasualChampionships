@@ -1,14 +1,14 @@
 package net.casual.championships.common.ui.elements
 
-import net.casual.arcade.gui.elements.PlayerSpecificElement
-import net.casual.arcade.gui.sidebar.SidebarComponent
+import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.MinigameUtils.getMinigame
-import net.casual.arcade.utils.PlayerUtils
 import net.casual.arcade.utils.PlayerUtils.isSurvival
+import net.casual.arcade.utils.PlayerUtils.player
+import net.casual.arcade.visuals.elements.PlayerSpecificElement
+import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -39,7 +39,7 @@ class TeammateElement(private val index: Int, private val buffer: Component): Pl
             teammate = player
         } else {
             name = players.filter { it != player.scoreboardName }[this.index - 1]
-            teammate = PlayerUtils.player(name)
+            teammate = player.server.player(name)
         }
 
         val formatted = this.createTeammate(name, team)

@@ -2,8 +2,8 @@ package net.casual.championships.common.arena
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import net.casual.arcade.area.templates.PlaceableAreaTemplate
-import net.casual.arcade.utils.location.teleporter.EntityTeleporter
+import net.casual.arcade.minigame.template.area.PlaceableAreaTemplate
+import net.casual.arcade.minigame.template.teleporter.EntityTeleporter
 import net.minecraft.server.level.ServerLevel
 
 class ArenaTemplate(

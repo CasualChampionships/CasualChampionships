@@ -2,39 +2,33 @@ package net.casual.championships.minigame.lobby
 
 import com.google.common.collect.ImmutableList
 import com.mojang.brigadier.context.CommandContext
-import net.casual.arcade.chat.ChatFormatter
-import net.casual.arcade.events.minigame.*
+import net.casual.arcade.commands.*
 import net.casual.arcade.events.player.PlayerFallEvent
 import net.casual.arcade.events.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.ServerTickEvent
-import net.casual.arcade.gui.tab.ArcadePlayerListDisplay
-import net.casual.arcade.minigame.MinigameSettings
 import net.casual.arcade.minigame.annotation.Listener
-import net.casual.arcade.minigame.events.lobby.LobbyMinigame
-import net.casual.arcade.scheduler.MinecraftTimeDuration
-import net.casual.arcade.task.impl.PlayerTask
-import net.casual.arcade.utils.CommandUtils
-import net.casual.arcade.utils.CommandUtils.argument
-import net.casual.arcade.utils.CommandUtils.commandSuccess
-import net.casual.arcade.utils.CommandUtils.fail
-import net.casual.arcade.utils.CommandUtils.literal
-import net.casual.arcade.utils.CommandUtils.success
+import net.casual.arcade.minigame.chat.ChatFormatter
+import net.casual.arcade.minigame.events.*
+import net.casual.arcade.minigame.lobby.LobbyMinigame
+import net.casual.arcade.minigame.settings.MinigameSettings
+import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
+import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
+import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.ComponentUtils.command
-import net.casual.arcade.utils.ComponentUtils.function
 import net.casual.arcade.utils.ComponentUtils.green
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.shadowless
-import net.casual.arcade.utils.MinigameUtils.getMinigame
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.PlayerUtils.teleportTo
-import net.casual.arcade.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.time.MinecraftTimeDuration
+import net.casual.arcade.visuals.tab.PlayerListDisplay
 import net.casual.championships.CasualMod
 import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.minigame.CasualSettings
@@ -49,7 +43,6 @@ import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
 import net.casual.championships.duel.ui.DuelConfigurationGui
 import net.casual.championships.minigame.CasualMinigames
-import net.casual.championships.util.CasualConfig
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.EntityArgument
@@ -104,11 +97,11 @@ class CasualLobbyMinigame(
 
         this.registerCommands()
 
-        val display = ArcadePlayerListDisplay(CasualLobbyPlayerListEntries(this))
+        val display = PlayerListDisplay(CasualLobbyPlayerListEntries(this))
         CommonUI.addCasualFooterAndHeader(this, display)
         this.ui.setPlayerListDisplay(display)
 
-        this.advancements.addAll(LobbyAdvancements.getAllAdvancements())
+        this.advancements.addAll(LobbyAdvancements)
     }
 
     @Listener
@@ -128,7 +121,7 @@ class CasualLobbyMinigame(
 
         if (!this.players.isAdmin(player)) {
             player.setGameMode(GameType.ADVENTURE)
-        } else if (CasualConfig.dev) {
+        } else if (CasualMod.config.dev) {
             player.sendSystemMessage(Component.literal("Minigames are in dev mode!").red())
         } else {
             player.sendSystemMessage(Component.literal("Minigames are NOT in dev mode!").red())
@@ -240,7 +233,7 @@ class CasualLobbyMinigame(
     }
 
     private fun registerCommands() {
-        this.commands.register(CommandUtils.buildLiteral("duel") {
+        this.commands.register(CommandTree.buildLiteral("duel") {
             literal("start") {
                 executes(::startDuel)
             }
@@ -306,9 +299,9 @@ class CasualLobbyMinigame(
         val unready = requester.arePlayersReady(requesting) {
             started = startDuelWith(started, initiator, duelers, setOf(), requester, settings, false)
         }
-        val startAnyways = Component.translatable("casual.duel.clickToStart").mini().green().function {
+        val startAnyways = Component.translatable("casual.duel.clickToStart").mini().green()/*.function {
             started = startDuelWith(started, initiator, duelers, unready, requester, settings, true)
-        }
+        }*/
         requester.broadcastTo(startAnyways, initiator)
     }
 
@@ -347,7 +340,7 @@ class CasualLobbyMinigame(
         this.duels.add(duel)
         duel.events.register<MinigameCloseEvent> { this.duels.remove(duel) }
 
-        duel.commands.register(CommandUtils.buildLiteral("duel") {
+        duel.commands.register(CommandTree.buildLiteral("duel") {
             literal("leave") {
                 executes { context ->
                     val player = context.source.playerOrException

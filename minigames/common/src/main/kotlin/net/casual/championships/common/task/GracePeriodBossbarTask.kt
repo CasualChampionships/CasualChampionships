@@ -3,17 +3,16 @@ package net.casual.championships.common.task
 import com.google.gson.JsonObject
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.task.AnyMinigameTaskFactory
-import net.casual.arcade.minigame.task.impl.BossBarTask
-import net.casual.arcade.task.SavableTask
-import net.casual.arcade.task.Task
-import net.casual.arcade.task.serialization.TaskCreationContext
-import net.casual.arcade.task.serialization.TaskWriteContext
-import net.casual.arcade.utils.BossbarUtils.readData
-import net.casual.championships.common.ui.bossbar.GraceBossBar
+import net.casual.arcade.minigame.task.impl.BossbarTask
+import net.casual.arcade.scheduler.task.SavableTask
+import net.casual.arcade.scheduler.task.Task
+import net.casual.arcade.scheduler.task.serialization.TaskCreationContext
+import net.casual.arcade.scheduler.task.serialization.TaskWriteContext
+import net.casual.championships.common.ui.bossbar.GraceBossbar
 
-class GracePeriodBossBarTask(
+class GracePeriodBossbarTask(
     minigame: Minigame<*>
-): BossBarTask<GraceBossBar>(minigame, GraceBossBar()), SavableTask {
+): BossbarTask<GraceBossbar>(minigame, GraceBossbar()), SavableTask {
     override val id = Companion.id
 
     override fun writeCustomData(context: TaskWriteContext): JsonObject {
@@ -24,7 +23,7 @@ class GracePeriodBossBarTask(
         override val id = "grace_period_boss_bar_task"
 
         override fun create(minigame: Minigame<*>, context: TaskCreationContext): Task {
-            return GracePeriodBossBarTask(minigame).readData(context)
+            return GracePeriodBossbarTask(minigame).readData(context)
         }
     }
 }
