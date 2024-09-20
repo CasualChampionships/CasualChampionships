@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.GuiHelpers
-import eu.pb4.sgui.api.gui.GuiInterface
 import me.senseiwells.replay.player.PlayerRecorders
 import net.casual.arcade.border.MultiLevelBorderListener
 import net.casual.arcade.border.MultiLevelBorderTracker
@@ -12,7 +11,6 @@ import net.casual.arcade.border.TrackedBorder
 import net.casual.arcade.entity.player.ExtendedGameMode
 import net.casual.arcade.entity.player.ExtendedGameMode.Companion.extendedGameMode
 import net.casual.arcade.events.BuiltInEventPhases
-import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.level.LevelLootEvent
 import net.casual.arcade.events.minigame.*
@@ -104,6 +102,7 @@ import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.Holder
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
@@ -119,6 +118,7 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.item.Items
+import net.minecraft.world.item.alchemy.Potion
 import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
@@ -297,9 +297,9 @@ class UHCMinigame(
         for (item in event.items) {
             val contents = item.get(DataComponents.POTION_CONTENTS) ?: continue
             val potion = contents.potion
-            if (potion.isPresent && potion.get().value() == Potions.HEALING.value()) {
-                val newContents = contents.withPotion(Potions.REGENERATION)
-                item.set(DataComponents.POTION_CONTENTS, newContents)
+            if (potion.isPresent) {
+                val replacement = this.replacePotion(potion.get())
+                item.set(DataComponents.POTION_CONTENTS, contents.withPotion(replacement))
             }
         }
     }
@@ -332,16 +332,7 @@ class UHCMinigame(
 
     @Listener
     private fun onTippedArrowTradeOffer(event: TippedArrowTradeOfferEvent) {
-        event.potion = when (event.potion.value()) {
-            Potions.HEALING.value(), Potions.STRONG_HEALING.value(), Potions.STRONG_REGENERATION.value() -> Potions.REGENERATION
-            Potions.STRONG_POISON.value() -> Potions.POISON
-            Potions.STRONG_HARMING.value() -> Potions.HARMING
-            Potions.STRONG_LEAPING.value() -> Potions.LEAPING
-            Potions.STRONG_SLOWNESS.value() -> Potions.SLOWNESS
-            Potions.STRONG_STRENGTH.value() -> Potions.STRENGTH
-            Potions.STRONG_TURTLE_MASTER.value() -> Potions.TURTLE_MASTER
-            else -> return
-        }
+        event.potion = this.replacePotion(event.potion)
     }
 
     @Listener
@@ -713,7 +704,7 @@ class UHCMinigame(
         val border = level.worldBorder
 
         val worldBorderTime = this.stats.getOrCreateStat(player, UHCStats.WORLD_BORDER_TIME)
-        if (border.isWithinBounds(player.boundingBox)) {
+        if (border.isWithinBounds(player.position())) {
             if (worldBorderTime.value > 0) {
                 worldBorderTime.modify { 0 }
                 player.connection.send(ClientboundInitializeBorderPacket(border))
@@ -808,6 +799,19 @@ class UHCMinigame(
     private fun resetPlayerHealth(player: ServerPlayer) {
         player.boostHealth(this.settings.health)
         player.resetHealth()
+    }
+
+    private fun replacePotion(potion: Holder<Potion>): Holder<Potion> {
+        return when (potion.value()) {
+            Potions.HEALING.value(), Potions.STRONG_HEALING.value(), Potions.STRONG_REGENERATION.value() -> Potions.REGENERATION
+            Potions.STRONG_POISON.value() -> Potions.POISON
+            Potions.STRONG_HARMING.value() -> Potions.HARMING
+            Potions.STRONG_LEAPING.value() -> Potions.LEAPING
+            Potions.STRONG_SLOWNESS.value() -> Potions.SLOWNESS
+            Potions.STRONG_STRENGTH.value() -> Potions.STRENGTH
+            Potions.STRONG_TURTLE_MASTER.value() -> Potions.TURTLE_MASTER
+            else -> potion
+        }
     }
 
     // Commands

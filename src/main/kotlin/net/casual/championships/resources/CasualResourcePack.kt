@@ -1,6 +1,5 @@
 package net.casual.championships.resources
 
-import me.senseiwells.glide.GlideMod
 import net.casual.arcade.utils.impl.ConcatenatedList.Companion.concat
 import net.casual.championships.CasualMod
 import net.casual.championships.common.CommonMod
@@ -12,7 +11,7 @@ object CasualResourcePack {
     private val default = CommonMod.COMMON_PACKS.toList()
 
     // TODO: make this autogen
-    private val all = default.concat(listOf(UHCMod.UHC_PACK, GlideMod.resourcePack))
+    private val all = default.concat(listOf(UHCMod.UHC_PACK))
 
     fun generateAll(location: Path = CasualConfig.resolve("packs")) {
         for (pack in this.all) {

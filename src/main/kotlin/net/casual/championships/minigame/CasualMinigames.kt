@@ -1,8 +1,6 @@
 package net.casual.championships.minigame
 
-import com.mojang.authlib.GameProfile
 import com.mojang.serialization.JsonOps
-import me.senseiwells.glide.minigame.GlideMinigame
 import net.casual.arcade.chat.ChatFormatter
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.minigame.MinigameAddPlayerEvent
@@ -32,19 +30,13 @@ import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ComponentUtils.yellow
-import net.casual.arcade.utils.FantasyUtils
 import net.casual.arcade.utils.JsonUtils
-import net.casual.arcade.utils.JsonUtils.booleanOrDefault
-import net.casual.arcade.utils.JsonUtils.obj
-import net.casual.arcade.utils.JsonUtils.string
 import net.casual.arcade.utils.MinigameUtils.broadcastChangesToAdmin
 import net.casual.arcade.utils.PlayerUtils
-import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.arcade.utils.StringUtils.toSmallCaps
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.impl.Sound
-import net.casual.arcade.utils.json.LongSerializer
 import net.casual.championships.CasualMod
 import net.casual.championships.commands.CasualCommand
 import net.casual.championships.commands.MinesweeperCommand
@@ -71,11 +63,9 @@ import net.casual.championships.util.DatabaseLogin
 import net.casual.championships.util.DatabaseLoginSerializer
 import net.casual.database.CasualDatabase
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.players.UserWhiteListEntry
-import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
@@ -119,16 +109,6 @@ object CasualMinigames {
         Minigames.registerFactory(UHCMinigame.ID, this::createUHCMinigame)
         Minigames.registerFactory(DuelMinigame.ID, this::createDuelMinigame)
         Minigames.registerFactory(CasualLobbyMinigame.ID, this::createLobbyMinigame)
-        Minigames.registerFactory(GlideMinigame.ID) { context ->
-            val glide = GlideMinigame.create(context)
-            glide.addResources(object: MinigameResources {
-                override fun getPacks(): Collection<PackInfo> {
-                    val pack = CasualResourcePackHost.getHostedPack("glide_pack") ?: return listOf()
-                    return listOf(pack.toPackInfo(!CasualConfig.dev))
-                }
-            })
-            glide
-        }
 
         GlobalEventHandler.register<ServerRegisterCommandEvent> { (dispatcher, context) ->
             MinesweeperCommand.register(dispatcher, context)

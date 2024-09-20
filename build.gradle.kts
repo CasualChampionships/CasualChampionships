@@ -1,6 +1,3 @@
-import org.apache.commons.io.output.ByteArrayOutputStream
-import java.nio.charset.Charset
-
 plugins {
     val jvmVersion = libs.versions.fabric.kotlin.get()
         .split("+kotlin.")[1]
@@ -14,7 +11,7 @@ plugins {
 }
 
 group = "net.casual"
-version = this.getGitHash().substring(0, 6)
+version = "1.0.0"
 
 allprojects {
     apply(plugin = "fabric-loom")
@@ -23,6 +20,7 @@ allprojects {
 
     repositories {
         mavenLocal()
+        maven("https://maven.supersanta.me/snapshots")
         maven("https://maven.maxhenkel.de/repository/public")
         maven("https://maven.parchmentmc.org/")
         maven("https://jitpack.io")
@@ -90,7 +88,6 @@ dependencies {
     include(libs.arcade)
     include(libs.server.replay)
     include(libs.map.canvas)
-    includeModImplementation(libs.glide)
 
     for (subproject in project.subprojects) {
         if (subproject.path != ":minigames") {
@@ -100,15 +97,6 @@ dependencies {
     }
 
     includeImplementation(libs.casual.database)
-}
-
-fun getGitHash(): String {
-    val out = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "rev-parse", "HEAD")
-        standardOutput = out
-    }
-    return out.toString(Charset.defaultCharset()).trim()
 }
 
 private fun DependencyHandler.includeModImplementation(dependencyNotation: Any) {

@@ -6,16 +6,15 @@ import eu.pb4.sgui.api.gui.HotbarGui
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ScreenUtils.setSlot
-import net.casual.championships.common.items.ForwardFacingPlayerHead
-import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.CommonItems
 import net.casual.championships.common.util.CommonUI
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
 import net.minecraft.world.item.component.ResolvableProfile
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.Vec3
 
 class UHCSpectatorHotbar(
     player: ServerPlayer,
@@ -37,6 +36,20 @@ class UHCSpectatorHotbar(
             gui.setParent(this)
             gui.open()
         }
+    }
+
+    override fun onClickBlock(result: BlockHitResult): Boolean {
+        if (this.getSlot(this.selectedSlot) != null) {
+            return super.onClickBlock(result)
+        }
+        return true
+    }
+
+    override fun onClickEntity(id: Int, type: EntityInteraction, sneaking: Boolean, pos: Vec3?): Boolean {
+        if (this.getSlot(this.selectedSlot) != null) {
+            return super.onClickEntity(id, type, sneaking, pos)
+        }
+        return true
     }
 
     override fun canPlayerClose(): Boolean {
