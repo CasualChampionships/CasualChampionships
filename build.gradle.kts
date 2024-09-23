@@ -84,16 +84,22 @@ allprojects {
     }
 }
 
+subprojects {
+    if (this.path != ":minigames-common") {
+        dependencies {
+            api(project(path = ":minigames-common", configuration = "namedElements"))
+        }
+    }
+}
+
 dependencies {
     include(libs.arcade)
     include(libs.server.replay)
     include(libs.map.canvas)
 
     for (subproject in project.subprojects) {
-        if (subproject.path != ":minigames") {
-            implementation(project(mapOf("path" to subproject.path, "configuration" to "namedElements")))
-            include(subproject)
-        }
+        implementation(project(path = subproject.path, configuration = "namedElements"))
+        include(subproject)
     }
 
     includeImplementation(libs.casual.database)
