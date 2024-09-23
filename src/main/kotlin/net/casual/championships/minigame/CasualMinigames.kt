@@ -18,6 +18,8 @@ import net.casual.arcade.minigame.events.MinigameCloseEvent
 import net.casual.arcade.minigame.events.MinigameCompleteEvent
 import net.casual.arcade.minigame.events.MinigamePauseEvent
 import net.casual.arcade.minigame.lobby.LobbyMinigame
+import net.casual.arcade.minigame.ready.MinigamePlayerReadyHandler
+import net.casual.arcade.minigame.ready.ReadyChecker
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.template.minigame.MinigamesTemplate
 import net.casual.arcade.minigame.template.minigame.SequentialMinigames
@@ -42,7 +44,7 @@ import net.casual.championships.CasualMod
 import net.casual.championships.commands.CasualCommand
 import net.casual.championships.commands.MinesweeperCommand
 import net.casual.championships.common.ui.CasualCountdown
-import net.casual.championships.common.ui.CasualReadyChecker
+import net.casual.championships.common.ui.CasualTeamReadyHandler
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
@@ -67,6 +69,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.players.UserWhiteListEntry
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
+import java.util.concurrent.CompletableFuture
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.reader
@@ -101,6 +104,14 @@ object CasualMinigames {
 
     fun hasWinner(): Boolean {
         return this.winners.isNotEmpty()
+    }
+
+    fun reloadResourcePacks(server: MinecraftServer): CompletableFuture<Void> {
+        return CasualResourcePackHost.reload().thenAcceptAsync({
+            for (player in this.minigame.players) {
+                this.getMinigames().sendResourcesTo(player)
+            }
+        }, server)
     }
 
     internal fun registerEvents() {
@@ -228,7 +239,10 @@ object CasualMinigames {
     internal fun setCasualUI(minigame: Minigame<*>) {
         minigame.settings.broadcastChangesToAdmin()
         minigame.ui.setPlayerListDisplay(CommonUI.createTeamMinigameTabDisplay(minigame))
-        minigame.ui.readier = CasualReadyChecker(minigame)
+        minigame.ui.readier = ReadyChecker(
+            MinigamePlayerReadyHandler(minigame),
+            CasualTeamReadyHandler(minigame)
+        )
         minigame.ui.countdown = CasualCountdown
 
         minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
@@ -353,34 +367,44 @@ object CasualMinigames {
     }
 
     fun reloadTeams(server: MinecraftServer) {
-        this.getDataManager().createTeams(server)
-
-        val scoreboard = server.scoreboard
-        this.minigame.teams.setAdminTeam(scoreboard.getOrCreateAdminTeam())
-        this.minigame.teams.setSpectatorTeam(scoreboard.getOrCreateSpectatorTeam())
-        val minigames = this.getMinigames()
-        for (player in server.playerList.players) {
-            if (minigames.event.isAdmin(player)) {
-                this.minigame.players.addAdmin(player)
-                val team = player.team
-                if (team == null || team == this.minigame.teams.getAdminTeam()) {
+        this.getDataManager().createTeams(server).thenApplyAsync({ teams ->
+            val scoreboard = server.scoreboard
+            this.minigame.teams.setAdminTeam(scoreboard.getOrCreateAdminTeam())
+            this.minigame.teams.setSpectatorTeam(scoreboard.getOrCreateSpectatorTeam())
+            val minigames = this.getMinigames()
+            for (player in server.playerList.players) {
+                if (minigames.event.isAdmin(player)) {
+                    this.minigame.players.addAdmin(player)
+                    val team = player.team
+                    if (team == null || team == this.minigame.teams.getAdminTeam()) {
+                        this.minigame.players.setSpectating(player)
+                    }
+                }
+            }
+            for (player in this.minigame.players) {
+                if (player.team == null) {
                     this.minigame.players.setSpectating(player)
                 }
             }
-        }
-        for (player in this.minigame.players) {
-            if (player.team == null) {
-                this.minigame.players.setSpectating(player)
-            }
-        }
 
-        val whitelist = server.playerList.whiteList
-        for (entry in whitelist.entries.toList()) {
-            server.playerList.whiteList.remove(entry)
-        }
-        for (participant in this.getDataManager().getParticipants()) {
-            whitelist.add(UserWhiteListEntry(participant))
-        }
+            if (CasualResourcePackHost.loadTeamColors(teams)) {
+                this.reloadResourcePacks(server)
+            }
+        }, server)
+
+        this.reloadWhitelist(server)
+    }
+
+    fun reloadWhitelist(server: MinecraftServer) {
+        this.getDataManager().getParticipants().thenAcceptAsync({ participants ->
+            val whitelist = server.playerList.whiteList
+            for (entry in whitelist.entries.toList()) {
+                server.playerList.whiteList.remove(entry)
+            }
+            for (participant in participants) {
+                whitelist.add(UserWhiteListEntry(participant))
+            }
+        }, server)
     }
 
     private fun createDataManager(config: CasualConfig): DataManager {

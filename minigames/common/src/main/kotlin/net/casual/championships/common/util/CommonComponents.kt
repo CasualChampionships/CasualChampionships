@@ -44,14 +44,6 @@ object CommonComponents {
     val CONFIRM by translatable("casual.gui.confirm")
     val CANCEL by translatable("casual.gui.cancel")
 
-    val READY_QUERY by translatable("casual.ready.question")
-    val NOT_READY = translatableWithArgs("casual.ready.notReady")
-    val IS_READY = translatableWithArgs("casual.ready.isReady")
-    val CANNOT_READY by translatable("casual.ready.notNow")
-    val ALREADY_READY by translatable("casual.ready.alreadyReady")
-    val ALREADY_UNREADY by translatable("casual.ready.alreadyUnready")
-    val ALL_READY by translatable("casual.ready.allReady")
-
     val TEAMS by translatable("casual.team.teams")
     val TEAMMATES by translatable("casual.team.teammates")
     val ADDED_TO_TEAM = translatableWithArgs("casual.team.added")

@@ -1,9 +1,9 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.gui.predicate.PlayerObserverPredicate
-import net.casual.arcade.gui.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate.Companion.teammates
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate.Companion.visibleObservee
+import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
+import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
 
 @Suppress("JoinDeclarationAndAssignment")
 object CommonPredicates {

@@ -61,8 +61,8 @@ class UHCAdvancementManager(
             this.uhc.stats.getOrCreateStat(player, CommonStats.WON).modify { true }
         }
 
-        val lowest = DamageCounter(Float.MAX_VALUE)
-        val highest = DamageCounter(Float.MIN_VALUE)
+        val lowest = DamageCounter(Float.POSITIVE_INFINITY)
+        val highest = DamageCounter(Float.NEGATIVE_INFINITY)
         for (player in this.uhc.players) {
             if (this.uhc.tags.has(player, CommonTags.HAS_PARTICIPATED)) {
                 val current = this.uhc.stats.getOrCreateStat(player, ArcadeStats.DAMAGE_DEALT).value
@@ -321,7 +321,8 @@ class UHCAdvancementManager(
     @Listener(flags = ListenerFlags.HAS_PLAYER)
     private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
         val isUHCAdvancement = UHCAdvancements.contains(event.advancement)
-        event.announce = event.announce && isUHCAdvancement && this.uhc.players.isPlaying(event.player)
+        event.announce = event.announce && isUHCAdvancement &&
+            (this.uhc.players.isPlaying(event.player) || this.uhc.phase >= UHCPhase.GameOver)
         if (isUHCAdvancement) {
             val advancementsAwarded = this.uhc.stats.getOrCreateStat(event.player, UHCStats.ADVANCEMENTS_AWARDED)
             advancementsAwarded.increment()

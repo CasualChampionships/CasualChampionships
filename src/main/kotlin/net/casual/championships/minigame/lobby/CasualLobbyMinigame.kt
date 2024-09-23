@@ -10,6 +10,7 @@ import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.chat.ChatFormatter
 import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.lobby.LobbyMinigame
+import net.casual.arcade.minigame.ready.ReadyChecker
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
@@ -296,12 +297,14 @@ class CasualLobbyMinigame(
             return
         }
 
-        val unready = requester.arePlayersReady(requesting) {
+        val checker = ReadyChecker(requester)
+        checker.arePlayersReady(requesting).then {
             started = startDuelWith(started, initiator, duelers, setOf(), requester, settings, false)
         }
-        val startAnyways = Component.translatable("casual.duel.clickToStart").mini().green()/*.function {
+        val startAnyways = Component.translatable("casual.duel.clickToStart").mini().green().function { context ->
+            val unready = checker.getUnreadyPlayers(context.server)
             started = startDuelWith(started, initiator, duelers, unready, requester, settings, true)
-        }*/
+        }
         requester.broadcastTo(startAnyways, initiator)
     }
 

@@ -16,7 +16,6 @@ import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.level.LevelLootEvent
 import net.casual.arcade.events.player.*
 import net.casual.arcade.events.server.ServerTickEvent
-import net.casual.arcade.gui.predicate.PlayerObserverPredicate
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.ListenerFlags
@@ -73,6 +72,7 @@ import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.impl.Location
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
 import net.casual.arcade.visuals.shapes.ArrowShape
 import net.casual.arcade.visuals.shapes.ShapePoints.Companion.drawAsParticlesFor
 import net.casual.championships.common.event.TippedArrowTradeOfferEvent
@@ -328,8 +328,6 @@ class UHCMinigame(
     @Listener(flags = ListenerFlags.HAS_PLAYER)
     private fun onPlayerRespawn(event: PlayerRespawnEvent) {
         val player = event.player
-
-        player.setGameMode(GameType.SPECTATOR)
 
         player.lastDeathLocation.ifPresent { location ->
             val level = player.server.getLevel(location.dimension)

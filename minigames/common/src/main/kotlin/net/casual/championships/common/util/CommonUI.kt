@@ -1,7 +1,5 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.gui.predicate.PlayerObserverPredicate
-import net.casual.arcade.gui.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.chat.ChatFormatter
 import net.casual.arcade.minigame.managers.MinigameChatManager
@@ -21,6 +19,8 @@ import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.elements.SidebarElements
 import net.casual.arcade.visuals.nametag.PlayerNameTag
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate
+import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
+import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.arcade.visuals.sidebar.Sidebar
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.tab.PlayerListDisplay

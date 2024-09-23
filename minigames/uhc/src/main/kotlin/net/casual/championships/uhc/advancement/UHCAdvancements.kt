@@ -401,7 +401,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val LAST_MAN_STANDING = register {
         parent(SOLOIST)
-        id = id("soloist")
+        id = id("last_man_standing")
         display(Items.ARROW)
         setTitleAndDesc("uhc.advancements.lastManStanding")
         toast()

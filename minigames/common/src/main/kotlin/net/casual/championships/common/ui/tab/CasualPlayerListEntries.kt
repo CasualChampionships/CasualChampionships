@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
-import net.casual.arcade.rp.font.heads.PlayerHeadFont
+import net.casual.arcade.resources.font.heads.PlayerHeadFont
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.greyscale

@@ -73,6 +73,7 @@ enum class UHCPhase(
                 resetToDefault()
                 set(GameRules.RULE_NATURAL_REGENERATION, false)
                 set(GameRules.RULE_DOINSOMNIA, false)
+                set(GameRules.RULE_DO_IMMEDIATE_RESPAWN, true)
             }
 
             minigame.teams.hideNameTags()

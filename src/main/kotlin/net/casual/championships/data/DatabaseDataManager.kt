@@ -4,14 +4,14 @@ import com.mojang.authlib.GameProfile
 import kotlinx.coroutines.*
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.stats.ArcadeStats
+import net.casual.arcade.minigame.utils.getHexColor
+import net.casual.arcade.minigame.utils.setHexColor
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CommonStats
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.uhc.UHCStats
-import net.casual.championships.util.DataUtils.toChatFormatting
-import net.casual.championships.util.DataUtils.toMinecraftColor
 import net.casual.database.*
 import net.casual.database.stats.DuelPlayerStats
 import net.casual.database.stats.PlayerStats
@@ -27,8 +27,7 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
+import java.util.concurrent.CompletableFuture
 import kotlin.jvm.optionals.getOrNull
 import net.casual.database.Minigame as DatabaseMinigame
 
@@ -39,36 +38,41 @@ class DatabaseDataManager(
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val currentEvent = this.database.transaction { createEvent(eventName) }
 
-    override fun getParticipants(): Set<GameProfile> {
-        val profiles = HashSet<GameProfile>()
-        this.database.transaction {
-            for (player in database.getDiscordPlayers()) {
+    override fun getParticipants(): CompletableFuture<Set<GameProfile>> {
+        val future = CompletableFuture<Set<GameProfile>>()
+        this.asyncTransaction {
+            val profiles = HashSet<GameProfile>()
+            for (player in this.database.getDiscordPlayers()) {
                 if (player.team != null) {
                     profiles.add(GameProfile(player.id.value, player.name))
                 }
             }
+            future.complete(profiles)
         }
-        return profiles
+        return future
     }
 
-    override fun createTeams(server: MinecraftServer) {
+    override fun createTeams(server: MinecraftServer): CompletableFuture<Collection<PlayerTeam>> {
+        val future = CompletableFuture<Collection<PlayerTeam>>()
         val scoreboard = server.scoreboard
-        this.transaction {
-            val teams = this.database.getDiscordTeams()
-            for (team in teams) {
-                val players = team.players.toList()
-                server.execute {
-                    this.createTeam(team, players, scoreboard)
+        this.asyncTransaction {
+            val teams = this.database.getDiscordTeams().map { it to it.players.toList() }
+            server.execute {
+                val created = ArrayList<PlayerTeam>(teams.size)
+                for ((team, players) in teams) {
+                    created.add(this.createTeam(team, players, scoreboard))
                 }
+                future.complete(created)
             }
         }
+        return future
     }
 
     override fun syncUHCData(uhc: UHCMinigame) {
         val participants = uhc.players.allProfiles.map {
             uhc.server.scoreboard.getPlayersTeam(it.name) to it
         }
-        this.transaction {
+        this.asyncTransaction {
             CasualMod.logger.info("Synchronizing uhc stats for ${uhc.uuid}")
 
             val databaseMinigame = this.getOrCreateMinigame(uhc)
@@ -101,7 +105,7 @@ class DatabaseDataManager(
         val participants = duel.players.allProfiles.map {
             duel.server.scoreboard.getPlayersTeam(it.name) to it
         }
-        this.transaction {
+        this.asyncTransaction {
             CasualMod.logger.info("Synchronizing duel stats for ${duel.uuid}")
             val databaseMinigame = this.getOrCreateMinigame(duel)
             for ((team, profile) in participants) {
@@ -126,7 +130,7 @@ class DatabaseDataManager(
         this.coroutineScope.cancel()
     }
 
-    private fun transaction(statement: (Transaction) -> Unit) {
+    private fun asyncTransaction(statement: (Transaction) -> Unit) {
         this.coroutineScope.launch {
             database.transaction(statement)
         }
@@ -230,11 +234,11 @@ class DatabaseDataManager(
         return EventTeam.new {
             name = playerTeam.name
             event = currentEvent
-            color = playerTeam.color.toMinecraftColor()
+            color = playerTeam.getHexColor() ?: 0xFFFFFF
         }
     }
 
-    private fun createTeam(discordTeam: DiscordTeam, players: List<DiscordPlayer>, scoreboard: Scoreboard) {
+    private fun createTeam(discordTeam: DiscordTeam, players: List<DiscordPlayer>, scoreboard: Scoreboard): PlayerTeam {
         var team = scoreboard.getPlayerTeam(discordTeam.name)
         if (team == null) {
             team = scoreboard.addPlayerTeam(discordTeam.name)!!
@@ -244,13 +248,14 @@ class DatabaseDataManager(
         }
 
         team.playerPrefix = Component.literal("[${discordTeam.prefix}] ")
-        team.color = discordTeam.color.toChatFormatting()
+        team.setHexColor(discordTeam.color)
 
         for (player in players) {
             scoreboard.addPlayerToTeam(player.name, team)
         }
         team.isAllowFriendlyFire = false
         team.collisionRule = Team.CollisionRule.ALWAYS
+        return team
     }
 
     private fun createEvent(eventName: String): Event {

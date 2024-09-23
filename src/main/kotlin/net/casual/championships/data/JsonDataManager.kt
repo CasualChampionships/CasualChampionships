@@ -8,6 +8,7 @@ import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.uhc.UHCMinigame
 import net.casual.championships.util.CasualConfig
 import net.minecraft.server.MinecraftServer
+import net.minecraft.world.scores.PlayerTeam
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -16,12 +17,12 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 
 class JsonDataManager: DataManager {
-    override fun getParticipants(): Set<GameProfile> {
-        return hashSetOf()
+    override fun getParticipants(): CompletableFuture<Set<GameProfile>> {
+        return CompletableFuture.completedFuture(setOf())
     }
 
-    override fun createTeams(server: MinecraftServer) {
-
+    override fun createTeams(server: MinecraftServer): CompletableFuture<Collection<PlayerTeam>> {
+        return CompletableFuture.completedFuture(listOf())
     }
 
     override fun syncUHCData(uhc: UHCMinigame) {

@@ -11,9 +11,7 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.codec.CodecProvider
 import net.casual.arcade.utils.encodedOptionalFieldOf
 import net.casual.championships.CasualMod
-import net.casual.championships.common.CommonMod
 import net.casual.championships.resources.CasualResourcePackHost
-import net.casual.championships.util.CasualConfig
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer

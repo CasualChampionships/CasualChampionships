@@ -22,9 +22,9 @@ data class CasualConfig(
     val dev: Boolean = false,
     @SerialName("database_login")
     val database: DatabaseLogin = DatabaseLogin(),
-    @SerialName("past_host_ip")
+    @SerialName("pack_host_ip")
     val packHostIp: String = "0.0.0.0",
-    @SerialName("past_host_port")
+    @SerialName("pack_host_port")
     val packHostPort: Int = PackHost.DEFAULT_PORT
 ) {
     @OptIn(ExperimentalSerializationApi::class)

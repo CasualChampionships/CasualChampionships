@@ -25,14 +25,6 @@
 
   "casual.tab.ping": "Ping: %s ms",
 
-  "casual.ready.question": "Are you ready?",
-  "casual.ready.notReady": "%s is not ready!",
-  "casual.ready.isReady": "%s is ready!",
-  "casual.ready.notNow": "You cannot ready now!",
-  "casual.ready.alreadyReady": "You have already readied up!",
-  "casual.ready.alreadyUnready": "You are already unreadied!",
-  "casual.ready.allReady": "All teams are ready!",
-
   "casual.team.teams": "Teams",
   "casual.team.teammates": "Teammates",
   "casual.team.added": "You have been added to team %s",

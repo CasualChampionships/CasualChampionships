@@ -4,11 +4,13 @@ import com.mojang.authlib.GameProfile
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.uhc.UHCMinigame
 import net.minecraft.server.MinecraftServer
+import net.minecraft.world.scores.PlayerTeam
+import java.util.concurrent.CompletableFuture
 
 interface DataManager {
-    fun getParticipants(): Set<GameProfile>
+    fun getParticipants(): CompletableFuture<Set<GameProfile>>
 
-    fun createTeams(server: MinecraftServer)
+    fun createTeams(server: MinecraftServer): CompletableFuture<Collection<PlayerTeam>>
 
     fun syncUHCData(uhc: UHCMinigame)
 
