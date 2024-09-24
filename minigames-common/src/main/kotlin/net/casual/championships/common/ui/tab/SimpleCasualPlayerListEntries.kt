@@ -1,6 +1,7 @@
 package net.casual.championships.common.ui.tab
 
 import net.casual.arcade.minigame.Minigame
+import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.italicise
 import net.casual.arcade.utils.ComponentUtils.literal
@@ -20,7 +21,7 @@ class SimpleCasualPlayerListEntries(
         val player = this.getPlayerAt(index)
         var display = Component.empty().append(entry.display).mini()
         if (this.minigame.players.isSpectating(player)) {
-            display = player.scoreboardName.literal().colour(0x919191).italicise().mini()
+            display = player.scoreboardName.literal().color(0x919191).italicise().mini()
         }
         return entry.copy(display = display)
     }

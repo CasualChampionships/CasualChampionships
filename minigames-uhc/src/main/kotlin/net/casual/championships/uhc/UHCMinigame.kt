@@ -31,7 +31,6 @@ import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
-import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.bold
@@ -70,6 +69,7 @@ import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.ResourceUtils
+import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds

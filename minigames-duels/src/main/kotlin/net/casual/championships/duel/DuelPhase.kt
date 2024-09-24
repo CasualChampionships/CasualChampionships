@@ -3,10 +3,10 @@ package net.casual.championships.duel
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.arcade.minigame.utils.MinigameUtils.countdown
-import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.PlayerUtils.sendTitle
+import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.resetToDefault

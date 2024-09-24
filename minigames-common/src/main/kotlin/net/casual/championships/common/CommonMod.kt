@@ -10,6 +10,7 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
 import net.casual.arcade.resources.utils.ResourcePackUtils.addSounds
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.championships.common.items.MenuItem
+import net.casual.championships.common.items.TintedMenuItem
 import net.casual.championships.common.util.*
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
@@ -71,6 +72,7 @@ object CommonMod: ModInitializer {
                 .alignedRight()
                 .displayItems { _, output ->
                     output.acceptAll(MenuItem.MODELLER.all())
+                    output.accept(TintedMenuItem.FLAG)
                 }
                 .build()
         )

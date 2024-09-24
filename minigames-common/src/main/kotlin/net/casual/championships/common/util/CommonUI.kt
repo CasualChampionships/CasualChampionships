@@ -12,6 +12,7 @@ import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.sendSound
+import net.casual.arcade.utils.TeamUtils.getHexColor
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.LevelSpecificElement
@@ -24,6 +25,7 @@ import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toP
 import net.casual.arcade.visuals.sidebar.Sidebar
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.tab.PlayerListDisplay
+import net.casual.championships.common.items.TintedMenuItem
 import net.casual.championships.common.ui.elements.SpectatorAndAdminTeamsElement
 import net.casual.championships.common.ui.elements.TeammateElement
 import net.casual.championships.common.ui.game.TeamSelectorGui
@@ -37,6 +39,7 @@ import net.minecraft.ChatFormatting.*
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.item.component.DyedItemColor
 import net.minecraft.world.level.border.BorderStatus
 
 object CommonUI {
@@ -177,10 +180,13 @@ object CommonUI {
 
     fun createTeamSelectionGui(minigame: Minigame<*>, player: ServerPlayer): TeamSelectorGui {
         val selections = minigame.teams.getAllNonSpectatorOrAdminTeams().map {
-            // TODO: Fix colours here
-            val head = ItemUtils.colouredHeadForFormatting(it.color, CommonItems.FORWARD_FACING_PLAYER_HEAD)
-            head.set(DataComponents.CUSTOM_NAME, it.formattedDisplayName.mini())
-            TeamSelectorGui.Selection(it, head)
+            val flag = TintedMenuItem.FLAG
+            val color = it.getHexColor()
+            if (color != null) {
+                flag.set(DataComponents.DYED_COLOR, DyedItemColor(color, false))
+            }
+            flag.set(DataComponents.CUSTOM_NAME, it.formattedDisplayName.mini())
+            TeamSelectorGui.Selection(it, flag)
         }
         return TeamSelectorGui(player, selections)
     }

@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.casual.arcade.dimensions.vanilla.VanillaLikeLevel
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
+import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
@@ -182,7 +183,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
                 icon.text = Component.empty()
                     .append(head)
                     .append(ComponentUtils.space(-10))
-                    .append(UHCComponents.Bitmap.PLAYER_BACKGROUND.colour(player.teamColor))
+                    .append(UHCComponents.Bitmap.PLAYER_BACKGROUND.color(player.teamColor))
                     .append(ComponentUtils.space(-1))
             }
         // }

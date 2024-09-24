@@ -7,7 +7,6 @@ import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
-import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.literal
@@ -15,6 +14,7 @@ import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
+import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds

@@ -8,10 +8,10 @@ import net.casual.arcade.host.HostedPack
 import net.casual.arcade.host.PackHost
 import net.casual.arcade.host.PackHost.HostedPackRef
 import net.casual.arcade.host.pack.DirectoryPackSupplier
-import net.casual.arcade.minigame.utils.getHexColor
 import net.casual.arcade.resources.ArcadeResourcePacks
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.ResourcePackUtils.addPack
+import net.casual.arcade.utils.TeamUtils.getHexColor
 import net.casual.championships.CasualMod
 import net.casual.championships.common.CommonMod
 import net.casual.championships.events.CasualConfigReloaded

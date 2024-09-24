@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "casual_common:item/gui/flag_pole",
+    "layer1": "casual_common:item/gui/flag"
+  }
+}

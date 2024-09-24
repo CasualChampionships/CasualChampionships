@@ -1,13 +1,13 @@
 package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
-import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.PlayerUtils.player
+import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.championships.common.util.CommonComponents

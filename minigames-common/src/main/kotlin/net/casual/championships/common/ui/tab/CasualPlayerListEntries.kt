@@ -3,14 +3,14 @@ package net.casual.championships.common.ui.tab
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.heads.PlayerHeadFont
 import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.ComponentUtils.colour
+import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.greyscale
 import net.casual.arcade.utils.ComponentUtils.italicise
 import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.visuals.tab.PlayerListEntries
 import net.casual.arcade.visuals.tab.TeamListEntries
 import net.minecraft.network.chat.Component
@@ -44,11 +44,11 @@ open class CasualPlayerListEntries(
                 name.color(team)
                 PlayerHeadComponents.getHeadOrDefault(player)
             } else {
-                name.italicise().colour(0x919191)
+                name.italicise().color(0x919191)
                 GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
             }
         } else {
-            name.colour(0x808080)
+            name.color(0x808080)
             GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
         }
         return PlayerListEntries.Entry.fromComponent(

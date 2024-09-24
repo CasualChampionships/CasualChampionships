@@ -1,9 +1,11 @@
 package net.casual.championships.common.util
 
 import net.casual.arcade.utils.ComponentUtils.bold
+import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.colour
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.championships.common.minigame.rules.Rules
@@ -39,6 +41,6 @@ object RuleUtils {
     }
 
     fun formatLine(component: MutableComponent): MutableComponent {
-        return component.mini().colour(0x92ddfe)
+        return component.mini().color(0x92ddfe)
     }
 }

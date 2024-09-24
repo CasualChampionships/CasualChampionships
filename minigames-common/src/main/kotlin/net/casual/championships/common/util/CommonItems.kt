@@ -11,6 +11,7 @@ object CommonItems {
 
     val FORWARD_FACING_PLAYER_HEAD = register("forward_facing_player_head", ForwardFacingPlayerHead())
     val MENU = register("menu", MenuItem.MODELLER.item())
+    val TINTED_MENU = register("tinted_menu", TintedMenuItem.MODELLER.item())
     val BORDER = register("border", BorderItem.MODELLER.item())
 
     val MINESWEEPER = register("minesweeper", MinesweeperItem.MODELLER.item())
