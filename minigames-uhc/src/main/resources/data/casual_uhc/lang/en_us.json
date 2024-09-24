@@ -109,8 +109,6 @@
   "uhc.advancements.theEndIsNear": "The End Is Near",
   "uhc.advancements.theEndIsNear.desc": "... We're in the endgame now",
 
-  "uhc.broadcast.spectator": "While you are spectating don't spoil information to your team or chat!\nYou can join the spectator VC to talk about the game",
-
   "uhc.rules.announcement": "Next Minigame: UHC",
   "uhc.rules.announcement.1": " Please take a moment to read the rules and information about the game.",
 
@@ -120,7 +118,8 @@
   "uhc.rules.mods.3": " If you are unsure please ask an admin.",
 
   "uhc.rules.exploits": "Exploits",
-  "uhc.rules.exploits.1": " Exploits are the use of a bug to gain an §bunfair advantage§r, and they are strictly prohibited! (TNT Duplication is the only exception to this)",
+  "uhc.rules.exploits.1": " Exploits that give you an unfair advantage are strictly prohibited!",
+  "uhc.rules.exploits.2": " TNT Duplication is the only exception to this.",
 
   "uhc.rules.border": "World Border",
   "uhc.rules.border.1": " The World Border shrinks in 6 stages.",
@@ -144,7 +143,7 @@
   "uhc.rules.glowing.1": " Once the border reaches its final size, a two-minute countdown will begin. After the countdown finishes, all remaining players will receive the glowing effect",
 
   "uhc.rules.heads": "Player Heads",
-  "uhc.rules.heads.1": " Players will §balways§r drop their heads on death which can be eaten for some buffs.",
+  "uhc.rules.heads.1": " Players will always drop their heads on death which can be eaten for some buffs.",
   "uhc.rules.heads.2": " Surrounding the player head in gold ingots will yield a golden head, which gives better buffs.",
 
   "uhc.rules.chat": "Chat",

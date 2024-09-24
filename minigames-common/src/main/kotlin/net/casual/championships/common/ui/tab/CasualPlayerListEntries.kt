@@ -3,6 +3,7 @@ package net.casual.championships.common.ui.tab
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import net.casual.arcade.minigame.Minigame
+import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.heads.PlayerHeadFont
 import net.casual.arcade.utils.ComponentUtils
@@ -28,7 +29,7 @@ open class CasualPlayerListEntries(
     }
 
     override fun formatTeamName(server: MinecraftServer, team: PlayerTeam): MutableComponent {
-        return super.formatTeamName(server, team).mini()
+        return super.formatTeamName(server, team).color(team).mini()
     }
 
     override fun createPlayerEntry(
@@ -40,7 +41,7 @@ open class CasualPlayerListEntries(
         val name = Component.literal(username)
         val head = if (player != null) {
             if (this.minigame.players.isPlaying(player)) {
-                name.withStyle(team.color)
+                name.color(team)
                 PlayerHeadComponents.getHeadOrDefault(player)
             } else {
                 name.italicise().colour(0x919191)

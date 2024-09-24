@@ -1,6 +1,7 @@
 package net.casual.championships.uhc
 
 import com.google.gson.JsonObject
+import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.GuiHelpers
@@ -30,10 +31,12 @@ import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
+import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.colour
+import net.casual.arcade.utils.ComponentUtils.join
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
@@ -70,6 +73,7 @@ import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.impl.Location
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
@@ -104,6 +108,7 @@ import net.minecraft.core.Holder
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket
 import net.minecraft.resources.ResourceKey
@@ -470,7 +475,10 @@ class UHCMinigame(
             player.teleportTo(Location.of(0.0, 128.0, 0.0, level = this.overworld))
         }
 
-        this.chat.broadcastInfo(UHCComponents.BROADCAST_SPECTATING.mini(), listOf(player))
+        val rules = this.getSpectatorRules().join("\n\n".literal())
+        this.scheduler.schedule(1.Ticks) {
+            this.chat.broadcastInfo(rules.mini(), listOf(player))
+        }
     }
 
     @Listener
@@ -521,7 +529,7 @@ class UHCMinigame(
         if (team !== null && !this.teams.isTeamEliminated(team) && team.getOnlinePlayers().none(this.players::isPlaying)) {
             this.teams.addEliminatedTeam(team)
             this.chat.broadcastWithSound(
-                CommonComponents.HAS_BEEN_ELIMINATED.generate(team.name).withStyle(team.color).bold().mini(),
+                CommonComponents.HAS_BEEN_ELIMINATED.generate(team.name).color(team).bold().mini(),
                 Sound(CommonSounds.TEAM_ELIMINATION)
             )
         }
@@ -559,14 +567,13 @@ class UHCMinigame(
             addRule("uhc.rules.chat", 2)
             rule {
                 title = RuleUtils.formatTitle(Component.translatable("uhc.rules.spectators"))
+                val rules = getSpectatorRules()
                 entry {
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.1")))
+                    line(rules[0])
                 }
                 entry {
-                    val s = "/s".literal().mini().bold().colour(0x65b7db)
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.2", s)))
-                    val sneak = Component.keybind("key.sneak").mini().bold().colour(0x65b7db)
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.3", sneak)))
+                    line(rules[1])
+                    line(rules[2])
                 }
             }
             addRule("uhc.rules.gentleman", 1)
@@ -589,6 +596,16 @@ class UHCMinigame(
             addRule("uhc.rules.questions", 1)
             addRule("uhc.rules.finally", 1 to 9.Seconds)
         }
+    }
+
+    private fun getSpectatorRules(): List<MutableComponent> {
+        val s = "/s".literal().mini().bold().colour(0x65b7db)
+        val sneak = Component.keybind("key.sneak").mini().bold().colour(0x65b7db)
+        return listOf(
+            RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.1")),
+            RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.2", s)),
+            RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.3", sneak))
+        )
     }
 
     // World Border
@@ -850,10 +867,10 @@ class UHCMinigame(
             literal("map") {
                 requiresAdminOrPermission()
                 literal("give") {
-                    executes { mapRenderer.getMaps().forEach(it.source.playerOrException::addItem).commandSuccess() }
+                    executes { mapRenderer.getMaps().forEach(it.source.playerOrException::addItem); 1 }
                 }
                 literal("clear") {
-                    executes { mapRenderer.clear().commandSuccess() }
+                    executes { mapRenderer.clear(); 1 }
                 }
             }
             literal("fullbright") {
@@ -925,7 +942,8 @@ class UHCMinigame(
         if (!this.players.isSpectating(player)) {
             return context.source.fail(CommonComponents.NOT_SPECTATING)
         }
-        return player.teleportTo(target.location).commandSuccess()
+        player.teleportTo(target.location)
+        return Command.SINGLE_SUCCESS
     }
 
     companion object {

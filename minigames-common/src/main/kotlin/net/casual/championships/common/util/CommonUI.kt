@@ -177,6 +177,7 @@ object CommonUI {
 
     fun createTeamSelectionGui(minigame: Minigame<*>, player: ServerPlayer): TeamSelectorGui {
         val selections = minigame.teams.getAllNonSpectatorOrAdminTeams().map {
+            // TODO: Fix colours here
             val head = ItemUtils.colouredHeadForFormatting(it.color, CommonItems.FORWARD_FACING_PLAYER_HEAD)
             head.set(DataComponents.CUSTOM_NAME, it.formattedDisplayName.mini())
             TeamSelectorGui.Selection(it, head)

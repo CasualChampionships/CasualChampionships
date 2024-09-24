@@ -2,7 +2,6 @@ package net.casual.championships.common.ui.game
 
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
-import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.visuals.screen.SimpleNestedGui
@@ -46,6 +45,6 @@ class TeamSelectorGui(
         }
     }
 
-    data class Selection(val team: PlayerTeam, val display: ItemStack = ItemUtils.colouredHeadForFormatting(team.color))
+    data class Selection(val team: PlayerTeam, val display: ItemStack)
 }
 

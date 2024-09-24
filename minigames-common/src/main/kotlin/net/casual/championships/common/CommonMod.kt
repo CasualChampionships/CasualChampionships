@@ -1,5 +1,6 @@
 package net.casual.championships.common
 
+import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils
 import net.casual.arcade.resources.ArcadeResourcePacks
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
@@ -8,10 +9,12 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
 import net.casual.arcade.resources.utils.ResourcePackUtils.addSounds
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.*
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.CreativeModeTab
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -59,6 +62,31 @@ object CommonMod: ModInitializer {
         CommonSounds.noop()
 
         AntiCheat.registerEvents()
+
+        PolymerItemGroupUtils.registerPolymerItemGroup(
+            id("menu"),
+            CreativeModeTab.builder(CreativeModeTab.Row.TOP, 7)
+                .title("Menu Items".literal())
+                .icon(MenuItem::TICK)
+                .alignedRight()
+                .displayItems { _, output ->
+                    output.acceptAll(MenuItem.MODELLER.all())
+                }
+                .build()
+        )
+        PolymerItemGroupUtils.registerPolymerItemGroup(
+            id("heads"),
+            CreativeModeTab.builder(CreativeModeTab.Row.TOP, 7)
+                .title("Head Items".literal())
+                .icon(CommonItems.GOLDEN_HEAD::getDefaultInstance)
+                .alignedRight()
+                .displayItems { _, output ->
+                    output.accept(CommonItems.GOLDEN_HEAD)
+                    output.accept(CommonItems.PLAYER_HEAD)
+                    output.accept(CommonItems.FORWARD_FACING_PLAYER_HEAD)
+                }
+                .build()
+        )
     }
 
     fun id(path: String): ResourceLocation {

@@ -167,7 +167,7 @@ class MinesweeperGui(
         return when (tile) {
             -1 -> MINE.named(CommonComponents.MINESWEEPER_MINE)
             0 -> ItemStack.EMPTY
-            else -> MinesweeperItem.MODELLER.create(tile).named(tile.toString())
+            else -> MinesweeperItem.of(tile).named(tile.toString())
         }
     }
 

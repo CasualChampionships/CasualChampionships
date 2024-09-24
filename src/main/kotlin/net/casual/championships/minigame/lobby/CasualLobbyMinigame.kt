@@ -1,6 +1,7 @@
 package net.casual.championships.minigame.lobby
 
 import com.google.common.collect.ImmutableList
+import com.mojang.brigadier.Command
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.*
 import net.casual.arcade.events.player.PlayerFallEvent
@@ -257,7 +258,8 @@ class CasualLobbyMinigame(
         val player = context.source.playerOrException
         val settings = DuelSettings(this.casualLobby.duelArenaTemplates)
         val gui = DuelConfigurationGui(player, settings, this.players::all, this::requestDuelWith)
-        return gui.open().commandSuccess()
+        gui.open()
+        return Command.SINGLE_SUCCESS
     }
 
     private fun viewDueler(context: CommandContext<CommandSourceStack>): Int {

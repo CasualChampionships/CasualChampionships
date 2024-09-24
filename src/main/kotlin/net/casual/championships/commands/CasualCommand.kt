@@ -1,9 +1,8 @@
 package net.casual.championships.commands
 
-import com.mojang.brigadier.CommandDispatcher
+import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.CommandTree
-import net.casual.arcade.commands.commandSuccess
 import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.championships.CasualMod
@@ -15,43 +14,41 @@ import net.minecraft.commands.arguments.EntityArgument
 
 @Suppress("UnstableApiUsage")
 object CasualCommand: CommandTree {
-    override fun register(dispatcher: CommandDispatcher<CommandSourceStack>, buildContext: CommandBuildContext) {
-        dispatcher.register(
-            Commands.literal("casual").requiresAdminOrPermission().then(
-                Commands.literal("team").then(
-                    Commands.literal("reload").executes(this::reloadTeams)
-                )
+    override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
+        return Commands.literal("casual").requiresAdminOrPermission().then(
+            Commands.literal("team").then(
+                Commands.literal("reload").executes(this::reloadTeams)
+            )
+        ).then(
+            Commands.literal("config").then(
+                Commands.literal("reload").executes(this::reloadConfig)
+            )
+        ).then(
+            Commands.literal("resources").then(
+                Commands.literal("reload").executes(this::reloadResources)
+            )
+        ).then(
+            Commands.literal("lobby").executes(this::returnToLobby)
+        ).then(
+            Commands.literal("floodgates").then(
+                Commands.literal("open").executes { this.floodgates(it, true) }
             ).then(
-                Commands.literal("config").then(
-                    Commands.literal("reload").executes(this::reloadConfig)
-                )
+                Commands.literal("close").executes { this.floodgates(it, false) }
+            )
+        ).then(
+            Commands.literal("winners").then(
+                Commands.literal("clear").executes {
+                    CasualMinigames.winners.clear(); 1
+                }
             ).then(
-                Commands.literal("resources").then(
-                    Commands.literal("reload").executes(this::reloadResources)
-                )
-            ).then(
-                Commands.literal("lobby").executes(this::returnToLobby)
-            ).then(
-                Commands.literal("floodgates").then(
-                    Commands.literal("open").executes { this.floodgates(it, true) }
-                ).then(
-                    Commands.literal("close").executes { this.floodgates(it, false) }
-                )
-            ).then(
-                Commands.literal("winners").then(
-                    Commands.literal("clear").executes {
-                        CasualMinigames.winners.clear().commandSuccess()
-                    }
-                ).then(
-                    Commands.literal("add").then(
-                        Commands.argument("players", EntityArgument.players()).executes {
-                            val players = EntityArgument.getPlayers(it, "players")
-                            for (player in players) {
-                                CasualMinigames.winners.add(player.scoreboardName)
-                            }
-                            1
+                Commands.literal("add").then(
+                    Commands.argument("players", EntityArgument.players()).executes {
+                        val players = EntityArgument.getPlayers(it, "players")
+                        for (player in players) {
+                            CasualMinigames.winners.add(player.scoreboardName)
                         }
-                    )
+                        1
+                    }
                 )
             )
         )

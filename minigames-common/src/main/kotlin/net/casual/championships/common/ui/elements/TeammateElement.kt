@@ -1,6 +1,7 @@
 package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
+import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.literal
@@ -13,7 +14,7 @@ import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.scores.Team
+import net.minecraft.world.scores.PlayerTeam
 
 class TeammateElement(private val index: Int, private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
     private val none = SidebarComponent.withCustomScore(
@@ -56,13 +57,13 @@ class TeammateElement(private val index: Int, private val buffer: Component): Pl
         return SidebarComponent.withCustomScore(formatted, score.append(this.buffer))
     }
 
-    private fun createTeammate(name: String, team: Team): MutableComponent {
+    private fun createTeammate(name: String, team: PlayerTeam): MutableComponent {
         return Component.empty().apply {
             append(buffer)
             append(" ")
             append(PlayerHeadComponents.getHeadOrDefault(name))
             append(" ")
-            append(name.literal().mini().withStyle(team.color))
+            append(name.literal().mini().color(team))
         }
     }
 }

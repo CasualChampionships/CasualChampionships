@@ -1,8 +1,8 @@
 package net.casual.championships.common.util
 
+import com.mojang.brigadier.Command
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
-import net.casual.arcade.commands.commandSuccess
 import net.casual.arcade.commands.function
 import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.Minigame
@@ -67,12 +67,13 @@ object CommonCommands {
         val location = "[%.0f, %.0f, %.0f]".format(position.x, position.y, position.z).literal().lime().function {
             it.player.lookAt(EntityAnchorArgument.Anchor.EYES, position)
         }
-        return minigame.chat.broadcastAsPlayerTo(
+        minigame.chat.broadcastAsPlayerTo(
             player,
             CommonComponents.BROADCAST_POSITION.generate(location),
             team.getOnlinePlayers(),
             minigame.chat.teamChatFormatter
-        ).commandSuccess()
+        )
+        return Command.SINGLE_SUCCESS
     }
 
     fun openSpectatingScreen(
@@ -84,6 +85,7 @@ object CommonCommands {
             throw NOT_SPECTATOR.create()
         }
 
-        return CommonUI.createTeamSelectionGui(minigame, player).open().commandSuccess()
+        CommonUI.createTeamSelectionGui(minigame, player).open()
+        return Command.SINGLE_SUCCESS
     }
 }

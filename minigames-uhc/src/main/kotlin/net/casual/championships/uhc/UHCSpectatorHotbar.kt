@@ -3,7 +3,6 @@ package net.casual.championships.uhc
 import eu.pb4.sgui.api.ClickType
 import eu.pb4.sgui.api.elements.GuiElement
 import eu.pb4.sgui.api.gui.HotbarGui
-import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.util.CommonItems
@@ -64,16 +63,14 @@ class UHCSpectatorHotbar(
     private fun createMapGuiElement(map: ItemStack, index: Int): GuiElement {
         return GuiElement(map) { _, type, _, _ ->
             if (type == ClickType.OFFHAND_SWAP) {
-                GlobalTickedScheduler.later {
-                    val current = this.maps[index]
-                    val offhand = this.getSlot(9)?.itemStack ?: ItemStack.EMPTY
-                    if (current.itemStack.isEmpty) {
-                        current.itemStack = offhand
-                        this.setSlot(9, ItemStack.EMPTY)
-                    } else if (offhand.isEmpty) {
-                        this.setSlot(9, current.itemStack)
-                        current.itemStack = ItemStack.EMPTY
-                    }
+                val current = this.maps[index]
+                val offhand = this.getSlot(9)?.itemStack ?: ItemStack.EMPTY
+                if (current.itemStack.isEmpty) {
+                    current.itemStack = offhand
+                    this.setSlot(9, ItemStack.EMPTY)
+                } else if (offhand.isEmpty) {
+                    this.setSlot(9, current.itemStack)
+                    current.itemStack = ItemStack.EMPTY
                 }
             }
         }

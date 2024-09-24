@@ -7,6 +7,7 @@ import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
+import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.literal
@@ -49,7 +50,7 @@ enum class UHCPhase(
             minigame.levels.all().forEach { it.dayTime = 0 }
             minigame.resetWorldBorders()
 
-            val (level, height) = when (minigame.settings.startingDimension) {
+            val (level, _) = when (minigame.settings.startingDimension) {
                 VanillaDimension.Overworld -> minigame.overworld to null
                 VanillaDimension.Nether -> minigame.nether to 120
                 VanillaDimension.End -> minigame.end to null
@@ -152,7 +153,7 @@ enum class UHCPhase(
             minigame.winners.addAll(team.players)
 
             for (player in minigame.players) {
-                player.sendTitle(CommonComponents.GAME_WON.generate(team.name).withStyle(team.color).mini())
+                player.sendTitle(CommonComponents.GAME_WON.generate(team.name).color(team).mini())
             }
 
             // TODO: Better winning screen

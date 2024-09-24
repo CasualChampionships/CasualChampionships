@@ -3,6 +3,7 @@ package net.casual.championships.duel
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.arcade.minigame.utils.MinigameUtils.countdown
+import net.casual.arcade.minigame.utils.color
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.PlayerUtils.sendTitle
@@ -71,7 +72,12 @@ enum class DuelPhase(
                 val winner = minigame.players.playing.firstOrNull()
                 if (winner != null) {
                     minigame.stats.getOrCreateStat(winner, CommonStats.WON).modify { true }
-                    winner.scoreboardName.literal().withStyle(winner.team?.color ?: ChatFormatting.RESET)
+                    val named = winner.scoreboardName.literal()
+                    val team = winner.team
+                    if (team != null) {
+                        named.color(team)
+                    }
+                    named
                 } else {
                     null
                 }

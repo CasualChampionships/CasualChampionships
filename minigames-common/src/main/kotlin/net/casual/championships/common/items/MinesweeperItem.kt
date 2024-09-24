@@ -4,7 +4,6 @@ import net.casual.arcade.items.ArcadeModelledItem
 import net.casual.arcade.items.ItemModeller
 import net.casual.arcade.items.ResourcePackItemModeller
 import net.casual.championships.common.CommonMod
-import net.casual.championships.common.util.CommonItems
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -31,8 +30,21 @@ class MinesweeperItem private constructor(): Item(Properties()), ArcadeModelledI
         val SEVEN by MODELLER.model(CommonMod.id("minesweeper/7"))
         val EIGHT by MODELLER.model(CommonMod.id("minesweeper/8"))
         val MINE by MODELLER.model(CommonMod.id("minesweeper/mine"))
-        val EMPTY by MODELLER.model(CommonMod.id("minesweeper/empty"))
         val FLAG by MODELLER.model(CommonMod.id("minesweeper/flag"))
         val FLAG_COUNTER by MODELLER.model(CommonMod.id("minesweeper/flag_counter"))
+
+        fun of(tile: Int): ItemStack {
+            return when (tile) {
+                1 -> ONE
+                2 -> TWO
+                3 -> THREE
+                4 -> FOUR
+                5 -> FIVE
+                6 -> SIX
+                7 -> SEVEN
+                8 -> EIGHT
+                else -> throw IllegalArgumentException("Invalid tile")
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package net.casual.championships.minigame
 
 import com.mojang.serialization.JsonOps
+import net.casual.arcade.commands.register
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.player.PlayerJoinEvent
 import net.casual.arcade.events.player.PlayerRequestLoginEvent
@@ -119,9 +120,8 @@ object CasualMinigames {
         Minigames.registerFactory(DuelMinigame.ID, this::createDuelMinigame)
         Minigames.registerFactory(CasualLobbyMinigame.ID, this::createLobbyMinigame)
 
-        GlobalEventHandler.register<ServerRegisterCommandEvent> { (dispatcher, context) ->
-            MinesweeperCommand.register(dispatcher, context)
-            CasualCommand.register(dispatcher, context)
+        GlobalEventHandler.register<ServerRegisterCommandEvent> { event ->
+            event.register(MinesweeperCommand, CasualCommand)
         }
 
         GlobalEventHandler.register<PlayerRequestLoginEvent> { event ->

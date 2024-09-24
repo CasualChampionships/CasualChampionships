@@ -52,7 +52,7 @@ object CasualResourcePackHost {
         var index = 0
         val colors = HashBiMap.create<ChatFormatting, Int>()
         for (team in teams) {
-            val color = team.getHexColor() ?: continue
+            val color = team.getHexColor()?.coerceIn(-1, 0xFFFFFF) ?: continue
             val original = colors.inverse()[color] ?: ChatFormatting.entries.getOrNull(index++)
             if (original == null) {
                 CasualMod.logger.error("Tried to load more team colors than were available!!")
@@ -67,7 +67,11 @@ object CasualResourcePackHost {
             this.colors.putAll(colors)
             this.hostCommon(ArcadeResourcePacks.createCustomGlowColorPack {
                 for ((formatting, color) in colors) {
-                    set(formatting, color)
+                    if (color != -1) {
+                        set(formatting, color)
+                    } else {
+                        rainbow(formatting)
+                    }
                 }
             })
             return true
