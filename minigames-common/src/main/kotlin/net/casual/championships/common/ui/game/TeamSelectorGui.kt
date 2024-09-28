@@ -4,9 +4,9 @@ import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
-import net.casual.arcade.visuals.screen.SimpleNestedGui
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.MenuItem
+import net.casual.championships.common.ui.CommonSimpleGui
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -17,7 +17,7 @@ import net.minecraft.world.scores.PlayerTeam
 class TeamSelectorGui(
     player: ServerPlayer,
     selections: List<Selection>
-): SimpleNestedGui(MenuType.GENERIC_9x6, player, true) {
+): CommonSimpleGui(MenuType.GENERIC_9x6, player, true) {
     init {
         this.title = Component.empty()
             .append(ComponentUtils.space(-8))

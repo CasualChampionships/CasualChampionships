@@ -6,12 +6,13 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.GuiHelpers
 import me.senseiwells.replay.player.PlayerRecorders
+import net.casual.arcade.border.tracker.MultiLevelBorderListener
+import net.casual.arcade.border.tracker.MultiLevelBorderTracker
+import net.casual.arcade.border.tracker.TrackedBorder
 import net.casual.arcade.commands.*
-import net.casual.arcade.dimensions.border.MultiLevelBorderListener
-import net.casual.arcade.dimensions.border.MultiLevelBorderTracker
-import net.casual.arcade.dimensions.border.TrackedBorder
-import net.casual.arcade.dimensions.utils.FantasyUtils
-import net.casual.arcade.dimensions.utils.FantasyUtils.PersistentConfig
+import net.casual.arcade.dimensions.level.LevelPersistence
+import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
+import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevelsBuilder
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.block.BrewingStandBrewEvent
 import net.casual.arcade.events.level.LevelLootEvent
@@ -34,7 +35,7 @@ import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.colour
+import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.join
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
@@ -43,7 +44,6 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.withMiniShiftedDownFont
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.arrayOrDefault
-import net.casual.arcade.utils.JsonUtils.booleanOrDefault
 import net.casual.arcade.utils.JsonUtils.longOrDefault
 import net.casual.arcade.utils.JsonUtils.longOrNull
 import net.casual.arcade.utils.JsonUtils.obj
@@ -130,18 +130,8 @@ import net.minecraft.world.level.border.WorldBorder
 import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.scores.Team
-import kotlin.collections.Collection
-import kotlin.collections.HashSet
-import kotlin.collections.Map
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.count
-import kotlin.collections.filter
-import kotlin.collections.forEach
-import kotlin.collections.iterator
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.none
 import kotlin.math.abs
 import kotlin.math.atan2
 
@@ -178,11 +168,12 @@ class UHCMinigame(
         this.addEventListener(this.uhcAdvancements)
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
         this.advancements.addAll(UHCAdvancements)
-        this.initialiseBorderTracker()
 
         this.levels.add(this.overworld)
         this.levels.add(this.nether)
         this.levels.add(this.end)
+        this.initialiseBorderTracker()
+
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.overworld)
     }
 
@@ -297,8 +288,8 @@ class UHCMinigame(
 
         if (!this.players.isSpectating(player)) {
             this.updateWorldBorder(player)
-        } else {
-            val gui = GuiHelpers.getCurrentGui(event.player)
+        } else if (!player.isCreative) {
+            val gui = GuiHelpers.getCurrentGui(player)
             if (gui == null && player.containerMenu == player.inventoryMenu) {
                 UHCSpectatorHotbar(event.player, this).open()
             }
@@ -446,9 +437,12 @@ class UHCMinigame(
         )
         player.setGameMode(GameType.SURVIVAL)
 
-        if (team != null && team.getOnlineCount() == 1) {
-            this.scheduler.schedule(1.Seconds) {
-                player.grantAdvancement(UHCAdvancements.SOLOIST)
+        if (team != null) {
+            this.teams.removeEliminatedTeam(team)
+            if (team.getOnlineCount() == 1) {
+                this.scheduler.schedule(1.Seconds) {
+                    player.grantAdvancement(UHCAdvancements.SOLOIST)
+                }
             }
         }
     }
@@ -580,16 +574,16 @@ class UHCMinigame(
             rule {
                 title = RuleUtils.formatTitle(Component.translatable("uhc.rules.reminders"))
                 entry {
-                    val teamglow = "/uhc teamglow".literal().mini().bold().colour(0x65b7db)
-                    val fullbright = "/uhc fullbright".literal().mini().bold().colour(0x65b7db)
-                    val pos = "/uhc pos".literal().mini().bold().colour(0x65b7db)
+                    val teamglow = "/uhc teamglow".literal().mini().bold().color(0x65b7db)
+                    val fullbright = "/uhc fullbright".literal().mini().bold().color(0x65b7db)
+                    val pos = "/uhc pos".literal().mini().bold().color(0x65b7db)
                     line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.1", teamglow)))
                     line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.2", fullbright)))
                     line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.3", pos)))
                 }
                 entry {
-                    val prefix = "!".literal().mini().bold().colour(0x65b7db)
-                    val chat = "/chat".literal().mini().bold().colour(0x65b7db)
+                    val prefix = "!".literal().mini().bold().color(0x65b7db)
+                    val chat = "/chat".literal().mini().bold().color(0x65b7db)
                     line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.4", prefix, chat)))
                 }
             }
@@ -599,8 +593,8 @@ class UHCMinigame(
     }
 
     private fun getSpectatorRules(): List<MutableComponent> {
-        val s = "/s".literal().mini().bold().colour(0x65b7db)
-        val sneak = Component.keybind("key.sneak").mini().bold().colour(0x65b7db)
+        val s = "/s".literal().mini().bold().color(0x65b7db)
+        val sneak = Component.keybind("key.sneak").mini().bold().color(0x65b7db)
         return listOf(
             RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.1")),
             RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.2", s)),
@@ -780,20 +774,21 @@ class UHCMinigame(
     }
 
     private fun updateHUD(player: ServerPlayer) {
-        if (this.players.isSpectating(player)) {
-            return
-        }
-
         val direction = CommonComponents.direction(Direction.orderedByNearest(player).filter { it.axis != Direction.Axis.Y }[0])
-        val back = ComponentUtils.negativeWidthOf(direction)
         val position = "(${player.blockX}, ${player.blockY}, ${player.blockZ})"
         val shift = position.length - 7
 
+        val mode = this.chat.getChatModeFor(player)
         player.connection.send(ClientboundSetActionBarTextPacket(
             Component.empty().apply {
-                append(ComponentUtils.space(215 + shift * 6))
+                append(ComponentUtils.space(127))
+                append(ComponentUtils.space(shift * 6))
+                append(ComponentUtils.negativeWidthOf(mode.name))
+                append(Component.empty().append(mode.name).withMiniShiftedDownFont(7))
+
+                append(ComponentUtils.space(190))
                 append(direction.withMiniShiftedDownFont(6))
-                append(back)
+                append(ComponentUtils.negativeWidthOf(direction))
                 append(ComponentUtils.space(-2))
                 append(position.literal().withMiniShiftedDownFont(7))
             }
@@ -954,10 +949,6 @@ class UHCMinigame(
             val parameters = context.parameters
             val dimensions = parameters.objOrNull("dimensions")
             val seed = parameters.longOrNull("seed") ?: WorldOptions.randomSeed()
-            val overworldSeed = parameters.longOrDefault("overworld_seed", seed)
-            val netherSeed = parameters.longOrDefault("nether_seed", seed)
-            val endSeed = parameters.longOrDefault("end_seed", seed)
-            val permanent = parameters.booleanOrDefault("permanent")
             val (overworld, nether, end) = if (dimensions != null) {
                 Triple(
                     ResourceLocation.parse(dimensions.string("overworld")),
@@ -972,20 +963,34 @@ class UHCMinigame(
                 )
             }
             val server = context.server
-            val levels = FantasyUtils.createPersistentVanillaLikeLevels(
-                context.server,
-                PersistentConfig(overworld, FantasyUtils.createOverworldConfig(server, overworldSeed)),
-                PersistentConfig(nether, FantasyUtils.createNetherConfig(server, netherSeed)),
-                PersistentConfig(end, FantasyUtils.createEndConfig(server, endSeed))
-            )
-            val uhc = UHCMinigame(server, levels.overworld, levels.nether, levels.end)
-            uhc.levels.add(levels.overworldHandle)
-            uhc.levels.add(levels.netherHandle)
-            uhc.levels.add(levels.endHandle)
-            if (permanent) {
-                uhc.settings.shouldDeleteLevels = false
+
+            val levels = VanillaLikeLevelsBuilder.build(server) {
+                set(VanillaDimension.Overworld) {
+                    dimensionKey(overworld)
+                    seed(parameters.longOrDefault("overworld_seed", seed))
+                    defaultLevelProperties()
+                    persistence(LevelPersistence.Permanent)
+                }
+                set(VanillaDimension.Nether) {
+                    dimensionKey(nether)
+                    seed(parameters.longOrDefault("nether_seed", seed))
+                    defaultLevelProperties()
+                    persistence(LevelPersistence.Permanent)
+                }
+                set(VanillaDimension.End) {
+                    dimensionKey(end)
+                    seed(parameters.longOrDefault("end_seed", seed))
+                    defaultLevelProperties()
+                    persistence(LevelPersistence.Permanent)
+                }
             }
-            return uhc
+
+            return UHCMinigame(
+                server,
+                levels.getOrThrow(VanillaDimension.Overworld),
+                levels.getOrThrow(VanillaDimension.Nether),
+                levels.getOrThrow(VanillaDimension.End)
+            )
         }
     }
 }

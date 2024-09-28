@@ -1,6 +1,6 @@
 package net.casual.championships.uhc
 
-import net.casual.arcade.dimensions.vanilla.VanillaDimension
+import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
 import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration

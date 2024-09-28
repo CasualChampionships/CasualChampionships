@@ -23,13 +23,16 @@ import net.casual.championships.common.items.MenuItem.Companion.THREE_TIMES
 import net.casual.championships.common.items.MenuItem.Companion.THREE_TIMES_SELECTED
 import net.casual.championships.common.items.MenuItem.Companion.TWO_TIMES
 import net.casual.championships.common.items.MenuItem.Companion.TWO_TIMES_SELECTED
+import net.casual.championships.common.items.TintedMenuItem
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.duel.arena.ArenaSize
 import net.casual.championships.duel.arena.ArenaSize.*
 import net.casual.championships.duel.arena.DuelArenasTemplate
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
+import net.minecraft.world.item.component.DyedItemColor
 import kotlin.enums.enumEntries
 
 class DuelSettings(
@@ -37,7 +40,9 @@ class DuelSettings(
 ): DisplayableSettings(CasualSettings.Defaults(Component.translatable("casual.gui.duel.settings").mini())) {
     val displayableTeams = bool {
         name = "teams"
-        display = Items.GREEN_BANNER.named(Component.translatable("casual.gui.duel.settings.teams").mini())
+        val flag = TintedMenuItem.FLAG.named(Component.translatable("casual.gui.duel.settings.teams").mini())
+        flag.set(DataComponents.DYED_COLOR, DyedItemColor(0xFF0000, false))
+        display = flag
         value = false
         defaults.options(this)
     }

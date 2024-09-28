@@ -12,6 +12,7 @@ import net.casual.arcade.utils.ItemUtils.lore
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.MenuItem
+import net.casual.championships.common.ui.CommonSimpleGui
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonItems
 import net.casual.championships.duel.DuelSettings
@@ -26,7 +27,7 @@ class DuelConfigurationGui(
     private val settings: DuelSettings,
     private val players: () -> List<ServerPlayer>,
     private val start: (ServerPlayer, List<ServerPlayer>, DuelSettings) -> Unit
-): SimpleGui(MenuType.GENERIC_9x6, player, true) {
+): CommonSimpleGui(MenuType.GENERIC_9x6, player, true) {
     private val selectedPlayers = HashSet<UUID>()
     private val confirm: GuiElement
     private val waiting: GuiElement

@@ -1,5 +1,7 @@
 package net.casual.championships.duel
 
+import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
+import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.level.LevelBlockChangedEvent
 import net.casual.arcade.events.level.LevelFluidTrySpreadEvent
@@ -51,12 +53,10 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.context.DirectionalPlaceContext
 import net.minecraft.world.level.GameType
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet
-import xyz.nucleoid.fantasy.Fantasy
-import xyz.nucleoid.fantasy.RuntimeWorldConfig
-import xyz.nucleoid.fantasy.util.VoidChunkGenerator
 import kotlin.random.Random
 
 class DuelMinigame(
@@ -246,11 +246,12 @@ class DuelMinigame(
     }
 
     private fun createArena(): Arena {
-        val handle = Fantasy.get(this.server).openTemporaryWorld(
-            RuntimeWorldConfig().setGenerator(VoidChunkGenerator(this.server))
-        )
-        this.levels.add(handle)
-        val level = handle.asWorld()
+        val level = CustomLevelBuilder.build(this.server) {
+            randomDimensionKey()
+            dimensionType(BuiltinDimensionTypes.OVERWORLD)
+            chunkGenerator(VoidChunkGenerator(server))
+        }
+        this.levels.add(level)
         return this.duelSettings.getArenaTemplate().create(level)
     }
 

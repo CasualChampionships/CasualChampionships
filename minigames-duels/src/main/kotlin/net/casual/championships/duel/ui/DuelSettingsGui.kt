@@ -4,9 +4,9 @@ import net.casual.arcade.minigame.settings.display.MenuGameSetting
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.hideTooltip
-import net.casual.arcade.visuals.screen.SimpleNestedGui
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.MenuItem
+import net.casual.championships.common.ui.CommonSimpleGui
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.duel.DuelSettings
 import net.minecraft.network.chat.Component
@@ -17,7 +17,7 @@ class DuelSettingsGui(
     player: ServerPlayer,
     private val settings: DuelSettings,
     private val configuration: DuelConfigurationGui
-): SimpleNestedGui(MenuType.GENERIC_9x6, player, true) {
+): CommonSimpleGui(MenuType.GENERIC_9x6, player, true) {
     init {
         this.setParent(this.configuration)
 

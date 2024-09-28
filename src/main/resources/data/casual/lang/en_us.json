@@ -1,0 +1,18 @@
+{
+  "lobby.advancements.root": "Lobby Advancements",
+  "lobby.advancements.root.desc": "Advancements to achieve during the Lobby!",
+  "lobby.advancements.notNow": "Not Now",
+  "lobby.advancements.notNow.desc": "Sensei's words echoed... There's a time and a place for everything, but not now.",
+  "lobby.advancements.officiallyBored": "Officially Bored",
+  "lobby.advancements.officiallyBored.desc": "Beat Minesweeper in less than 40 seconds",
+  "lobby.advancements.uhOh": "Uh Oh",
+  "lobby.advancements.uhOh.desc": "Oops, I forgot to add barriers!",
+  "lobby.advancements.parkourMaster": "Parkour Master",
+  "lobby.advancements.parkourMaster.desc": "Complete the parkour in the lobby",
+  "lobby.advancements.adminAbuse": "Admin Abuse",
+  "lobby.advancements.adminAbuse.desc": "Respect your admins",
+  "lobby.advancements.gamer": "Gamer",
+  "lobby.advancements.gamer.desc": "Hold the Minesweeper record for a long time",
+  "lobby.advancements.youShallNotLeave": "You Shall Not Leave",
+  "lobby.advancements.youShallNotLeave.desc": "Where are you trying to go??"
+}

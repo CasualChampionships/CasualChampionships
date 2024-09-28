@@ -63,11 +63,11 @@
   "casual.game.borderDistance": "Distance",
   "casual.game.borderRadius": "Radius",
   "casual.game.insideBorder": "Travel %s to get to safety",
-  "casual.game.grace.first": "The grace period will last %s minutes. Once it is over pvp will be enabled and the border will start moving!",
+  "casual.game.grace.first": " The grace period will last %s minutes. Once it is over pvp will be enabled and the border will start moving!",
   "casual.game.grace.generic": "The grace period will end in %s minutes!",
-  "casual.game.borderPaused": "The border has paused shrinking",
-  "casual.game.borderResumed": "The border has resumed shrinking",
-  "casual.game.grace.over": "The grace period is now over and the border has started to move!",
+  "casual.game.borderPaused": " The border has paused shrinking",
+  "casual.game.borderResumed": " The border has resumed shrinking",
+  "casual.game.grace.over": " The grace period is now over and the border has started to move!",
   "casual.game.eliminated": "%s has been ELIMINATED!",
   "casual.game.won": "%s has won!",
 
@@ -79,17 +79,6 @@
 
   "casual.item.goldenHead": "Golden Head",
   "casual.item.head.tooltip": "Eat Me!",
-
-  "lobby.advancements.root": "Lobby Advancements",
-  "lobby.advancements.root.desc": "Advancements to achieve during the Lobby!",
-  "lobby.advancements.notNow": "Not Now",
-  "lobby.advancements.notNow.desc": "Sensei's words echoed... There's a time and a place for everything, but not now.",
-  "lobby.advancements.officiallyBored": "Officially Bored",
-  "lobby.advancements.officiallyBored.desc": "Beat Minesweeper in less than 40 seconds",
-  "lobby.advancements.uhOh": "Uh Oh",
-  "lobby.advancements.uhOh.desc": "Oops, I forgot to add barriers!",
-  "lobby.advancements.parkourMaster": "Parkour Master",
-  "lobby.advancements.parkourMaster.desc": "Complete the parkour in the lobby",
 
   "casual.game.startingIn.space.1": "\uDAFF\uDFDD",
   "casual.game.startingIn.space.2": "\uDAFF\uDF6F",
@@ -109,5 +98,10 @@
   "casual.game.direction.southWest.negativeWidth": "\uDAFF\uDFCA",
   "casual.game.direction.west.negativeWidth": "\uDAFF\uDFEA",
   "casual.game.direction.northWest.negativeWidth": "\uDAFF\uDFCA",
-  "casual.gui.spectators.difference.admins": "\uDB00\uDC18"
+  "casual.gui.spectators.difference.admins": "\uDB00\uDC18",
+  "minigame.chat.mode.global.negativeWidth": "\uDAFF\uDF76",
+  "minigame.chat.mode.admin.negativeWidth": "\uDAFF\uDF7C",
+  "minigame.chat.mode.spectator.negativeWidth": "\uDAFF\uDF64",
+  "minigame.chat.mode.team.negativeWidth": "\uDAFF\uDF82",
+  "minigame.chat.mode.maxWidth": "\uDB00\uDC9C"
 }

@@ -29,7 +29,7 @@ import net.casual.arcade.minigame.utils.MinigameUtils.broadcastChangesToAdmin
 import net.casual.arcade.resources.pack.PackInfo
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.colour
+import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
@@ -329,28 +329,28 @@ object CasualMinigames {
 
     private fun getMOTD(): Component {
         return Component.empty().apply {
-            append("╔".literal().colour(0x009BFF))
-            append("═".literal().colour(0x19A5FF))
-            append("═".literal().colour(0x33AFFF))
-            append("═".literal().colour(0x4DB9FF))
-            append("═".literal().colour(0x66C3FF))
-            append("═".literal().colour(0x80CDFF))
+            append("╔".literal().color(0x009BFF))
+            append("═".literal().color(0x19A5FF))
+            append("═".literal().color(0x33AFFF))
+            append("═".literal().color(0x4DB9FF))
+            append("═".literal().color(0x66C3FF))
+            append("═".literal().color(0x80CDFF))
             append("\uD83D\uDDE1".literal().yellow())
             append(" ")
-            append("C${"asual".toSmallCaps()} C${"hampionships".toSmallCaps()}".literal().bold().colour(0xFFAC1C))
+            append("C${"asual".toSmallCaps()} C${"hampionships".toSmallCaps()}".literal().bold().color(0xFFAC1C))
             append(" ")
             append("\uD83C\uDFF9".literal().yellow())
-            append("═".literal().colour(0x80CDFF))
-            append("═".literal().colour(0x66C3FF))
-            append("═".literal().colour(0x4DB9FF))
-            append("═".literal().colour(0x33AFFF))
-            append("═".literal().colour(0x19A5FF))
-            append("╗".literal().colour(0x009BFF))
+            append("═".literal().color(0x80CDFF))
+            append("═".literal().color(0x66C3FF))
+            append("═".literal().color(0x4DB9FF))
+            append("═".literal().color(0x33AFFF))
+            append("═".literal().color(0x19A5FF))
+            append("╗".literal().color(0x009BFF))
             append("\n")
 
-            append("╚".literal().colour(0x009BFF))
-            append("═".literal().colour(0x19A5FF))
-            append("═".literal().colour(0x33AFFF))
+            append("╚".literal().color(0x009BFF))
+            append("═".literal().color(0x19A5FF))
+            append("═".literal().color(0x33AFFF))
 
             append("   ")
             append("be prepared".toSmallCaps().literal().lime())
@@ -360,9 +360,9 @@ object CasualMinigames {
             append("let the chaos ensue".toSmallCaps().literal().lime())
             append("    ")
 
-            append("═".literal().colour(0x33AFFF))
-            append("═".literal().colour(0x19A5FF))
-            append("╝".literal().colour(0x009BFF))
+            append("═".literal().color(0x33AFFF))
+            append("═".literal().color(0x19A5FF))
+            append("╝".literal().color(0x009BFF))
         }
     }
 

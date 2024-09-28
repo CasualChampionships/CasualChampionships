@@ -10,9 +10,9 @@ import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.teleportTo
-import net.casual.arcade.visuals.screen.SimpleNestedGui
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.MenuItem
+import net.casual.championships.common.ui.CommonSimpleGui
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonItems
 import net.minecraft.network.chat.Component
@@ -22,7 +22,7 @@ import net.minecraft.world.inventory.MenuType
 class PlayerSelectorGui(
     player: ServerPlayer,
     profiles: List<GameProfile>
-): SimpleNestedGui(MenuType.GENERIC_9x6, player, true) {
+): CommonSimpleGui(MenuType.GENERIC_9x6, player, true) {
     init {
         this.title = Component.empty()
             .append(ComponentUtils.space(-8))

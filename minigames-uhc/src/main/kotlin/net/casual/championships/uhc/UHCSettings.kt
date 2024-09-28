@@ -1,6 +1,6 @@
 package net.casual.championships.uhc
 
-import net.casual.arcade.dimensions.vanilla.VanillaDimension
+import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.bool
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.enumeration
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64

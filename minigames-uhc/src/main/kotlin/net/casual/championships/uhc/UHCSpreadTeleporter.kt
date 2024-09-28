@@ -1,7 +1,7 @@
 package net.casual.championships.uhc
 
 import com.mojang.serialization.MapCodec
-import net.casual.arcade.dimensions.vanilla.VanillaLikeLevel
+import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter
 import net.casual.arcade.minigame.template.teleporter.ShapedTeleporter
 import net.casual.arcade.utils.StructureUtils

@@ -7,9 +7,9 @@ import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.visuals.screen.SimpleNestedGui
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.MenuItem
+import net.casual.championships.common.ui.CommonSimpleGui
 import net.casual.championships.common.util.CommonComponents
 import net.casual.championships.common.util.CommonItems
 import net.minecraft.network.chat.Component
@@ -19,7 +19,7 @@ import net.minecraft.world.inventory.MenuType
 class DuelPlayerSelectionGui(
     player: ServerPlayer,
     private val configuration: DuelConfigurationGui
-): SimpleNestedGui(MenuType.GENERIC_9x6, player, true) {
+): CommonSimpleGui(MenuType.GENERIC_9x6, player, true) {
     private var page = 0
 
     init {

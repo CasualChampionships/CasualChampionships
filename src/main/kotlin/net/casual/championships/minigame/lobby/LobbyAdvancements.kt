@@ -1,6 +1,7 @@
 package net.casual.championships.minigame.lobby
 
 import net.casual.arcade.utils.AdvancementUtils.setTitleAndDesc
+import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.advancement.AdvancementCollection
 import net.casual.championships.CasualMod
 import net.minecraft.advancements.AdvancementType
@@ -48,6 +49,33 @@ object LobbyAdvancements: AdvancementCollection() {
         id = CasualMod.id("officially_bored")
         display(Items.COMMAND_BLOCK)
         setTitleAndDesc("lobby.advancements.officiallyBored")
+        toast()
+        announce()
+    }
+
+    val ADMIN_ABUSE = register {
+        parent(OFFICIALLY_BORED)
+        id = CasualMod.id("admin_abuse")
+        display(ItemUtils.createPlayerHead("senseiwells"))
+        setTitleAndDesc("lobby.advancements.adminAbuse")
+        toast()
+        announce()
+    }
+
+    val GAMER = register {
+        parent(ROOT)
+        id = CasualMod.id("gamer")
+        display(ItemUtils.createPlayerHead("senseiwells"))
+        setTitleAndDesc("lobby.advancements.gamer")
+        toast()
+        announce()
+    }
+
+    val YOU_SHALL_NOT_LEAVE = register {
+        parent(ROOT)
+        id = CasualMod.id("you_shall_not_leave")
+        display(Items.STRUCTURE_VOID)
+        setTitleAndDesc("lobby.advancements.youShallNotLeave")
         toast()
         announce()
     }
