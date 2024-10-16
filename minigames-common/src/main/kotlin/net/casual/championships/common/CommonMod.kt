@@ -1,6 +1,7 @@
 package net.casual.championships.common
 
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils
+import net.casual.arcade.dimensions.utils.DimensionRegistries
 import net.casual.arcade.resources.ArcadeResourcePacks
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
@@ -11,9 +12,11 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.addSounds
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.items.TintedMenuItem
+import net.casual.championships.common.level.ReducedMobSpawningRules
 import net.casual.championships.common.util.*
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.core.Registry
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.CreativeModeTab
 import org.slf4j.Logger
@@ -63,6 +66,8 @@ object CommonMod: ModInitializer {
         CommonSounds.noop()
 
         AntiCheat.registerEvents()
+
+        Registry.register(DimensionRegistries.CUSTOM_MOB_SPAWNING_RULES, id("reduced_mob_cap"), ReducedMobSpawningRules)
 
         PolymerItemGroupUtils.registerPolymerItemGroup(
             id("menu"),

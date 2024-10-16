@@ -10,10 +10,10 @@ plugins {
     java
 }
 
-group = "net.casual"
-version = "1.0.0"
-
 allprojects {
+    group = "net.casual"
+    version = "1.0.2"
+
     apply(plugin = "fabric-loom")
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
@@ -50,7 +50,6 @@ allprojects {
         modImplementation(libs.fabric.kotlin)
 
         modImplementation(libs.arcade)
-        modImplementation(libs.arcade.datagen)
         modImplementation(libs.server.replay)
 
         modImplementation(libs.map.canvas)

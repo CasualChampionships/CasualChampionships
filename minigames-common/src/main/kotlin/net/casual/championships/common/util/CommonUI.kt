@@ -9,7 +9,6 @@ import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.TeamUtils.getHexColor
@@ -179,7 +178,7 @@ object CommonUI {
     }
 
     fun createTeamSelectionGui(minigame: Minigame<*>, player: ServerPlayer): TeamSelectorGui {
-        val selections = minigame.teams.getAllNonSpectatorOrAdminTeams().map {
+        val selections = minigame.teams.getAllNonSpectatorOrAdminTeams().sortedBy { it.name }.map {
             val flag = TintedMenuItem.FLAG
             val color = it.getHexColor()
             if (color != null) {

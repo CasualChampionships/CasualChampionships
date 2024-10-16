@@ -50,7 +50,7 @@ class DuelSettings(
 
     val displayableHealth = float64 {
         name = "health"
-        display = Items.POTION.named(Component.translatable("casual.gui.duel.settings.health").mini())
+        display = MenuItem.HEALTH_BOOST.named(Component.translatable("casual.gui.duel.settings.health").mini())
             .potion(Potions.HEALING)
             .hideAttributeTooltips()
         value = 1.0
@@ -68,7 +68,7 @@ class DuelSettings(
 
     val displayableNaturalRegen = bool {
         name = "natural_regeneration"
-        display = Items.GOLDEN_APPLE.named(Component.translatable("casual.gui.duel.settings.naturalRegeneration").mini())
+        display = MenuItem.NATURAL_REGEN.named(Component.translatable("casual.gui.duel.settings.naturalRegeneration").mini())
         value = false
         defaults.options(this)
     }
@@ -76,7 +76,7 @@ class DuelSettings(
 
     val displayableGlowing = bool {
         name = "glowing"
-        display = Items.SPECTRAL_ARROW.named(Component.translatable("casual.gui.duel.settings.glowing").mini())
+        display = MenuItem.GLOWING.named(Component.translatable("casual.gui.duel.settings.glowing").mini())
         value = false
         defaults.options(this)
     }

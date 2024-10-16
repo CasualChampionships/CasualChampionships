@@ -32,6 +32,7 @@
   "casual.team.noTeam": "You are not on a team!",
   "casual.spectator.notSpectating": "You are not spectating!",
   "casual.spectator.teleport": "Teleport To Players",
+  "casual.spectator.gamemodeSwitcher": "Gamemode Switcher",
 
   "casual.position.broadcast": "My position is %s",
 

@@ -19,11 +19,9 @@ import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
-import net.minecraft.world.level.Level
 import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.biome.Biomes
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
-import java.util.*
 
 class CasualChampionshipsTemplate(
     name: String = "default",
@@ -37,6 +35,8 @@ class CasualChampionshipsTemplate(
     override fun getAdditionalPacks(): Iterable<PackInfo> {
         val packs = ArrayList<PackInfo>()
         for (pack in this.additionalPacks) {
+            // TODO:
+            @Suppress("DEPRECATION")
             val hosted = CasualResourcePackHost.getHostedPack(pack)
             if (hosted == null) {
                 CasualMod.logger.error("Failed to load additional pack $pack")

@@ -159,6 +159,10 @@ class UHCMinigame(
         this.ui.addBossbar(ActiveBossbar(this))
         this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
+
+        this.levels.add(this.overworld)
+        this.levels.add(this.nether)
+        this.levels.add(this.end)
     }
 
     override fun initialize() {
@@ -168,10 +172,6 @@ class UHCMinigame(
         this.addEventListener(this.uhcAdvancements)
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
         this.advancements.addAll(UHCAdvancements)
-
-        this.levels.add(this.overworld)
-        this.levels.add(this.nether)
-        this.levels.add(this.end)
         this.initialiseBorderTracker()
 
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.overworld)
@@ -375,6 +375,11 @@ class UHCMinigame(
         if (event.stack.isOf(CommonItems.PLAYER_HEAD) || event.stack.isOf(CommonItems.GOLDEN_HEAD)) {
             this.stats.getOrCreateStat(event.player, UHCStats.HEADS_CONSUMED).increment()
         }
+    }
+
+    @Listener
+    private fun onPlayerSpectatorTeleport(event: PlayerSpectatorTeleportEvent) {
+        event.cancel()
     }
 
     @Listener
@@ -784,13 +789,13 @@ class UHCMinigame(
                 append(ComponentUtils.space(127))
                 append(ComponentUtils.space(shift * 6))
                 append(ComponentUtils.negativeWidthOf(mode.name))
-                append(Component.empty().append(mode.name).withMiniShiftedDownFont(7))
+                append(Component.empty().append(mode.name).withMiniShiftedDownFont(63))
 
                 append(ComponentUtils.space(190))
-                append(direction.withMiniShiftedDownFont(6))
+                append(direction.withMiniShiftedDownFont(54))
                 append(ComponentUtils.negativeWidthOf(direction))
                 append(ComponentUtils.space(-2))
-                append(position.literal().withMiniShiftedDownFont(7))
+                append(position.literal().withMiniShiftedDownFont(63))
             }
         ))
     }

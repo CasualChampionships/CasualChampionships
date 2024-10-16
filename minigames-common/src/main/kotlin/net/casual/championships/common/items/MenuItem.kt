@@ -5,7 +5,6 @@ import net.casual.arcade.items.ItemModeller
 import net.casual.arcade.items.ResourcePackItemModeller
 import net.casual.championships.common.CommonMod
 import net.casual.championships.common.CommonMod.id
-import net.casual.championships.common.util.CommonItems
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -20,6 +19,7 @@ class MenuItem private constructor(): Item(Properties()), ArcadeModelledItem {
         return MODELLER
     }
 
+    @Suppress("unused")
     companion object {
         val MODELLER = ResourcePackItemModeller(MenuItem(), CommonMod.CUSTOM_MODEL_PACK.getCreator())
         val TICK by MODELLER.model(id("gui/green_tick"))
@@ -51,6 +51,10 @@ class MenuItem private constructor(): Item(Properties()), ArcadeModelledItem {
 
         val GEAR by MODELLER.model(id("gui/gear"))
         val ARENA by MODELLER.model(id("gui/arena"))
+        val NATURAL_REGEN by MODELLER.model(id("gui/natural_regen"))
+        val HEALTH_BOOST by MODELLER.model(id("gui/health_boost"))
+        val GLOWING by MODELLER.model(id("gui/glowing"))
+        val GAMEMODE_SWITCHER by MODELLER.model(id("gui/gamemode_switcher"))
 
         val LARGE by MODELLER.model(id("gui/large_icon"))
         val LARGE_SELECTED by MODELLER.model(id("gui/large_icon_selected"))

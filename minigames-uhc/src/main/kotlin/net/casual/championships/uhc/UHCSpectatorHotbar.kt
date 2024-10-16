@@ -3,12 +3,13 @@ package net.casual.championships.uhc
 import eu.pb4.sgui.api.ClickType
 import eu.pb4.sgui.api.elements.GuiElement
 import eu.pb4.sgui.api.gui.HotbarGui
-import net.casual.arcade.minigame.gamemode.ExtendedGameMode
+import net.casual.arcade.minigame.gamemode.ExtendedGameMode.AdventureSpectator
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGameMode
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.NoClipSpectator
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.visuals.screen.setSlot
+import net.casual.championships.common.items.MenuItem
 import net.casual.championships.common.util.CommonItems
 import net.casual.championships.common.util.CommonUI
 import net.minecraft.core.component.DataComponents
@@ -33,6 +34,16 @@ class UHCSpectatorHotbar(
             val element = this.createMapGuiElement(map, i)
             this.maps.add(i, element)
             this.addSlot(element)
+        }
+        val switcher = MenuItem.GAMEMODE_SWITCHER
+            .named(Component.translatable("casual.spectator.gamemodeSwitcher"))
+        this.setSlot(7, switcher) { ->
+            this.player.sendSound(SoundEvents.UI_BUTTON_CLICK)
+            val mode = when (player.extendedGameMode) {
+                AdventureSpectator -> NoClipSpectator
+                else -> AdventureSpectator
+            }
+            player.extendedGameMode = mode
         }
         this.setTeleportElement()
     }

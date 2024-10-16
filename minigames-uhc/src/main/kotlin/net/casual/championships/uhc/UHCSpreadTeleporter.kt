@@ -110,7 +110,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
                 { holder -> !holder.isOceanOrRiver() },
                 containing, this.delta.toInt(), min((this.delta / 10).toInt(), 32), this.level.height
             )
-            if (pair == null) {
+            if (pair == null || !this.level.isInWorldBounds(pair.first)) {
                 // We have no other option...
                 return point
             }

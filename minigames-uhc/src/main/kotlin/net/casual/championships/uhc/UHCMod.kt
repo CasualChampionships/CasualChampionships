@@ -4,12 +4,13 @@ import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.utils.ComponentUtils.literal
+import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.resources.ResourceLocation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-object UHCMod {
+object UHCMod: ModInitializer {
     private const val MOD_ID = "casual_uhc"
 
     internal val container = FabricLoader.getInstance().getModContainer(MOD_ID).get()
@@ -21,6 +22,10 @@ object UHCMod {
         addLangsFromData(MOD_ID)
         addFont(UHCComponents.Bitmap)
         packDescription = "Resources for CasualChampionships UHC minigame".literal()
+    }
+
+    override fun onInitialize() {
+        UHCMapRenderer.noop()
     }
 
     internal fun id(path: String): ResourceLocation {

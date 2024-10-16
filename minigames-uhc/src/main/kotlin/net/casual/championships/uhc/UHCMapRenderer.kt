@@ -6,16 +6,18 @@ import it.unimi.dsi.fastutil.doubles.Double2ObjectLinkedOpenHashMap
 import it.unimi.dsi.fastutil.doubles.Double2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
+import net.casual.arcade.items.ItemModeller.Companion.registerNextModel
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.yellow
+import net.casual.championships.common.CommonMod
 import net.casual.championships.uhc.border.UHCBorderSize
-import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceKey
 import net.minecraft.server.level.ServerLevel
@@ -23,6 +25,8 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.BiomeTags
 import net.minecraft.util.Mth
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.world.item.component.CustomModelData
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.biome.Biomes
@@ -30,7 +34,6 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.border.BorderStatus
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.MapColor
-import net.minecraft.world.level.saveddata.maps.MapDecorationType
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes
 import java.util.*
 import kotlin.math.abs
@@ -54,7 +57,14 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
     }
 
     fun getMaps(): List<ItemStack> {
-        return this.canvases.values.map { it.canvas.asStack() }
+        return this.canvases.values.map { data ->
+            val map = data.canvas.asStack()
+            val model = data.customModel
+            if (model != null) {
+                map.set(DataComponents.CUSTOM_MODEL_DATA, model)
+            }
+            map
+        }
     }
 
     fun clear() {
@@ -63,18 +73,19 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
 
     fun update(level: ServerLevel) {
         val dimension = VanillaLikeLevel.getLikeDimension(level)
-        val (canvas, _, sizeIcon, playerIcons) = this.canvases.getOrPut(level.dimension()) {
-            val dimensionName = when (dimension) {
-                Level.OVERWORLD -> "overworld"
-                Level.NETHER -> "nether"
-                Level.END -> "end"
-                else -> level.dimension().location().path
+        val (canvas, _, _, sizeIcon, playerIcons) = this.canvases.getOrPut(level.dimension()) {
+            val (dimensionName, model) = when (dimension) {
+                Level.OVERWORLD -> "overworld" to CustomModelData(OVERWORLD_ID)
+                Level.NETHER -> "nether" to CustomModelData(NETHER_ID)
+                Level.END -> "end" to CustomModelData(END_ID)
+                else -> level.dimension().location().path to null
             }
 
             val canvas = DrawableCanvas.create()
             val formattedDimension = dimensionName.literal().mini().yellow()
             CanvasData(
                 canvas,
+                model,
                 canvas.createIcon(MapDecorationTypes.TARGET_X, true, 26, 220, 0, formattedDimension),
                 canvas.createIcon(MapDecorationTypes.TARGET_X, true, 26, 236, 0, null),
                 Object2ObjectOpenHashMap()
@@ -316,31 +327,27 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         return CanvasColor.PALE_GREEN_NORMAL
     }
 
-    private fun formattingToMapDecoration(formatting: ChatFormatting?): Holder<MapDecorationType>? {
-        return when (formatting) {
-            ChatFormatting.BLACK -> MapDecorationTypes.BLACK_BANNER
-            ChatFormatting.DARK_BLUE -> MapDecorationTypes.BLUE_BANNER
-            ChatFormatting.DARK_GREEN -> MapDecorationTypes.GREEN_BANNER
-            ChatFormatting.DARK_AQUA -> MapDecorationTypes.CYAN_BANNER
-            ChatFormatting.DARK_RED -> MapDecorationTypes.BROWN_BANNER
-            ChatFormatting.DARK_PURPLE -> MapDecorationTypes.PURPLE_BANNER
-            ChatFormatting.GOLD -> MapDecorationTypes.ORANGE_BANNER
-            ChatFormatting.GRAY -> MapDecorationTypes.LIGHT_GRAY_BANNER
-            ChatFormatting.DARK_GRAY -> MapDecorationTypes.GRAY_BANNER
-            ChatFormatting.BLUE -> MapDecorationTypes.MAGENTA_BANNER
-            ChatFormatting.GREEN -> MapDecorationTypes.LIME_BANNER
-            ChatFormatting.AQUA -> MapDecorationTypes.LIGHT_BLUE_BANNER
-            ChatFormatting.RED -> MapDecorationTypes.RED_BANNER
-            ChatFormatting.LIGHT_PURPLE -> MapDecorationTypes.PINK_BANNER
-            ChatFormatting.YELLOW -> MapDecorationTypes.YELLOW_BANNER
-            else -> MapDecorationTypes.WHITE_BANNER
-        }
-    }
-
     private data class CanvasData(
         val canvas: PlayerCanvas,
+        val customModel: CustomModelData?,
         val dimensionIcon: CanvasIcon,
         val sizeIcon: CanvasIcon,
         val playerIcons: MutableMap<UUID, CanvasIcon>
     )
+
+    companion object {
+        val OVERWORLD_ID = CommonMod.CUSTOM_MODEL_PACK.getCreator().registerNextModel(
+            Items.FILLED_MAP, CommonMod.id("gui/overworld_map")
+        )
+        val NETHER_ID = CommonMod.CUSTOM_MODEL_PACK.getCreator().registerNextModel(
+            Items.FILLED_MAP, CommonMod.id("gui/nether_map")
+        )
+        val END_ID = CommonMod.CUSTOM_MODEL_PACK.getCreator().registerNextModel(
+            Items.FILLED_MAP, CommonMod.id("gui/end_map")
+        )
+
+        fun noop() {
+
+        }
+    }
 }

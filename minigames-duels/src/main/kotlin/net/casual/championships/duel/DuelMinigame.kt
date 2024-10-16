@@ -143,7 +143,7 @@ class DuelMinigame(
     @Listener
     private fun onFluidTrySpread(event: LevelFluidTrySpreadEvent) {
         if (!this.modifiableBlocks.contains(event.spreadPos) && !event.spreadBlockState.isAir) {
-            event.cancel(false)
+            event.canSpread = false
         }
     }
 
