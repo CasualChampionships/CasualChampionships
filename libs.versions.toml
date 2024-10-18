@@ -7,7 +7,7 @@ parchment            = "1.21:2024.07.28"
 fabric-api           = "0.103.0+1.21.1"
 fabric-kotlin        = "1.11.0+kotlin.2.0.0"
 map-canvas           = "0.4.1+1.21"
-arcade               = "0.3.0-alpha.30+1.21.1"
+arcade               = "0.3.0-alpha.32+1.21.1"
 server-replay        = "1.1.2+1.21.1"
 casual-database      = "0.2.0"
 

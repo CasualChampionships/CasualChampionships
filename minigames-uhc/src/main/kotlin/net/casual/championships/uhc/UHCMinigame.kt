@@ -201,7 +201,9 @@ class UHCMinigame(
         dimensions.addProperty("nether", this.nether.dimension().location().toString())
         dimensions.addProperty("end", this.end.dimension().location().toString())
         json.add("dimensions", dimensions)
-        json.addProperty("seed", this.overworld.seed)
+        json.addProperty("overworld_seed", this.overworld.seed)
+        json.addProperty("nether_seed", this.nether.seed)
+        json.addProperty("end_seed", this.end.seed)
     }
 
     @Listener(during = During(before = BORDER_FINISHED_ID))
