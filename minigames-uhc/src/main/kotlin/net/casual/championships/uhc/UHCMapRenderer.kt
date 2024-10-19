@@ -9,10 +9,10 @@ import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
 import net.casual.arcade.items.ItemModeller.Companion.registerNextModel
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.literal
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.yellow
+import net.casual.arcade.utils.TeamUtils.color
 import net.casual.championships.common.CommonMod
 import net.casual.championships.uhc.border.UHCBorderSize
 import net.minecraft.core.BlockPos
@@ -193,7 +193,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
                 icon.text = Component.empty()
                     .append(head)
                     .append(ComponentUtils.space(-10))
-                    .append(UHCComponents.Bitmap.PLAYER_BACKGROUND.color(player.teamColor))
+                    .append(UHCComponents.Bitmap.PLAYER_BACKGROUND.color(player.team))
                     .append(ComponentUtils.space(-1))
             }
         // }
