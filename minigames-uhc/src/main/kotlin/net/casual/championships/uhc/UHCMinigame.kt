@@ -634,7 +634,7 @@ class UHCMinigame(
                 entry {
                     line(rules[0])
                     line(rules[1])
-                    line(rules[2])
+                    line(Component.empty())
                 }
             }
             addRule("uhc.rules.gentleman", 1)

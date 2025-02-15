@@ -543,7 +543,7 @@ class CasualLobbyMinigame(
     @Suppress("UnstableApiUsage")
     private fun createSidebar(): Sidebar {
         val name = CasualMinigames.getMinigames().event.name.replace('_', ' ')
-        val title = Component.literal("Casual Championships").mini().bold()
+        val title = Component.literal("Casual Championships").mini().bold().gold()
         val sidebar = DynamicSidebar(ComponentElements.of(title))
         val event = SidebarComponent.withCustomScore(
             Component.literal(" Event:").mini().red().bold(),

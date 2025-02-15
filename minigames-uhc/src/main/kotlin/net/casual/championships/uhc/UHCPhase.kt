@@ -23,9 +23,13 @@ import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.resetToDefault
 import net.casual.arcade.utils.set
 import net.casual.arcade.utils.teleportTo
+import net.casual.arcade.visuals.predicate.EntityObserverPredicate
+import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
+import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.championships.common.task.GlowingBossbarTask
 import net.casual.championships.common.task.GracePeriodBossbarTask
 import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.util.CommonPredicates
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
@@ -79,8 +83,15 @@ enum class UHCPhase(
             minigame.teams.hideNameTags()
 
             minigame.ui.removeAllNameTags()
-            minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
-            minigame.ui.addNameTag(CommonUI.createPlayingHealthTag())
+            val observeeNotSpectating = PlayerObserverPredicate { observee, _ ->
+                !minigame.players.isSpectating(observee)
+            }
+            minigame.ui.addNameTag(CommonUI.createPlayingNameTag(
+                EntityObserverPredicate.visibleObservee().toPlayer().and(observeeNotSpectating)
+            ))
+            minigame.ui.addNameTag(CommonUI.createPlayingHealthTag(
+                CommonPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(observeeNotSpectating)
+            ))
         }
     },
     Grace(GRACE_ID) {
