@@ -6,9 +6,10 @@ import net.casual.arcade.minigame.template.teleporter.EntityTeleporter
 import net.casual.arcade.minigame.template.teleporter.ShapedTeleporter
 import net.casual.arcade.utils.BlockPosUtils
 import net.casual.arcade.utils.StructureUtils
-import net.casual.arcade.utils.impl.Location
 import net.casual.arcade.utils.isOceanOrRiver
 import net.casual.arcade.utils.isOf
+import net.casual.arcade.utils.math.location.LocationWithLevel
+import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.visuals.shapes.LevelSurfaceShape
 import net.casual.arcade.visuals.shapes.Regular2DPolygonShape
 import net.casual.arcade.visuals.shapes.ShapePoints
@@ -35,16 +36,16 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
     private val netherSpawn by lazy { StructureUtils.read(structurePath.resolve("nether_spawn.nbt")) }
     private val endSpawn by lazy { StructureUtils.read(structurePath.resolve("end_spawn.nbt")) }
 
-    override fun teleportTeam(team: PlayerTeam, entities: Collection<Entity>, location: Location) {
-        val (level, pos, rot) = location
-        val origin = BlockPos.containing(pos)
+    override fun teleportTeam(team: PlayerTeam, entities: Collection<Entity>, location: LocationWithLevel<ServerLevel>) {
+        val level = location.level
+        val origin = BlockPos.containing(location.position)
         val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
         for (position in positions) {
             val adjusted = this.getTopNonCollidingPos(level, position)
             if (adjusted == null || !level.worldBorder.isWithinBounds(adjusted)) {
                 continue
             }
-            super.teleportTeam(team, entities, Location.of(adjusted.center, rot, level))
+            super.teleportTeam(team, entities, level.asLocation(adjusted.center, location.rotation))
             return
         }
 
@@ -59,7 +60,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
 
         spawn.placeInWorld(level, corner, corner, settings, level.random, Block.UPDATE_CLIENTS)
 
-        super.teleportTeam(team, entities, Location.of(origin.center, rot, level))
+        super.teleportTeam(team, entities, level.asLocation(origin.center, location.rotation))
     }
 
     override fun createShape(level: ServerLevel, points: Int): ShapePoints {
