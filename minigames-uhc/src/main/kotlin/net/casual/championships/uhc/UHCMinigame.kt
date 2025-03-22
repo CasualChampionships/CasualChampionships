@@ -13,6 +13,7 @@ import net.casual.arcade.border.tracker.TrackedBorder
 import net.casual.arcade.commands.*
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
+import net.casual.arcade.events.server.block.BlockDropEvent
 import net.casual.arcade.events.server.block.BrewingStandBrewEvent
 import net.casual.arcade.events.server.level.LevelLootEvent
 import net.casual.arcade.events.server.player.*
@@ -75,6 +76,7 @@ import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatMMSS
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.isOf
 import net.casual.arcade.utils.math.location.Location.Companion.withRotation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
@@ -111,6 +113,9 @@ import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBorderSize
 import net.casual.championships.uhc.border.UHCBorderStage
+import net.casual.championships.uhc.recipe.FlowerPowerRecipe
+import net.casual.championships.uhc.recipe.HeavyCoreRecipe
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags
 import net.minecraft.ChatFormatting
 import net.minecraft.ChatFormatting.*
 import net.minecraft.commands.CommandSourceStack
@@ -130,23 +135,30 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.tags.BlockTags
 import net.minecraft.util.Mth
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potion
 import net.minecraft.world.item.alchemy.Potions
+import net.minecraft.world.item.crafting.RecipeType
+import net.minecraft.world.item.crafting.SingleRecipeInput
+import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.border.WorldBorder
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.scores.Team
 import java.util.*
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 import kotlin.math.atan2
 
@@ -223,6 +235,12 @@ class UHCMinigame(
         this.registerCommands()
         this.addEventListener(this.uhcAdvancements)
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
+        if (this.settings.heavyHeads) {
+            this.recipes.add(HeavyCoreRecipe.INSTANCE)
+        }
+        if (this.settings.flowerPower) {
+            this.recipes.add(FlowerPowerRecipe.create(this.server.registryAccess()))
+        }
         this.advancements.addAll(UHCAdvancements)
         this.initialiseBorderTracker()
 
@@ -315,6 +333,7 @@ class UHCMinigame(
 
         if (!this.players.isSpectating(player)) {
             this.updateWorldBorder(player)
+            this.updatePedalToTheMetal(player)
         } else if (!player.isCreative) {
             val interval = 20.Minutes.ticks
             if (this.uptime % interval == interval - 1) {
@@ -387,6 +406,41 @@ class UHCMinigame(
         val (player, stack) = event
         if (stack.isOf(Items.BOW)) {
             player.cooldowns.addCooldown(stack, this.settings.bowCooldown.ticks)
+        }
+    }
+
+    @Listener
+    private fun onBlockMined(event: PlayerBlockMinedEvent) {
+        if (!this.settings.bloodDiamonds) {
+            return
+        }
+
+        val (player, _, state) = event
+        if (state.isOf(BlockTags.DIAMOND_ORES)) {
+            player.hurtServer(player.serverLevel(), player.damageSources().magic(), 1.0F)
+        }
+    }
+
+    @Listener
+    private fun onBlockDrop(event: BlockDropEvent) {
+        if (!this.settings.instantSmeltOres) {
+            return
+        }
+
+        val entity = event.params.getOptionalParameter(LootContextParams.THIS_ENTITY)
+        if (entity is ServerPlayer) {
+            if (event.state.isOf(ConventionalBlockTags.ORES)) {
+                val tool = event.params.getOptionalParameter(LootContextParams.TOOL) ?: return
+                val silkTouch = tool.enchantments.keySet().any { it.isOf(Enchantments.SILK_TOUCH) }
+                if (silkTouch) {
+                    return
+                }
+                event.drops = event.drops.map { item ->
+                    val input = SingleRecipeInput(item)
+                    val recipe = this.server.recipeManager.getRecipeFor(RecipeType.SMELTING, input, event.level)
+                    recipe.getOrNull()?.value?.assemble(input, event.level.registryAccess()) ?: item
+                }
+            }
         }
     }
 
@@ -512,6 +566,13 @@ class UHCMinigame(
                     player.grantAdvancement(UHCAdvancements.SOLOIST)
                 }
             }
+        }
+
+        if (this.settings.headStart) {
+            player.inventory.add(ItemStack(Items.STONE_PICKAXE))
+            player.inventory.add(ItemStack(Items.STONE_AXE))
+            player.inventory.add(ItemStack(Items.BUNDLE))
+            player.inventory.add(ItemStack(Items.APPLE, 5))
         }
     }
 
@@ -856,6 +917,22 @@ class UHCMinigame(
                 CommonComponents.INSIDE_BORDER.generate(CommonComponents.direction(direction).lime()).mini()
             )
         }
+    }
+
+    private fun updatePedalToTheMetal(player: ServerPlayer) {
+        if (!this.settings.pedalToTheMetal) {
+            return
+        }
+
+        val teammates = player.team?.getOnlinePlayers() ?: return
+        for (teammate in teammates) {
+            if (teammate != player && teammate.closerThan(player, 50.0)) {
+                return
+            }
+        }
+        player.addEffect(MobEffectInstance(
+            MobEffects.MOVEMENT_SPEED, 5.Seconds.ticks + 5, 0, false, false, false
+        ))
     }
 
     private fun createSidebar(): DynamicSidebar {

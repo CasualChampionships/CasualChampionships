@@ -3,6 +3,7 @@ package net.casual.championships.uhc
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
+import net.casual.championships.uhc.item.UHCItems
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.chat.Component
@@ -26,6 +27,7 @@ object UHCMod: ModInitializer {
 
     override fun onInitialize() {
         UHCMapRenderer.noop()
+        UHCItems.noop()
     }
 
     internal fun id(path: String): ResourceLocation {

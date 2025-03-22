@@ -179,5 +179,47 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         defaults.options(this)
     })
 
+    var instantSmeltOres by this.register(bool {
+        name = "instant_smelt_ores"
+        display = Items.FURNACE.named("Instant Smelt Ores")
+        value = false
+        defaults.options(this)
+    })
+
+    var flowerPower by this.register(bool {
+        name = "flower_power"
+        display = Items.POPPY.named("Flower Power")
+        value = false
+        defaults.options(this)
+    })
+
+    var bloodDiamonds by this.register(bool {
+        name = "blood_diamonds"
+        display = Items.DIAMOND.named("Blood Diamonds")
+        value = false
+        defaults.options(this)
+    })
+
+    var heavyHeads by this.register(bool {
+        name = "heavy_heads"
+        display = Items.HEAVY_CORE.named("Heavy Heads")
+        value = false
+        defaults.options(this)
+    })
+
+    var headStart by this.register(bool {
+        name = "head_start"
+        display = Items.BUNDLE.named("Head Start")
+        value = false
+        defaults.options(this)
+    })
+
+    var pedalToTheMetal by this.register(bool {
+        name = "pedal_to_the_metal"
+        display = Items.MINECART.named("Pedal to The Metal")
+        value = false
+        defaults.options(this)
+    })
+
     var borderStage by this.borderStageSetting
 }
