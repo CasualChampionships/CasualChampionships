@@ -75,7 +75,6 @@ import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.arcade.utils.TimeUtils.format
 import net.casual.arcade.utils.TimeUtils.formatMMSS
 import net.casual.arcade.utils.impl.Location
 import net.casual.arcade.utils.impl.Sound
