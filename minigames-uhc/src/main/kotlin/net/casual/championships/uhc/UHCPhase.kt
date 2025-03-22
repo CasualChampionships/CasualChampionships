@@ -18,8 +18,8 @@ import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.arcade.utils.impl.Location
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.resetToDefault
 import net.casual.arcade.utils.set
 import net.casual.arcade.utils.teleportTo
@@ -36,6 +36,7 @@ import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
+import net.minecraft.world.phys.Vec3
 
 internal const val INITIALIZING_ID = "initializing"
 internal const val GRACE_ID = "grace"
@@ -62,7 +63,7 @@ enum class UHCPhase(
 
             for (player in minigame.players.spectating) {
                 if (player.level() != level) {
-                    player.teleportTo(Location.of(0.0, 200.0, 0.0, 0.0F, 0.0F, level))
+                    player.teleportTo(level.asLocation(Vec3(0.0, 200.0, 0.0)))
                 }
             }
 

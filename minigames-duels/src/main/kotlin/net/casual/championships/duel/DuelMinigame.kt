@@ -31,11 +31,11 @@ import net.casual.arcade.utils.LootTableUtils.exactly
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.resetHealth
-import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.arcade.utils.impl.Location
+import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
+import net.casual.arcade.utils.teleportTo
 import net.casual.championships.common.items.PlayerHeadItem
 import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.CommonItems
@@ -192,8 +192,7 @@ class DuelMinigame(
         player.lastDeathLocation.ifPresent { location ->
             val level = player.server.getLevel(location.dimension)
             if (level != null && this.levels.has(level) && player.isSpectator) {
-                val pos = location.pos
-                player.teleportTo(Location.of(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), level = level))
+                player.teleportTo(level.asLocation(location.pos.center))
             }
         }
     }

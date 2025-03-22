@@ -60,14 +60,12 @@ import net.casual.arcade.utils.PlayerUtils.directionVectorToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.grantAllRecipesSilently
-import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.resetExperience
 import net.casual.arcade.utils.PlayerUtils.resetHealth
 import net.casual.arcade.utils.PlayerUtils.resetHunger
 import net.casual.arcade.utils.PlayerUtils.revokeAllAdvancements
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
-import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
@@ -76,8 +74,11 @@ import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatMMSS
-import net.casual.arcade.utils.impl.Location
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.math.location.Location.Companion.withRotation
+import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
+import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
+import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.LevelSpecificElement
@@ -141,6 +142,7 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.border.WorldBorder
 import net.minecraft.world.phys.HitResult
+import net.minecraft.world.phys.Vec3
 import net.minecraft.world.scores.Team
 import java.util.*
 import kotlin.collections.component1
@@ -356,11 +358,11 @@ class UHCMinigame(
     private fun onPlayerRespawn(event: PlayerRespawnEvent) {
         val player = event.player
 
-        player.lastDeathLocation.ifPresent { location ->
-            val level = player.server.getLevel(location.dimension)
+        player.lastDeathLocation.ifPresent { pos ->
+            val level = player.server.getLevel(pos.dimension)
             if (level != null && this.levels.has(level)) {
-                val pos = location.pos
-                player.teleportTo(Location.of(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), level = level))
+                val location = pos.pos.center.withRotation(player.rotationVector).with(level)
+                player.teleportTo(location)
             }
         }
     }
@@ -421,7 +423,7 @@ class UHCMinigame(
         if (player.isSpectator && this.players.isSpectating(player)) {
             val target = event.getTarget()
             if (target is ServerPlayer) {
-                player.teleportTo(target.location)
+                player.teleportTo(target.locationWithLevel)
             }
         }
         event.cancel()
@@ -522,7 +524,7 @@ class UHCMinigame(
         this.tags.remove(player, CommonTags.HAS_TEAM_GLOW)
 
         if (!this.levels.has(player.serverLevel())) {
-            player.teleportTo(Location.of(0.0, 128.0, 0.0, level = this.overworld))
+            player.teleportTo(this.overworld.asLocation(Vec3(0.0, 128.0, 0.0)))
         }
 
         val rules = this.getSpectatorRules().join(Component.literal("\n\n"))
@@ -1033,7 +1035,7 @@ class UHCMinigame(
         if (teleport) {
             for (player in this.players.playing) {
                 if (team.players.contains(player.scoreboardName) && target != player) {
-                    target.teleportTo(player.location)
+                    target.teleportTo(player.locationWithLevel)
                     break
                 }
             }
@@ -1062,7 +1064,7 @@ class UHCMinigame(
         if (!this.players.isSpectating(player)) {
             return context.source.fail(CommonComponents.NOT_SPECTATING)
         }
-        player.teleportTo(target.location)
+        player.teleportTo(target.locationWithLevel)
         return Command.SINGLE_SUCCESS
     }
 

@@ -64,7 +64,7 @@ class CasualLobbyMinigameFactory(
             context.server,
             context.uuid,
             area,
-            this.data.spawn.get(level),
+            this.data.spawn.get().with(level),
             this.data.podium,
             this.data.podiumView,
             this.data.fireworkLocations,

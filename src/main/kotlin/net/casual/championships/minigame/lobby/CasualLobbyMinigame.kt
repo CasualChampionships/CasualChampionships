@@ -22,7 +22,6 @@ import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.stats.StatType
-import net.casual.arcade.minigame.template.location.LocationTemplate
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.minigame.utils.MinigameUtils.isMinigameAdminOrHasPermission
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
@@ -37,16 +36,17 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.arcade.utils.PlayerUtils.location
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
-import net.casual.arcade.utils.PlayerUtils.teleportTo
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.arcade.utils.impl.Location
+import net.casual.arcade.utils.math.location.LocationWithLevel
+import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
+import net.casual.arcade.utils.math.location.providers.LocationProvider
+import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
@@ -83,6 +83,7 @@ import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.component.FireworkExplosion.Shape
@@ -100,10 +101,10 @@ class CasualLobbyMinigame(
     server: MinecraftServer,
     uuid: UUID,
     area: PlaceableArea,
-    spawn: Location,
-    private val podiumTemplate: LocationTemplate,
-    private val podiumViewTemplate: LocationTemplate,
-    private val fireworksLocations: List<LocationTemplate>,
+    spawn: LocationWithLevel<ServerLevel>,
+    private val podiumTemplate: LocationProvider,
+    private val podiumViewTemplate: LocationProvider,
+    private val fireworksLocations: List<LocationProvider>,
     private val fireworkColors: List<Int>,
     private val duelArenaTemplates: List<DuelArenasTemplate>,
     private val factory: CasualLobbyMinigameFactory
@@ -344,9 +345,9 @@ class CasualLobbyMinigame(
 
     override fun teleportToSpawn(player: ServerPlayer) {
         val location = if (CasualMinigames.isWinner(player)) {
-            this.podiumTemplate.get(this.area.level)
+            this.podiumTemplate.get().with(this.area.level)
         } else if (CasualMinigames.hasWinner()) {
-            this.podiumViewTemplate.get(this.area.level)
+            this.podiumViewTemplate.get().with(this.area.level)
         } else {
             this.spawn
         }
@@ -408,7 +409,7 @@ class CasualLobbyMinigame(
         }
 
         minigame.players.add(player, true, this.players.isAdmin(player))
-        player.teleportTo(dueler.location)
+        player.teleportTo(dueler.locationWithLevel)
         return context.source.success(Component.translatable("casual.duel.teleportingToDuel"))
     }
 
@@ -523,8 +524,8 @@ class CasualLobbyMinigame(
 
     private fun spawnFireworkDisplay(player: ServerPlayer) {
         for (template in this.fireworksLocations) {
-            val firingLocation = template.get(this.area.level)
-            val firework = VirtualFirework.build {
+            val firingLocation = template.get().with(this.area.level)
+            val firework = VirtualFirework.build(this.area.level) {
                 location = firingLocation
                 duration = Random.nextInt(20, 30).Ticks
 

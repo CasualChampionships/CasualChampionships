@@ -8,8 +8,8 @@ import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.utils.PlayerUtils.location
-import net.casual.arcade.utils.PlayerUtils.teleportTo
+import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
+import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.ui.CommonSimpleGui
@@ -34,7 +34,7 @@ class PlayerSelectorGui(
             this.setSlot(47 + i, head.named(name)) { ->
                 val selected = this.player.server.playerList.getPlayer(profile.id)
                 if (selected != null) {
-                    this.player.teleportTo(selected.location)
+                    this.player.teleportTo(selected.locationWithLevel)
                 }
             }
         }
