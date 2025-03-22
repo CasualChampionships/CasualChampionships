@@ -420,7 +420,7 @@ object CasualMinigames {
         if (login.url.isEmpty()) {
             return JsonDataManager()
         }
-        val location = if (config.dev) "casual_championships_debug" else "casual_championships"
+        val location = if (config.dev) "${login.name}_debug" else login.name
         val database = CasualDatabase(login.url + "/$location", login.username, login.password)
         database.initialize()
         return MultiDataManager.of(
