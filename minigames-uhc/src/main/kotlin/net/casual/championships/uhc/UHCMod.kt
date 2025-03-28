@@ -3,6 +3,7 @@ package net.casual.championships.uhc
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
+import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
 import net.casual.championships.uhc.item.UHCItems
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
@@ -21,6 +22,7 @@ object UHCMod: ModInitializer {
     val UHC_PACK = NamedResourcePackCreator.named("uhc") {
         addAssetSource(MOD_ID)
         addLangsFromData(MOD_ID)
+        addMissingItemModels(MOD_ID)
         addFont(UHCComponents.Bitmap)
         packDescription = Component.literal("Resources for CasualChampionships UHC minigame")
     }

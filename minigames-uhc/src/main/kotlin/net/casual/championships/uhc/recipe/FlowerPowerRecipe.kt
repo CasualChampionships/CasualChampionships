@@ -12,18 +12,23 @@ import net.minecraft.world.item.crafting.RecipeHolder
 import net.minecraft.world.item.crafting.ShapedRecipe
 
 object FlowerPowerRecipe {
-    fun create(access: RegistryAccess): RecipeHolder<ShapedRecipe> {
-        return CraftingRecipeBuilder.shaped(access) {
-            key(UHCMod.id("flower_power"))
-            category = CraftingBookCategory.MISC
-            height = 3
-            width = 3
-            result = UHCItems.FLOWER_POWER.named("Flower Power")
-            val x = ItemTags.SMALL_FLOWERS
-            val o = Items.DIAMOND_BLOCK
-            ingredients(x, x, x, x)
-            ingredients(o)
-            ingredients(x, x, x, x)
+    private lateinit var instance: RecipeHolder<ShapedRecipe>
+
+    fun getOrCreate(access: RegistryAccess): RecipeHolder<ShapedRecipe> {
+        if (!this::instance.isInitialized) {
+            this.instance = CraftingRecipeBuilder.shaped(access) {
+                key(UHCMod.id("flower_power"))
+                category = CraftingBookCategory.MISC
+                height = 3
+                width = 3
+                result = UHCItems.FLOWER_POWER.named("Flower Power")
+                val x = ItemTags.SMALL_FLOWERS
+                val o = Items.DIAMOND_BLOCK
+                ingredients(x, x, x, x)
+                ingredients(o)
+                ingredients(x, x, x, x)
+            }
         }
+        return this.instance
     }
 }

@@ -15,6 +15,8 @@ import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.uhc.border.UHCBorderSize
 import net.casual.championships.uhc.border.UHCBorderStage
+import net.casual.championships.uhc.recipe.FlowerPowerRecipe
+import net.casual.championships.uhc.recipe.HeavyCoreRecipe
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
@@ -191,6 +193,15 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         display = Items.POPPY.named("Flower Power")
         value = false
         defaults.options(this)
+        listener { _, _, value ->
+            val recipe = FlowerPowerRecipe.getOrCreate(uhc.server.registryAccess())
+            if (value) {
+                uhc.recipes.add(recipe)
+                uhc.players.allProfiles.forEach { profile -> uhc.recipes.grant(profile.id, recipe.id) }
+            } else {
+                uhc.recipes.remove(recipe.id)
+            }
+        }
     })
 
     var bloodDiamonds by this.register(bool {
@@ -205,6 +216,15 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         display = Items.HEAVY_CORE.named("Heavy Heads")
         value = false
         defaults.options(this)
+        listener { _, _, value ->
+            val recipe = HeavyCoreRecipe.INSTANCE
+            if (value) {
+                uhc.recipes.add(recipe)
+                uhc.players.allProfiles.forEach { profile -> uhc.recipes.grant(profile.id, recipe.id) }
+            } else {
+                uhc.recipes.remove(recipe.id)
+            }
+        }
     })
 
     var headStart by this.register(bool {

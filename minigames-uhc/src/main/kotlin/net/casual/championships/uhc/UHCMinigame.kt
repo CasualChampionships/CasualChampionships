@@ -239,7 +239,7 @@ class UHCMinigame(
             this.recipes.add(HeavyCoreRecipe.INSTANCE)
         }
         if (this.settings.flowerPower) {
-            this.recipes.add(FlowerPowerRecipe.create(this.server.registryAccess()))
+            this.recipes.add(FlowerPowerRecipe.getOrCreate(this.server.registryAccess()))
         }
         this.advancements.addAll(UHCAdvancements)
         this.initialiseBorderTracker()

@@ -210,7 +210,7 @@ class DuelMinigame(
     private fun onMinigameSetPlaying(event: MinigameSetPlayingEvent) {
         val player = event.player
 
-        this.recipes.grant(player, GoldenHeadRecipe.INSTANCE, true)
+        this.recipes.grant(player, GoldenHeadRecipe.INSTANCE.id, true)
         player.setGameMode(GameType.SURVIVAL)
         player.boostHealth(this.duelSettings.health)
         player.resetHealth()

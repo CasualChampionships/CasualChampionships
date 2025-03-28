@@ -18,6 +18,7 @@ object UHCItems {
                 .component(DataComponents.DAMAGE, 0)
                 .component(DataComponents.MAX_STACK_SIZE, 1)
                 .component(DataComponents.USE_COOLDOWN, UseCooldown(15.0F, Optional.of(id("flower_power"))))
+                .component(DataComponents.ITEM_MODEL, id("flower_power"))
         )
     }
 
