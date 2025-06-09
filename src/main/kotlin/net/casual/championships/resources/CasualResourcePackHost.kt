@@ -11,9 +11,12 @@ import net.casual.arcade.host.HostedPack
 import net.casual.arcade.host.PackHost
 import net.casual.arcade.host.PackHost.HostedPackRef
 import net.casual.arcade.host.pack.DirectoryPackSupplier
+import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.resources.ArcadeResourcePacks
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
+import net.casual.arcade.resources.pack.PackInfo
 import net.casual.arcade.resources.utils.ResourcePackUtils.addPack
+import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.TeamUtils.getHexColor
 import net.casual.championships.CasualMod
 import net.casual.championships.common.CommonMod
@@ -50,9 +53,18 @@ object CasualResourcePackHost {
         return this.common.values.map(HostedPackRef::value)
     }
 
-    @Deprecated("")
     fun getHostedPack(name: String): HostedPack? {
         return this.host.getHostedPack(name)
+    }
+
+    fun createResourcesFromPacks(packs: () -> List<String>): MinigameResources {
+        return object: MinigameResources {
+            override fun getPacks(): Collection<PackInfo> {
+                return packs.invoke().mapNotNull { pack ->
+                    getHostedPack(pack)?.toPackInfo(!CasualMod.config.dev)
+                }
+            }
+        }
     }
 
     fun loadTeamColors(teams: Collection<PlayerTeam>): Boolean {
@@ -60,13 +72,16 @@ object CasualResourcePackHost {
         val colors = HashBiMap.create<ChatFormatting, Int>()
         for (team in teams) {
             val color = team.getHexColor()?.coerceIn(-1, 0xFFFFFF) ?: continue
-            val original = colors.inverse()[color] ?: ChatFormatting.entries.getOrNull(index++)
+            var original = colors.inverse()[color]
             if (original == null) {
-                CasualMod.logger.error("Tried to load more team colors than were available!!")
-            } else {
-                colors[original] = color
-                team.color = original
+                if (index >= 16) {
+                    CasualMod.logger.error("Tried to load more team colors than were available!!")
+                    continue
+                }
+                original = ChatFormatting.entries[index++]
             }
+            colors[original] = color
+            team.color = original
         }
 
         if (this.colors != colors) {

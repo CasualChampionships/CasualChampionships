@@ -31,6 +31,8 @@ enum class DuelPhase(
 
             minigame.levels.setGameRules {
                 resetToDefault()
+                set(GameRules.RULE_COMMANDBLOCKOUTPUT, false)
+                set(GameRules.RULE_RANDOMTICKING, 0)
                 if (!minigame.duelSettings.naturalRegen) {
                     set(GameRules.RULE_NATURAL_REGENERATION, false)
                 }

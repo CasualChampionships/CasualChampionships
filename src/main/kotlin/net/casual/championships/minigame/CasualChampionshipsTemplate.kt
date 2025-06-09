@@ -22,19 +22,10 @@ class CasualChampionshipsTemplate(
     repeat: Boolean = true,
     private val additionalPacks: List<String>
 ): SimpleMinigamesTemplate(name, lobby, operators, minigames, repeat) {
-    override fun getAdditionalPacks(): Iterable<PackInfo> {
-        val packs = ArrayList<PackInfo>()
-        for (pack in this.additionalPacks) {
-            // TODO:
-            @Suppress("DEPRECATION")
-            val hosted = CasualResourcePackHost.getHostedPack(pack)
-            if (hosted == null) {
-                CasualMod.logger.error("Failed to load additional pack $pack")
-                continue
-            }
-            packs.add(hosted.toPackInfo(!CasualMod.config.dev))
-        }
+    private val resources = CasualResourcePackHost.createResourcesFromPacks { this.additionalPacks }
 
+    override fun getAdditionalPacks(): Iterable<PackInfo> {
+        val packs = ArrayList<PackInfo>(this.resources.getPacks())
         return CasualResourcePackHost.getCommonPacks().mapTo(packs) {
             it.toPackInfo(!CasualMod.config.dev)
         }

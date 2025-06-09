@@ -7,13 +7,15 @@ import net.minecraft.core.Vec3i
 
 class DuelArenaData(
     val position: Vec3i,
-    val teleporter: EntityTeleporter
+    val teleporter: EntityTeleporter,
+    val additionalPacks: List<String>
 ) {
     companion object {
         val CODEC: Codec<DuelArenaData> = RecordCodecBuilder.create { instance ->
             instance.group(
                 Vec3i.CODEC.fieldOf("position").forGetter(DuelArenaData::position),
-                EntityTeleporter.CODEC.fieldOf("teleporter").forGetter(DuelArenaData::teleporter)
+                EntityTeleporter.CODEC.fieldOf("teleporter").forGetter(DuelArenaData::teleporter),
+                Codec.STRING.listOf().optionalFieldOf("additional_packs", listOf()).forGetter(DuelArenaData::additionalPacks)
             ).apply(instance, ::DuelArenaData)
         }
     }

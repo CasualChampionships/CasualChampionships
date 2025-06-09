@@ -924,6 +924,7 @@ class UHCMinigame(
             return
         }
 
+        // TODO: Check if players are ALIVE!
         val teammates = player.team?.getOnlinePlayers() ?: return
         for (teammate in teammates) {
             if (teammate != player && teammate.closerThan(player, 50.0)) {

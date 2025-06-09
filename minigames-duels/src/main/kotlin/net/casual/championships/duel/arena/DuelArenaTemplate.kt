@@ -12,6 +12,10 @@ class DuelArenaTemplate(val name: String) {
         StructureUtils.readWithData(arenas.resolve(this.name), DuelArenaData.CODEC)
     }
 
+    fun additionalPacks(): List<String> {
+        return this.pair.second.additionalPacks
+    }
+
     fun create(level: ServerLevel): DuelArena {
         val (structure, data) = this.pair
         return DuelArena(StructureArea(structure, data.position, level), data.teleporter)

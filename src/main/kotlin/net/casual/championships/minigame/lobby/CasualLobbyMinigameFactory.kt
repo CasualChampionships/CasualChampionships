@@ -12,9 +12,6 @@ import net.casual.arcade.minigame.area.StructureArea
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.template.area.PlaceableAreaTemplate
-import net.casual.arcade.minigame.utils.MinigameResources
-import net.casual.arcade.resources.pack.PackInfo
-import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.StructureUtils
 import net.casual.arcade.utils.codec.CodecProvider
 import net.casual.arcade.utils.encodedOptionalFieldOf
@@ -73,21 +70,7 @@ class CasualLobbyMinigameFactory(
             this
         )
         CasualMinigames.setCasualUI(minigame)
-        // TODO:
-        minigame.resources.add(object: MinigameResources {
-            override fun getPacks(): Collection<PackInfo> {
-                @Suppress("DEPRECATION")
-                return data.packs.mapNotNull { pack ->
-                    val hosted = CasualResourcePackHost.getHostedPack(pack)
-                    if (hosted != null) {
-                        hosted.toPackInfo(!CasualMod.config.dev)
-                    } else {
-                        CasualMod.logger.error("Failed to load lobby pack $pack")
-                        null
-                    }
-                }
-            }
-        })
+        minigame.resources.add(CasualResourcePackHost.createResourcesFromPacks { data.packs })
         return minigame
     }
 

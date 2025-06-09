@@ -12,7 +12,7 @@ import net.minecraft.world.item.component.ResolvableProfile
 
 class GoldenHeadItem(properties: Properties): HeadItem(properties) {
     override fun getResolvableProfile(stack: ItemStack): ResolvableProfile {
-        return PolymerUtils.createProfileComponent(GOLDEN_PRESENT, null)
+        return PolymerUtils.createProfileComponent(GOLDEN, null)
     }
 
     override fun addEffects(player: ServerPlayer) {

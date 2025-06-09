@@ -4,13 +4,13 @@ import com.mojang.serialization.JsonOps
 import net.casual.arcade.commands.register
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
-import net.casual.arcade.events.server.player.PlayerJoinEvent
-import net.casual.arcade.events.server.player.PlayerRequestLoginEvent
-import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.ServerLoadedEvent
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerSaveEvent
 import net.casual.arcade.events.server.ServerStoppingEvent
+import net.casual.arcade.events.server.player.PlayerJoinEvent
+import net.casual.arcade.events.server.player.PlayerRequestLoginEvent
+import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.chat.ChatFormatter
 import net.casual.arcade.minigame.events.*
@@ -158,7 +158,7 @@ object CasualMinigames {
         }
 
         GlobalEventHandler.Server.register<PlayerJoinEvent>(phase = PlayerJoinEvent.PHASE_INITIALIZED) {
-            it.delayJoinMessage = true
+            it.joinMessageModification = PlayerJoinEvent.JoinMessageModification.Delay
         }
         GlobalEventHandler.Server.register<PlayerJoinEvent> {
             val player = it.player
@@ -220,6 +220,10 @@ object CasualMinigames {
         }
         this.setCasualUI(minigame)
         minigame.ui.setPlayerListDisplay(CommonUI.createSimpleTabDisplay(minigame))
+
+        minigame.resources.add(CasualResourcePackHost.createResourcesFromPacks {
+            minigame.duelSettings.getArenaTemplate().additionalPacks()
+        })
     }
 
     internal fun setCasualUI(minigame: Minigame) {
