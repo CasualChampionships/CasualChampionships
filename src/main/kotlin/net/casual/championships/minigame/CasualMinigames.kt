@@ -12,7 +12,6 @@ import net.casual.arcade.events.server.player.PlayerJoinEvent
 import net.casual.arcade.events.server.player.PlayerRequestLoginEvent
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.minigame.chat.ChatFormatter
 import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.ready.MinigamePlayerReadyHandler
 import net.casual.arcade.minigame.ready.ReadyChecker
@@ -33,6 +32,7 @@ import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.PlayerUtils.broadcastToOps
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
+import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.codec.CodecProvider.Companion.register
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.toSmallCaps

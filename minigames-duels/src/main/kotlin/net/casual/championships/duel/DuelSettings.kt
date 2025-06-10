@@ -45,7 +45,7 @@ class DuelSettings(
     val displayableTeams = bool {
         name = "teams"
         val flag = FLAG.named(Component.translatable("casual.gui.duel.settings.teams").mini())
-        flag.set(DataComponents.DYED_COLOR, DyedItemColor(0xFF0000, false))
+        flag.set(DataComponents.DYED_COLOR, DyedItemColor(0xFF0000))
         display = flag
         value = false
         defaults.options(this)

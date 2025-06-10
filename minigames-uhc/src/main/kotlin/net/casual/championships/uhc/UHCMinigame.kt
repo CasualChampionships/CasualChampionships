@@ -6,7 +6,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.GuiHelpers
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import me.senseiwells.replay.player.PlayerRecorders
+import me.senseiwells.replay.recorder.player.PlayerRecorders
 import net.casual.arcade.border.tracker.MultiLevelBorderListener
 import net.casual.arcade.border.tracker.MultiLevelBorderTracker
 import net.casual.arcade.border.tracker.TrackedBorder
@@ -549,13 +549,13 @@ class UHCMinigame(
         this.tags.add(player, CommonTags.HAS_TEAM_GLOW)
 
         player.addEffect(
-            MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 2000, 255, true, false)
+            MobEffectInstance(MobEffects.RESISTANCE, 2000, 255, true, false)
         )
         player.setGameMode(GameType.SURVIVAL)
         player.afterPacksLoad {
-            player.removeEffect(MobEffects.DAMAGE_RESISTANCE)
+            player.removeEffect(MobEffects.RESISTANCE)
             player.addEffect(
-                MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 200, 255, true, false)
+                MobEffectInstance(MobEffects.RESISTANCE, 200, 255, true, false)
             )
         }
 
@@ -932,7 +932,7 @@ class UHCMinigame(
             }
         }
         player.addEffect(MobEffectInstance(
-            MobEffects.MOVEMENT_SPEED, 5.Seconds.ticks + 5, 0, false, false, false
+            MobEffects.SPEED, 5.Seconds.ticks + 5, 0, false, false, false
         ))
     }
 

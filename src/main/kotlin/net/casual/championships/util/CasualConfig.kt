@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import net.casual.arcade.host.PackHost
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CommonConfig
 import net.fabricmc.loader.api.FabricLoader
@@ -22,11 +21,7 @@ import kotlin.io.path.outputStream
 data class CasualConfig(
     val dev: Boolean = false,
     @SerialName("database_login")
-    val database: DatabaseLogin = DatabaseLogin(),
-    @SerialName("pack_host_ip")
-    val packHostIp: String = "0.0.0.0",
-    @SerialName("pack_host_port")
-    val packHostPort: Int = PackHost.DEFAULT_PORT
+    val database: DatabaseLogin = DatabaseLogin()
 ) {
     @OptIn(ExperimentalSerializationApi::class)
     companion object {
@@ -45,6 +40,7 @@ data class CasualConfig(
             encodeDefaults = true
             prettyPrint = true
             prettyPrintIndent = "  "
+            ignoreUnknownKeys = true
         }
 
         fun read(): CasualConfig {

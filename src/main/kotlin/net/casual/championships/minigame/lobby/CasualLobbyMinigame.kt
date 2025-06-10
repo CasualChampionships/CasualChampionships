@@ -12,7 +12,6 @@ import net.casual.arcade.events.server.player.PlayerTickEvent
 import net.casual.arcade.events.server.player.PlayerTryAttackEvent
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.area.PlaceableArea
-import net.casual.arcade.minigame.chat.ChatFormatter
 import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.lobby.LobbyMinigame
 import net.casual.arcade.minigame.lobby.LobbyPhase
@@ -43,6 +42,7 @@ import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.math.location.LocationWithLevel
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.math.location.providers.LocationProvider
@@ -58,7 +58,6 @@ import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
 import net.casual.arcade.visuals.tab.PlayerListDisplay
 import net.casual.championships.CasualMod
-import net.casual.championships.CasualMod.config
 import net.casual.championships.commands.MinesweeperCommand
 import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.minigame.CasualSettings

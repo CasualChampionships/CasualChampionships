@@ -17,11 +17,11 @@ class GoldenHeadItem(properties: Properties): HeadItem(properties) {
 
     override fun addEffects(player: ServerPlayer) {
         player.addEffect(MobEffectInstance(REGENERATION, 50, 3))
-        player.addEffect(MobEffectInstance(MOVEMENT_SPEED, 20 * 20, 1))
+        player.addEffect(MobEffectInstance(SPEED, 20 * 20, 1))
         player.addEffect(MobEffectInstance(SATURATION, 5, 4))
 
         player.addEffect(MobEffectInstance(ABSORPTION, 120 * 20, 0))
-        player.addEffect(MobEffectInstance(DAMAGE_RESISTANCE, 5 * 20, 0))
+        player.addEffect(MobEffectInstance(RESISTANCE, 5 * 20, 0))
     }
 
     override fun getName(stack: ItemStack): Component {

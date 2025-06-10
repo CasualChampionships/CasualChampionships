@@ -9,7 +9,7 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFrom
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
 import net.casual.arcade.resources.utils.ResourcePackUtils.addSounds
-import net.casual.arcade.scheduler.task.utils.TaskRegisties
+import net.casual.arcade.scheduler.task.utils.TaskRegistries
 import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.level.ReducedMobSpawningRules
 import net.casual.championships.common.task.GlowingBossbarTask
@@ -66,8 +66,8 @@ object CommonMod: ModInitializer {
 
         Registry.register(DimensionRegistries.CUSTOM_MOB_SPAWNING_RULES, id("reduced_mob_cap"), ReducedMobSpawningRules)
 
-        Registry.register(TaskRegisties.TASK_FACTORY, GracePeriodBossbarTask.id, GracePeriodBossbarTask)
-        Registry.register(TaskRegisties.TASK_FACTORY, GlowingBossbarTask.id, GlowingBossbarTask)
+        Registry.register(TaskRegistries.TASK_FACTORY, GracePeriodBossbarTask.id, GracePeriodBossbarTask)
+        Registry.register(TaskRegistries.TASK_FACTORY, GlowingBossbarTask.id, GlowingBossbarTask)
 
         PolymerItemGroupUtils.registerPolymerItemGroup(
             id("menu"),

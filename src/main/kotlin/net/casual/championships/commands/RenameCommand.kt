@@ -30,7 +30,7 @@ object RenameCommand: CommandTree {
     private fun renamePlayerItem(context: CommandContext<CommandSourceStack>): Int {
         val player = EntityArgument.getPlayer(context, "player")
         val slot = SlotArgument.getSlot(context, "slot")
-        val name = ComponentArgument.getComponent(context, "name")
+        val name = ComponentArgument.getRawComponent(context, "name")
         val access = player.getSlot(slot)
         if (access == SlotAccess.NULL) {
             return context.source.fail("Tried to rename item in unknown slot")

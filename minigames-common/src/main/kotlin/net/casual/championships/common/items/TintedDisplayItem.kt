@@ -20,7 +20,7 @@ class TintedDisplayItem(properties: Properties): Item(properties), PolymerItem {
         context: PacketContext
     ): ItemStack {
         val copy = super.getPolymerItemStack(stack, flag, context)
-        copy.set(DYED_COLOR, DyedItemColor(DyedItemColor.getOrDefault(stack, 0xFFFFFF), false))
+        copy.set(DYED_COLOR, DyedItemColor(DyedItemColor.getOrDefault(stack, 0xFFFFFF)))
         return copy
     }
 }

@@ -1,24 +1,24 @@
 package net.casual.championships.common.items
 
-import eu.pb4.polymer.core.api.item.PolymerItem
+import eu.pb4.polymer.core.api.item.VanillaModeledPolymerItem
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.ChatFormatting
 import net.minecraft.core.component.DataComponents
-import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.*
 import net.minecraft.world.item.component.ResolvableProfile
+import net.minecraft.world.item.component.TooltipDisplay
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Blocks
 import xyz.nucleoid.packettweaker.PacketContext
+import java.util.function.Consumer
 
-abstract class HeadItem(properties: Properties): BlockItem(Blocks.PLAYER_HEAD, properties), PolymerItem {
+abstract class HeadItem(properties: Properties): BlockItem(Blocks.PLAYER_HEAD, properties), VanillaModeledPolymerItem {
     abstract fun addEffects(player: ServerPlayer)
 
     open fun getResolvableProfile(stack: ItemStack): ResolvableProfile? {
@@ -51,23 +51,21 @@ abstract class HeadItem(properties: Properties): BlockItem(Blocks.PLAYER_HEAD, p
         return super.useOn(context)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun appendHoverText(
         stack: ItemStack,
         context: TooltipContext,
-        tooltipComponents: MutableList<Component>,
-        tooltipFlag: TooltipFlag
+        display: TooltipDisplay,
+        consumer: Consumer<Component>,
+        flag: TooltipFlag
     ) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag)
-        tooltipComponents.add(CommonComponents.HEAD_TOOLTIP.withStyle(ChatFormatting.GRAY))
+        @Suppress("DEPRECATION")
+        super.appendHoverText(stack, context, display, consumer, flag)
+        consumer.accept(CommonComponents.HEAD_TOOLTIP.withStyle(ChatFormatting.GRAY))
     }
 
     override fun getPolymerItem(itemStack: ItemStack, context: PacketContext): Item {
         return Items.PLAYER_HEAD
-    }
-
-    override fun getPolymerItemModel(stack: ItemStack, context: PacketContext?): ResourceLocation {
-        // TODO: Why this?
-        return BuiltInRegistries.ITEM.getKey(Items.PLAYER_HEAD)
     }
 
     override fun getPolymerItemStack(

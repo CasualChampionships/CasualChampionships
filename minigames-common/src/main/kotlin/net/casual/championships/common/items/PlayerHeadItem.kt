@@ -15,7 +15,7 @@ import kotlin.jvm.optionals.getOrNull
 class PlayerHeadItem(properties: Properties): HeadItem(properties) {
     override fun addEffects(player: ServerPlayer) {
         player.addEffect(MobEffectInstance(MobEffects.REGENERATION, 60, 2))
-        player.addEffect(MobEffectInstance(MobEffects.MOVEMENT_SPEED, 15 * 20, 1))
+        player.addEffect(MobEffectInstance(MobEffects.SPEED, 15 * 20, 1))
         player.addEffect(MobEffectInstance(MobEffects.SATURATION, 5, 4))
     }
 

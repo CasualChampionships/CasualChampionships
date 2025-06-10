@@ -6,10 +6,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import me.senseiwells.replay.config.ReplayConfig
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
-import net.casual.arcade.events.server.ServerStoppingEvent
-import net.casual.arcade.host.HostedPack
-import net.casual.arcade.host.PackHost
+import net.casual.arcade.host.GlobalPackHost
 import net.casual.arcade.host.PackHost.HostedPackRef
+import net.casual.arcade.host.data.HostedPack
 import net.casual.arcade.host.pack.DirectoryPackSupplier
 import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.resources.ArcadeResourcePacks
@@ -37,7 +36,7 @@ object CasualResourcePackHost {
 
     private val colors = Object2IntOpenHashMap<ChatFormatting>()
 
-    private val host = PackHost(CasualMod.config.packHostIp, CasualMod.config.packHostPort)
+    private val host = GlobalPackHost
     private val common = HashMap<String, HostedPackRef>()
 
     val uhc: HostedPack by this.host(UHCMod.UHC_PACK)
@@ -108,11 +107,6 @@ object CasualResourcePackHost {
     }
 
     internal fun registerEvents() {
-        this.host.start()
-
-        GlobalEventHandler.Server.register<ServerStoppingEvent> {
-            this.host.stop()
-        }
         GlobalEventHandler.Server.register<CasualConfigReloaded> {
             this.reload()
         }
@@ -131,7 +125,7 @@ object CasualResourcePackHost {
     private fun cachePackForReplay(hosted: HostedPack) {
         try {
             @Suppress("DEPRECATION")
-            val pathHash = Hashing.sha1().hashString(hosted.url, StandardCharsets.UTF_8).toString()
+            val pathHash = Hashing.sha1().hashString(hosted.url.resolve(), StandardCharsets.UTF_8).toString()
             val path = ReplayConfig.root.resolve("packs").createDirectories().resolve(pathHash)
             path.outputStream().use {
                 hosted.pack.stream().transferTo(it)

@@ -22,7 +22,7 @@ class FlowerPowerItem(properties: Properties): Item(properties), PolymerItem {
     override fun use(level: Level, player: Player, interactionHand: InteractionHand): InteractionResult {
         val stack = player.getItemInHand(interactionHand)
         player.addEffect(MobEffectInstance(
-            MobEffects.DAMAGE_BOOST, 5.Seconds.ticks, 0
+            MobEffects.STRENGTH, 5.Seconds.ticks, 0
         ))
         stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(interactionHand))
         return InteractionResult.SUCCESS_SERVER

@@ -1,5 +1,7 @@
 package net.casual.championships.duel
 
+import net.casual.arcade.minigame.extensions.PlayerMovementRestrictionExtension.Companion.restrictMovement
+import net.casual.arcade.minigame.extensions.PlayerMovementRestrictionExtension.Companion.unrestrictMovement
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.arcade.minigame.utils.MinigameUtils.countdown
@@ -49,7 +51,9 @@ enum class DuelPhase(
     },
     Countdown(COUNTDOWN_ID) {
         override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
-            minigame.settings.freezeEntities.set(true)
+            for (player in minigame.players.playing) {
+                player.restrictMovement()
+            }
             minigame.ui.countdown.countdown(minigame).then {
                 minigame.setPhase(Dueling)
             }
@@ -57,7 +61,9 @@ enum class DuelPhase(
     },
     Dueling(DUELING_ID) {
         override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
-            minigame.settings.freezeEntities.set(false)
+            for (player in minigame.players.playing) {
+                player.unrestrictMovement()
+            }
         }
     },
     Complete(COMPLETE_ID) {

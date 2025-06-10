@@ -1,7 +1,6 @@
 package net.casual.championships.common.util
 
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.minigame.chat.ChatFormatter
 import net.casual.arcade.minigame.managers.MinigameChatManager
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.utils.ComponentUtils.bold
@@ -10,6 +9,7 @@ import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.TeamUtils.getHexColor
+import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
@@ -141,7 +141,7 @@ object CommonUI {
             val flag = DisplayItems.FLAG
             val color = it.getHexColor()
             if (color != null) {
-                flag.set(DataComponents.DYED_COLOR, DyedItemColor(color, false))
+                flag.set(DataComponents.DYED_COLOR, DyedItemColor(color))
             }
             flag.set(DataComponents.CUSTOM_NAME, it.formattedDisplayName.mini())
             TeamSelectorGui.Selection(it, flag)
