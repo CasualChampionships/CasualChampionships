@@ -51,7 +51,7 @@ import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.elements.UniversalElement
-import net.casual.arcade.visuals.firework.VirtualFirework
+import net.casual.arcade.visuals.entity.firework.VirtualFirework
 import net.casual.arcade.visuals.sidebar.DynamicSidebar
 import net.casual.arcade.visuals.sidebar.Sidebar
 import net.casual.arcade.visuals.sidebar.SidebarComponent
