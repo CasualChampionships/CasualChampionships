@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.GuiHelpers
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import me.senseiwells.replay.recorder.player.PlayerRecorders
 import net.casual.arcade.border.tracker.MultiLevelBorderListener
 import net.casual.arcade.border.tracker.MultiLevelBorderTracker
@@ -13,8 +14,9 @@ import net.casual.arcade.border.tracker.TrackedBorder
 import net.casual.arcade.commands.*
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
-import net.casual.arcade.events.server.block.BlockDropEvent
+import net.casual.arcade.events.server.block.BlockDropLootEvent
 import net.casual.arcade.events.server.block.BrewingStandBrewEvent
+import net.casual.arcade.events.server.entity.EntityDropLootEvent
 import net.casual.arcade.events.server.level.LevelLootEvent
 import net.casual.arcade.events.server.player.*
 import net.casual.arcade.minigame.Minigame
@@ -91,6 +93,7 @@ import net.casual.arcade.visuals.shapes.ShapePoints.Companion.drawAsParticlesFor
 import net.casual.arcade.visuals.sidebar.DynamicSidebar
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
+import net.casual.championships.common.event.ChunkGenerationMobSpawnEvent
 import net.casual.championships.common.event.TippedArrowTradeOfferEvent
 import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent
 import net.casual.championships.common.event.border.BorderPortalWithinBoundsEvent
@@ -151,6 +154,7 @@ import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.border.WorldBorder
+import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
@@ -422,7 +426,7 @@ class UHCMinigame(
     }
 
     @Listener
-    private fun onBlockDrop(event: BlockDropEvent) {
+    private fun onBlockDrop(event: BlockDropLootEvent) {
         if (!this.settings.instantSmeltOres) {
             return
         }
@@ -633,6 +637,19 @@ class UHCMinigame(
             this.effects.forceUpdate(teammate, player)
             this.effects.forceUpdate(player, teammate)
         }
+    }
+
+    @Listener
+    private fun onEntityDropLoot(event: EntityDropLootEvent) {
+        val drops = ObjectArrayList<ItemStack>()
+        event.drops.map { it.copyWithCount(it.count * 2) }
+            .forEach(LootTable.createStackSplitter(event.level, drops::add))
+        event.drops = drops
+    }
+
+    @Listener
+    private fun onChunkGenerationMobSpawn(event: ChunkGenerationMobSpawnEvent) {
+        event.probability *= 0.5F
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {

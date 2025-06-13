@@ -4,6 +4,7 @@
   "package": "net.casual.championships.common.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "event.NaturalSpawnerMixin",
     "event.NetherPortalBlockMixin",
     "event.PortalForcerMixin",
     "event.TippedArrowForItemsAndEmeraldsMixin",
