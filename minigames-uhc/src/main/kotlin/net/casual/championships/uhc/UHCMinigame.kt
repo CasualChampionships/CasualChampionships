@@ -647,7 +647,7 @@ class UHCMinigame(
         event.drops = drops
     }
 
-    @Listener
+    @Listener(requiresMainThread = false)
     private fun onChunkGenerationMobSpawn(event: ChunkGenerationMobSpawnEvent) {
         event.probability *= 0.5F
     }
