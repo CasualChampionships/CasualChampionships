@@ -153,7 +153,9 @@ object CasualMinigames {
                 this.getMinigames().setData(data)
             }
 
-            it.server.playerList.setUsingWhiteList(true)
+            if (this.dataManager !is JsonDataManager) {
+                it.server.playerList.setUsingWhiteList(true)
+            }
             this.createTeams(it.server)
         }
 

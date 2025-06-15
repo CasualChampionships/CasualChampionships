@@ -11,6 +11,7 @@ import net.casual.arcade.minigame.area.PlaceableArea
 import net.casual.arcade.minigame.area.StructureArea
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
+import net.casual.arcade.minigame.template.area.BoxedAreaTemplate
 import net.casual.arcade.minigame.template.area.PlaceableAreaTemplate
 import net.casual.arcade.utils.StructureUtils
 import net.casual.arcade.utils.codec.CodecProvider
@@ -89,7 +90,7 @@ class CasualLobbyMinigameFactory(
 
     private fun createPlaceableArea(level: CustomLevel): PlaceableArea {
         if (this.name.isEmpty) {
-            return PlaceableAreaTemplate.DEFAULT.create(level)
+            return BoxedAreaTemplate(this.data.position).create(level)
         }
         return StructureArea(this.structure, this.data.position, level)
     }

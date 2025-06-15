@@ -12,7 +12,7 @@ import net.minecraft.world.level.biome.Biomes
 import java.util.*
 
 class CasualLobbyData(
-    val position: Vec3i = Vec3i(0, 1, 0),
+    val position: Vec3i = Vec3i(0, -1, 0),
     val spawn: LocationProvider = LocationProvider.DEFAULT,
     val podium: LocationProvider = LocationProvider.DEFAULT,
     val podiumView: LocationProvider = LocationProvider.DEFAULT,
