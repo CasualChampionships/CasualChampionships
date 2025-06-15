@@ -8,10 +8,8 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CommonConfig
-import net.fabricmc.loader.api.FabricLoader
 import org.apache.commons.lang3.SerializationException
 import java.io.IOException
-import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
@@ -25,16 +23,7 @@ data class CasualConfig(
 ) {
     @OptIn(ExperimentalSerializationApi::class)
     companion object {
-        private val root = FabricLoader.getInstance().configDir.resolve("CasualChampionships")
-        private val config = this.root.resolve("config.json")
-
-        @Deprecated(
-            "Use CommonConfig",
-            ReplaceWith("CommonConfig.resolve(next)", "net.casual.championships.common.util.CommonConfig")
-        )
-        fun resolve(next: String): Path {
-            return CommonConfig.resolve(next)
-        }
+        private val config = CommonConfig.resolve("config.json")
 
         private val json = Json {
             encodeDefaults = true
