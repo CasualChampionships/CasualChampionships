@@ -7,7 +7,6 @@ import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.GuiHelpers
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import me.senseiwells.replay.recorder.player.PlayerRecorders
 import net.casual.arcade.border.tracker.MultiLevelBorderListener
 import net.casual.arcade.border.tracker.MultiLevelBorderTracker
 import net.casual.arcade.border.tracker.TrackedBorder
@@ -63,6 +62,7 @@ import net.casual.arcade.utils.PlayerUtils.directionVectorToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.grantAllRecipesSilently
+import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.PlayerUtils.resetExperience
 import net.casual.arcade.utils.PlayerUtils.resetHealth
 import net.casual.arcade.utils.PlayerUtils.resetHunger
@@ -370,9 +370,9 @@ class UHCMinigame(
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         val (player, source) = event
 
-        GlobalTickedScheduler.schedule(1.Seconds) {
-            PlayerRecorders.get(player)?.stop()
-        }
+        // GlobalTickedScheduler.schedule(1.Seconds) {
+        //     PlayerRecorders.get(player)?.stop()
+        // }
 
         this.onEliminated(player, player.getKillCreditWith(source))
     }
@@ -382,7 +382,7 @@ class UHCMinigame(
         val player = event.player
 
         player.lastDeathLocation.ifPresent { pos ->
-            val level = player.server.getLevel(pos.dimension)
+            val level = player.levelServer.getLevel(pos.dimension)
             if (level != null && this.levels.has(level)) {
                 val location = pos.pos.center.withRotation(player.rotationVector).with(level)
                 player.teleportTo(location)
@@ -402,7 +402,7 @@ class UHCMinigame(
         player.resetHunger()
         player.resetExperience()
         player.clearPlayerInventory()
-        PlayerRecorders.get(player)?.stop()
+        // PlayerRecorders.get(player)?.stop()
     }
 
     @Listener
@@ -421,7 +421,7 @@ class UHCMinigame(
 
         val (player, _, state) = event
         if (state.isOf(BlockTags.DIAMOND_ORES)) {
-            player.hurtServer(player.serverLevel(), player.damageSources().magic(), 1.0F)
+            player.hurtServer(player.level(), player.damageSources().magic(), 1.0F)
         }
     }
 
@@ -511,9 +511,9 @@ class UHCMinigame(
         val player = event.player
         this.mapRenderer.stopWatching(player)
 
-        if (!PlayerRecorders.has(player) && this.settings.replay) {
-            PlayerRecorders.create(player).start()
-        }
+        // if (!PlayerRecorders.has(player) && this.settings.replay) {
+        //     PlayerRecorders.create(player).start()
+        // }
     }
 
     @Listener
@@ -588,7 +588,7 @@ class UHCMinigame(
         this.effects.addFullbright(player)
         this.tags.remove(player, CommonTags.HAS_TEAM_GLOW)
 
-        if (!this.levels.has(player.serverLevel())) {
+        if (!this.levels.has(player.level())) {
             player.teleportTo(this.overworld.asLocation(Vec3(0.0, 128.0, 0.0)))
         }
 

@@ -8,6 +8,7 @@ import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.visuals.screen.setSlot
@@ -32,7 +33,7 @@ class PlayerSelectorGui(
             val head = ItemUtils.createPlayerHead(profile, CommonItems.FORWARD_FACING_PLAYER_HEAD)
             val name = Component.literal(profile.name).yellow().mini()
             this.setSlot(47 + i, head.named(name)) { ->
-                val selected = this.player.server.playerList.getPlayer(profile.id)
+                val selected = this.player.levelServer.playerList.getPlayer(profile.id)
                 if (selected != null) {
                     this.player.teleportTo(selected.locationWithLevel)
                 }

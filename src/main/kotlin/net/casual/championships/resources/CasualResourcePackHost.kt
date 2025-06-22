@@ -1,9 +1,7 @@
 package net.casual.championships.resources
 
 import com.google.common.collect.HashBiMap
-import com.google.common.hash.Hashing
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import me.senseiwells.replay.config.ReplayConfig
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.host.GlobalPackHost
@@ -24,11 +22,7 @@ import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.uhc.UHCMod
 import net.minecraft.ChatFormatting
 import net.minecraft.world.scores.PlayerTeam
-import java.io.IOException
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletableFuture
-import kotlin.io.path.createDirectories
-import kotlin.io.path.outputStream
 
 object CasualResourcePackHost {
     private val packs = CommonConfig.resolve("packs")
@@ -123,15 +117,15 @@ object CasualResourcePackHost {
     }
 
     private fun cachePackForReplay(hosted: HostedPack) {
-        try {
-            @Suppress("DEPRECATION")
-            val pathHash = Hashing.sha1().hashString(hosted.url.resolve(), StandardCharsets.UTF_8).toString()
-            val path = ReplayConfig.root.resolve("packs").createDirectories().resolve(pathHash)
-            path.outputStream().use {
-                hosted.pack.stream().transferTo(it)
-            }
-        } catch (e: IOException) {
-            CasualMod.logger.error("Failed to cache pack for replays", e)
-        }
+        // try {
+        //     @Suppress("DEPRECATION")
+        //     val pathHash = Hashing.sha1().hashString(hosted.url.resolve(), StandardCharsets.UTF_8).toString()
+        //     val path = ReplayConfig.root.resolve("packs").createDirectories().resolve(pathHash)
+        //     path.outputStream().use {
+        //         hosted.pack.stream().transferTo(it)
+        //     }
+        // } catch (e: IOException) {
+        //     CasualMod.logger.error("Failed to cache pack for replays", e)
+        // }
     }
 }

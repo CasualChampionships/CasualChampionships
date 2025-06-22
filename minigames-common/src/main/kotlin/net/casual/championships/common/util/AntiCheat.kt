@@ -7,6 +7,7 @@ import net.casual.arcade.events.server.level.LevelTickEvent
 import net.casual.arcade.events.server.player.PlayerBlockPlacedEvent
 import net.casual.arcade.extensions.event.LevelExtensionEvent
 import net.casual.arcade.utils.PlayerUtils.broadcastToOps
+import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.extensions.WorldBlockTrackerExtension
 import net.casual.championships.common.extensions.WorldBlockTrackerExtension.Companion.blockTracker
@@ -44,7 +45,7 @@ object AntiCheat {
             GlobalEventHandler.Server.broadcast(PlayerCheatEvent(event.player, Type.FlexibleBlockPlacement))
 
             val message = Component.literal("Player ").append(event.player.displayName!!).append(" used fbp")
-            event.player.server.playerList.players.broadcastToOps(message)
+            event.player.levelServer.playerList.players.broadcastToOps(message)
 
             event.cancel()
         }

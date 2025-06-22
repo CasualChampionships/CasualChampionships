@@ -83,14 +83,14 @@ enum class UHCPhase(
 
             minigame.teams.hideNameTags()
 
-            minigame.ui.removeAllNameTags()
+            minigame.ui.removeAllNametags()
             val observeeNotSpectating = PlayerObserverPredicate { observee, _ ->
                 !minigame.players.isSpectating(observee)
             }
-            minigame.ui.addNameTag(CommonUI.createPlayingNameTag(
+            minigame.ui.addNametag(CommonUI.createPlayingNameTag(
                 EntityObserverPredicate.visibleObservee().toPlayer().and(observeeNotSpectating)
             ))
-            minigame.ui.addNameTag(CommonUI.createPlayingHealthTag(
+            minigame.ui.addNametag(CommonUI.createPlayingHealthTag(
                 CommonPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(observeeNotSpectating)
             ))
         }

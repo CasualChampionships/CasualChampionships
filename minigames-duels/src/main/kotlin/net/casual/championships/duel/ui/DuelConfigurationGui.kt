@@ -8,6 +8,7 @@ import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.lore
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.ui.CommonSimpleGui
@@ -46,7 +47,7 @@ class DuelConfigurationGui(
         val confirm = DisplayItems.TICK
         confirm.named(CommonComponents.CONFIRM.mini())
         this.confirm = GuiElement(confirm) { _, _, _, _ ->
-            val playerList = this.player.server.playerList
+            val playerList = this.player.levelServer.playerList
             this.start.invoke(this.player, this.selectedPlayers.mapNotNull(playerList::getPlayer), this.settings)
             this.close()
         }

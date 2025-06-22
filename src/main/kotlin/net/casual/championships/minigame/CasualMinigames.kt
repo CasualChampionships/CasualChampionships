@@ -237,7 +237,7 @@ object CasualMinigames {
         )
         minigame.ui.countdown = CasualCountdown
 
-        minigame.ui.addNameTag(CommonUI.createPlayingNameTag())
+        minigame.ui.addNametag(CommonUI.createPlayingNameTag())
         minigame.events.register<MinigameAddPlayerEvent> {
             it.player.team?.nameTagVisibility = Team.Visibility.NEVER
         }

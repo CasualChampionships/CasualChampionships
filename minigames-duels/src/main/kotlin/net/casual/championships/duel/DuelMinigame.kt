@@ -30,6 +30,7 @@ import net.casual.arcade.utils.LootTableUtils.enchant
 import net.casual.arcade.utils.LootTableUtils.exactly
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
+import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.PlayerUtils.resetHealth
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
@@ -190,7 +191,7 @@ class DuelMinigame(
         val player = event.player
 
         player.lastDeathLocation.ifPresent { location ->
-            val level = player.server.getLevel(location.dimension)
+            val level = player.levelServer.getLevel(location.dimension)
             if (level != null && this.levels.has(level) && player.isSpectator) {
                 player.teleportTo(level.asLocation(location.pos.center))
             }
@@ -216,7 +217,7 @@ class DuelMinigame(
         player.resetHealth()
 
         val stacks = getOrCreateLootTable(this.server.registryAccess()).getRandomItems(
-            LootParams.Builder(player.serverLevel()).create(ContextKeySet.Builder().build()),
+            LootParams.Builder(player.level()).create(ContextKeySet.Builder().build()),
             this.lootSeed
         )
 

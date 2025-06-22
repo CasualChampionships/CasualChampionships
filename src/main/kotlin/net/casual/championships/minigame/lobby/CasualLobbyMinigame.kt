@@ -35,6 +35,7 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
+import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
@@ -474,7 +475,7 @@ class CasualLobbyMinigame(
             return false
         }
 
-        val duel = DuelMinigameFactory(settings).create(MinigameCreationContext(initiator.server))
+        val duel = DuelMinigameFactory(settings).create(MinigameCreationContext(initiator.levelServer))
         this.duels.add(duel)
         duel.events.register<MinigameCloseEvent> { this.duels.remove(duel) }
 

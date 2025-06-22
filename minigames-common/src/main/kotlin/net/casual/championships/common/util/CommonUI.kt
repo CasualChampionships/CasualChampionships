@@ -13,7 +13,7 @@ import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
-import net.casual.arcade.visuals.nametag.PlayerNameTag
+import net.casual.arcade.visuals.nametag.PlayerNametag
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
@@ -71,14 +71,14 @@ object CommonUI {
 
     fun createPlayingNameTag(
         predicate: PlayerObserverPredicate = EntityObserverPredicate.visibleObservee().toPlayer()
-    ): PlayerNameTag {
-        return PlayerNameTag({ it.displayName!! }, predicate)
+    ): PlayerNametag {
+        return PlayerNametag({ it.displayName!! }, predicate)
     }
 
     fun createPlayingHealthTag(
         predicate: PlayerObserverPredicate = CommonPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
-    ): PlayerNameTag {
-        return PlayerNameTag(
+    ): PlayerNametag {
+        return PlayerNametag(
             { Component.literal(String.format("%.1f ", it.health / 2)).append(CommonComponents.Hud.HARDCORE_HEART) },
             predicate
         )

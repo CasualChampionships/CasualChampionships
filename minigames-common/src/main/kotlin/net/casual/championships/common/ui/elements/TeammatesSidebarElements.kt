@@ -7,6 +7,7 @@ import net.casual.arcade.utils.ComponentUtils.italicise
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.wrap
 import net.casual.arcade.utils.PlayerUtils.isSurvival
+import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.PlayerUtils.player
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.visuals.sidebar.SidebarComponent
@@ -40,7 +41,7 @@ class TeammatesSidebarElements(
         }
 
         for (username in teammates) {
-            components.addRow(this.createTeammateComponent(player.server, username, team))
+            components.addRow(this.createTeammateComponent(player.levelServer, username, team))
         }
     }
 

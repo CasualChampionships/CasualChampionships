@@ -56,8 +56,8 @@ class UHCSpectatorHotbar(
     }
 
     override fun onClickBlock(result: BlockHitResult): Boolean {
-        val state = this.player.serverLevel().getBlockState(result.blockPos)
-        val menu = state.getMenuProvider(this.player.serverLevel(), result.blockPos)
+        val state = this.player.level().getBlockState(result.blockPos)
+        val menu = state.getMenuProvider(this.player.level(), result.blockPos)
         if (menu != null) {
             this.player.openMenu(menu)
             return false
@@ -66,7 +66,7 @@ class UHCSpectatorHotbar(
     }
 
     override fun onClickEntity(id: Int, type: EntityInteraction, sneaking: Boolean, pos: Vec3?): Boolean {
-        val entity = this.player.serverLevel().getEntity(id)
+        val entity = this.player.level().getEntity(id)
         if (entity != null && type == EntityInteraction.ATTACK && this.player.extendedGameMode == NoClipSpectator) {
             this.player.camera = entity
             return false
