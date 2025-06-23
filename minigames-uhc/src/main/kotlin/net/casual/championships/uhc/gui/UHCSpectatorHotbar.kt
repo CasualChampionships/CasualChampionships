@@ -1,4 +1,4 @@
-package net.casual.championships.uhc
+package net.casual.championships.uhc.gui
 
 import eu.pb4.sgui.api.ClickType
 import eu.pb4.sgui.api.elements.GuiElement
@@ -12,6 +12,7 @@ import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.util.CommonItems
 import net.casual.championships.common.util.CommonUI
+import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer

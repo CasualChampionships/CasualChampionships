@@ -1,4 +1,4 @@
-package net.casual.championships.uhc
+package net.casual.championships.uhc.utils
 
 import com.mojang.serialization.MapCodec
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
@@ -13,6 +13,7 @@ import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocat
 import net.casual.arcade.visuals.shapes.LevelSurfaceShape
 import net.casual.arcade.visuals.shapes.Regular2DPolygonShape
 import net.casual.arcade.visuals.shapes.ShapePoints
+import net.casual.championships.uhc.UHCMod
 import net.minecraft.core.BlockPos
 import net.minecraft.core.BlockPos.MutableBlockPos
 import net.minecraft.core.Direction
@@ -41,7 +42,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
         val origin = BlockPos.containing(location.position)
         val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
         for (position in positions) {
-            val adjusted = this.getTopNonCollidingPos(level, position)
+            val adjusted = getTopNonCollidingPos(level, position)
             if (adjusted == null || !level.worldBorder.isWithinBounds(adjusted)) {
                 continue
             }
@@ -50,9 +51,9 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
         }
 
         val spawn = when (VanillaLikeLevel.getLikeDimension(level)) {
-            Level.NETHER -> this.netherSpawn
-            Level.END -> this.endSpawn
-            else -> this.overworldSpawn
+            Level.NETHER -> netherSpawn
+            Level.END -> endSpawn
+            else -> overworldSpawn
         }
         val corner = origin.offset(-spawn.size.x / 2, -spawn.size.y / 2 - 1, -spawn.size.z / 2)
         val settings = StructurePlaceSettings().setKnownShape(true)

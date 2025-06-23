@@ -4,7 +4,9 @@ import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
+import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.UHCItems
+import net.casual.championships.uhc.utils.UHCComponents
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.chat.Component

@@ -1,4 +1,4 @@
-package net.casual.championships.uhc
+package net.casual.championships.uhc.minigame
 
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
@@ -33,6 +33,7 @@ import net.casual.championships.common.util.CommonPredicates
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
+import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules

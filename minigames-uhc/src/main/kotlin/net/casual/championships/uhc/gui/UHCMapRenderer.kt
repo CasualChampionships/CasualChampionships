@@ -1,4 +1,4 @@
-package net.casual.championships.uhc
+package net.casual.championships.uhc.gui
 
 import eu.pb4.mapcanvas.api.core.*
 import it.unimi.dsi.fastutil.doubles.Double2ObjectFunction
@@ -13,6 +13,8 @@ import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.championships.common.CommonMod
+import net.casual.championships.uhc.utils.UHCComponents
+import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.border.UHCBorderSize
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder

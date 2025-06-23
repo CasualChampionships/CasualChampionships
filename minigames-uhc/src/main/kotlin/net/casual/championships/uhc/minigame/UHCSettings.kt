@@ -1,4 +1,4 @@
-package net.casual.championships.uhc
+package net.casual.championships.uhc.minigame
 
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.bool

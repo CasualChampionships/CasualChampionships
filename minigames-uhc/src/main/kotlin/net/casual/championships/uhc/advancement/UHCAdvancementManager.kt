@@ -25,10 +25,10 @@ import net.casual.arcade.utils.isInStructure
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.util.CommonStats
 import net.casual.championships.common.util.CommonTags
-import net.casual.championships.uhc.GAME_OVER_ID
-import net.casual.championships.uhc.UHCMinigame
-import net.casual.championships.uhc.UHCPhase
-import net.casual.championships.uhc.UHCStats
+import net.casual.championships.uhc.minigame.GAME_OVER_ID
+import net.casual.championships.uhc.minigame.UHCMinigame
+import net.casual.championships.uhc.minigame.UHCPhase
+import net.casual.championships.uhc.utils.UHCStats
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.animal.IronGolem

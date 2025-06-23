@@ -57,8 +57,8 @@ import net.casual.championships.duel.DuelMinigameFactory
 import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.minigame.lobby.CasualLobbyMinigameFactory
 import net.casual.championships.resources.CasualResourcePackHost
-import net.casual.championships.uhc.UHCMinigame
-import net.casual.championships.uhc.UHCMinigameFactory
+import net.casual.championships.uhc.minigame.UHCMinigame
+import net.casual.championships.uhc.minigame.UHCMinigameFactory
 import net.casual.championships.util.CasualConfig
 import net.casual.championships.util.CasualTeamUtils.getOrCreateAdminTeam
 import net.casual.championships.util.CasualTeamUtils.getOrCreateSpectatorTeam

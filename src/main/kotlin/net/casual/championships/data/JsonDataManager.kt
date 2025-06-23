@@ -6,7 +6,7 @@ import net.casual.arcade.utils.JsonUtils
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CommonConfig
 import net.casual.championships.duel.DuelMinigame
-import net.casual.championships.uhc.UHCMinigame
+import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.scores.PlayerTeam
 import java.text.SimpleDateFormat

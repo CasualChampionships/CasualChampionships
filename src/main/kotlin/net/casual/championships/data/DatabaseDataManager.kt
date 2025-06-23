@@ -10,8 +10,8 @@ import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CommonStats
 import net.casual.championships.duel.DuelMinigame
-import net.casual.championships.uhc.UHCMinigame
-import net.casual.championships.uhc.UHCStats
+import net.casual.championships.uhc.minigame.UHCMinigame
+import net.casual.championships.uhc.utils.UHCStats
 import net.casual.database.*
 import net.casual.database.stats.DuelPlayerStats
 import net.casual.database.stats.PlayerStats

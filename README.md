@@ -147,9 +147,7 @@ then we must specify its arguments which consist of the `"dimensions"` property.
 Here you must define the seed and the underlying dimension key for each of the three
 vanilla dimensions. 
 You may leave the seed and/or the dimension key undefined, in which case a random seed
-and random dimension id will be used respectively. 
-Be warned: if you use a random dimension ids, the game will not be able to persist over a 
-server restart! 
+and random dimension id will be used respectively.
 
 Once you have configured this you can run `/casual config reload` or restart the server
 to allow these changes to take effect.

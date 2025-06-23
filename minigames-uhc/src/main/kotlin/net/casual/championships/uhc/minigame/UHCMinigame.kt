@@ -1,4 +1,4 @@
-package net.casual.championships.uhc
+package net.casual.championships.uhc.minigame
 
 import com.google.gson.JsonObject
 import com.mojang.brigadier.Command
@@ -11,6 +11,7 @@ import net.casual.arcade.border.tracker.MultiLevelBorderListener
 import net.casual.arcade.border.tracker.MultiLevelBorderTracker
 import net.casual.arcade.border.tracker.TrackedBorder
 import net.casual.arcade.commands.*
+import net.casual.arcade.dimensions.utils.deleteCustomLevel
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.block.BlockDropLootEvent
@@ -111,13 +112,19 @@ import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.common.util.CommonUI.broadcastInfo
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.common.util.RuleUtils.addRule
-import net.casual.championships.uhc.UHCPhase.*
+import net.casual.championships.uhc.UHCMod
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBorderSize
 import net.casual.championships.uhc.border.UHCBorderStage
+import net.casual.championships.uhc.gui.UHCMapRenderer
+import net.casual.championships.uhc.gui.UHCSpectatorHotbar
+import net.casual.championships.uhc.minigame.UHCPhase.*
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
+import net.casual.championships.uhc.utils.UHCComponents
+import net.casual.championships.uhc.utils.UHCDimensions
+import net.casual.championships.uhc.utils.UHCStats
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags
 import net.minecraft.ChatFormatting
 import net.minecraft.ChatFormatting.*
@@ -169,9 +176,7 @@ import kotlin.math.atan2
 class UHCMinigame(
     server: MinecraftServer,
     uuid: UUID,
-    val overworld: ServerLevel,
-    val nether: ServerLevel,
-    val end: ServerLevel,
+    private val dimensions: UHCDimensions,
     private val factory: UHCMinigameFactory? = null
 ): Minigame(server, uuid), MultiLevelBorderListener, RulesProvider {
     private val tracker = MultiLevelBorderTracker()
@@ -187,14 +192,19 @@ class UHCMinigame(
 
     override val settings = UHCSettings(this)
 
+    val overworld: ServerLevel
+        get() = this.dimensions.overworld.level
+    val nether: ServerLevel
+        get() = this.dimensions.nether.level
+    val end: ServerLevel
+        get() = this.dimensions.end.level
+
     init {
         this.ui.addBossbar(ActiveBossbar(this))
         this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
 
-        this.levels.add(this.overworld)
-        this.levels.add(this.nether)
-        this.levels.add(this.end)
+        this.levels.addAll(this.dimensions.map { it.level })
     }
 
     override fun phases(): Collection<UHCPhase> {
@@ -251,6 +261,15 @@ class UHCMinigame(
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.overworld)
 
         this.ui.setSidebar(this.createSidebar())
+    }
+
+    @Listener
+    private fun onMinigameClose(event: MinigameCloseEvent) {
+        for ((level, persist) in this.dimensions) {
+            if (!persist) {
+                this.server.deleteCustomLevel(level)
+            }
+        }
     }
 
     @Listener(during = During(before = BORDER_FINISHED_ID))

@@ -1,6 +1,7 @@
-package net.casual.championships.uhc
+package net.casual.championships.uhc.utils
 
 import net.casual.arcade.minigame.stats.StatType
+import net.casual.championships.uhc.UHCMod
 
 object UHCStats {
     val HALF_HEART_TIME = StatType.int32(UHCMod.id("half_heart_time"))
