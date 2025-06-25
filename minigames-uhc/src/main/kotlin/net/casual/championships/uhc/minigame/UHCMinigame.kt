@@ -6,7 +6,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.GuiHelpers
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import net.casual.arcade.border.tracker.MultiLevelBorderListener
 import net.casual.arcade.border.tracker.MultiLevelBorderTracker
 import net.casual.arcade.border.tracker.TrackedBorder
@@ -16,7 +15,7 @@ import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.block.BlockDropLootEvent
 import net.casual.arcade.events.server.block.BrewingStandBrewEvent
-import net.casual.arcade.events.server.entity.EntityDropLootEvent
+import net.casual.arcade.events.server.entity.EntityBeforeLootEvent
 import net.casual.arcade.events.server.level.LevelLootEvent
 import net.casual.arcade.events.server.player.*
 import net.casual.arcade.minigame.Minigame
@@ -161,17 +160,15 @@ import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.border.WorldBorder
-import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.scores.Team
 import java.util.*
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 import kotlin.math.atan2
+import kotlin.math.roundToInt
 
 class UHCMinigame(
     server: MinecraftServer,
@@ -659,16 +656,13 @@ class UHCMinigame(
     }
 
     @Listener
-    private fun onEntityDropLoot(event: EntityDropLootEvent) {
-        val drops = ObjectArrayList<ItemStack>()
-        event.drops.map { it.copyWithCount(it.count * 2) }
-            .forEach(LootTable.createStackSplitter(event.level, drops::add))
-        event.drops = drops
+    private fun onEntityBeforeLoot(event: EntityBeforeLootEvent) {
+        event.lootMultiplier *= MOB_LOOT_MULTIPLIER
     }
 
     @Listener(requiresMainThread = false)
     private fun onChunkGenerationMobSpawn(event: ChunkGenerationMobSpawnEvent) {
-        event.probability *= 0.5F
+        event.probability *= MOB_SPAWN_PROBABILITY
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
@@ -1219,6 +1213,9 @@ class UHCMinigame(
     }
 
     companion object {
+        private const val MOB_SPAWN_PROBABILITY = 1.0F / 2.0F
+        private val MOB_LOOT_MULTIPLIER = (1.0F / MOB_SPAWN_PROBABILITY).roundToInt()
+
         private val FAKE_BORDER = WorldBorder()
         val ID = UHCMod.id("uhc_minigame")
     }
