@@ -1,15 +1,8 @@
 package net.casual.championships.uhc.minigame
 
 import com.google.gson.JsonObject
-import com.mojang.brigadier.Command
-import com.mojang.brigadier.arguments.BoolArgumentType
-import com.mojang.brigadier.context.CommandContext
 import eu.pb4.sgui.api.GuiHelpers
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import net.casual.arcade.border.tracker.MultiLevelBorderListener
-import net.casual.arcade.border.tracker.MultiLevelBorderTracker
-import net.casual.arcade.border.tracker.TrackedBorder
-import net.casual.arcade.commands.*
+import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.dimensions.utils.deleteCustomLevel
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
@@ -29,15 +22,12 @@ import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGa
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
-import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
-import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.join
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
@@ -45,20 +35,11 @@ import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ComponentUtils.withMiniShiftedDownFont
 import net.casual.arcade.utils.ComponentUtils.wrap
 import net.casual.arcade.utils.ItemUtils.isOf
-import net.casual.arcade.utils.JsonUtils.array
-import net.casual.arcade.utils.JsonUtils.arrayOrDefault
 import net.casual.arcade.utils.JsonUtils.int
 import net.casual.arcade.utils.JsonUtils.obj
-import net.casual.arcade.utils.JsonUtils.objects
-import net.casual.arcade.utils.JsonUtils.string
-import net.casual.arcade.utils.JsonUtils.strings
-import net.casual.arcade.utils.JsonUtils.toJsonArray
-import net.casual.arcade.utils.JsonUtils.toJsonStringArray
-import net.casual.arcade.utils.MathUtils.opposite
+import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
-import net.casual.arcade.utils.PlayerUtils.directionToNearestBorder
-import net.casual.arcade.utils.PlayerUtils.directionVectorToNearestBorder
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.grantAllRecipesSilently
@@ -88,8 +69,8 @@ import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.LevelSpecificElement
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
-import net.casual.arcade.visuals.shapes.ArrowShape
 import net.casual.arcade.visuals.shapes.ShapePoints.Companion.drawAsParticlesFor
+import net.casual.arcade.visuals.shapes.impl.ArrowShape
 import net.casual.arcade.visuals.sidebar.DynamicSidebar
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
@@ -98,7 +79,6 @@ import net.casual.championships.common.event.TippedArrowTradeOfferEvent
 import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent
 import net.casual.championships.common.event.border.BorderPortalWithinBoundsEvent
 import net.casual.championships.common.items.PlayerHeadItem
-import net.casual.championships.common.minigame.rules.Rules
 import net.casual.championships.common.minigame.rules.RulesProvider
 import net.casual.championships.common.recipes.GoldenHeadRecipe
 import net.casual.championships.common.ui.bossbar.ActiveBossbar
@@ -110,37 +90,29 @@ import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.common.util.CommonUI.broadcastInfo
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
-import net.casual.championships.common.util.RuleUtils.addRule
 import net.casual.championships.uhc.UHCMod
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
-import net.casual.championships.uhc.border.UHCBorderSize
-import net.casual.championships.uhc.border.UHCBorderStage
+import net.casual.championships.uhc.border.UHCBoundaryPhase
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbar
-import net.casual.championships.uhc.minigame.UHCPhase.*
+import net.casual.championships.uhc.minigame.UHCPhase.GameOver
+import net.casual.championships.uhc.minigame.UHCPhase.Initializing
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
 import net.casual.championships.uhc.utils.UHCComponents
 import net.casual.championships.uhc.utils.UHCDimensions
+import net.casual.championships.uhc.utils.UHCRules
 import net.casual.championships.uhc.utils.UHCStats
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags
 import net.minecraft.ChatFormatting
 import net.minecraft.ChatFormatting.*
-import net.minecraft.commands.CommandSourceStack
-import net.minecraft.commands.arguments.EntityArgument
-import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.Holder
 import net.minecraft.core.component.DataComponents
-import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
-import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket
-import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -158,8 +130,6 @@ import net.minecraft.world.item.crafting.SingleRecipeInput
 import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
-import net.minecraft.world.level.Level
-import net.minecraft.world.level.border.WorldBorder
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
@@ -175,13 +145,11 @@ class UHCMinigame(
     uuid: UUID,
     private val dimensions: UHCDimensions,
     private val factory: UHCMinigameFactory? = null
-): Minigame(server, uuid), MultiLevelBorderListener, RulesProvider {
-    private val tracker = MultiLevelBorderTracker()
-
-    private var movingBorders = HashSet<ResourceKey<Level>>()
-    private var stationaryBorders = Object2IntOpenHashMap<ResourceKey<Level>>()
-
+): Minigame(server, uuid), RulesProvider by UHCRules {
     override val id = ID
+
+    private var lastBoundaryTime = 0.Ticks
+    var boundaryPhase = UHCBoundaryPhase.First
 
     val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)
@@ -204,6 +172,41 @@ class UHCMinigame(
         this.levels.addAll(this.dimensions.map { it.level })
     }
 
+    fun resetPlayerHealth(player: ServerPlayer) {
+        player.boostHealth(this.settings.health)
+        player.resetHealth()
+    }
+
+    fun onStartBoundary() {
+        this.lastBoundaryTime = this.uptime.Ticks
+    }
+
+    fun onPauseBoundary() {
+        this.lastBoundaryTime = this.uptime.Ticks
+        this.chat.broadcastGame(component = CommonComponents.BORDER_PAUSED.mini().red())
+    }
+
+    fun onResumeBoundary() {
+        this.lastBoundaryTime = this.uptime.Ticks
+        this.chat.broadcastGame(
+            component = CommonComponents.BORDER_RESUMED.mini().red(),
+            sound = Sound(CommonSounds.GAME_BORDER_MOVING)
+        )
+    }
+
+    fun onFinishBoundary() {
+        for (player in this.players) {
+            player.sendSound(CommonSounds.GAME_GRACE_END)
+        }
+        if (this.settings.endGameGlow) {
+            this.settings.glowing = true
+        }
+        if (this.settings.generatePortals) {
+            this.overworld.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
+            this.nether.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
+        }
+    }
+
     override fun phases(): Collection<UHCPhase> {
         return UHCPhase.entries
     }
@@ -213,37 +216,27 @@ class UHCMinigame(
     }
 
     override fun load(data: JsonObject) {
-        this.movingBorders = HashSet(data.arrayOrDefault("moving_borders").strings().map {
-            ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(it))
-        })
         if (data.has("advancements")) {
             this.uhcAdvancements.deserialize(data.obj("advancements"))
         }
-        if (data.has("stationary_borders")) {
-            for (json in data.array("stationary_borders").objects()) {
-                val key = ResourceKey.create(
-                    Registries.DIMENSION, ResourceLocation.parse(json.string("dimension"))
-                )
-                val time = json.int("time")
-                this.stationaryBorders.put(key, time)
-            }
+        if (data.has("boundary_phase")) {
+            this.boundaryPhase = UHCBoundaryPhase.entries[data.int("boundary_phase")]
+        }
+        if (data.has("last_boundary_time")) {
+            this.lastBoundaryTime = data.int("last_boundary_time").Ticks
         }
     }
 
     override fun save(data: JsonObject) {
         data.add("advancements", this.uhcAdvancements.serialize())
-        data.add("moving_borders", this.movingBorders.toJsonStringArray { it.location().toString() })
-        data.add("stationary_borders", this.stationaryBorders.object2IntEntrySet().toJsonArray {
-            val json = JsonObject()
-            json.addProperty("dimension", it.key.location().toString())
-            json.addProperty("time", it.intValue)
-            json
-        })
+        data.addProperty("boundary_phase", this.boundaryPhase.ordinal)
+        data.addProperty("last_boundary_time", this.lastBoundaryTime.ticks)
     }
 
     @Listener
     private fun onInitialize(event: MinigameInitializeEvent) {
-        this.registerCommands()
+        this.commands.register(UHCMinigameCommands(this))
+
         this.addEventListener(this.uhcAdvancements)
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
         if (this.settings.heavyHeads) {
@@ -253,7 +246,6 @@ class UHCMinigame(
             this.recipes.add(FlowerPowerRecipe.getOrCreate(this.server.registryAccess()))
         }
         this.advancements.addAll(UHCAdvancements)
-        this.initialiseBorderTracker()
 
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.overworld)
 
@@ -269,24 +261,6 @@ class UHCMinigame(
         }
     }
 
-    @Listener(during = During(before = BORDER_FINISHED_ID))
-    private fun onPause(event: MinigamePauseEvent) {
-        for ((border, level) in this.tracker.getAllTracking()) {
-            if (this.movingBorders.contains(level.dimension())) {
-                this.moveWorldBorder(border, border.size)
-            }
-        }
-    }
-
-    @Listener(during = During(before = BORDER_FINISHED_ID))
-    private fun onUnpause(event: MinigameUnpauseEvent) {
-        for ((border, level) in this.tracker.getAllTracking()) {
-            if (this.movingBorders.contains(level.dimension())) {
-                this.moveWorldBorder(border, level, this.settings.borderStage, UHCBorderSize.End)
-            }
-        }
-    }
-
     @Listener
     private fun onBrewingStandBrew(event: BrewingStandBrewEvent) {
         if (!this.settings.opPotions) {
@@ -297,6 +271,7 @@ class UHCMinigame(
         }
     }
 
+    // TODO: Fix these events to work with the new boundary!
     @Listener
     private fun onBorderEntityPortalEntryPointEvent(event: BorderEntityPortalEntryPointEvent) {
         val (border, _, _, pos) = event
@@ -352,12 +327,12 @@ class UHCMinigame(
         val (player) = event
 
         if (!this.players.isSpectating(player)) {
-            this.updateWorldBorder(player)
+            this.updateBoundaryInfo(player)
             this.updatePedalToTheMetal(player)
         } else if (!player.isCreative) {
             val interval = 20.Minutes.ticks
             if (this.uptime % interval == interval - 1) {
-                val rules = this.getSpectatorRules().join(Component.literal("\n\n"))
+                val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
                 this.chat.broadcastInfo(rules.mini(), listOf(player))
             }
 
@@ -608,7 +583,7 @@ class UHCMinigame(
             player.teleportTo(this.overworld.asLocation(Vec3(0.0, 128.0, 0.0)))
         }
 
-        val rules = this.getSpectatorRules().join(Component.literal("\n\n"))
+        val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
         this.scheduler.schedule(1.Ticks) {
             this.chat.broadcastInfo(rules.mini(), listOf(player))
         }
@@ -715,199 +690,11 @@ class UHCMinigame(
         }
     }
 
-    // Rules
-
-    override fun getRules(): Rules {
-        return Rules.build {
-            addRule("uhc.rules.announcement", 1)
-            addRule("uhc.rules.mods", 3)
-            addRule("uhc.rules.exploits", 2)
-            addRule("uhc.rules.pvp", 3, 6)
-            addRule("uhc.rules.gameplay", 3)
-            addRule("uhc.rules.glowing", 1)
-            addRule("uhc.rules.heads", 2)
-            addRule("uhc.rules.chat", 2)
-            rule {
-                title = RuleUtils.formatTitle(Component.translatable("uhc.rules.spectators"))
-                val rules = getSpectatorRules()
-                entry {
-                    line(rules[0])
-                    line(rules[1])
-                    line(Component.empty())
-                }
-            }
-            addRule("uhc.rules.gentleman", 1)
-            rule {
-                title = RuleUtils.formatTitle(Component.translatable("uhc.rules.reminders"))
-                entry {
-                    val teamglow = Component.literal("/uhc teamglow").mini().bold().color(0x65b7db)
-                    val fullbright = Component.literal("/uhc fullbright").mini().bold().color(0x65b7db)
-                    val pos = Component.literal("/uhc pos").mini().bold().color(0x65b7db)
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.1", teamglow)))
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.2", fullbright)))
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.3", pos)))
-                }
-                entry {
-                    val prefix = Component.literal("!").mini().bold().color(0x65b7db)
-                    val chat = Component.literal("/chat").mini().bold().color(0x65b7db)
-                    line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.4", prefix, chat)))
-                }
-            }
-            addRule("uhc.rules.questions", 1)
-            addRule("uhc.rules.finally", 1)
-        }
-    }
-
-    private fun getSpectatorRules(): List<MutableComponent> {
-        val s = Component.literal("/s").mini().bold().color(0x65b7db)
-        val sneak = Component.keybind("key.sneak").mini().bold().color(0x65b7db)
-        return listOf(
-            RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.1")),
-            RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.2", s)),
-            RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.3", sneak))
-        )
-    }
-
-    // World Border
-
-    fun startWorldBorders() {
-        this.moveWorldBorders(this.settings.borderStage)
-    }
-
-    fun resetWorldBorders() {
-        val multiplier = this.settings.borderSizeMultiplier
-        for ((border, level) in this.tracker.getAllTracking()) {
-            border.setSizeUntracked(UHCBorderStage.First.getStartSizeFor(level, multiplier))
-            this.stationaryBorders.put(level.dimension(), this.uptime)
-        }
-        this.movingBorders.clear()
-    }
-
-    fun moveWorldBorders(stage: UHCBorderStage, size: UHCBorderSize = UHCBorderSize.End, instant: Boolean = false) {
-        for ((border, level) in this.tracker.getAllTracking()) {
-            this.moveWorldBorder(border, level, stage, size, instant)
-        }
-    }
-
-    override fun onSingleBorderActive(border: TrackedBorder, level: ServerLevel) {
-        this.movingBorders.add(level.dimension())
-    }
-
-    override fun onSingleBorderComplete(border: TrackedBorder, level: ServerLevel) {
-        if (!this.paused) {
-            this.movingBorders.remove(level.dimension())
-            this.stationaryBorders.put(level.dimension(), this.uptime)
-        }
-    }
-
-    override fun onAllBordersComplete(borders: Map<TrackedBorder, ServerLevel>) {
-        val stage = this.settings.borderStage
-        val size = stage.getEndSizeFor(this.overworld, this.settings.borderSizeMultiplier)
-        if (this.overworld.worldBorder.size != size) {
-            UHCMod.logger.info("Border paused at stage $stage")
-            return
-        }
-
-        UHCMod.logger.info("Finished world border stage: $stage")
-        if (stage == UHCBorderStage.Fifth) {
-            this.setPhase(BorderFinished)
-            this.stationaryBorders.clear()
-            return
-        }
-
-        val delay = this.settings.borderTime * stage.getPausedTimeAsPercent()
-        this.scheduler.schedulePhased(delay, MinigameTask(this, UHCMinigame::startNextBorders))
-        this.chat.broadcastGame(
-            component = CommonComponents.BORDER_PAUSED.mini().red()
-        )
-    }
-
-    private fun startNextBorders() {
-        this.settings.borderStageSetting.setQuietly(this.settings.borderStage.getNextStage())
-        this.moveWorldBorders(this.settings.borderStage)
-
-        this.chat.broadcastGame(
-            component = CommonComponents.BORDER_RESUMED.mini().red(),
-            sound = Sound(CommonSounds.GAME_BORDER_MOVING)
-        )
-    }
-
-    fun onBorderFinish() {
-        for (player in this.players) {
-            player.sendSound(CommonSounds.GAME_GRACE_END)
-        }
-        if (this.settings.endGameGlow) {
-            this.settings.glowing = true
-        }
-        if (this.settings.generatePortals) {
-            this.overworld.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
-            this.nether.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
-        }
-    }
-
-    fun getCurrentBorderSizeFor(level: Level, size: UHCBorderSize): Double {
-        val stage = this.settings.borderStage
-        val modified =  if (level == this.end && stage >= UHCBorderStage.Fifth) UHCBorderStage.Fourth else stage
-        val multiplier = this.settings.borderSizeMultiplier
-        return if (size == UHCBorderSize.End) {
-            modified.getEndSizeFor(level, multiplier)
-        } else {
-            modified.getStartSizeFor(level, multiplier)
-        }
-    }
-
-    private fun initialiseBorderTracker() {
-        this.tracker.addListener(this)
-        for (level in this.levels.all()) {
-            this.tracker.addLevelBorder(level)
-        }
-    }
-
-    private fun moveWorldBorder(border: TrackedBorder, level: Level, stage: UHCBorderStage, size: UHCBorderSize, instant: Boolean = false) {
-        val modified =  if (level == this.end && stage >= UHCBorderStage.Fourth) UHCBorderStage.Third else stage
-        val multiplier = this.settings.borderSizeMultiplier
-        val dest = if (size == UHCBorderSize.End) {
-            modified.getEndSizeFor(level, multiplier)
-        } else {
-            modified.getStartSizeFor(level, multiplier)
-        }
-        val time = if (instant) -1.0 else modified.getRemainingMovingTimeAsPercent(border.size, level, multiplier)
-
-        UHCMod.logger.info("Level ${level.dimension().location()} moving to $dest")
-        this.moveWorldBorder(border, dest, time)
-    }
-
-    private fun isFinalStage(level: ServerLevel, stage: UHCBorderStage = settings.borderStage): Boolean {
-        if (level == this.end && stage >= UHCBorderStage.Third) {
-            return true
-        }
-        return stage == UHCBorderStage.Fifth
-    }
-
-    private fun moveWorldBorder(border: TrackedBorder, newSize: Double, percent: Double = -1.0) {
-        val duration = this.settings.borderTime * percent
-        if (!duration.isZero) {
-            border.lerpSizeBetween(border.size, newSize, duration)
-            return
-        }
-        border.size = newSize
-    }
-
-    private fun updateWorldBorder(player: ServerPlayer) {
+    private fun updateBoundaryInfo(player: ServerPlayer) {
         val level = player.level()
-        val border = level.worldBorder
+        val boundary = level.levelBoundary ?: return
 
-        val worldBorderTime = this.stats.getOrCreateStat(player, UHCStats.WORLD_BORDER_TIME)
-        if (border.isWithinBounds(player.position())) {
-            if (worldBorderTime.value > 0) {
-                worldBorderTime.modify { 0 }
-                player.connection.send(ClientboundInitializeBorderPacket(border))
-            }
-            return
-        }
-        worldBorderTime.increment()
-
-        val vector = player.directionVectorToNearestBorder()
+        val vector = boundary.getDirectionTo(player.eyePosition).reverse()
 
         val start = player.eyePosition.add(0.0, 4.0, 0.0)
         val end = start.add(vector.normalize())
@@ -926,21 +713,7 @@ class UHCMinigame(
             }
         }
 
-        val direction = player.directionToNearestBorder()
-        val fakeDirection = direction.opposite()
-
-        val fakeCenterX = border.centerX + fakeDirection.stepX * border.size
-        val fakeCenterZ = border.centerZ + fakeDirection.stepZ * border.size
-
-        val scale = level.dimensionType().coordinateScale
-
-        FAKE_BORDER.size = border.size + 0.6
-        FAKE_BORDER.lerpSizeBetween(FAKE_BORDER.size, FAKE_BORDER.size - 0.5, Long.MAX_VALUE)
-        // Foolish Minecraft uses scale for the centre, even on the client,
-        // so we need to reproduce.
-        FAKE_BORDER.setCenter(fakeCenterX * scale, fakeCenterZ * scale)
-        player.connection.send(ClientboundInitializeBorderPacket(FAKE_BORDER))
-
+        val direction = MathUtils.getDirection8(vector)
         if (this.uptime % 200 == 0) {
             player.sendTitle(
                 Component.empty(),
@@ -954,8 +727,7 @@ class UHCMinigame(
             return
         }
 
-        // TODO: Check if players are ALIVE!
-        val teammates = player.team?.getOnlinePlayers() ?: return
+        val teammates = player.team?.getOnlinePlayers()?.filter { it.isAlive } ?: return
         for (teammate in teammates) {
             if (teammate != player && teammate.closerThan(player, 50.0)) {
                 return
@@ -1050,11 +822,6 @@ class UHCMinigame(
         return this.players.isSpectating(observee) && observee !== observer
     }
 
-    private fun resetPlayerHealth(player: ServerPlayer) {
-        player.boostHealth(this.settings.health)
-        player.resetHealth()
-    }
-
     private fun replacePotion(potion: Holder<Potion>): Holder<Potion> {
         return when (potion.value()) {
             Potions.HEALING.value(), Potions.STRONG_HEALING.value(), Potions.STRONG_REGENERATION.value() -> Potions.REGENERATION
@@ -1068,132 +835,30 @@ class UHCMinigame(
         }
     }
 
-    // Commands
-
-    private fun registerCommands() {
-        this.commands.register(CommandTree.buildLiteral("uhc") {
-            literal("player") {
-                requiresAdminOrPermission()
-                argument("player", EntityArgument.player()) {
-                    literal("add") {
-                        argument("team", TeamArgument.team()) {
-                            argument("teleport", BoolArgumentType.bool()) {
-                                executes(::addPlayerToTeam)
-                            }
-                            executes { addPlayerToTeam(it, false) }
-                        }
-                    }
-                    literal("reset-health") {
-                        executes(::resetPlayerHealth)
-                    }
-                }
-            }
-            literal("border") {
-                requiresAdminOrPermission()
-                literal("start") {
-                    executes(::startWorldBorders)
-                }
-            }
-            literal("map") {
-                requiresAdminOrPermission()
-                literal("give") {
-                    executes { mapRenderer.getMaps().forEach(it.source.playerOrException::addItem); 1 }
-                }
-                literal("clear") {
-                    executes { mapRenderer.clear(); 1 }
-                }
-            }
-            literal("fullbright") {
-                executes { CommonCommands.toggleFullbright(this@UHCMinigame, it) }
-            }
-            literal("teamglow") {
-                executes { CommonCommands.toggleTeamGlow(this@UHCMinigame, it) }
-            }
-            literal("spectate") {
-                executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
-                argument("player", EntityArgument.player()) {
-                    executes(::teleportToPlayer)
-                }
-            }
-            literal("pos") {
-                executes { CommonCommands.broadcastPositionToTeammates(this@UHCMinigame, it) }
-            }
-        })
-        this.commands.register(CommandTree.buildLiteral("s") {
-            executes { CommonCommands.openSpectatingScreen(this@UHCMinigame, it) }
-            argument("player", EntityArgument.player()) {
-                executes(::teleportToPlayer)
-            }
-        })
-    }
-
-    private fun addPlayerToTeam(
-        context: CommandContext<CommandSourceStack>,
-        teleport: Boolean = BoolArgumentType.getBool(context, "teleport")
-    ): Int {
-        val target = EntityArgument.getPlayer(context, "player")
-        val team = TeamArgument.getTeam(context, "team")
-
-        val server = context.source.server
-        server.scoreboard.addPlayerToTeam(target.scoreboardName, team)
-        target.sendSystemMessage(CommonComponents.ADDED_TO_TEAM.generate(team.formattedDisplayName))
-
-        this.players.setPlaying(target)
-
-        if (teleport) {
-            for (player in this.players.playing) {
-                if (team.players.contains(player.scoreboardName) && target != player) {
-                    target.teleportTo(player.locationWithLevel)
-                    break
-                }
-            }
+    private fun isFinalStage(level: ServerLevel): Boolean {
+        if (level == this.end && this.boundaryPhase >= UHCBoundaryPhase.Third) {
+            return true
         }
-
-        val message = Component.literal("${target.scoreboardName} has joined team ")
-            .append(team.formattedDisplayName)
-            .append(" and has ${if (teleport) "been teleported to a random teammate" else "not been teleported"}")
-        return context.source.success(message, true)
-    }
-
-    private fun resetPlayerHealth(context: CommandContext<CommandSourceStack>): Int {
-        val target = EntityArgument.getPlayer(context, "player")
-        this.resetPlayerHealth(target)
-        return context.source.success("Successfully reset ${target.scoreboardName}'s health")
-    }
-
-    private fun startWorldBorders(context: CommandContext<CommandSourceStack>): Int {
-        this.startWorldBorders()
-        return context.source.success("Successfully started world borders")
-    }
-
-    private fun teleportToPlayer(context: CommandContext<CommandSourceStack>): Int {
-        val target = EntityArgument.getPlayer(context, "player")
-        val player = context.source.playerOrException
-        if (!this.players.isSpectating(player)) {
-            return context.source.fail(CommonComponents.NOT_SPECTATING)
-        }
-        player.teleportTo(target.locationWithLevel)
-        return Command.SINGLE_SUCCESS
+        return this.boundaryPhase == UHCBoundaryPhase.Fifth
     }
 
     private inner class BorderMovingInfo(private val buffer: Component): LevelSpecificElement<SidebarComponent> {
         override fun get(level: ServerLevel): SidebarComponent {
-            if (movingBorders.contains(level.dimension())) {
-                val remainingTime = settings.borderStage.getRemainingMovingTime(
-                    level.worldBorder.size, level, settings.borderSizeMultiplier
-                )
+            val boundary = level.levelBoundary ?: return SidebarComponent.EMPTY
+            if (boundary.shape.getStatus().isMoving()) {
+                val remainingTime = boundaryPhase.getDuration(settings.borderTime) - (uptime.Ticks - lastBoundaryTime)
                 return SidebarComponent.withCustomScore(
                     this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderPausingIn").mini()),
                     Component.literal(remainingTime.formatMMSS()).withStyle(colorTime(remainingTime)).mini().append(this.buffer)
                 )
             }
-            if (!stationaryBorders.containsKey(level.dimension()) || isFinalStage(level)) {
+            if (isFinalStage(level)) {
                 return SidebarComponent.withNoScore(
                     this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderFinished").mini())
                 )
             }
-            val pauseTime = stationaryBorders.getInt(level.dimension())
-            val remainingTime = settings.borderStage.pausedTime - (uptime.Ticks - pauseTime.Ticks)
+
+            val remainingTime = boundaryPhase.getCooldown(settings.borderTime) - (uptime.Ticks - lastBoundaryTime)
             return SidebarComponent.withCustomScore(
                 this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderMovingIn").mini()),
                 Component.literal(remainingTime.formatMMSS()).withStyle(colorTime(remainingTime)).append(buffer).mini()
@@ -1216,7 +881,6 @@ class UHCMinigame(
         private const val MOB_SPAWN_PROBABILITY = 1.0F / 2.0F
         private val MOB_LOOT_MULTIPLIER = (1.0F / MOB_SPAWN_PROBABILITY).roundToInt()
 
-        private val FAKE_BORDER = WorldBorder()
         val ID = UHCMod.id("uhc_minigame")
     }
 }

@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.border.BorderStatus
 
+// TODO: Update these to support boundaries instead
 class BorderStatusElement(private val buffer: Component): LevelSpecificElement<SidebarComponent> {
     override fun get(level: ServerLevel): SidebarComponent {
         val phase = ((level.server.tickCount / 3) % 5) + 1

@@ -13,8 +13,6 @@ import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.minigame.CasualSettings
-import net.casual.championships.uhc.border.UHCBorderSize
-import net.casual.championships.uhc.border.UHCBorderStage
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
 import net.minecraft.world.item.Items
@@ -156,24 +154,6 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         defaults.options(this)
     })
 
-    var borderSize by this.register(enumeration<UHCBorderSize> {
-        name = "border_size"
-        display = Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.named("World Border Size").hideAttributeTooltips()
-        value = UHCBorderSize.Start
-        defaults.options(this, UHCBorderSize::class.java)
-    })
-
-    var borderStageSetting = this.register(enumeration<UHCBorderStage> {
-        name = "border_stage"
-        display = Items.BARRIER.named("World Border Stage")
-        value = UHCBorderStage.First
-        defaults.options(this, UHCBorderStage::class.java)
-        listener { setting, _, value ->
-            setting.setQuietly(value)
-            uhc.moveWorldBorders(value, borderSize, true)
-        }
-    })
-
     var replay by this.register(bool {
         name = "replay"
         display = Items.END_PORTAL_FRAME.named("Server Replay")
@@ -240,6 +220,4 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         value = false
         defaults.options(this)
     })
-
-    var borderStage by this.borderStageSetting
 }

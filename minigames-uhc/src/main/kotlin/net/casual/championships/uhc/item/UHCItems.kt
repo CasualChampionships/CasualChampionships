@@ -26,6 +26,7 @@ object UHCItems {
 
     }
 
+    @Suppress("SameParameterValue")
     private fun register(path: String, provider: (Properties) -> Item): Item {
         val key = ResourceKey.create(Registries.ITEM, id(path))
         val properties = Properties().setId(key)

@@ -5,6 +5,8 @@ import it.unimi.dsi.fastutil.doubles.Double2ObjectFunction
 import it.unimi.dsi.fastutil.doubles.Double2ObjectLinkedOpenHashMap
 import it.unimi.dsi.fastutil.doubles.Double2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
+import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
@@ -15,7 +17,7 @@ import net.casual.arcade.utils.TeamUtils.color
 import net.casual.championships.common.CommonMod
 import net.casual.championships.uhc.utils.UHCComponents
 import net.casual.championships.uhc.minigame.UHCMinigame
-import net.casual.championships.uhc.border.UHCBorderSize
+import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
 import net.minecraft.core.component.DataComponents
@@ -31,7 +33,6 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.biome.Biomes
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.border.BorderStatus
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.MapColor
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes
@@ -92,25 +93,30 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
             )
         }
 
-        var startSize = this.uhc.getCurrentBorderSizeFor(level, UHCBorderSize.Start)
-        val endSize = this.uhc.getCurrentBorderSizeFor(level, UHCBorderSize.End)
+        // Let's just assume that our center is stationary because that makes things easier.
+        // Let's also assume that our boundary is square because that also makes things easier
+        var startSize = UHCBoundaryManager.calculateSizeAndCenter(this.uhc, level, this.uhc.boundaryPhase.start).size.x
+        val endSize = UHCBoundaryManager.calculateSizeAndCenter(this.uhc, level, this.uhc.boundaryPhase.end).size.x
 
-        val border = level.worldBorder
-        if (border.size == endSize) {
+        val boundary = level.levelBoundary ?: return
+        if (boundary.getSize().x == endSize) {
             startSize = endSize
         }
+
         startSize = max(startSize * 1.1, 32.0)
 
-        val (edge, outer) = if (border.status == BorderStatus.STATIONARY) {
+        val (edge, outer) = if (boundary.getStatus() == BoundaryShape.Status.Stationary) {
             CanvasColor.LAPIS_BLUE_HIGH to CanvasColor.LAPIS_BLUE_NORMAL
         } else {
             CanvasColor.DULL_RED_HIGH to CanvasColor.DULL_RED_NORMAL
         }
 
-        val borderMinX = border.minX
-        val borderMinZ = border.minZ
-        val borderMaxX = border.maxX
-        val borderMaxZ = border.maxZ
+        val box = boundary.getAABB()
+        val center = boundary.getCenter()
+        val borderMinX = box.minX
+        val borderMinZ = box.minZ
+        val borderMaxX = box.maxX
+        val borderMaxZ = box.maxZ
 
         val scale = startSize / 128
         val scaledBorderMinX = Mth.floor(borderMinX / scale + 0.5) + 64
@@ -118,11 +124,11 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         val scaledBorderMaxX = Mth.floor(borderMaxX / scale - 0.5) + 64
         val scaledBorderMaxZ = Mth.floor(borderMaxZ / scale - 0.5) + 64
 
-        val map = this.getOrCreateMap(level, dimension, border.centerX, border.centerZ, startSize)
+        val map = this.getOrCreateMap(level, dimension, center.x, center.z, startSize)
         for (x in 0..< 128) {
             for (z in 0..< 128) {
-                val isInCenter = x in (scaledBorderMinX)..scaledBorderMaxX &&
-                        z in (scaledBorderMinZ..scaledBorderMaxZ)
+                val isInCenter = x in (scaledBorderMinX)..scaledBorderMaxX
+                    && z in (scaledBorderMinZ..scaledBorderMaxZ)
                 if (!isInCenter) {
                     canvas.set(x, z, outer)
                     continue
@@ -143,7 +149,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         sizeIcon.text = Component.literal("$roundedStartSize x $roundedStartSize").mini().yellow()
 
         for (players in level.players()) {
-            if (this.isPlayerValidForIcon(players, level, border.centerX, border.centerZ, startSize)) {
+            if (this.isPlayerValidForIcon(players, level, center.x, center.z, startSize)) {
                 playerIcons.computeIfAbsent(players.uuid) {
                     canvas.createIcon(MapDecorationTypes.TARGET_X, true, 0, 0, 0, null)
                 }
@@ -155,7 +161,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         val iter = playerIcons.iterator()
         for ((uuid, icon) in iter) {
             val player = players.getPlayer(uuid)
-            if (player == null || !this.isPlayerValidForIcon(player, level, border.centerX, border.centerZ, startSize)) {
+            if (player == null || !this.isPlayerValidForIcon(player, level, center.x, center.z, startSize)) {
                 canvas.removeIcon(icon)
                 iter.remove()
                 continue

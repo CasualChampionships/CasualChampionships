@@ -10,9 +10,9 @@ import net.casual.arcade.utils.isOceanOrRiver
 import net.casual.arcade.utils.isOf
 import net.casual.arcade.utils.math.location.LocationWithLevel
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
-import net.casual.arcade.visuals.shapes.LevelSurfaceShape
-import net.casual.arcade.visuals.shapes.Regular2DPolygonShape
-import net.casual.arcade.visuals.shapes.ShapePoints
+import net.casual.arcade.visuals.shapes.ShapePoints.Companion.points
+import net.casual.arcade.visuals.shapes.impl.LevelSurfaceShape
+import net.casual.arcade.visuals.shapes.impl.RegularPolygonShape
 import net.casual.championships.uhc.UHCMod
 import net.minecraft.core.BlockPos
 import net.minecraft.core.BlockPos.MutableBlockPos
@@ -43,6 +43,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
         val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
         for (position in positions) {
             val adjusted = getTopNonCollidingPos(level, position)
+            // TODO: Stop using world border here
             if (adjusted == null || !level.worldBorder.isWithinBounds(adjusted)) {
                 continue
             }
@@ -64,13 +65,14 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
         super.teleportTeam(team, entities, level.asLocation(origin.center, location.rotation))
     }
 
-    override fun createShape(level: ServerLevel, points: Int): ShapePoints {
+    override fun createShape(level: ServerLevel, points: Int): Iterator<Vec3> {
+        // TODO: Stop using world border here
         val border = level.worldBorder
         val center = Vec3(border.centerX, level.seaLevel + 1.0, border.centerZ)
-        val polygon = Regular2DPolygonShape.createHorizontal(center, border.size * 0.45, points)
+        val polygon = RegularPolygonShape.createHorizontal(center, border.size * 0.45, points)
         return LevelSurfaceShape(level) { steps ->
             BiomeRounderIterator(level, polygon.iterator(steps), polygon.sideLength * 0.3)
-        }
+        }.points()
     }
 
     override fun codec(): MapCodec<out EntityTeleporter> {

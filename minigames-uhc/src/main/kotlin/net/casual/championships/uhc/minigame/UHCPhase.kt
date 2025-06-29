@@ -33,6 +33,7 @@ import net.casual.championships.common.util.CommonPredicates
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
+import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
@@ -41,8 +42,8 @@ import net.minecraft.world.phys.Vec3
 
 internal const val INITIALIZING_ID = "initializing"
 internal const val GRACE_ID = "grace"
-internal const val BORDER_MOVING_ID = "border_moving"
-internal const val BORDER_FINISHED_ID = "border_finished"
+internal const val BOUNDARY_MOVING_ID = "border_moving"
+internal const val BOUNDARY_FINISHED_ID = "border_finished"
 internal const val GAME_OVER_ID = "game_over"
 
 enum class UHCPhase(
@@ -53,7 +54,7 @@ enum class UHCPhase(
             minigame.settings.canPvp.set(false)
             minigame.settings.tickFreezeOnPause.set(true)
             minigame.levels.all().forEach { it.dayTime = 0 }
-            minigame.resetWorldBorders()
+            UHCBoundaryManager.reset(minigame)
 
             val (level, _) = when (minigame.settings.startingDimension) {
                 VanillaDimension.Overworld -> minigame.overworld to null
@@ -103,7 +104,7 @@ enum class UHCPhase(
             val duration = minigame.settings.gracePeriod
             val task = GracePeriodBossbarTask(minigame)
                 .withDuration(duration - 1.Ticks)
-                .then(PhaseChangeTask(minigame, BorderMoving))
+                .then(PhaseChangeTask(minigame, BoundaryMoving))
             minigame.scheduler.schedulePhasedCancellable(duration, task).runIfCancelled()
 
             val minutes = duration.minutes
@@ -120,16 +121,16 @@ enum class UHCPhase(
             }
         }
     },
-    BorderMoving(BORDER_MOVING_ID) {
+    BoundaryMoving(BOUNDARY_MOVING_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
-            minigame.startWorldBorders()
+            UHCBoundaryManager.start(minigame)
         }
     },
-    BorderFinished(BORDER_FINISHED_ID) {
+    BoundaryFinished(BOUNDARY_FINISHED_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             val task = GlowingBossbarTask(minigame)
                 .withDuration(2.Minutes)
-                .then(MinigameTask(minigame, UHCMinigame::onBorderFinish))
+                .then(MinigameTask(minigame, UHCMinigame::onFinishBoundary))
             minigame.scheduler.schedulePhasedCancellable(2.Minutes, task).runIfCancelled()
         }
 
