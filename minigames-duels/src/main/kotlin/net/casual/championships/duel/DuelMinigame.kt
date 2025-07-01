@@ -88,6 +88,7 @@ class DuelMinigame(
 
     @Listener
     private fun onInitialize(event: MinigameInitializeEvent) {
+        this.tickrate.useGlobalManager = false
         this.settings.copyFrom(this.duelSettings)
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
 

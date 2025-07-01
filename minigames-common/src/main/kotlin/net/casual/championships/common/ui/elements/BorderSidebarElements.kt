@@ -33,11 +33,12 @@ class BorderStatusElement(private val buffer: Component): LevelSpecificElement<S
 
 class BorderDistanceElement(private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
     override fun get(player: ServerPlayer): SidebarComponent {
-        val vectorToBorder = player.level().levelBoundary?.getDirectionFrom(player.position()) ?: Vec3.ZERO
-        val multiplier = if (vectorToBorder.x < 0 || vectorToBorder.z < 0) -1 else 1
+        val boundary = player.level().levelBoundary ?: return SidebarComponent.EMPTY
+        val vectorToBorder = boundary.getDirectionFrom(player.position())
+        val multiplier = if (boundary.contains(player.position())) 1 else -1
         val distanceToBorder = multiplier * vectorToBorder.length().toInt()
 
-        val percent = distanceToBorder / (player.level().worldBorder.size / 2.0)
+        val percent = distanceToBorder / (boundary.getSize().x / 2.0)
         val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
         val display = Component.empty().append(this.buffer).append(" ").append(CommonComponents.BORDER_DISTANCE.mini())
         val score = Component.literal(distanceToBorder.toString()).append(this.buffer).withStyle(colour)

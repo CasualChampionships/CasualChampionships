@@ -236,6 +236,7 @@ class UHCMinigame(
 
     @Listener
     private fun onInitialize(event: MinigameInitializeEvent) {
+        this.tickrate.useGlobalManager = false
         this.commands.register(UHCMinigameCommands(this))
 
         this.addEventListener(this.uhcAdvancements)

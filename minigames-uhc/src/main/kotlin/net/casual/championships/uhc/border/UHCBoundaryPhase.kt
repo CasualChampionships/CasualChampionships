@@ -6,7 +6,7 @@ import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.minecraft.world.phys.Vec3
 
 private fun default(radius: Double): SizeAndCenter {
-    return SizeAndCenter(Vec3(radius, 1024.0, radius), Vec3(0.0, 63.0, 0.0))
+    return SizeAndCenter(Vec3(radius, 16384.0, radius), Vec3(0.0, 63.0, 0.0))
 }
 
 enum class UHCBoundaryPhase(
