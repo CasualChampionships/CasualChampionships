@@ -166,6 +166,8 @@ class UHCMinigame(
         get() = this.dimensions.end.level
 
     init {
+        this.tickrate.useGlobalManager = false
+
         this.ui.addBossbar(ActiveBossbar(this))
         this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
@@ -236,7 +238,6 @@ class UHCMinigame(
 
     @Listener
     private fun onInitialize(event: MinigameInitializeEvent) {
-        this.tickrate.useGlobalManager = false
         this.commands.register(UHCMinigameCommands(this))
 
         this.addEventListener(this.uhcAdvancements)
