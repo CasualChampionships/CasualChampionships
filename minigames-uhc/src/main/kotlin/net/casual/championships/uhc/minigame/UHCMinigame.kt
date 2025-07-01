@@ -113,6 +113,7 @@ import net.minecraft.core.Holder
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket
+import net.minecraft.network.protocol.game.ClientboundTickingStepPacket
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -493,10 +494,12 @@ class UHCMinigame(
             event.spectating = true
         }
 
-        // TODO: Fix wb not displaying (until next tick) when minigame is paused
-
-        // Needed for updating the player's health
-        GlobalTickedScheduler.schedule(1.Seconds, player::resetSentInfo)
+        GlobalTickedScheduler.schedule(1.Seconds) {
+            // This is kinda a hack fix, but we need it, so the client renders the world border
+            player.connection.send(ClientboundTickingStepPacket(1))
+            // Needed for updating the player's health
+            player.resetSentInfo()
+        }
     }
 
     @Listener

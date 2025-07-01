@@ -34,6 +34,7 @@ object CasualResourcePackHost {
     private val common = HashMap<String, HostedPackRef>()
 
     val uhc: HostedPack by this.host(UHCMod.UHC_PACK)
+    val boundary: HostedPack by this.host(ArcadeResourcePacks.BOUNDARY_SHADER)
 
     init {
         this.host.addSupplier(DirectoryPackSupplier(this.packs))

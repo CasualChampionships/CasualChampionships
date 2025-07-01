@@ -200,6 +200,9 @@ object CasualMinigames {
         minigame.resources.add(
             MinigameResources.of(CasualResourcePackHost.uhc.toPackInfo(!CasualMod.config.dev))
         )
+        minigame.resources.add(
+            MinigameResources.of(CasualResourcePackHost.boundary.toPackInfo(!CasualMod.config.dev))
+        )
 
         minigame.events.register<MinigameCloseEvent> {
             getMinigames().returnToLobby()
