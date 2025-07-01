@@ -35,6 +35,7 @@ import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.codec.CodecProvider.Companion.register
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.set
 import net.casual.arcade.utils.toSmallCaps
 import net.casual.championships.CasualMod
 import net.casual.championships.commands.CasualCommand
@@ -67,6 +68,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.players.UserWhiteListEntry
+import net.minecraft.world.level.GameRules
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
@@ -142,6 +144,8 @@ object CasualMinigames {
             val minigames = SequentialMinigames(this.readMinigameEvent(), it.server)
             this.minigames = minigames
 
+            // We have to set it globally because Mojang made it a global toggle
+            it.server.gameRules.set(GameRules.RULE_LOCATOR_BAR, false, it.server)
             it.server.setMessageOfTheDay(this.getMOTD())
 
             this.dataManager = createDataManager(CasualMod.config)
