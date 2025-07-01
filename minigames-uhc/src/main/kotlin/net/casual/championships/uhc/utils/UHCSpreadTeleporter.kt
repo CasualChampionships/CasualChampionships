@@ -1,6 +1,7 @@
 package net.casual.championships.uhc.utils
 
 import com.mojang.serialization.MapCodec
+import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter
 import net.casual.arcade.minigame.template.teleporter.ShapedTeleporter
@@ -39,12 +40,12 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
 
     override fun teleportTeam(team: PlayerTeam, entities: Collection<Entity>, location: LocationWithLevel<ServerLevel>) {
         val level = location.level
+        val boundary = level.levelBoundary
         val origin = BlockPos.containing(location.position)
         val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
         for (position in positions) {
             val adjusted = getTopNonCollidingPos(level, position)
-            // TODO: Stop using world border here
-            if (adjusted == null || !level.worldBorder.isWithinBounds(adjusted)) {
+            if (adjusted == null || (boundary != null && !boundary.contains(adjusted.center))) {
                 continue
             }
             super.teleportTeam(team, entities, level.asLocation(adjusted.center, location.rotation))
@@ -66,10 +67,9 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
     }
 
     override fun createShape(level: ServerLevel, points: Int): Iterator<Vec3> {
-        // TODO: Stop using world border here
-        val border = level.worldBorder
-        val center = Vec3(border.centerX, level.seaLevel + 1.0, border.centerZ)
-        val polygon = RegularPolygonShape.createHorizontal(center, border.size * 0.45, points)
+        val border = level.levelBoundary ?: throw IllegalStateException("No level boundary!")
+        val center = Vec3(border.getCenter().x, level.seaLevel + 1.0, border.getCenter().z)
+        val polygon = RegularPolygonShape.createHorizontal(center, border.getSize().x * 0.45, points)
         return LevelSurfaceShape(level) { steps ->
             BiomeRounderIterator(level, polygon.iterator(steps), polygon.sideLength * 0.3)
         }.points()

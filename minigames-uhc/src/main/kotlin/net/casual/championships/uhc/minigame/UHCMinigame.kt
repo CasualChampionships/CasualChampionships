@@ -493,6 +493,8 @@ class UHCMinigame(
             event.spectating = true
         }
 
+        // TODO: Fix wb not displaying (until next tick) when minigame is paused
+
         // Needed for updating the player's health
         GlobalTickedScheduler.schedule(1.Seconds, player::resetSentInfo)
     }
@@ -694,7 +696,11 @@ class UHCMinigame(
         val level = player.level()
         val boundary = level.levelBoundary ?: return
 
-        val vector = boundary.getDirectionTo(player.eyePosition).reverse()
+        if (boundary.contains(player.position())) {
+            return
+        }
+
+        val vector = boundary.getDirectionFrom(player.eyePosition)
 
         val start = player.eyePosition.add(0.0, 4.0, 0.0)
         val end = start.add(vector.normalize())
@@ -709,7 +715,7 @@ class UHCMinigame(
                 val rotation = atan2(vector.x, vector.z)
 
                 val arrow = ArrowShape.createHorizontalCentred(position.x, hit.location.y + 0.1, position.z, 1.0, rotation)
-                arrow.drawAsParticlesFor(player)
+                arrow.drawAsParticlesFor(player, pointsPerUnit = 10.0)
             }
         }
 

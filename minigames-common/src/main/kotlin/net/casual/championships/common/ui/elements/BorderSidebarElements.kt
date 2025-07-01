@@ -1,8 +1,9 @@
 package net.casual.championships.common.ui.elements
 
+import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
+import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.PlayerUtils.distanceToNearestBorder
 import net.casual.arcade.visuals.elements.LevelSpecificElement
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.sidebar.SidebarComponent
@@ -11,15 +12,14 @@ import net.minecraft.ChatFormatting.*
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.level.border.BorderStatus
+import net.minecraft.world.phys.Vec3
 
-// TODO: Update these to support boundaries instead
 class BorderStatusElement(private val buffer: Component): LevelSpecificElement<SidebarComponent> {
     override fun get(level: ServerLevel): SidebarComponent {
         val phase = ((level.server.tickCount / 3) % 5) + 1
-        val border = when (level.worldBorder.status) {
-            BorderStatus.SHRINKING -> CommonComponents.Border.red(phase)
-            BorderStatus.GROWING -> CommonComponents.Border.green(phase)
+        val border = when (level.levelBoundary?.getStatus()) {
+            BoundaryShape.Status.Shrinking -> CommonComponents.Border.red(phase)
+            BoundaryShape.Status.Growing -> CommonComponents.Border.green(phase)
             else -> CommonComponents.Border.blue(phase)
         }
         val display = Component.empty()
@@ -33,7 +33,7 @@ class BorderStatusElement(private val buffer: Component): LevelSpecificElement<S
 
 class BorderDistanceElement(private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
     override fun get(player: ServerPlayer): SidebarComponent {
-        val vectorToBorder = player.distanceToNearestBorder()
+        val vectorToBorder = player.level().levelBoundary?.getDirectionFrom(player.position()) ?: Vec3.ZERO
         val multiplier = if (vectorToBorder.x < 0 || vectorToBorder.z < 0) -1 else 1
         val distanceToBorder = multiplier * vectorToBorder.length().toInt()
 
@@ -48,7 +48,7 @@ class BorderDistanceElement(private val buffer: Component): PlayerSpecificElemen
 class BorderSizeElement(private val buffer: Component): LevelSpecificElement<SidebarComponent> {
     override fun get(level: ServerLevel): SidebarComponent {
         val display = Component.empty().append(this.buffer).append(" ").append(CommonComponents.BORDER_RADIUS.mini())
-        val score = Component.literal((level.worldBorder.size / 2.0).toInt().toString()).append(this.buffer)
+        val score = Component.literal(((level.levelBoundary?.getSize()?.x ?: 0.0) / 2.0).toInt().toString()).append(this.buffer)
         return SidebarComponent.withCustomScore(display, score.mini())
     }
 }
