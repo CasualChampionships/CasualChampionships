@@ -7,6 +7,7 @@ import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Compan
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.string
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ItemUtils.hideAttributeTooltips
+import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.championships.duel.arena.DuelArenaTemplate
@@ -56,7 +57,7 @@ class DuelSettings(
         name = "health"
         display = HEALTH_BOOST.named(Component.translatable("casual.gui.duel.settings.health").mini())
             .potion(Potions.HEALING)
-            .hideAttributeTooltips()
+            .hideTooltip(DataComponents.POTION_CONTENTS)
         value = 1.0
         option("normal", ONE_TIMES.named("Normal"), 0.0) { setting, _, _ ->
             (if (setting.get() == 0.0) ONE_TIMES_SELECTED else ONE_TIMES).named("Normal")

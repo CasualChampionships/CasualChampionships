@@ -12,6 +12,7 @@ import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.yellow
+import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.championships.common.CommonMod
@@ -61,6 +62,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         return this.canvases.values.map { data ->
             val map = data.canvas.asStack().named(data.dimensionIcon.text!!)
             val model = data.model
+            map.hideTooltip(DataComponents.MAP_ID)
             if (model != null) {
                 map.set(DataComponents.ITEM_MODEL, model)
             }

@@ -7,6 +7,7 @@ import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.gold
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.TeamUtils.getHexColor
 import net.casual.arcade.utils.chat.ChatFormatter
@@ -142,6 +143,7 @@ object CommonUI {
             val color = it.getHexColor()
             if (color != null) {
                 flag.set(DataComponents.DYED_COLOR, DyedItemColor(color))
+                flag.hideTooltip(DataComponents.DYED_COLOR)
             }
             flag.set(DataComponents.CUSTOM_NAME, it.formattedDisplayName.mini())
             TeamSelectorGui.Selection(it, flag)
