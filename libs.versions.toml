@@ -1,12 +1,11 @@
 [versions]
-minecraft       = "1.21.6"
+minecraft       = "1.21.8"
 fabric-loader   = "0.16.14"
-parchment       = "1.21.5:2025.06.15"
-fabric-api      = "0.127.1+1.21.6"
-fabric-kotlin   = "1.13.3+kotlin.2.1.21"
+parchment       = "1.21.6:2025.06.29"
+fabric-api      = "0.129.0+1.21.8"
+fabric-kotlin   = "1.13.4+kotlin.2.2.0"
 map-canvas      = "0.5.1+1.21.5"
-arcade          = "0.5.1-beta.31+1.21.6"
-server-replay   = "2.3.0+1.21.5"
+arcade          = "0.6.0-beta.8+1.21.8"
 casual-database = "0.2.0"
 
 # Plugins
@@ -21,7 +20,6 @@ map-canvas      = { module = "eu.pb4:map-canvas-api"                        , ve
 arcade          = { module = "net.casualchampionships:arcade"               , version.ref = "arcade" }
 arcade-datagen  = { module = "net.casualchampionships:arcade-datagen"       , version.ref = "arcade" }
 casual-database = { module = "net.casual-championships:casual-database-core", version.ref = "casual-database" }
-server-replay   = { module = "me.senseiwells:server-replay"                 , version.ref = "server-replay" }
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }

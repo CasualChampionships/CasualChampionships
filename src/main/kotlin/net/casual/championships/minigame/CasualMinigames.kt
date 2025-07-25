@@ -4,10 +4,10 @@ import com.mojang.serialization.JsonOps
 import net.casual.arcade.commands.register
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
-import net.casual.arcade.events.server.ServerLoadedEvent
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerSaveEvent
-import net.casual.arcade.events.server.ServerStoppingEvent
+import net.casual.arcade.events.server.ServerStartEvent
+import net.casual.arcade.events.server.ServerStopEvent
 import net.casual.arcade.events.server.player.PlayerJoinEvent
 import net.casual.arcade.events.server.player.PlayerRequestLoginEvent
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
@@ -71,7 +71,6 @@ import net.minecraft.server.players.UserWhiteListEntry
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
-import java.util.concurrent.CompletableFuture
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.reader
@@ -108,12 +107,10 @@ object CasualMinigames {
         return this.winners.isNotEmpty()
     }
 
-    fun reloadResourcePacks(server: MinecraftServer): CompletableFuture<Void> {
-        return CasualResourcePackHost.reload().thenAcceptAsync({
-            for (player in this.minigame.players) {
-                this.getMinigames().sendResourcesTo(player)
-            }
-        }, server)
+    fun reloadResourcePacks() {
+        for (player in this.minigame.players) {
+            this.getMinigames().sendResourcesTo(player)
+        }
     }
 
     internal fun registerEvents() {
@@ -140,7 +137,7 @@ object CasualMinigames {
         }
 
         // This must happen before minigames are loaded
-        GlobalEventHandler.Server.register<ServerLoadedEvent>(0) {
+        GlobalEventHandler.Server.register<ServerStartEvent>(0) {
             val minigames = SequentialMinigames(this.readMinigameEvent(), it.server)
             this.minigames = minigames
 
@@ -151,7 +148,7 @@ object CasualMinigames {
             this.dataManager = createDataManager(CasualMod.config)
 
         }
-        GlobalEventHandler.Server.register<ServerLoadedEvent>(Int.MAX_VALUE) {
+        GlobalEventHandler.Server.register<ServerStartEvent>(Int.MAX_VALUE) {
             val data = this.loadMinigameEventData()
             if (data != null) {
                 this.getMinigames().setData(data)
@@ -184,7 +181,7 @@ object CasualMinigames {
             this.dataManager = this.createDataManager(config)
         }
 
-        GlobalEventHandler.Server.register<ServerStoppingEvent> {
+        GlobalEventHandler.Server.register<ServerStopEvent> {
             this.getDataManager().close()
         }
     }
@@ -387,7 +384,7 @@ object CasualMinigames {
             }
 
             if (CasualResourcePackHost.loadTeamColors(teams)) {
-                this.reloadResourcePacks(server)
+                this.reloadResourcePacks()
             }
         }, server)
 

@@ -196,14 +196,12 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
 
         icon.move(scaledPlayerX, scaledPlayerZ, 0)
         // if (icon.text == null) {
-            val head = PlayerHeadComponents.getHead(player).getNow(null)
-            if (head != null) {
-                icon.text = Component.empty()
-                    .append(head)
-                    .append(SpacingFontResources.spaced(-10))
-                    .append(UHCComponents.Bitmap.PLAYER_BACKGROUND.copy().color(player.team))
-                    .append(SpacingFontResources.spaced(-1))
-            }
+        val head = PlayerHeadComponents.getHeadOrDefault(player)
+        icon.text = Component.empty()
+            .append(head)
+            .append(SpacingFontResources.spaced(-10))
+            .append(UHCComponents.Bitmap.PLAYER_BACKGROUND.copy().color(player.team))
+            .append(SpacingFontResources.spaced(-1))
         // }
     }
 

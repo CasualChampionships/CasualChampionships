@@ -72,10 +72,8 @@ object CasualCommand: CommandTree {
     }
 
     private fun reloadResources(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.reloadResourcePacks(context.source.server).thenRun {
-            context.source.success("Successfully reloaded resources, resending packs...")
-        }
-        return context.source.success("Reloading resources...")
+        CasualMinigames.reloadResourcePacks()
+        return context.source.success("Resending resources...")
     }
 
     private fun returnToLobby(context: CommandContext<CommandSourceStack>): Int {

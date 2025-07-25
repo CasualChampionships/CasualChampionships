@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
-import net.casual.arcade.resources.font.heads.PlayerHeadFont
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.greyscale
@@ -45,11 +44,11 @@ open class CasualPlayerListEntries(
                 PlayerHeadComponents.getHeadOrDefault(player)
             } else {
                 name.italicise().color(0x919191)
-                GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
+                GREYSCALE_CACHE.get(username).getNow(PlayerHeadComponents.get().getDefault())
             }
         } else {
             name.color(0x808080)
-            GREYSCALE_CACHE.get(username).getNow(PlayerHeadFont.STEVE_HEAD)
+            GREYSCALE_CACHE.get(username).getNow(PlayerHeadComponents.get().getDefault())
         }
         return PlayerListEntries.Entry.fromComponent(
             Component.empty().append(head).append(SpacingFontResources.spaced(2)).append(name.mini())
@@ -61,7 +60,7 @@ open class CasualPlayerListEntries(
             .expireAfterAccess(Duration.ofSeconds(60))
             .build(object: CacheLoader<String, CompletableFuture<Component>>() {
                 override fun load(key: String): CompletableFuture<Component> {
-                    return PlayerHeadComponents.getHead(key).thenApply { it.greyscale() }
+                    return PlayerHeadComponents.get().getHead(key).thenApply { it.greyscale() }
                 }
             })
     }

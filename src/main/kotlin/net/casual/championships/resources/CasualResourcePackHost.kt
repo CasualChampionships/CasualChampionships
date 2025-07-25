@@ -2,12 +2,10 @@ package net.casual.championships.resources
 
 import com.google.common.collect.HashBiMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.host.GlobalPackHost
 import net.casual.arcade.host.PackHost.HostedPackRef
-import net.casual.arcade.host.data.HostedPack
-import net.casual.arcade.host.pack.DirectoryPackSupplier
+import net.casual.arcade.host.pack.hosted.HostedPack
+import net.casual.arcade.host.pack.provider.DirectoryPackProvider
 import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.resources.ArcadeResourcePacks
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
@@ -18,11 +16,9 @@ import net.casual.arcade.utils.TeamUtils.getHexColor
 import net.casual.championships.CasualMod
 import net.casual.championships.common.CommonMod
 import net.casual.championships.common.util.CommonConfig
-import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.uhc.UHCMod
 import net.minecraft.ChatFormatting
 import net.minecraft.world.scores.PlayerTeam
-import java.util.concurrent.CompletableFuture
 
 object CasualResourcePackHost {
     private val packs = CommonConfig.resolve("packs")
@@ -34,10 +30,10 @@ object CasualResourcePackHost {
     private val common = HashMap<String, HostedPackRef>()
 
     val uhc: HostedPack by this.host(UHCMod.UHC_PACK)
-    val boundary: HostedPack by this.host(ArcadeResourcePacks.BOUNDARY_SHADER)
+    val boundary: HostedPack by this.host(ArcadeResourcePacks.BOUNDARY_SHADER_PACK)
 
     init {
-        this.host.addSupplier(DirectoryPackSupplier(this.packs))
+        this.host.add(DirectoryPackProvider(this.packs))
         for (creator in CommonMod.COMMON_PACKS) {
             this.hostCommon(creator)
         }
@@ -48,7 +44,7 @@ object CasualResourcePackHost {
     }
 
     fun getHostedPack(name: String): HostedPack? {
-        return this.host.getHostedPack(name)
+        return this.host.get(name)
     }
 
     fun createResourcesFromPacks(packs: () -> List<String>): MinigameResources {
@@ -95,16 +91,8 @@ object CasualResourcePackHost {
         return false
     }
 
-    internal fun reload(): CompletableFuture<Void> {
-        return this.host.reload().thenAcceptAsync {
-            it.forEach(this::cachePackForReplay)
-        }
-    }
-
     internal fun registerEvents() {
-        GlobalEventHandler.Server.register<CasualConfigReloaded> {
-            this.reload()
-        }
+
     }
 
     private fun hostCommon(creator: NamedResourcePackCreator) {

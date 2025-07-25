@@ -46,9 +46,9 @@ object CommonMod: ModInitializer {
 
     val COMMON_PACKS = listOf(
         ArcadeResourcePacks.PADDING_FONT_PACK,
-        ArcadeResourcePacks.PLAYER_HEADS_PACK,
+        ArcadeResourcePacks.PIXEL_FONT_PACK,
         ArcadeResourcePacks.HIDE_PLAYER_LIST_HEADS_PACK,
-        ArcadeResourcePacks.MINI_MINECRAFT_FONT,
+        ArcadeResourcePacks.MINI_MINECRAFT_FONT_PACK,
         ArcadeResourcePacks.SPACING_FONT_PACK,
         ArcadeResourcePacks.HIDE_PLAYER_LIST_PING_PACK,
         ArcadeResourcePacks.ACTION_BAR_FONT_PACK,
