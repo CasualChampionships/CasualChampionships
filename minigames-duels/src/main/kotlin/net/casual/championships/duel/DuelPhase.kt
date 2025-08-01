@@ -44,6 +44,9 @@ enum class DuelPhase(
 
             minigame.arena.teleporter.teleport(minigame.level, minigame.players.playing, minigame.duelSettings.teams)
 
+            minigame.settings.canInteractAll = false
+            minigame.settings.canAttackEntities.set(false)
+
             GlobalTickedScheduler.later {
                 minigame.setPhase(Countdown)
             }
@@ -61,6 +64,9 @@ enum class DuelPhase(
     },
     Dueling(DUELING_ID) {
         override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
+            minigame.settings.canInteractAll = true
+            minigame.settings.canAttackEntities.set(true)
+
             for (player in minigame.players.playing) {
                 player.unrestrictMovement()
             }
