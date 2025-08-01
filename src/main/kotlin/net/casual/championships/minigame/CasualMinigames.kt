@@ -8,6 +8,7 @@ import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerSaveEvent
 import net.casual.arcade.events.server.ServerStartEvent
 import net.casual.arcade.events.server.ServerStopEvent
+import net.casual.arcade.events.server.player.PlayerChatEvent
 import net.casual.arcade.events.server.player.PlayerJoinEvent
 import net.casual.arcade.events.server.player.PlayerRequestLoginEvent
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
@@ -24,6 +25,7 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.ComponentUtils.bold
 import net.casual.arcade.utils.ComponentUtils.color
 import net.casual.arcade.utils.ComponentUtils.green
+import net.casual.arcade.utils.ComponentUtils.isEmpty
 import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.ComponentUtils.red
@@ -31,8 +33,11 @@ import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.PlayerUtils.broadcastToOps
+import net.casual.arcade.utils.PlayerUtils.getChatUsername
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.arcade.utils.chat.ChatFormatter
+import net.casual.arcade.utils.chat.PlayerChatFormatter
+import net.casual.arcade.utils.chat.PlayerFormattedChat
 import net.casual.arcade.utils.codec.CodecProvider.Companion.register
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.set
@@ -168,6 +173,10 @@ object CasualMinigames {
             this.getMinigames().addPlayer(player)
         }
 
+        GlobalEventHandler.Server.register<PlayerChatEvent> { event ->
+            event.format { it.copy(username = event.player.getChatUsername(false)) }
+        }
+
         GlobalEventHandler.Server.register<ServerSaveEvent> {
             this.writeMinigameEventData(this.getMinigames().getData())
         }
@@ -250,6 +259,16 @@ object CasualMinigames {
         }
         minigame.chat.systemChatFormatter = ChatFormatter {
             ChatFormatter.SYSTEM.format(Component.empty().append(it).mini())
+        }
+        minigame.chat.globalChatFormatter = object: PlayerChatFormatter {
+            override fun format(player: ServerPlayer, message: PlayerFormattedChat): PlayerFormattedChat {
+                val team = player.team
+                val prefixed = when {
+                    !message.prefix.isEmpty() || team == null -> message
+                    else -> message.copy(prefix = team.formattedDisplayName)
+                }
+                return PlayerChatFormatter.Global.format(player, prefixed)
+            }
         }
 
         this.setPauseNotification(minigame)
