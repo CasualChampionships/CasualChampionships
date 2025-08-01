@@ -22,10 +22,9 @@ class CasualChampionshipsTemplate(
     repeat: Boolean = true,
     private val additionalPacks: List<String>
 ): SimpleMinigamesTemplate(name, lobby, operators, minigames, repeat) {
-    private val resources = CasualResourcePackHost.createResourcesFromPacks { this.additionalPacks }
-
     override fun getAdditionalPacks(): Iterable<PackInfo> {
-        val packs = ArrayList<PackInfo>(this.resources.getPacks())
+        val resources = CasualResourcePackHost.createResourcesFromPacks { this.additionalPacks }
+        val packs = ArrayList<PackInfo>(resources.getPacks())
         return CasualResourcePackHost.getCommonPacks().mapTo(packs) {
             it.toPackInfo(!CasualMod.config.dev)
         }

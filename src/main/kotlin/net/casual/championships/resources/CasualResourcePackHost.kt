@@ -4,8 +4,8 @@ import com.google.common.collect.HashBiMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import net.casual.arcade.host.GlobalPackHost
 import net.casual.arcade.host.PackHost.HostedPackRef
+import net.casual.arcade.host.pack.PathPack
 import net.casual.arcade.host.pack.hosted.HostedPack
-import net.casual.arcade.host.pack.provider.DirectoryPackProvider
 import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.resources.ArcadeResourcePacks
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
@@ -19,6 +19,7 @@ import net.casual.championships.common.util.CommonConfig
 import net.casual.championships.uhc.UHCMod
 import net.minecraft.ChatFormatting
 import net.minecraft.world.scores.PlayerTeam
+import kotlin.io.path.listDirectoryEntries
 
 object CasualResourcePackHost {
     private val packs = CommonConfig.resolve("packs")
@@ -33,7 +34,9 @@ object CasualResourcePackHost {
     val boundary: HostedPack by this.host(ArcadeResourcePacks.BOUNDARY_SHADER_PACK)
 
     init {
-        this.host.add(DirectoryPackProvider(this.packs))
+        for (pack in this.packs.listDirectoryEntries("*.zip")) {
+            this.host.add(PathPack(pack))
+        }
         for (creator in CommonMod.COMMON_PACKS) {
             this.hostCommon(creator)
         }
