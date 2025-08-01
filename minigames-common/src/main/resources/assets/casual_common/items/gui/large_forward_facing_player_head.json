@@ -3,8 +3,7 @@
     "type": "minecraft:special",
     "base": "casual_common:item/gui/large_forward_facing_player_head",
     "model": {
-      "type": "minecraft:head",
-      "kind": "player"
+      "type": "minecraft:player_head"
     }
   }
 }

@@ -47,6 +47,7 @@ class DuelSettings(
         name = "teams"
         val flag = FLAG.named(Component.translatable("casual.gui.duel.settings.teams").mini())
         flag.set(DataComponents.DYED_COLOR, DyedItemColor(0xFF0000))
+        flag.hideTooltip(DataComponents.DYED_COLOR)
         display = flag
         value = false
         defaults.options(this)
