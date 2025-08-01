@@ -47,6 +47,7 @@ import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.math.location.LocationWithLevel
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.math.location.providers.LocationProvider
+import net.casual.arcade.utils.set
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.visuals.elements.ComponentElements
@@ -87,6 +88,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.component.FireworkExplosion.Shape
+import net.minecraft.world.level.GameRules
 import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.scores.PlayerTeam
@@ -160,6 +162,10 @@ class CasualLobbyMinigame(
         this.ui.setSidebar(this.createSidebar())
 
         this.settings.canAttackEntities.set(true)
+
+        this.levels.setGameRules {
+            set(GameRules.RULE_LOCATOR_BAR, false)
+        }
     }
 
     @Listener
