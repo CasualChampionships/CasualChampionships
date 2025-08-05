@@ -471,4 +471,22 @@ object UHCAdvancements: AdvancementCollection() {
         toast()
         announce()
     }
+
+    val WART_HOARDER = register {
+        parent(ROOT)
+        id = id("wart_hoarder")
+        display(Items.NETHER_WART)
+        setTitleAndDesc("uhc.advancements.wartHoarder")
+        toast()
+        announce()
+    }
+
+    val SPAWNER_SABOTEUR = register {
+        parent(WART_HOARDER)
+        id = id("spawner_saboteur")
+        display(Items.BLAZE_POWDER)
+        setTitleAndDesc("uhc.advancements.spawnerSaboteur")
+        toast()
+        announce()
+    }
 }

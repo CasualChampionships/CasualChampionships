@@ -204,6 +204,16 @@ class UHCAdvancementManager(
         if (event.state.block == Blocks.BEE_NEST) {
             event.player.grantAdvancement(UHCAdvancements.BEE_NES)
         }
+
+        if (event.state.block === Blocks.NETHER_WART &&
+            event.player.isInStructure(BuiltinStructures.FORTRESS)
+        ) {
+            val netherWartMined = this.uhc.stats.getOrCreateStat(event.player, UHCStats.NETHER_WART_MINED)
+            netherWartMined.increment()
+            if (netherWartMined.value > 11) {
+                event.player.grantAdvancement(UHCAdvancements.WART_HOARDER)
+            }
+        }
     }
 
     @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
