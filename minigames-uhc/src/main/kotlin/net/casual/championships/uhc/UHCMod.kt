@@ -15,7 +15,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 object UHCMod: ModInitializer {
-    private const val MOD_ID = "casual_uhc"
+    const val MOD_ID = "casual_uhc"
 
     internal val container = FabricLoader.getInstance().getModContainer(MOD_ID).get()
 

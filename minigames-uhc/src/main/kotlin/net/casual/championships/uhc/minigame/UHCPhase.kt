@@ -1,5 +1,6 @@
 package net.casual.championships.uhc.minigame
 
+import de.maxhenkel.voicechat.api.Group
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
@@ -33,12 +34,15 @@ import net.casual.championships.common.util.CommonPredicates
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
+import net.casual.championships.uhc.UHCMod
+import net.casual.championships.uhc.UHCVoicePlugin
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec3
+import java.util.UUID
 
 internal const val INITIALIZING_ID = "initializing"
 internal const val GRACE_ID = "grace"
@@ -71,6 +75,40 @@ enum class UHCPhase(
 
             GlobalTickedScheduler.later {
                 minigame.setPhase(Grace)
+            }
+
+            val voicechatApi = UHCVoicePlugin.voicechatApi!!
+            val spectatorTeam = minigame.teams.getSpectatorTeam()
+            val password = UUID.randomUUID().toString()
+            UHCMod.logger.info("UHC Voice Groups Password: {}", password)
+            val spectatorGroup = voicechatApi.groupBuilder()
+                .setName(spectatorTeam.name)
+                .setType(Group.Type.NORMAL)
+                .setPersistent(true)
+                .setHidden(true)
+                .setPassword(password)
+                .build()
+            minigame.voiceGroups[spectatorTeam] = spectatorGroup
+            for (player in minigame.players.spectating) {
+                val connection = voicechatApi.getConnectionOf(player.uuid) ?: continue
+                connection.group = spectatorGroup
+            }
+
+            for (team in minigame.teams.getPlayingTeams()) {
+                val group = voicechatApi.groupBuilder()
+                    .setName(team.name)
+                    .setType(Group.Type.OPEN)
+                    .setPersistent(true)
+                    .setHidden(true)
+                    .setPassword(password)
+                    .build()
+
+                minigame.voiceGroups[team] = group
+
+                for (player in team.getOnlinePlayers()) {
+                    val connection = voicechatApi.getConnectionOf(player.uuid) ?: continue
+                    connection.group = group
+                }
             }
         }
 

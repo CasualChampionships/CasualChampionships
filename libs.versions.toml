@@ -7,6 +7,7 @@ fabric-kotlin   = "1.13.4+kotlin.2.2.0"
 map-canvas      = "0.5.1+1.21.5"
 arcade          = "0.6.0-beta.32+1.21.8"
 casual-database = "0.2.0"
+voicechat-api        = "2.5.31"
 
 # Plugins
 fabric-loom = "1.10-SNAPSHOT"
@@ -20,6 +21,7 @@ map-canvas      = { module = "eu.pb4:map-canvas-api"                        , ve
 arcade          = { module = "net.casualchampionships:arcade"               , version.ref = "arcade" }
 arcade-datagen  = { module = "net.casualchampionships:arcade-datagen"       , version.ref = "arcade" }
 casual-database = { module = "net.casual-championships:casual-database-core", version.ref = "casual-database" }
+voicechat-api   = { module = "de.maxhenkel.voicechat:voicechat-api"         , version.ref = "voicechat-api" }
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }

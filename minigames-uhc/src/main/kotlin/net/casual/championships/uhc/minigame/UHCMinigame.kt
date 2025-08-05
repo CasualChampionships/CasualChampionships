@@ -1,6 +1,7 @@
 package net.casual.championships.uhc.minigame
 
 import com.google.gson.JsonObject
+import de.maxhenkel.voicechat.api.Group
 import eu.pb4.sgui.api.GuiHelpers
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.dimensions.utils.deleteCustomLevel
@@ -91,9 +92,11 @@ import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.common.util.CommonUI.broadcastInfo
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.uhc.UHCMod
+import net.casual.championships.uhc.UHCVoicePlugin
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBoundaryPhase
+import net.casual.championships.uhc.event.VoiceChatPlayerConnectedEvent
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbar
 import net.casual.championships.uhc.minigame.UHCPhase.GameOver
@@ -152,6 +155,7 @@ class UHCMinigame(
     private var lastBoundaryTime = 0.Ticks
     var boundaryPhase = UHCBoundaryPhase.First
 
+    val voiceGroups = HashMap<Team, Group>()
     val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)
     val winners = HashSet<String>()
@@ -397,6 +401,8 @@ class UHCMinigame(
         player.resetExperience()
         player.clearPlayerInventory()
         // PlayerRecorders.get(player)?.stop()
+        val connection = UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)
+        connection?.group = null
     }
 
     @Listener
@@ -590,6 +596,8 @@ class UHCMinigame(
             player.teleportTo(this.overworld.asLocation(Vec3(0.0, 128.0, 0.0)))
         }
 
+        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = voiceGroups[this.teams.getSpectatorTeam()]
+
         val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
         this.scheduler.schedule(1.Ticks) {
             this.chat.broadcastInfo(rules.mini(), listOf(player))
@@ -619,12 +627,52 @@ class UHCMinigame(
         }
     }
 
+    @Listener(priority = -1)
+    private fun onClose(event: MinigameCloseEvent) {
+        val voicechatApi = UHCVoicePlugin.voicechatApi!!
+        for (player in this.players) {
+            val connection = voicechatApi.getConnectionOf(player.uuid)
+            connection?.group = null
+        }
+
+        for (group in this.voiceGroups.values) {
+            voicechatApi.removeGroup(group.id)
+        }
+    }
+
+    @Listener(during = During(before = GAME_OVER_ID))
+    private fun onVoiceChatPlayerConnected(event: VoiceChatPlayerConnectedEvent) {
+        val player = event.connection.player.player as? ServerPlayer ?: return
+        if (!this.players.has(player)) {
+            return
+        }
+
+        val (connection) = event
+        if (this.players.isSpectating(player)) {
+            connection.group = voiceGroups[this.teams.getSpectatorTeam()]
+            return
+        }
+
+        val team = player.team
+        if (team != null && voiceGroups.containsKey(team)) {
+            connection.group = voiceGroups[team]
+        }
+    }
+
     @Listener
     private fun onPlayerTeamJoin(event: PlayerTeamJoinEvent) {
         val (player, team) = event
         for (teammate in team.getOnlinePlayers()) {
             this.effects.forceUpdate(teammate, player)
             this.effects.forceUpdate(player, teammate)
+        }
+    }
+
+    @Listener(phase = BuiltInEventPhases.POST)
+    private fun afterPlayerTeamJoin(event: PlayerTeamJoinEvent) {
+        val (player, team) = event
+        if (voiceGroups.containsKey(team)) {
+            UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = voiceGroups[team]
         }
     }
 
