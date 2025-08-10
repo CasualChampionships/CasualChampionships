@@ -92,7 +92,7 @@ import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.common.util.CommonUI.broadcastInfo
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.uhc.UHCMod
-import net.casual.championships.uhc.UHCVoicePlugin
+import net.casual.championships.uhc.compat.UHCVoicePlugin
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBoundaryPhase

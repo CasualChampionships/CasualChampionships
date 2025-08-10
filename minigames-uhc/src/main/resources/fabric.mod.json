@@ -20,13 +20,13 @@
       }
     ],
     "voicechat": [
-      "net.casual.championships.uhc.UHCVoicePlugin"
+      {
+        "adapter": "kotlin",
+        "value": "net.casual.championships.uhc.compat.UHCVoicePlugin"
+      }
     ]
   },
   "mixins": [
 
-  ],
-  "depends": {
-    "voicechat": "*"
-  }
+  ]
 }

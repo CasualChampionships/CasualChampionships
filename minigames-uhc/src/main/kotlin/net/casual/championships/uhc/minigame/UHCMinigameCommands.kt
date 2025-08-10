@@ -12,7 +12,7 @@ import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locatio
 import net.casual.arcade.utils.teleportTo
 import net.casual.championships.common.util.CommonCommands
 import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.uhc.UHCVoicePlugin
+import net.casual.championships.uhc.compat.UHCVoicePlugin
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
