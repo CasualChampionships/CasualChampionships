@@ -76,40 +76,6 @@ enum class UHCPhase(
             GlobalTickedScheduler.later {
                 minigame.setPhase(Grace)
             }
-
-            val voicechatApi = UHCVoicePlugin.voicechatApi!!
-            val spectatorTeam = minigame.teams.getSpectatorTeam()
-            val password = UUID.randomUUID().toString()
-            UHCMod.logger.info("UHC Voice Groups Password: {}", password)
-            val spectatorGroup = voicechatApi.groupBuilder()
-                .setName(spectatorTeam.name)
-                .setType(Group.Type.NORMAL)
-                .setPersistent(true)
-                .setHidden(true)
-                .setPassword(password)
-                .build()
-            minigame.voiceGroups[spectatorTeam] = spectatorGroup
-            for (player in minigame.players.spectating) {
-                val connection = voicechatApi.getConnectionOf(player.uuid) ?: continue
-                connection.group = spectatorGroup
-            }
-
-            for (team in minigame.teams.getPlayingTeams()) {
-                val group = voicechatApi.groupBuilder()
-                    .setName(team.name)
-                    .setType(Group.Type.OPEN)
-                    .setPersistent(true)
-                    .setHidden(true)
-                    .setPassword(password)
-                    .build()
-
-                minigame.voiceGroups[team] = group
-
-                for (player in team.getOnlinePlayers()) {
-                    val connection = voicechatApi.getConnectionOf(player.uuid) ?: continue
-                    connection.group = group
-                }
-            }
         }
 
         override fun initialize(minigame: UHCMinigame) {

@@ -179,6 +179,41 @@ class UHCMinigame(
         this.levels.addAll(this.dimensions.map { it.level })
     }
 
+    fun addPlayerToAppropriateVoiceGroup(player: ServerPlayer) {
+        val team = when {
+            this.players.isSpectating(player) -> this.teams.getSpectatorTeam()
+            else -> player.team ?: return
+        }
+        val group = getVoiceGroupOfTeam(team)
+        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = group
+    }
+
+    fun getVoiceGroupOfTeam(team: Team): Group {
+        return when {
+            this.teams.isSpectatorTeam(team) || this.teams.isAdminTeam(team) -> this.voiceGroups.computeIfAbsent(team) {
+                createDefaultGroupWithType(Group.Type.NORMAL, team.name)
+            }
+            else -> this.voiceGroups.computeIfAbsent(team) {
+                createDefaultGroupWithType(Group.Type.OPEN, team.name)
+            }
+        }
+    }
+
+    fun createDefaultGroupWithType(type: Group.Type, name: String): Group {
+        val password = UUID.randomUUID().toString()
+        return UHCVoicePlugin.voicechatApi!!.groupBuilder()
+            .setName(name)
+            .setType(type)
+            .setPersistent(true)
+            .setHidden(true)
+            .setPassword(password)
+            .build()
+    }
+
+    fun playerLeaveVoiceGroup(player: ServerPlayer) {
+        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = null
+    }
+
     fun resetPlayerHealth(player: ServerPlayer) {
         player.boostHealth(this.settings.health)
         player.resetHealth()
@@ -401,8 +436,7 @@ class UHCMinigame(
         player.resetExperience()
         player.clearPlayerInventory()
         // PlayerRecorders.get(player)?.stop()
-        val connection = UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)
-        connection?.group = null
+        playerLeaveVoiceGroup(player)
     }
 
     @Listener
@@ -507,6 +541,8 @@ class UHCMinigame(
             player.connection.send(ClientboundTickingStepPacket(1))
             // Needed for updating the player's health
             player.resetSentInfo()
+
+            addPlayerToAppropriateVoiceGroup(player)
         }
     }
 
@@ -596,7 +632,7 @@ class UHCMinigame(
             player.teleportTo(this.overworld.asLocation(Vec3(0.0, 128.0, 0.0)))
         }
 
-        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = voiceGroups[this.teams.getSpectatorTeam()]
+        addPlayerToAppropriateVoiceGroup(player)
 
         val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
         this.scheduler.schedule(1.Ticks) {
@@ -647,16 +683,7 @@ class UHCMinigame(
             return
         }
 
-        val (connection) = event
-        if (this.players.isSpectating(player)) {
-            connection.group = voiceGroups[this.teams.getSpectatorTeam()]
-            return
-        }
-
-        val team = player.team
-        if (team != null && voiceGroups.containsKey(team)) {
-            connection.group = voiceGroups[team]
-        }
+        addPlayerToAppropriateVoiceGroup(player)
     }
 
     @Listener
@@ -670,10 +697,8 @@ class UHCMinigame(
 
     @Listener(phase = BuiltInEventPhases.POST)
     private fun afterPlayerTeamJoin(event: PlayerTeamJoinEvent) {
-        val (player, team) = event
-        if (voiceGroups.containsKey(team)) {
-            UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = voiceGroups[team]
-        }
+        val (player) = event
+        addPlayerToAppropriateVoiceGroup(player)
     }
 
     @Listener
@@ -683,6 +708,7 @@ class UHCMinigame(
             this.effects.forceUpdate(teammate, player)
             this.effects.forceUpdate(player, teammate)
         }
+        playerLeaveVoiceGroup(player)
     }
 
     @Listener
