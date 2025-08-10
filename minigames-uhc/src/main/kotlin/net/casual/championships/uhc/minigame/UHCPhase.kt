@@ -1,6 +1,5 @@
 package net.casual.championships.uhc.minigame
 
-import de.maxhenkel.voicechat.api.Group
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
@@ -34,15 +33,12 @@ import net.casual.championships.common.util.CommonPredicates
 import net.casual.championships.common.util.CommonSounds
 import net.casual.championships.common.util.CommonUI
 import net.casual.championships.common.util.CommonUI.broadcastGame
-import net.casual.championships.uhc.UHCMod
-import net.casual.championships.uhc.UHCVoicePlugin
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.phys.Vec3
-import java.util.UUID
 
 internal const val INITIALIZING_ID = "initializing"
 internal const val GRACE_ID = "grace"
