@@ -9,4 +9,6 @@ object UHCStats {
     val ADVANCEMENTS_AWARDED = StatType.int32(UHCMod.id("advancements_awarded"))
 
     val LAST_SNEAK_TIME = StatType.int32(UHCMod.id("last_sneak_time"))
+
+    val NETHER_WART_MINED = StatType.int32(UHCMod.id("nether_wart_mined"))
 }

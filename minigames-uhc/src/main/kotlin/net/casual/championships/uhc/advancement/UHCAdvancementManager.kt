@@ -195,14 +195,24 @@ class UHCAdvancementManager(
 
     @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerBlockMined(event: PlayerBlockMinedEvent) {
-        val blocksMined = this.uhc.stats.getOrCreateStat(event.player, CommonStats.BLOCKS_MINED)
+        val (player, _, state) = event
+
+        val blocksMined = this.uhc.stats.getOrCreateStat(player, CommonStats.BLOCKS_MINED)
         blocksMined.increment()
         if (blocksMined.value >= 2500) {
-            event.player.grantAdvancement(UHCAdvancements.HUMAN_QUARRY)
+            player.grantAdvancement(UHCAdvancements.HUMAN_QUARRY)
         }
 
-        if (event.state.block == Blocks.BEE_NEST) {
-            event.player.grantAdvancement(UHCAdvancements.BEE_NES)
+        if (state.block == Blocks.BEE_NEST) {
+            player.grantAdvancement(UHCAdvancements.BEE_NES)
+        }
+
+        if (state.block === Blocks.NETHER_WART && player.isInStructure(BuiltinStructures.FORTRESS)) {
+            val netherWartMined = this.uhc.stats.getOrCreateStat(player, UHCStats.NETHER_WART_MINED)
+            netherWartMined.increment()
+            if (netherWartMined.value > 11) {
+                player.grantAdvancement(UHCAdvancements.WART_HOARDER)
+            }
         }
     }
 

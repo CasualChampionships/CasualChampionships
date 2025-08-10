@@ -119,9 +119,11 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.BlockTags
 import net.minecraft.util.Mth
+import net.minecraft.util.ProblemReporter
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potion
@@ -129,8 +131,14 @@ import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.item.crafting.SingleRecipeInput
 import net.minecraft.world.item.enchantment.Enchantments
+import net.minecraft.world.level.BaseSpawner
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
+import net.minecraft.world.level.SpawnData
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity
+import net.minecraft.world.level.storage.TagValueInput
+import net.minecraft.world.level.storage.TagValueOutput
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
@@ -409,11 +417,28 @@ class UHCMinigame(
 
     @Listener
     private fun onBlockMined(event: PlayerBlockMinedEvent) {
+        val (player, _, state, be) = event
+
+        if (state.isOf(Blocks.SPAWNER) && be is SpawnerBlockEntity) {
+            val spawnerValueOutput = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING)
+            be.spawner.save(spawnerValueOutput)
+            val spawnerNbt = spawnerValueOutput.buildResult()
+            // This is so fucking cursed; I can't believe this is the best way to do this
+            val isBlazeSpawner = spawnerNbt.getCompound(BaseSpawner.SPAWN_DATA_TAG)
+                .flatMap { it.getCompound(SpawnData.ENTITY_TAG) }
+                .flatMap { EntityType.by(TagValueInput.create(ProblemReporter.DISCARDING, player.registryAccess(), it)) }
+                .map { it == EntityType.BLAZE }
+                .orElse(false)
+
+            if (isBlazeSpawner) {
+                player.grantAdvancement(UHCAdvancements.SPAWNER_SABOTEUR)
+            }
+        }
+
         if (!this.settings.bloodDiamonds) {
             return
         }
 
-        val (player, _, state) = event
         if (state.isOf(BlockTags.DIAMOND_ORES)) {
             player.hurtServer(player.level(), player.damageSources().magic(), 1.0F)
         }
