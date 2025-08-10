@@ -12,6 +12,7 @@ import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.codec.CodecProvider
 import net.casual.championships.uhc.utils.UHCDimensions
+import net.minecraft.core.UUIDUtil
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
@@ -57,21 +58,22 @@ data class DimensionWithSeed(
 }
 
 class UHCMinigameFactory(
-    private val dimensions: Map<VanillaDimension, DimensionWithSeed>
+    private val dimensions: Map<VanillaDimension, DimensionWithSeed>,
+    private val nerfedPlayers: Set<UUID>
 ): MinigameFactory {
     override fun codec(): MapCodec<out MinigameFactory> {
         return CODEC
     }
 
     override fun create(context: MinigameCreationContext): UHCMinigame {
-        val copy = HashMap(this.dimensions)
+        val dimensionsCopy = HashMap(this.dimensions)
         for (entry in VanillaDimension.entries) {
-            copy.putIfAbsent(entry, DimensionWithSeed.DEFAULT)
+            dimensionsCopy.putIfAbsent(entry, DimensionWithSeed.DEFAULT)
         }
 
         val seed = WorldOptions.randomSeed()
         val levels = VanillaLikeLevelsBuilder.build(context.server) {
-            for (entry in copy.entries) {
+            for (entry in dimensionsCopy.entries) {
                 val (dimension, data) = entry
                 val key = data.key.map { it.key }
                     .orElseGet { randomDimensionKey(dimension.getDimensionKey().location().path) }
@@ -81,7 +83,7 @@ class UHCMinigameFactory(
                 val updated = data.copy(
                     key = Optional.of(DimensionWithSeed.DimensionWithPersistence(key, persistence))
                 )
-                copy[dimension] = updated
+                dimensionsCopy[dimension] = updated
 
                 set(dimension) {
                     dimensionKey(key)
@@ -93,11 +95,12 @@ class UHCMinigameFactory(
         }
 
         val dimensions = UHCDimensions(
-            this.createLevelWithPersistence(levels, VanillaDimension.Overworld, copy),
-            this.createLevelWithPersistence(levels, VanillaDimension.Nether, copy),
-            this.createLevelWithPersistence(levels, VanillaDimension.End, copy),
+            this.createLevelWithPersistence(levels, VanillaDimension.Overworld, dimensionsCopy),
+            this.createLevelWithPersistence(levels, VanillaDimension.Nether, dimensionsCopy),
+            this.createLevelWithPersistence(levels, VanillaDimension.End, dimensionsCopy),
         )
-        return UHCMinigame(context.server, context.uuid, dimensions, UHCMinigameFactory(copy))
+        val nerfedPlayersCopy = HashSet(this.nerfedPlayers)
+        return UHCMinigame(context.server, context.uuid, dimensions, nerfedPlayersCopy, UHCMinigameFactory(dimensionsCopy, nerfedPlayersCopy))
     }
 
     private fun randomDimensionKey(dimension: String): ResourceKey<Level> {
@@ -125,7 +128,9 @@ class UHCMinigameFactory(
                     VanillaDimension.CODEC,
                     DimensionWithSeed.CODEC,
                     StringRepresentable.keys(VanillaDimension.entries.toTypedArray())
-                ).fieldOf("dimensions").forGetter(UHCMinigameFactory::dimensions)
+                ).fieldOf("dimensions").forGetter(UHCMinigameFactory::dimensions),
+                UUIDUtil.CODEC_SET.lenientOptionalFieldOf("nerfed_players", emptySet())
+                    .forGetter(UHCMinigameFactory::nerfedPlayers)
             ).apply(instance, ::UHCMinigameFactory)
         }
     }

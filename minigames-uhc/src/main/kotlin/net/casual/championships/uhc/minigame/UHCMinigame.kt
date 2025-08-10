@@ -124,6 +124,8 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.ai.attributes.AttributeModifier
+import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potion
@@ -153,6 +155,7 @@ class UHCMinigame(
     server: MinecraftServer,
     uuid: UUID,
     private val dimensions: UHCDimensions,
+    private val nerfedPlayers: Set<UUID>,
     private val factory: UHCMinigameFactory? = null
 ): Minigame(server, uuid), RulesProvider by UHCRules {
     override val id = ID
@@ -184,6 +187,19 @@ class UHCMinigame(
     }
 
     fun resetPlayerHealth(player: ServerPlayer) {
+        if (this.nerfedPlayers.contains(player.uuid)) run {
+            val maxHealth = player.attributes.getInstance(Attributes.MAX_HEALTH) ?: return@run
+            maxHealth.removeModifier(PLAYER_MAX_HEALTH_NERF_ID)
+            // nerf by halving total health
+            maxHealth.addPermanentModifier(
+                AttributeModifier(
+                    PLAYER_MAX_HEALTH_NERF_ID,
+                    -0.5,
+                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                )
+            )
+        }
+
         player.boostHealth(this.settings.health)
         player.resetHealth()
     }
@@ -401,6 +417,7 @@ class UHCMinigame(
     private fun onMinigamePlayerRemoved(event: MinigameRemovePlayerEvent) {
         val player = event.player
         player.unboostHealth()
+        player.attributes.getInstance(Attributes.MAX_HEALTH)?.removeModifier(PLAYER_MAX_HEALTH_NERF_ID)
         player.resetHunger()
         player.resetExperience()
         player.clearPlayerInventory()
@@ -916,6 +933,8 @@ class UHCMinigame(
     companion object {
         private const val MOB_SPAWN_PROBABILITY = 1.0F / 2.0F
         private val MOB_LOOT_MULTIPLIER = (1.0F / MOB_SPAWN_PROBABILITY).roundToInt()
+
+        private val PLAYER_MAX_HEALTH_NERF_ID = UHCMod.id("player_max_health_nerf")
 
         val ID = UHCMod.id("uhc_minigame")
     }
