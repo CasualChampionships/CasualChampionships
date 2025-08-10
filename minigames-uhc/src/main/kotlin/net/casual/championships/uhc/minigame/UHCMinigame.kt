@@ -179,41 +179,6 @@ class UHCMinigame(
         this.levels.addAll(this.dimensions.map { it.level })
     }
 
-    fun addPlayerToAppropriateVoiceGroup(player: ServerPlayer) {
-        val team = when {
-            this.players.isSpectating(player) -> this.teams.getSpectatorTeam()
-            else -> player.team ?: return
-        }
-        val group = getVoiceGroupOfTeam(team)
-        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = group
-    }
-
-    fun getVoiceGroupOfTeam(team: Team): Group {
-        return when {
-            this.teams.isSpectatorTeam(team) || this.teams.isAdminTeam(team) -> this.voiceGroups.computeIfAbsent(team) {
-                createDefaultGroupWithType(Group.Type.NORMAL, team.name)
-            }
-            else -> this.voiceGroups.computeIfAbsent(team) {
-                createDefaultGroupWithType(Group.Type.OPEN, team.name)
-            }
-        }
-    }
-
-    fun createDefaultGroupWithType(type: Group.Type, name: String): Group {
-        val password = UUID.randomUUID().toString()
-        return UHCVoicePlugin.voicechatApi!!.groupBuilder()
-            .setName(name)
-            .setType(type)
-            .setPersistent(true)
-            .setHidden(true)
-            .setPassword(password)
-            .build()
-    }
-
-    fun playerLeaveVoiceGroup(player: ServerPlayer) {
-        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = null
-    }
-
     fun resetPlayerHealth(player: ServerPlayer) {
         player.boostHealth(this.settings.health)
         player.resetHealth()
@@ -436,7 +401,7 @@ class UHCMinigame(
         player.resetExperience()
         player.clearPlayerInventory()
         // PlayerRecorders.get(player)?.stop()
-        playerLeaveVoiceGroup(player)
+        this.playerLeaveVoiceGroup(player)
     }
 
     @Listener
@@ -542,7 +507,7 @@ class UHCMinigame(
             // Needed for updating the player's health
             player.resetSentInfo()
 
-            addPlayerToAppropriateVoiceGroup(player)
+            this.addPlayerToAppropriateVoiceGroup(player)
         }
     }
 
@@ -632,7 +597,7 @@ class UHCMinigame(
             player.teleportTo(this.overworld.asLocation(Vec3(0.0, 128.0, 0.0)))
         }
 
-        addPlayerToAppropriateVoiceGroup(player)
+        this.addPlayerToAppropriateVoiceGroup(player)
 
         val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
         this.scheduler.schedule(1.Ticks) {
@@ -683,7 +648,7 @@ class UHCMinigame(
             return
         }
 
-        addPlayerToAppropriateVoiceGroup(player)
+        this.addPlayerToAppropriateVoiceGroup(player)
     }
 
     @Listener
@@ -698,7 +663,7 @@ class UHCMinigame(
     @Listener(phase = BuiltInEventPhases.POST)
     private fun afterPlayerTeamJoin(event: PlayerTeamJoinEvent) {
         val (player) = event
-        addPlayerToAppropriateVoiceGroup(player)
+        this.addPlayerToAppropriateVoiceGroup(player)
     }
 
     @Listener
@@ -708,7 +673,7 @@ class UHCMinigame(
             this.effects.forceUpdate(teammate, player)
             this.effects.forceUpdate(player, teammate)
         }
-        playerLeaveVoiceGroup(player)
+        this.playerLeaveVoiceGroup(player)
     }
 
     @Listener
@@ -719,6 +684,41 @@ class UHCMinigame(
     @Listener(requiresMainThread = false)
     private fun onChunkGenerationMobSpawn(event: ChunkGenerationMobSpawnEvent) {
         event.probability *= MOB_SPAWN_PROBABILITY
+    }
+
+    private fun addPlayerToAppropriateVoiceGroup(player: ServerPlayer) {
+        val team = when {
+            this.players.isSpectating(player) -> this.teams.getSpectatorTeam()
+            else -> player.team ?: return
+        }
+        val group = this.getVoiceGroupOfTeam(team)
+        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = group
+    }
+
+    private fun getVoiceGroupOfTeam(team: Team): Group {
+        return when {
+            this.teams.isSpectatorTeam(team) || this.teams.isAdminTeam(team) -> this.voiceGroups.computeIfAbsent(team) {
+                this.createDefaultGroupWithType(Group.Type.NORMAL, team.name)
+            }
+            else -> this.voiceGroups.computeIfAbsent(team) {
+                this.createDefaultGroupWithType(Group.Type.OPEN, team.name)
+            }
+        }
+    }
+
+    private fun createDefaultGroupWithType(type: Group.Type, name: String): Group {
+        val password = UUID.randomUUID().toString()
+        return UHCVoicePlugin.voicechatApi!!.groupBuilder()
+            .setName(name)
+            .setType(type)
+            .setPersistent(true)
+            .setHidden(true)
+            .setPassword(password)
+            .build()
+    }
+
+    private fun playerLeaveVoiceGroup(player: ServerPlayer) {
+        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = null
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
