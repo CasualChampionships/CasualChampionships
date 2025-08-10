@@ -630,7 +630,7 @@ class UHCMinigame(
     @Listener(flags = ListenerFlags.IS_SPECTATOR)
     private fun onPlayerSneak(event: PlayerSetSneakingEvent) {
         val (player, sneaking) = event
-        if (sneaking) {
+        if (!player.isShiftKeyDown && sneaking) {
             val last = this.stats.getOrCreateStat(player, UHCStats.LAST_SNEAK_TIME)
             if (abs(this.server.tickCount - last.value) < 7) {
                 val mode = when (player.extendedGameMode) {
