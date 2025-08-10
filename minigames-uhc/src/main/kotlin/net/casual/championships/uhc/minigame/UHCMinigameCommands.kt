@@ -3,7 +3,6 @@ package net.casual.championships.uhc.minigame
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.BoolArgumentType
-import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.*
@@ -12,15 +11,12 @@ import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locatio
 import net.casual.arcade.utils.teleportTo
 import net.casual.championships.common.util.CommonCommands
 import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.uhc.compat.UHCVoicePlugin
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
-import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.TeamArgument
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerPlayer
 
 class UHCMinigameCommands(
     private val uhc: UHCMinigame
@@ -53,20 +49,6 @@ class UHCMinigameCommands(
                     }
                     literal("reset-health") {
                         executes(::resetPlayerHealth)
-                    }
-                }
-            }
-            literal("voicechat") {
-                requiresAdminOrPermission()
-                literal("join") {
-                    argument("group", StringArgumentType.word()) {
-                        suggests { _, builder ->
-                            SharedSuggestionProvider.suggest(uhc.voiceGroups.values.map { it.name }, builder)
-                        }
-                        argument("player", EntityArgument.player()) {
-                            executes(::playerJoinVoiceGroup)
-                        }
-                        executes(::joinVoiceGroup)
                     }
                 }
             }
@@ -135,24 +117,6 @@ class UHCMinigameCommands(
         val target = EntityArgument.getPlayer(context, "player")
         this.uhc.resetPlayerHealth(target)
         return context.source.success("Successfully reset ${target.scoreboardName}'s health")
-    }
-
-    private fun playerJoinVoiceGroup(context: CommandContext<CommandSourceStack>): Int {
-        return joinVoiceGroup(context, EntityArgument.getPlayer(context, "player"))
-    }
-
-    private fun joinVoiceGroup(
-        context: CommandContext<CommandSourceStack>,
-        player: ServerPlayer = context.source.playerOrException
-    ): Int {
-        val groupName = StringArgumentType.getString(context, "group")
-        val matchingGroups = this.uhc.voiceGroups.values.filter { it.name.equals(groupName) }
-        if (matchingGroups.isEmpty()) {
-            return context.source.fail("Could not find a group named ${groupName}!")
-        }
-
-        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = matchingGroups.first()
-        return context.source.success("Successfully added ${player.scoreboardName} to $groupName")
     }
 
     private fun startBoundaries(context: CommandContext<CommandSourceStack>): Int {

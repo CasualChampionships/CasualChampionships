@@ -1,7 +1,6 @@
 package net.casual.championships.uhc.minigame
 
 import com.google.gson.JsonObject
-import de.maxhenkel.voicechat.api.Group
 import eu.pb4.sgui.api.GuiHelpers
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.dimensions.utils.deleteCustomLevel
@@ -92,11 +91,9 @@ import net.casual.championships.common.util.CommonUI.broadcastGame
 import net.casual.championships.common.util.CommonUI.broadcastInfo
 import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.uhc.UHCMod
-import net.casual.championships.uhc.compat.UHCVoicePlugin
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBoundaryPhase
-import net.casual.championships.uhc.event.VoiceChatPlayerConnectedEvent
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbar
 import net.casual.championships.uhc.minigame.UHCPhase.GameOver
@@ -155,7 +152,6 @@ class UHCMinigame(
     private var lastBoundaryTime = 0.Ticks
     var boundaryPhase = UHCBoundaryPhase.First
 
-    val voiceGroups = HashMap<Team, Group>()
     val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)
     val winners = HashSet<String>()
@@ -401,7 +397,6 @@ class UHCMinigame(
         player.resetExperience()
         player.clearPlayerInventory()
         // PlayerRecorders.get(player)?.stop()
-        this.playerLeaveVoiceGroup(player)
     }
 
     @Listener
@@ -506,8 +501,6 @@ class UHCMinigame(
             player.connection.send(ClientboundTickingStepPacket(1))
             // Needed for updating the player's health
             player.resetSentInfo()
-
-            this.addPlayerToAppropriateVoiceGroup(player)
         }
     }
 
@@ -597,8 +590,6 @@ class UHCMinigame(
             player.teleportTo(this.overworld.asLocation(Vec3(0.0, 128.0, 0.0)))
         }
 
-        this.addPlayerToAppropriateVoiceGroup(player)
-
         val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
         this.scheduler.schedule(1.Ticks) {
             this.chat.broadcastInfo(rules.mini(), listOf(player))
@@ -628,29 +619,6 @@ class UHCMinigame(
         }
     }
 
-    @Listener(priority = -1)
-    private fun onClose(event: MinigameCloseEvent) {
-        val voicechatApi = UHCVoicePlugin.voicechatApi!!
-        for (player in this.players) {
-            val connection = voicechatApi.getConnectionOf(player.uuid)
-            connection?.group = null
-        }
-
-        for (group in this.voiceGroups.values) {
-            voicechatApi.removeGroup(group.id)
-        }
-    }
-
-    @Listener(during = During(before = GAME_OVER_ID))
-    private fun onVoiceChatPlayerConnected(event: VoiceChatPlayerConnectedEvent) {
-        val player = event.connection.player.player as? ServerPlayer ?: return
-        if (!this.players.has(player)) {
-            return
-        }
-
-        this.addPlayerToAppropriateVoiceGroup(player)
-    }
-
     @Listener
     private fun onPlayerTeamJoin(event: PlayerTeamJoinEvent) {
         val (player, team) = event
@@ -660,12 +628,6 @@ class UHCMinigame(
         }
     }
 
-    @Listener(phase = BuiltInEventPhases.POST)
-    private fun afterPlayerTeamJoin(event: PlayerTeamJoinEvent) {
-        val (player) = event
-        this.addPlayerToAppropriateVoiceGroup(player)
-    }
-
     @Listener
     private fun onPlayerTeamLeave(event: PlayerTeamLeaveEvent) {
         val (player, team) = event
@@ -673,7 +635,6 @@ class UHCMinigame(
             this.effects.forceUpdate(teammate, player)
             this.effects.forceUpdate(player, teammate)
         }
-        this.playerLeaveVoiceGroup(player)
     }
 
     @Listener
@@ -684,41 +645,6 @@ class UHCMinigame(
     @Listener(requiresMainThread = false)
     private fun onChunkGenerationMobSpawn(event: ChunkGenerationMobSpawnEvent) {
         event.probability *= MOB_SPAWN_PROBABILITY
-    }
-
-    private fun addPlayerToAppropriateVoiceGroup(player: ServerPlayer) {
-        val team = when {
-            this.players.isSpectating(player) -> this.teams.getSpectatorTeam()
-            else -> player.team ?: return
-        }
-        val group = this.getVoiceGroupOfTeam(team)
-        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = group
-    }
-
-    private fun getVoiceGroupOfTeam(team: Team): Group {
-        return when {
-            this.teams.isSpectatorTeam(team) || this.teams.isAdminTeam(team) -> this.voiceGroups.computeIfAbsent(team) {
-                this.createDefaultGroupWithType(Group.Type.NORMAL, team.name)
-            }
-            else -> this.voiceGroups.computeIfAbsent(team) {
-                this.createDefaultGroupWithType(Group.Type.OPEN, team.name)
-            }
-        }
-    }
-
-    private fun createDefaultGroupWithType(type: Group.Type, name: String): Group {
-        val password = UUID.randomUUID().toString()
-        return UHCVoicePlugin.voicechatApi!!.groupBuilder()
-            .setName(name)
-            .setType(type)
-            .setPersistent(true)
-            .setHidden(true)
-            .setPassword(password)
-            .build()
-    }
-
-    private fun playerLeaveVoiceGroup(player: ServerPlayer) {
-        UHCVoicePlugin.voicechatApi!!.getConnectionOf(player.uuid)?.group = null
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
