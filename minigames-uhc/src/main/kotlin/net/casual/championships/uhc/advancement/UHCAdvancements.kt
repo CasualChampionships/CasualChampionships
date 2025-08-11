@@ -16,7 +16,7 @@ object UHCAdvancements: AdvancementCollection() {
         id = id("root")
         display(Items.GOLDEN_APPLE)
         setTitleAndDesc("uhc.advancements.root")
-        background = ClientAsset(ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/adventure.png"))
+        background = ClientAsset(ResourceLocation.withDefaultNamespace("gui/advancements/backgrounds/adventure"))
     }
 
     val FIRST_BLOOD = register {
