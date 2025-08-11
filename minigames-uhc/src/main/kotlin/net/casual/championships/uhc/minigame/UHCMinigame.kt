@@ -23,6 +23,7 @@ import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
+import net.casual.arcade.replay.recorder.player.ReplayPlayerRecorders
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.scheduler.GlobalTickedScheduler
@@ -144,6 +145,7 @@ import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.scores.Team
 import java.util.*
+import kotlin.io.path.createDirectories
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -372,9 +374,9 @@ class UHCMinigame(
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         val (player, source) = event
 
-        // GlobalTickedScheduler.schedule(1.Seconds) {
-        //     PlayerRecorders.get(player)?.stop()
-        // }
+        GlobalTickedScheduler.schedule(1.Seconds) {
+            ReplayPlayerRecorders.get(player).forEach { it.stop() }
+        }
 
         this.onEliminated(player, player.getKillCreditWith(source))
     }
@@ -404,7 +406,7 @@ class UHCMinigame(
         player.resetHunger()
         player.resetExperience()
         player.clearPlayerInventory()
-        // PlayerRecorders.get(player)?.stop()
+        ReplayPlayerRecorders.get(player).forEach { it.stop() }
     }
 
     @Listener
@@ -534,9 +536,13 @@ class UHCMinigame(
         val player = event.player
         this.mapRenderer.stopWatching(player)
 
-        // if (!PlayerRecorders.has(player) && this.settings.replay) {
-        //     PlayerRecorders.create(player).start()
-        // }
+        if (!ReplayPlayerRecorders.has(player) && this.settings.replay) {
+            val directory = CommonConfig.resolve("replays")
+                .resolve("uhc")
+                .resolve(player.scoreboardName)
+                .createDirectories()
+            ReplayPlayerRecorders.create(player, directory).start()
+        }
     }
 
     @Listener
