@@ -18,12 +18,15 @@
         "adapter": "kotlin",
         "value": "net.casual.championships.uhc.UHCMod"
       }
+    ],
+    "voicechat": [
+      {
+        "adapter": "kotlin",
+        "value": "net.casual.championships.uhc.compat.UHCVoicePlugin"
+      }
     ]
   },
   "mixins": [
 
-  ],
-  "depends": {
-
-  }
+  ]
 }

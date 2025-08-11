@@ -94,6 +94,7 @@ subprojects {
 dependencies {
     include(libs.arcade)
     include(libs.map.canvas)
+    includeImplementation(libs.voicechat.api)
 
     for (subproject in project.subprojects) {
         implementation(project(path = subproject.path, configuration = "namedElements"))
