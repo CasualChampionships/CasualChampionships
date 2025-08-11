@@ -39,6 +39,9 @@ import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.int
 import net.casual.arcade.utils.JsonUtils.obj
 import net.casual.arcade.utils.MathUtils
+import net.casual.arcade.utils.MathUtils.component1
+import net.casual.arcade.utils.MathUtils.component2
+import net.casual.arcade.utils.MathUtils.component3
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
@@ -284,47 +287,54 @@ class UHCMinigame(
         }
     }
 
-    // TODO: Fix these events to work with the new boundary!
     @Listener
     private fun onBorderEntityPortalEntryPointEvent(event: BorderEntityPortalEntryPointEvent) {
-        val (border, _, _, pos) = event
+        val (_, level, _, pos) = event
+
+        val boundary = level.levelBoundary ?: return
 
         // Blocks per millisecond
-        val shrinkingSpeed = border.lerpSpeed
+        val shrinkingSpeed = this.boundaryPhase.getSpeed()
         if (shrinkingSpeed <= 0) {
             // The border is static or expanding
             return
         }
         val margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
-        if (margin >= border.size * 0.5) {
+        if (margin >= boundary.getSize().x * 0.5) {
+            val (x, _, z) = boundary.getCenter()
             // The border would reach size 0 within 30 seconds
-            event.cancel(BlockPos.containing(border.centerX, pos.y, border.centerZ))
+            event.cancel(BlockPos.containing(x, pos.y, z))
             return
         }
 
+        val box = boundary.getAABB()
         event.cancel(BlockPos.containing(
-            Mth.clamp(pos.x, border.minX + margin, border.maxX - margin),
+            Mth.clamp(pos.x, box.minX + margin, box.maxX - margin),
             pos.y,
-            Mth.clamp(pos.z, border.minZ + margin, border.maxZ - margin)
+            Mth.clamp(pos.z, box.minZ + margin, box.maxZ - margin)
         ))
     }
 
     @Listener
     private fun onBorderWithinBoundsEvent(event: BorderPortalWithinBoundsEvent) {
-        val (border, _, pos) = event
+        val (_, level, pos) = event
+
+        val boundary = level.levelBoundary ?: return
+
         // Blocks per millisecond
-        val shrinkingSpeed = border.lerpSpeed
+        val shrinkingSpeed = this.boundaryPhase.getSpeed()
         if (shrinkingSpeed <= 0) {
             // The border is static or expanding
             return
         }
         var margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
-        margin = margin.coerceAtMost(border.size * 0.5 - 1)
+        margin = margin.coerceAtMost(boundary.getSize().x * 0.5 - 1)
+        val box = boundary.getAABB()
         event.cancel(
-            pos.x >= border.minX + margin
-                && pos.x + 1 <= border.maxX - margin
-                && pos.z >= border.minZ + margin
-                && pos.z + 1 <= border.maxZ - margin
+            pos.x >= box.minX + margin
+                && pos.x + 1 <= box.maxX - margin
+                && pos.z >= box.minZ + margin
+                && pos.z + 1 <= box.maxZ - margin
         )
     }
 
