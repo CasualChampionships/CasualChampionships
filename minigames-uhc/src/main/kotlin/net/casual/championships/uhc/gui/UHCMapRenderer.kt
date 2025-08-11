@@ -15,6 +15,7 @@ import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.TeamUtils.color
+import net.casual.arcade.utils.isOf
 import net.casual.championships.common.CommonMod
 import net.casual.championships.uhc.utils.UHCComponents
 import net.casual.championships.uhc.minigame.UHCMinigame
@@ -97,8 +98,9 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
 
         // Let's just assume that our center is stationary because that makes things easier.
         // Let's also assume that our boundary is square because that also makes things easier
-        var startSize = UHCBoundaryManager.calculateSizeAndCenter(this.uhc, level, this.uhc.boundaryPhase.start).size.x
-        val endSize = UHCBoundaryManager.calculateSizeAndCenter(this.uhc, level, this.uhc.boundaryPhase.end).size.x
+        val phase = this.uhc.boundaryPhase
+        var startSize = UHCBoundaryManager.calculateSizeAndCenter(this.uhc, level, phase.getStart(level)).size.x
+        val endSize = UHCBoundaryManager.calculateSizeAndCenter(this.uhc, level, phase.getEnd(level)).size.x
 
         val boundary = level.levelBoundary ?: return
         if (boundary.getSize().x == endSize) {
@@ -282,49 +284,49 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
     }
 
     private fun biomeToCanvasColor(biome: Holder<Biome>, pos: BlockPos): CanvasColor {
-        if (biome.`is`(BiomeTags.IS_OCEAN) || biome.`is`(BiomeTags.IS_DEEP_OCEAN) || biome.`is`(BiomeTags.IS_RIVER)) {
+        if (biome.isOf(BiomeTags.IS_OCEAN) || biome.isOf(BiomeTags.IS_DEEP_OCEAN) || biome.isOf(BiomeTags.IS_RIVER)) {
             return CanvasColor.WATER_BLUE_NORMAL
         }
-        if (biome.`is`(BiomeTags.IS_BADLANDS)){
+        if (biome.isOf(BiomeTags.IS_BADLANDS)){
             return CanvasColor.TERRACOTTA_ORANGE_HIGH
         }
-        if (biome.`is`(Biomes.DESERT) || biome.`is`(BiomeTags.IS_BEACH)) {
+        if (biome.isOf(Biomes.DESERT) || biome.isOf(BiomeTags.IS_BEACH)) {
             return CanvasColor.PALE_YELLOW_NORMAL
         }
-        if (biome.`is`(BiomeTags.IS_MOUNTAIN)){
+        if (biome.isOf(BiomeTags.IS_MOUNTAIN)){
             return CanvasColor.STONE_GRAY_NORMAL
         }
-        if (biome.`is`(BiomeTags.IS_SAVANNA)){
+        if (biome.isOf(BiomeTags.IS_SAVANNA)){
             return CanvasColor.GREEN_NORMAL
         }
-        if (biome.`is`(BiomeTags.IS_JUNGLE)) {
+        if (biome.isOf(BiomeTags.IS_JUNGLE)) {
             return CanvasColor.EMERALD_GREEN_LOW
         }
-        if (biome.`is`(Biomes.SNOWY_PLAINS) || biome.`is`(Biomes.SNOWY_TAIGA)) {
+        if (biome.isOf(Biomes.SNOWY_PLAINS) || biome.isOf(Biomes.SNOWY_TAIGA)) {
             return CanvasColor.WHITE_NORMAL
         }
-        if (biome.`is`(Biomes.NETHER_WASTES)) {
+        if (biome.isOf(Biomes.NETHER_WASTES)) {
             return CanvasColor.DARK_RED_NORMAL
         }
-        if (biome.`is`(Biomes.WARPED_FOREST)) {
+        if (biome.isOf(Biomes.WARPED_FOREST)) {
             return CanvasColor.BRIGHT_TEAL_NORMAL
         }
-        if (biome.`is`(Biomes.CRIMSON_FOREST)) {
+        if (biome.isOf(Biomes.CRIMSON_FOREST)) {
             return CanvasColor.RED_NORMAL
         }
-        if (biome.`is`(Biomes.BASALT_DELTAS)) {
+        if (biome.isOf(Biomes.BASALT_DELTAS)) {
             return CanvasColor.DEEPSLATE_GRAY_NORMAL
         }
-        if (biome.`is`(Biomes.SOUL_SAND_VALLEY)) {
+        if (biome.isOf(Biomes.SOUL_SAND_VALLEY)) {
             return CanvasColor.BROWN_NORMAL
         }
-        if (biome.`is`(Biomes.END_HIGHLANDS) || biome.`is`(Biomes.END_MIDLANDS) || biome.`is`(Biomes.END_BARRENS)) {
+        if (biome.isOf(Biomes.END_HIGHLANDS) || biome.isOf(Biomes.END_MIDLANDS) || biome.isOf(Biomes.END_BARRENS)) {
             return CanvasColor.PALE_YELLOW_LOW
         }
-        if (biome.`is`(Biomes.THE_VOID) || biome.`is`(Biomes.SMALL_END_ISLANDS)) {
+        if (biome.isOf(Biomes.THE_VOID) || biome.isOf(Biomes.SMALL_END_ISLANDS)) {
             return CanvasColor.BLACK_NORMAL
         }
-        if (biome.`is`(Biomes.THE_END)) {
+        if (biome.isOf(Biomes.THE_END)) {
             if (pos.x * pos.x + pos.z * pos.z < 50 * 50) {
                 return CanvasColor.PALE_YELLOW_LOW
             }

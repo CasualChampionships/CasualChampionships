@@ -6,13 +6,15 @@ import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.lev
 import net.casual.arcade.boundary.renderer.AxisAlignedDisplayBoundaryRenderer
 import net.casual.arcade.boundary.renderer.options.AxisAlignedModelRenderOptions
 import net.casual.arcade.boundary.shape.AxisAlignedBoundaryShape
+import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
+import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.utils.toIdString
+import net.casual.championships.common.task.GlowingBossbarTask
 import net.casual.championships.uhc.UHCMod
 import net.casual.championships.uhc.minigame.UHCMinigame
-import net.casual.championships.uhc.minigame.UHCPhase
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.phys.Vec3
 
@@ -41,30 +43,47 @@ object UHCBoundaryManager {
         return SizeAndCenter(size, center)
     }
 
+    fun getFinalPhase(uhc: UHCMinigame, level: ServerLevel): UHCBoundaryPhase {
+        return when (level) {
+            uhc.nether -> UHCBoundaryPhase.Fourth
+            uhc.end -> UHCBoundaryPhase.Third
+            else -> UHCBoundaryPhase.Sixth
+        }
+    }
+
     private fun move(uhc: UHCMinigame, current: UHCBoundaryPhase) {
         uhc.boundaryPhase = current
+        this.move(uhc, MinecraftTimeDuration.ZERO) { current.getStart(it) }
         val duration = current.getDuration(uhc.settings.borderTime)
-        this.move(uhc, current.end, duration)
+        this.move(uhc, duration) { current.getEnd(it) }
         uhc.scheduler.schedulePhased(duration, MinigameTask(uhc) { minigame ->
             this.complete(minigame, current)
         })
     }
 
     private fun complete(uhc: UHCMinigame, current: UHCBoundaryPhase) {
-        if (current == UHCBoundaryPhase.entries.last()) {
-            uhc.setPhase(UHCPhase.BoundaryFinished)
+        if (current.getNextStage() == current) {
+            UHCMod.logger.info("Completed boundary moving!")
             return
+        }
+
+        if (current == UHCBoundaryPhase.Fifth) {
+            val duration = current.getCooldown(uhc.settings.borderTime)
+            val task = GlowingBossbarTask(uhc)
+                .withDuration(duration)
+                .then(MinigameTask(uhc, UHCMinigame::weAreInTheEndgameNow))
+            uhc.scheduler.schedulePhasedCancellable(duration, task).runIfCancelled()
         }
 
         uhc.onPauseBoundary()
         val cooldown = current.getCooldown(uhc.settings.borderTime)
         uhc.scheduler.schedulePhased(cooldown, MinigameTask(uhc) { minigame ->
-            uhc.onResumeBoundary()
+            minigame.onResumeBoundary()
             this.move(minigame, current.getNextStage())
         })
     }
 
-    private fun move(uhc: UHCMinigame, target: SizeAndCenter, duration: MinecraftTimeDuration) {
+    private fun move(uhc: UHCMinigame, duration: MinecraftTimeDuration, getter: (ServerLevel) -> SizeAndCenter) {
         for (level in uhc.levels) {
             val boundary = level.levelBoundary
             if (boundary == null) {
@@ -72,31 +91,26 @@ object UHCBoundaryManager {
                 continue
             }
 
+            val target = getter.invoke(level)
             val modified = this.calculateSizeAndCenter(uhc, level, target)
             if (modified.size != boundary.getSize() || modified.center != boundary.getCenter()) {
                 boundary.resize(modified.size, duration)
                 boundary.recenter(modified.center, duration)
-                UHCMod.logger.info("Dimension ${level.dimension().toIdString()} moving to $target")
             }
         }
     }
 
     private fun createLevelBoundary(uhc: UHCMinigame, level: ServerLevel): LevelBoundary {
         val phase = UHCBoundaryPhase.First
-        val start = this.calculateSizeAndCenter(uhc, level, phase.start)
+        val start = this.calculateSizeAndCenter(uhc, level, phase.getStart(level))
         val shape = AxisAlignedBoundaryShape(start.aabb())
         val renderer = AxisAlignedDisplayBoundaryRenderer(shape, AxisAlignedModelRenderOptions.CUBOID_SHADER)
         return LevelBoundary(shape, renderer)
     }
 
     private fun clampBoundarySize(uhc: UHCMinigame, level: ServerLevel, size: Vec3): Vec3 {
-        if (level == uhc.end) {
-            val bounds = UHCBoundaryPhase.Third.end.size
-            return MathUtils.max(size, bounds)
-        } else if (level == uhc.nether) {
-            val bounds = UHCBoundaryPhase.Fourth.end.size
-            return MathUtils.max(size, bounds)
-        }
-        return size
+        val final = this.getFinalPhase(uhc, level)
+        val bounds = final.getEndSize(level)
+        return MathUtils.max(size, bounds)
     }
 }

@@ -13,6 +13,7 @@ import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.minigame.CasualSettings
+import net.casual.championships.uhc.border.UHCBoundaryPhase
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
 import net.minecraft.world.item.Items
@@ -47,10 +48,11 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
     var borderTime by this.register(time {
         name = "border_completion_time"
         display = DisplayItems.BORDER_DISTANCE.named("Border Completion Time")
-        value = 120.Minutes
+        value = UHCBoundaryPhase.TOTAL_TIME
         option("ten_minutes", Items.CAKE.named("10 Minutes"), 10.Minutes)
         option("thirty_minutes", Items.SCULK_SENSOR.named("30 Minutes"), 30.Minutes)
         option("two_hours", Items.GREEN_STAINED_GLASS_PANE.named("2 Hours"), 120.Minutes)
+        option("total_time", Items.GREEN_STAINED_GLASS_PANE.named("Total Time"), UHCBoundaryPhase.TOTAL_TIME)
         option("two_and_half_hours", Items.YELLOW_STAINED_GLASS_PANE.named("2.5 Hours"), 150.Minutes)
         option("three_hours", Items.RED_STAINED_GLASS_PANE.named("3 Hours"), 180.Minutes)
     })

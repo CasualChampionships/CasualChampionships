@@ -4,6 +4,7 @@ import com.google.gson.JsonObject
 import eu.pb4.sgui.api.GuiHelpers
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
+import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.dimensions.utils.deleteCustomLevel
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
@@ -43,6 +44,8 @@ import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.MathUtils.component1
 import net.casual.arcade.utils.MathUtils.component2
 import net.casual.arcade.utils.MathUtils.component3
+import net.casual.arcade.utils.MathUtils.isAbove
+import net.casual.arcade.utils.MathUtils.isBelow
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
@@ -99,6 +102,7 @@ import net.casual.championships.common.util.CommonUI.broadcastWithSound
 import net.casual.championships.uhc.UHCMod
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
+import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.border.UHCBoundaryPhase
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbar
@@ -166,7 +170,7 @@ class UHCMinigame(
     override val id = ID
 
     private var lastBoundaryTime = 0.Ticks
-    var boundaryPhase = UHCBoundaryPhase.First
+    var boundaryPhase: UHCBoundaryPhase = UHCBoundaryPhase.First
 
     val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)
@@ -213,7 +217,7 @@ class UHCMinigame(
         )
     }
 
-    fun onFinishBoundary() {
+    fun weAreInTheEndgameNow() {
         for (player in this.players) {
             player.sendSound(CommonSounds.GAME_GRACE_END)
         }
@@ -221,19 +225,9 @@ class UHCMinigame(
             this.settings.glowing = true
         }
 
-        val boundary = this.overworld.levelBoundary
-        if (boundary != null) {
-            val y = this.overworld.getHeight(Heightmap.Types.WORLD_SURFACE_WG, 0, 0).toDouble()
-            boundary.recenter(boundary.shape.center().with(Direction.Axis.Y, y))
-
-            val height = ((y - this.overworld.minY) + 10) + 20
-            val size = boundary.shape.size()
-            boundary.shape.resize(size.with(Direction.Axis.Y, height))
-            boundary.shape.resize(size.with(Direction.Axis.Y, 60.0), 8.Minutes)
-        }
-
         if (this.settings.generatePortals) {
-            this.overworld.portalForcer.createPortal(BlockPos(0, 64, 0), Direction.Axis.X)
+            val overworldSurface = this.overworld.getHeight(Heightmap.Types.WORLD_SURFACE_WG, 0, 0)
+            this.overworld.portalForcer.createPortal(BlockPos(0, overworldSurface, 0), Direction.Axis.X)
             this.nether.portalForcer.createPortal(BlockPos(0, 64, 0), Direction.Axis.X)
         }
     }
@@ -260,7 +254,7 @@ class UHCMinigame(
 
     override fun save(data: JsonObject) {
         data.add("advancements", this.uhcAdvancements.serialize())
-        data.addProperty("boundary_phase", this.boundaryPhase.ordinal)
+        data.addProperty("boundary_phase", UHCBoundaryPhase.entries.indexOf(this.boundaryPhase))
         data.addProperty("last_boundary_time", this.lastBoundaryTime.ticks)
     }
 
@@ -309,11 +303,17 @@ class UHCMinigame(
         val boundary = level.levelBoundary ?: return
 
         // Blocks per millisecond
-        val shrinkingSpeed = this.boundaryPhase.getSpeed()
-        if (shrinkingSpeed <= 0) {
-            // The border is static or expanding
+        val shrinkingSpeed = this.boundaryPhase.getSpeed(level)
+        if (shrinkingSpeed > 0) {
+            val box = boundary.getAABB()
+            event.cancel(BlockPos.containing(
+                Mth.clamp(pos.x, box.minX, box.maxX),
+                Mth.clamp(pos.y, box.minY, box.maxY),
+                Mth.clamp(pos.z, box.minZ, box.maxZ)
+            ))
             return
         }
+
         val margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
         if (margin >= boundary.getSize().x * 0.5) {
             val (x, y, z) = boundary.getCenter()
@@ -334,14 +334,14 @@ class UHCMinigame(
     private fun onPortalCreateValidPosition(event: PortalCreateValidPositionEvent) {
         val (level, position) = event
         val boundary = level.levelBoundary ?: return
-        event.and { this.isPositionValidForPortal(position, boundary) }
+        event.and { this.isPositionValidForPortal(level, position, boundary) }
     }
 
     @Listener
     private fun onPortalFindValidPosition(event: PortalFindValidPositionEvent) {
         val (level, position) = event
         val boundary = level.levelBoundary ?: return
-        event.and { this.isPositionValidForPortal(position, boundary) }
+        event.and { this.isPositionValidForPortal(level, position, boundary) }
     }
 
     @Listener
@@ -694,23 +694,26 @@ class UHCMinigame(
         event.probability *= MOB_SPAWN_PROBABILITY
     }
 
-    private fun isPositionValidForPortal(position: BlockPos, boundary: LevelBoundary): Boolean {
+    private fun isPositionValidForPortal(level: ServerLevel, position: BlockPos, boundary: LevelBoundary): Boolean {
         // Blocks per millisecond
-        val shrinkingSpeed = this.boundaryPhase.getSpeed()
+        val shrinkingSpeed = this.boundaryPhase.getSpeed(level)
         if (shrinkingSpeed <= 0) {
             // The border is static or expanding
-            return true
+            return boundary.contains(position) == BoundaryShape.Containment.Full
         }
 
-        var margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
-        margin = margin.coerceAtMost(boundary.getSize().x * 0.5 - 1)
+        val margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
+        val size = boundary.getSize()
+        val xMargin = margin.coerceAtMost(size.x * 0.5 - 1)
+        val yMargin = margin.coerceAtMost(size.y * 0.5 - 1)
+        val zMargin = margin.coerceAtMost(size.z * 0.5 - 1)
         val box = boundary.getAABB()
-        return position.x >= box.minX + margin
-            && position.x + 1 <= box.maxX - margin
-            && position.y >= box.minY + margin
-            && position.y + 1 <= box.maxY - margin
-            && position.z >= box.minZ + margin
-            && position.z + 1 <= box.maxZ - margin
+        return position.x >= box.minX + xMargin
+            && position.x + 1 <= box.maxX - xMargin
+            && position.y >= box.minY + yMargin
+            && position.y + 1 <= box.maxY - yMargin
+            && position.z >= box.minZ + zMargin
+            && position.z + 1 <= box.maxZ - zMargin
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
@@ -767,10 +770,29 @@ class UHCMinigame(
         val level = player.level()
         val boundary = level.levelBoundary ?: return
 
-        if (boundary.contains(player.position())) {
+        val position = player.position()
+        if (boundary.contains(position)) {
             return
         }
 
+        val box = boundary.getAABB()
+        when {
+            box.isAbove(position) -> this.handleOutsideBorderVertically(player, Direction.DOWN)
+            box.isBelow(position) -> this.handleOutsideBorderVertically(player, Direction.UP)
+            else -> this.handleOutsideBorderHorizontally(player, level, boundary)
+        }
+    }
+
+    private fun handleOutsideBorderVertically(player: ServerPlayer, direction: Direction) {
+        if (this.uptime % 200 == 0) {
+            player.sendTitle(
+                Component.empty(),
+                CommonComponents.INSIDE_BORDER.generate(CommonComponents.direction(direction).lime()).mini()
+            )
+        }
+    }
+
+    private fun handleOutsideBorderHorizontally(player: ServerPlayer, level: ServerLevel, boundary: LevelBoundary) {
         val vector = boundary.getDirectionFrom(player.eyePosition)
 
         val start = player.eyePosition.add(0.0, 4.0, 0.0)
@@ -785,7 +807,9 @@ class UHCMinigame(
                 val position = hit.blockPos
                 val rotation = atan2(vector.x, vector.z)
 
-                val arrow = ArrowShape.createHorizontalCentred(position.x, hit.location.y + 0.1, position.z, 1.0, rotation)
+                val arrow = ArrowShape.createHorizontalCentred(
+                    position.x, hit.location.y + 0.1, position.z, 1.0, rotation
+                )
                 arrow.drawAsParticlesFor(player, pointsPerUnit = 10.0)
             }
         }
@@ -913,10 +937,7 @@ class UHCMinigame(
     }
 
     private fun isFinalStage(level: ServerLevel): Boolean {
-        if (level == this.end && this.boundaryPhase >= UHCBoundaryPhase.Third) {
-            return true
-        }
-        return this.boundaryPhase == UHCBoundaryPhase.Fifth
+        return UHCBoundaryManager.getFinalPhase(this, level) <= this.boundaryPhase
     }
 
     private inner class BorderMovingInfo(private val buffer: Component): LevelSpecificElement<SidebarComponent> {
@@ -935,7 +956,11 @@ class UHCMinigame(
                 )
             }
 
-            val remainingTime = boundaryPhase.getCooldown(settings.borderTime) - (uptime.Ticks - lastBoundaryTime)
+            val cooldown = when {
+                boundaryPhase == UHCBoundaryPhase.First -> settings.gracePeriod
+                else -> boundaryPhase.getCooldown(settings.borderTime)
+            }
+            val remainingTime = cooldown - (uptime.Ticks - lastBoundaryTime)
             return SidebarComponent.withCustomScore(
                 this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderMovingIn").mini()),
                 Component.literal(remainingTime.formatMMSS()).withStyle(colorTime(remainingTime)).append(buffer).mini()
