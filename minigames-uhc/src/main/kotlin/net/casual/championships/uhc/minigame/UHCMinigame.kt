@@ -141,6 +141,7 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.level.SpawnData
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity
+import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.storage.TagValueInput
 import net.minecraft.world.level.storage.TagValueOutput
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
@@ -217,9 +218,21 @@ class UHCMinigame(
         if (this.settings.endGameGlow) {
             this.settings.glowing = true
         }
+
+        val boundary = this.overworld.levelBoundary
+        if (boundary != null) {
+            val y = this.overworld.getHeight(Heightmap.Types.WORLD_SURFACE_WG, 0, 0).toDouble()
+            boundary.recenter(boundary.shape.center().with(Direction.Axis.Y, y))
+
+            val height = ((y - this.overworld.minY) + 10) + 20
+            val size = boundary.shape.size()
+            boundary.shape.resize(size.with(Direction.Axis.Y, height))
+            boundary.shape.resize(size.with(Direction.Axis.Y, 60.0), 8.Minutes)
+        }
+
         if (this.settings.generatePortals) {
-            this.overworld.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
-            this.nether.portalForcer.createPortal(BlockPos(0, 100, 0), Direction.Axis.X)
+            this.overworld.portalForcer.createPortal(BlockPos(0, 64, 0), Direction.Axis.X)
+            this.nether.portalForcer.createPortal(BlockPos(0, 64, 0), Direction.Axis.X)
         }
     }
 
@@ -301,16 +314,16 @@ class UHCMinigame(
         }
         val margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
         if (margin >= boundary.getSize().x * 0.5) {
-            val (x, _, z) = boundary.getCenter()
+            val (x, y, z) = boundary.getCenter()
             // The border would reach size 0 within 30 seconds
-            event.cancel(BlockPos.containing(x, pos.y, z))
+            event.cancel(BlockPos.containing(x, y, z))
             return
         }
 
         val box = boundary.getAABB()
         event.cancel(BlockPos.containing(
             Mth.clamp(pos.x, box.minX + margin, box.maxX - margin),
-            pos.y,
+            Mth.clamp(pos.y, box.minY + margin, box.maxY - margin),
             Mth.clamp(pos.z, box.minZ + margin, box.maxZ - margin)
         ))
     }
@@ -333,6 +346,8 @@ class UHCMinigame(
         event.cancel(
             pos.x >= box.minX + margin
                 && pos.x + 1 <= box.maxX - margin
+                && pos.y >= box.minY + margin
+                && pos.y + 1 <= box.maxY - margin
                 && pos.z >= box.minZ + margin
                 && pos.z + 1 <= box.maxZ - margin
         )

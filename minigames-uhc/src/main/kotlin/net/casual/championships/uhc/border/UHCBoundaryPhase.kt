@@ -6,8 +6,8 @@ import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.minecraft.world.phys.Vec3
 import kotlin.math.abs
 
-private fun default(radius: Double): SizeAndCenter {
-    return SizeAndCenter(Vec3(radius, 16384.0, radius), Vec3(0.0, 63.0, 0.0))
+private fun default(diameter: Double): SizeAndCenter {
+    return SizeAndCenter(Vec3(diameter, 1024.0, diameter), Vec3(0.0, 63.0, 0.0))
 }
 
 enum class UHCBoundaryPhase(
@@ -30,11 +30,11 @@ enum class UHCBoundaryPhase(
     }
 
     fun getDuration(total: MinecraftTimeDuration): MinecraftTimeDuration {
-        return total * (this.duration / TOTAL_TIME)
+        return total * (this.duration.ticks.toDouble() / TOTAL_TIME.ticks)
     }
 
     fun getCooldown(total: MinecraftTimeDuration): MinecraftTimeDuration {
-        return total * (this.cooldown / TOTAL_TIME)
+        return total * (this.cooldown.ticks.toDouble() / TOTAL_TIME.ticks)
     }
 
     fun getNextStage(): UHCBoundaryPhase {

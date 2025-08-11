@@ -33,10 +33,12 @@ object UHCBoundaryManager {
         level: ServerLevel,
         target: SizeAndCenter
     ): SizeAndCenter {
+        val clamped = this.clampBoundarySize(uhc, level, target.size)
         val scale = 1 / level.dimensionType().coordinateScale
-        val size = target.size.scale(uhc.settings.borderSizeMultiplier * scale)
+        val sizeScale = uhc.settings.borderSizeMultiplier * scale
+        val size = clamped.multiply(sizeScale, 1.0, sizeScale)
         val center = target.center.multiply(scale, 1.0, scale)
-        return SizeAndCenter(this.clampBoundarySize(uhc, level, size), center)
+        return SizeAndCenter(size, center)
     }
 
     private fun move(uhc: UHCMinigame, current: UHCBoundaryPhase) {
@@ -90,6 +92,9 @@ object UHCBoundaryManager {
     private fun clampBoundarySize(uhc: UHCMinigame, level: ServerLevel, size: Vec3): Vec3 {
         if (level == uhc.end) {
             val bounds = UHCBoundaryPhase.Third.end.size
+            return MathUtils.max(size, bounds)
+        } else if (level == uhc.nether) {
+            val bounds = UHCBoundaryPhase.Fourth.end.size
             return MathUtils.max(size, bounds)
         }
         return size
