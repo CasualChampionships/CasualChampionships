@@ -2,7 +2,7 @@ package net.casual.championships.common.mixin.event;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import net.casual.arcade.events.GlobalEventHandler;
-import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent;
+import net.casual.championships.common.event.portal.EntityPortalEntryPositionEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -30,7 +30,7 @@ public class NetherPortalBlockMixin {
 		@Local(ordinal = 1) ServerLevel level,
 		@Local(argsOnly = true) Entity entity
 	) {
-		BorderEntityPortalEntryPointEvent event = new BorderEntityPortalEntryPointEvent(border, level, entity, new Vec3(x, y, z));
+		EntityPortalEntryPositionEvent event = new EntityPortalEntryPositionEvent(level, entity, new Vec3(x, y, z));
 		GlobalEventHandler.Server.broadcast(event);
 		if (event.isCancelled()) {
 			return event.result();

@@ -2,6 +2,7 @@ package net.casual.championships.uhc.minigame
 
 import com.google.gson.JsonObject
 import eu.pb4.sgui.api.GuiHelpers
+import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.dimensions.utils.deleteCustomLevel
 import net.casual.arcade.events.BuiltInEventPhases
@@ -80,8 +81,9 @@ import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
 import net.casual.championships.common.event.ChunkGenerationMobSpawnEvent
 import net.casual.championships.common.event.TippedArrowTradeOfferEvent
-import net.casual.championships.common.event.border.BorderEntityPortalEntryPointEvent
-import net.casual.championships.common.event.border.BorderPortalWithinBoundsEvent
+import net.casual.championships.common.event.portal.EntityPortalEntryPositionEvent
+import net.casual.championships.common.event.portal.PortalCreateValidPositionEvent
+import net.casual.championships.common.event.portal.PortalFindValidPositionEvent
 import net.casual.championships.common.items.PlayerHeadItem
 import net.casual.championships.common.minigame.rules.RulesProvider
 import net.casual.championships.common.recipes.GoldenHeadRecipe
@@ -301,8 +303,8 @@ class UHCMinigame(
     }
 
     @Listener
-    private fun onBorderEntityPortalEntryPointEvent(event: BorderEntityPortalEntryPointEvent) {
-        val (_, level, _, pos) = event
+    private fun onEntityPortalEntryPosition(event: EntityPortalEntryPositionEvent) {
+        val (level, _, pos) = event
 
         val boundary = level.levelBoundary ?: return
 
@@ -329,28 +331,17 @@ class UHCMinigame(
     }
 
     @Listener
-    private fun onBorderWithinBoundsEvent(event: BorderPortalWithinBoundsEvent) {
-        val (_, level, pos) = event
-
+    private fun onPortalCreateValidPosition(event: PortalCreateValidPositionEvent) {
+        val (level, position) = event
         val boundary = level.levelBoundary ?: return
+        event.and { this.isPositionValidForPortal(position, boundary) }
+    }
 
-        // Blocks per millisecond
-        val shrinkingSpeed = this.boundaryPhase.getSpeed()
-        if (shrinkingSpeed <= 0) {
-            // The border is static or expanding
-            return
-        }
-        var margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
-        margin = margin.coerceAtMost(boundary.getSize().x * 0.5 - 1)
-        val box = boundary.getAABB()
-        event.cancel(
-            pos.x >= box.minX + margin
-                && pos.x + 1 <= box.maxX - margin
-                && pos.y >= box.minY + margin
-                && pos.y + 1 <= box.maxY - margin
-                && pos.z >= box.minZ + margin
-                && pos.z + 1 <= box.maxZ - margin
-        )
+    @Listener
+    private fun onPortalFindValidPosition(event: PortalFindValidPositionEvent) {
+        val (level, position) = event
+        val boundary = level.levelBoundary ?: return
+        event.and { this.isPositionValidForPortal(position, boundary) }
     }
 
     @Listener
@@ -701,6 +692,25 @@ class UHCMinigame(
     @Listener(requiresMainThread = false)
     private fun onChunkGenerationMobSpawn(event: ChunkGenerationMobSpawnEvent) {
         event.probability *= MOB_SPAWN_PROBABILITY
+    }
+
+    private fun isPositionValidForPortal(position: BlockPos, boundary: LevelBoundary): Boolean {
+        // Blocks per millisecond
+        val shrinkingSpeed = this.boundaryPhase.getSpeed()
+        if (shrinkingSpeed <= 0) {
+            // The border is static or expanding
+            return true
+        }
+
+        var margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
+        margin = margin.coerceAtMost(boundary.getSize().x * 0.5 - 1)
+        val box = boundary.getAABB()
+        return position.x >= box.minX + margin
+            && position.x + 1 <= box.maxX - margin
+            && position.y >= box.minY + margin
+            && position.y + 1 <= box.maxY - margin
+            && position.z >= box.minZ + margin
+            && position.z + 1 <= box.maxZ - margin
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
