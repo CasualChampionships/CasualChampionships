@@ -165,6 +165,7 @@ class UHCMinigame(
     server: MinecraftServer,
     uuid: UUID,
     private val dimensions: UHCDimensions,
+    private val nerfedPlayers: Set<UUID>,
     private val factory: UHCMinigameFactory? = null
 ): Minigame(server, uuid), RulesProvider by UHCRules {
     override val id = ID
@@ -358,6 +359,7 @@ class UHCMinigame(
         if (!this.players.isSpectating(player)) {
             this.updateBoundaryInfo(player)
             this.updatePedalToTheMetal(player)
+            this.updatePlayerNerfs(player)
         } else if (!player.isCreative) {
             val interval = 20.Minutes.ticks
             if (this.uptime % interval == interval - 1) {
@@ -836,6 +838,17 @@ class UHCMinigame(
         }
         player.addEffect(MobEffectInstance(
             MobEffects.SPEED, 5.Seconds.ticks + 5, 0, false, false, false
+        ))
+    }
+
+    private fun updatePlayerNerfs(player: ServerPlayer) {
+        if (!this.nerfedPlayers.contains(player.uuid)) {
+            return
+        }
+
+        // Not a particularly glamorous way to do this, but it works
+        player.addEffect(MobEffectInstance(
+            MobEffects.WEAKNESS, MobEffectInstance.INFINITE_DURATION, 0, false, false, false
         ))
     }
 
