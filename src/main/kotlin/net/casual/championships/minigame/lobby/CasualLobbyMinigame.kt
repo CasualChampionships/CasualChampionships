@@ -88,11 +88,11 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.item.component.FireworkExplosion.Shape
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.level.GameType
-import net.minecraft.world.phys.AABB
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import java.text.DecimalFormat
@@ -295,12 +295,13 @@ class CasualLobbyMinigame(
 
     @Listener
     private fun onPlayerFall(event: PlayerFallEvent) {
-        if (!AABB.of(this.area.getBoundingBox()).intersects(event.player.boundingBox)) {
+        val minY = this.area.getEntityBoundingBox().minY + 5
+        if (event.player.y < minY) {
             event.player.grantAdvancement(LobbyAdvancements.UH_OH)
             val stat = this.stats.getOrCreateStat(event.player, LEFT_LOBBY_STAT)
             stat.increment()
             if (stat.value >= 20) {
-                event.player.grantAdvancement(LobbyAdvancements.YOU_SHALL_NOT_LEAVE)
+                // event.player.grantAdvancement(LobbyAdvancements.YOU_SHALL_NOT_LEAVE)
             }
         }
     }
@@ -334,7 +335,8 @@ class CasualLobbyMinigame(
             if (!isParkouring) {
                 if (wasParkouring) {
                     this.parkourers.removeInt(player.uuid)
-                    player.closeContainer()
+                    val gui = GuiHelpers.getCurrentGui(player) as? CasualLobbyParkourHotbarGui
+                    gui?.close()
                 }
                 continue
             }
@@ -346,9 +348,13 @@ class CasualLobbyMinigame(
             val currentCheckpointIndex = this.parkourers.getInt(player.uuid)
             val updatedCheckpointIndex = data.getIntersectingCheckpoint(player.position(), currentCheckpointIndex)
             val checkpoint = data.checkpoints[updatedCheckpointIndex]
-            if (currentCheckpointIndex != updatedCheckpointIndex) {
+            if (currentCheckpointIndex != updatedCheckpointIndex || !wasParkouring) {
                 this.parkourers.put(player.uuid, updatedCheckpointIndex)
                 player.sendTitle(checkpoint.title)
+                player.sendSound(SoundEvents.ARROW_HIT_PLAYER)
+                if (updatedCheckpointIndex == data.checkpoints.lastIndex) {
+                    player.grantAdvancement(LobbyAdvancements.PARKOUR_MASTER)
+                }
             }
 
             val yTeleportThreshold = checkpoint.collision.minY - 15

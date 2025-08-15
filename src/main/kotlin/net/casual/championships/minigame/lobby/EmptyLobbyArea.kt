@@ -16,7 +16,7 @@ class EmptyLobbyArea(override val level: ServerLevel): PlaceableArea {
     }
 
     override fun getEntityBoundingBox(): AABB {
-        return MathUtils.above(0.0)
+        return MathUtils.above(-50.0)
     }
 
     override fun place(): Boolean {

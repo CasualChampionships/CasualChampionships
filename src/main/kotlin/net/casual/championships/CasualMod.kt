@@ -6,6 +6,7 @@ import net.casual.arcade.minigame.utils.MinigameRegistries
 import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.minigame.lobby.CasualLobbyData
+import net.casual.championships.minigame.lobby.CasualLobbyParkourData
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.util.CasualConfig
 import net.casual.championships.util.CasualRegistration
@@ -38,6 +39,7 @@ object CasualMod: DedicatedServerModInitializer {
         CasualMinigames.registerEvents()
 
         CasualLobbyData.register(MinigameRegistries.MINIGAME_DATA_MODULE_PROVIDER)
+        CasualLobbyParkourData.register(MinigameRegistries.MINIGAME_DATA_MODULE_PROVIDER)
     }
 
     fun reload() {
