@@ -3,6 +3,8 @@ package net.casual.championships.minigame.lobby
 import com.google.common.collect.ImmutableList
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.context.CommandContext
+import eu.pb4.sgui.api.GuiHelpers
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import net.casual.arcade.commands.*
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerTickEvent
@@ -75,7 +77,6 @@ import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelMinigameFactory
 import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
-import net.casual.championships.duel.arena.DuelArenaTemplate
 import net.casual.championships.duel.arena.DuelArenasTemplate
 import net.casual.championships.duel.ui.DuelConfigurationGui
 import net.casual.championships.minigame.CasualMinigames
@@ -110,6 +111,7 @@ class CasualLobbyMinigame(
 ): LobbyMinigame(server, uuid, EmptyLobbyArea(spawn.level), spawn) {
     override val settings: MinigameSettings = CasualSettings(this)
 
+    private val parkourers = Object2IntOpenHashMap<UUID>()
     private val duels = ArrayList<DuelMinigame>()
     private val hasSeenFireworks = HashSet<UUID>()
     private var shouldWelcomePlayers = true
@@ -162,6 +164,13 @@ class CasualLobbyMinigame(
 
         this.levels.setGameRules {
             set(GameRules.RULE_LOCATOR_BAR, false)
+        }
+
+        val parkour = this.modules.get<CasualLobbyParkourData>()
+        if (parkour != null) {
+            this.events.register<ServerTickEvent> {
+                this.tickParkour(parkour)
+            }
         }
     }
 
@@ -315,6 +324,37 @@ class CasualLobbyMinigame(
             this.minesweeperRecord = millis
             val message = CommonComponents.MINESWEEPER_RECORD.generate(player.scoreboardName, formatted)
             this.chat.broadcast(message)
+        }
+    }
+
+    private fun tickParkour(data: CasualLobbyParkourData) {
+        for (player in this.players) {
+            val isParkouring = data.isWithinParkourArea(player.position())
+            val wasParkouring = this.parkourers.containsKey(player.uuid)
+            if (!isParkouring) {
+                if (wasParkouring) {
+                    this.parkourers.removeInt(player.uuid)
+                    player.closeContainer()
+                }
+                continue
+            }
+
+            if (GuiHelpers.getCurrentGui(player) == null) {
+                CasualLobbyParkourHotbarGui(player, data.exit).open()
+            }
+
+            val currentCheckpointIndex = this.parkourers.getInt(player.uuid)
+            val updatedCheckpointIndex = data.getIntersectingCheckpoint(player.position(), currentCheckpointIndex)
+            val checkpoint = data.checkpoints[updatedCheckpointIndex]
+            if (currentCheckpointIndex != updatedCheckpointIndex) {
+                this.parkourers.put(player.uuid, updatedCheckpointIndex)
+                player.sendTitle(checkpoint.title)
+            }
+
+            val yTeleportThreshold = checkpoint.collision.minY - 15
+            if (player.y < yTeleportThreshold) {
+                player.teleportTo(checkpoint.spawn)
+            }
         }
     }
 
