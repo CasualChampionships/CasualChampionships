@@ -11,7 +11,8 @@ import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.player.PlayerTickEvent
 import net.casual.arcade.events.server.player.PlayerTryAttackEvent
 import net.casual.arcade.minigame.annotation.Listener
-import net.casual.arcade.minigame.area.PlaceableArea
+import net.casual.arcade.minigame.data.MinigameDataModules
+import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.lobby.LobbyMinigame
 import net.casual.arcade.minigame.lobby.LobbyPhase
@@ -46,7 +47,6 @@ import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.math.location.LocationWithLevel
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
-import net.casual.arcade.utils.math.location.providers.LocationProvider
 import net.casual.arcade.utils.set
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.time.MinecraftTimeDuration
@@ -75,6 +75,7 @@ import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelMinigameFactory
 import net.casual.championships.duel.DuelRequester
 import net.casual.championships.duel.DuelSettings
+import net.casual.championships.duel.arena.DuelArenaTemplate
 import net.casual.championships.duel.arena.DuelArenasTemplate
 import net.casual.championships.duel.ui.DuelConfigurationGui
 import net.casual.championships.minigame.CasualMinigames
@@ -102,15 +103,11 @@ import kotlin.time.DurationUnit
 class CasualLobbyMinigame(
     server: MinecraftServer,
     uuid: UUID,
-    area: PlaceableArea,
     spawn: LocationWithLevel<ServerLevel>,
-    private val podiumTemplate: LocationProvider,
-    private val podiumViewTemplate: LocationProvider,
-    private val fireworksLocations: List<LocationProvider>,
-    private val fireworkColors: List<Int>,
     private val duelArenaTemplates: List<DuelArenasTemplate>,
+    private val modules: MinigameDataModules,
     private val factory: CasualLobbyMinigameFactory
-): LobbyMinigame(server, uuid, area, spawn) {
+): LobbyMinigame(server, uuid, EmptyLobbyArea(spawn.level), spawn) {
     override val settings: MinigameSettings = CasualSettings(this)
 
     private val duels = ArrayList<DuelMinigame>()
@@ -350,10 +347,12 @@ class CasualLobbyMinigame(
     }
 
     override fun teleportToSpawn(player: ServerPlayer) {
+        val data = this.modules.get<CasualLobbyData>()!!
+
         val location = if (CasualMinigames.isWinner(player)) {
-            this.podiumTemplate.get().with(this.area.level)
+            data.podium.get().with(this.area.level)
         } else if (CasualMinigames.hasWinner()) {
-            this.podiumViewTemplate.get().with(this.area.level)
+            data.podiumView.get().with(this.area.level)
         } else {
             this.spawn
         }
@@ -529,18 +528,19 @@ class CasualLobbyMinigame(
     }
 
     private fun spawnFireworkDisplay(player: ServerPlayer) {
-        for (template in this.fireworksLocations) {
+        val data = this.modules.get<CasualLobbyData>()!!
+        for (template in data.fireworkLocations) {
             val firingLocation = template.get().with(this.area.level)
             val firework = VirtualFirework.build(this.area.level) {
                 location = firingLocation
                 duration = Random.nextInt(20, 30).Ticks
 
                 SHAPES.asSequence().shuffled().take(Random.nextInt(1, 4)).forEach { shape ->
-                    val index = Random.nextInt(fireworkColors.size)
+                    val index = Random.nextInt(data.fireworkColors.size)
                     explosion {
                         shape(shape)
-                        addPrimaryColours(fireworkColors[index])
-                        addFadeColours(fireworkColors[index])
+                        addPrimaryColours(data.fireworkColors[index])
+                        addFadeColours(data.fireworkColors[index])
                         trail()
                         twinkle()
                     }

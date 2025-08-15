@@ -3,43 +3,44 @@ package net.casual.championships.minigame.lobby
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import net.casual.arcade.dimensions.level.CustomLevel
 import net.casual.arcade.dimensions.level.LevelPersistence
 import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
+import net.casual.arcade.dimensions.utils.getDimensionPath
 import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
-import net.casual.arcade.minigame.area.PlaceableArea
-import net.casual.arcade.minigame.area.StructureArea
+import net.casual.arcade.minigame.data.MinigameDataModules
+import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
+import net.casual.arcade.minigame.data.module.MinigameWorldData
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
-import net.casual.arcade.minigame.template.area.BoxedAreaTemplate
-import net.casual.arcade.minigame.template.area.PlaceableAreaTemplate
-import net.casual.arcade.utils.StructureUtils
 import net.casual.arcade.utils.codec.CodecProvider
 import net.casual.arcade.utils.encodedOptionalFieldOf
+import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CommonConfig
 import net.casual.championships.duel.arena.DuelArenasTemplate
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePackHost
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate
 import java.util.*
 
 class CasualLobbyMinigameFactory(
     private val name: Optional<String>,
     private val duelArenas: List<DuelArenasTemplate>
 ): MinigameFactory {
-    private lateinit var structure: StructureTemplate
-    private var data = CasualLobbyData.DEFAULT
+    private lateinit var modules: MinigameDataModules
 
     override fun codec(): MapCodec<out MinigameFactory> {
         return CODEC
     }
 
     override fun create(context: MinigameCreationContext): CasualLobbyMinigame {
-        this.readStructureData()
+        this.initializeModules(context.server)
+
+        val data = this.modules.get<CasualLobbyData>()!!
         val level = CustomLevelBuilder.build(context.server) {
+            spoofedDimensionKey(CasualMod.id("lobby"))
             randomDimensionKey()
             dimensionType(BuiltinDimensionTypes.OVERWORLD)
             chunkGenerator(VoidChunkGenerator(context.server, data.biome))
@@ -57,17 +58,16 @@ class CasualLobbyMinigameFactory(
                 }
             }
         }
-        val area = this.createPlaceableArea(level)
+
+        val path = context.server.getDimensionPath(level.dimension())
+        this.modules.get<MinigameWorldData>()!!.extract(path)
+
         val minigame = CasualLobbyMinigame(
             context.server,
             context.uuid,
-            area,
-            this.data.spawn.get().with(level),
-            this.data.podium,
-            this.data.podiumView,
-            this.data.fireworkLocations,
-            this.data.fireworkColors,
+            data.spawn.get().with(level),
             this.duelArenas,
+            this.modules,
             this
         )
         CasualMinigames.setCasualUI(minigame)
@@ -75,24 +75,18 @@ class CasualLobbyMinigameFactory(
         return minigame
     }
 
-    private fun readStructureData() {
-        if (!this.name.isEmpty && !this::structure.isInitialized) {
+    private fun initializeModules(server: MinecraftServer) {
+        if (this::modules.isInitialized) {
+            return
+        }
+        if (this.name.isPresent) {
             val path = lobbies.resolve(this.name.get())
-            try {
-                val (structure, data) = StructureUtils.readWithData(path, CasualLobbyData.CODEC)
-                this.data = data
-                this.structure = structure
-            } catch (e: Exception) {
-                CasualMod.logger.error("Failed to read structure: $path", e)
-            }
+            val archive = ReadableArchive.from(path)
+            this.modules = MinigameDataModules.from(archive, server)
+        } else {
+            CasualMod.logger.error("No lobby specified for event!")
+            this.modules = MinigameDataModules.empty()
         }
-    }
-
-    private fun createPlaceableArea(level: CustomLevel): PlaceableArea {
-        if (this.name.isEmpty) {
-            return BoxedAreaTemplate(this.data.position).create(level)
-        }
-        return StructureArea(this.structure, this.data.position, level)
     }
 
     companion object: CodecProvider<CasualLobbyMinigameFactory> {
