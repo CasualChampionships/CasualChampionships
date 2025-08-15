@@ -124,8 +124,6 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.ai.attributes.AttributeModifier
-import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potion
@@ -187,19 +185,6 @@ class UHCMinigame(
     }
 
     fun resetPlayerHealth(player: ServerPlayer) {
-        if (this.nerfedPlayers.contains(player.uuid)) run {
-            val maxHealth = player.attributes.getInstance(Attributes.MAX_HEALTH) ?: return@run
-            maxHealth.removeModifier(PLAYER_MAX_HEALTH_NERF_ID)
-            // nerf by halving total health
-            maxHealth.addPermanentModifier(
-                AttributeModifier(
-                    PLAYER_MAX_HEALTH_NERF_ID,
-                    -0.5,
-                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
-                )
-            )
-        }
-
         player.boostHealth(this.settings.health)
         player.resetHealth()
     }
@@ -356,6 +341,7 @@ class UHCMinigame(
         if (!this.players.isSpectating(player)) {
             this.updateBoundaryInfo(player)
             this.updatePedalToTheMetal(player)
+            this.updatePlayerNerfs(player)
         } else if (!player.isCreative) {
             val interval = 20.Minutes.ticks
             if (this.uptime % interval == interval - 1) {
@@ -417,7 +403,6 @@ class UHCMinigame(
     private fun onMinigamePlayerRemoved(event: MinigameRemovePlayerEvent) {
         val player = event.player
         player.unboostHealth()
-        player.attributes.getInstance(Attributes.MAX_HEALTH)?.removeModifier(PLAYER_MAX_HEALTH_NERF_ID)
         player.resetHunger()
         player.resetExperience()
         player.clearPlayerInventory()
@@ -791,6 +776,17 @@ class UHCMinigame(
         ))
     }
 
+    private fun updatePlayerNerfs(player: ServerPlayer) {
+        if (!this.nerfedPlayers.contains(player.uuid)) {
+            return
+        }
+
+        // Not a particularly glamorous way to do this, but it works
+        player.addEffect(MobEffectInstance(
+            MobEffects.WEAKNESS, MobEffectInstance.INFINITE_DURATION, 0, false, false, false
+        ))
+    }
+
     private fun createSidebar(): DynamicSidebar {
         val sidebar = DynamicSidebar(ComponentElements.of(UHCComponents.Bitmap.TITLE))
         val buffer = SpacingFontResources.spaced(4)
@@ -933,8 +929,6 @@ class UHCMinigame(
     companion object {
         private const val MOB_SPAWN_PROBABILITY = 1.0F / 2.0F
         private val MOB_LOOT_MULTIPLIER = (1.0F / MOB_SPAWN_PROBABILITY).roundToInt()
-
-        private val PLAYER_MAX_HEALTH_NERF_ID = UHCMod.id("player_max_health_nerf")
 
         val ID = UHCMod.id("uhc_minigame")
     }

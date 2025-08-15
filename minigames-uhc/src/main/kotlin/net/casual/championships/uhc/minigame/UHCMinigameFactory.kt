@@ -11,6 +11,7 @@ import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.codec.CodecProvider
+import net.casual.arcade.utils.setOf
 import net.casual.championships.uhc.utils.UHCDimensions
 import net.minecraft.core.UUIDUtil
 import net.minecraft.core.registries.Registries
@@ -20,7 +21,6 @@ import net.minecraft.util.StringRepresentable
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.levelgen.WorldOptions
 import java.util.*
-import kotlin.collections.HashMap
 
 data class DimensionWithSeed(
     val key: Optional<DimensionWithPersistence>,
@@ -100,7 +100,13 @@ class UHCMinigameFactory(
             this.createLevelWithPersistence(levels, VanillaDimension.End, dimensionsCopy),
         )
         val nerfedPlayersCopy = HashSet(this.nerfedPlayers)
-        return UHCMinigame(context.server, context.uuid, dimensions, nerfedPlayersCopy, UHCMinigameFactory(dimensionsCopy, nerfedPlayersCopy))
+        return UHCMinigame(
+            context.server,
+            context.uuid,
+            dimensions,
+            nerfedPlayersCopy,
+            UHCMinigameFactory(dimensionsCopy, nerfedPlayersCopy)
+        )
     }
 
     private fun randomDimensionKey(dimension: String): ResourceKey<Level> {
@@ -129,8 +135,7 @@ class UHCMinigameFactory(
                     DimensionWithSeed.CODEC,
                     StringRepresentable.keys(VanillaDimension.entries.toTypedArray())
                 ).fieldOf("dimensions").forGetter(UHCMinigameFactory::dimensions),
-                UUIDUtil.CODEC_SET.lenientOptionalFieldOf("nerfed_players", emptySet())
-                    .forGetter(UHCMinigameFactory::nerfedPlayers)
+                UUIDUtil.STRING_CODEC.setOf().lenientOptionalFieldOf("nerfed_players", emptySet()).forGetter(UHCMinigameFactory::nerfedPlayers)
             ).apply(instance, ::UHCMinigameFactory)
         }
     }
