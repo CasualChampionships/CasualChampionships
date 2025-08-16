@@ -28,5 +28,10 @@
   ],
   "depends": {
 
+  },
+  "custom": {
+    "lithium:options": {
+      "mixin.ai.poi.fast_portals": false
+    }
   }
 }
