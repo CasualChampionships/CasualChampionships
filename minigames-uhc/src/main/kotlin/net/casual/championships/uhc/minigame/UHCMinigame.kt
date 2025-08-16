@@ -134,6 +134,8 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.ai.attributes.AttributeModifier
+import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potion
@@ -199,6 +201,11 @@ class UHCMinigame(
     fun resetPlayerHealth(player: ServerPlayer) {
         player.boostHealth(this.settings.health)
         player.resetHealth()
+    }
+
+    fun resetPlayerNerf(player: ServerPlayer) {
+        val instance = player.attributes.getInstance(Attributes.ATTACK_DAMAGE) ?: return
+        instance.removeModifier(NERFED_DAMAGE_MODIFIER)
     }
 
     fun onStartBoundary() {
@@ -846,10 +853,14 @@ class UHCMinigame(
             return
         }
 
-        // Not a particularly glamorous way to do this, but it works
-        player.addEffect(MobEffectInstance(
-            MobEffects.WEAKNESS, MobEffectInstance.INFINITE_DURATION, 0, false, false, false
-        ))
+        val instance = player.attributes.getInstance(Attributes.ATTACK_DAMAGE) ?: return
+        if (instance.hasModifier(NERFED_DAMAGE_MODIFIER)) {
+            return
+        }
+
+        instance.addPermanentModifier(
+            AttributeModifier(NERFED_DAMAGE_MODIFIER, this.settings.nerfedPlayerDamage, AttributeModifier.Operation.ADD_VALUE)
+        )
     }
 
     private fun createSidebar(): DynamicSidebar {
@@ -995,6 +1006,8 @@ class UHCMinigame(
     companion object {
         private const val MOB_SPAWN_PROBABILITY = 1.0F / 2.0F
         private val MOB_LOOT_MULTIPLIER = (1.0F / MOB_SPAWN_PROBABILITY).roundToInt()
+
+        private val NERFED_DAMAGE_MODIFIER = UHCMod.id("nerfed_damage")
 
         val ID = UHCMod.id("uhc_minigame")
     }

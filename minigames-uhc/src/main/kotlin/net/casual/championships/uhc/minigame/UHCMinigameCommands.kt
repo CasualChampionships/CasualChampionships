@@ -50,6 +50,9 @@ class UHCMinigameCommands(
                     literal("reset-health") {
                         executes(::resetPlayerHealth)
                     }
+                    literal("reset-nerf") {
+                        executes(::resetPlayerNerf)
+                    }
                 }
             }
             literal("border") {
@@ -117,6 +120,12 @@ class UHCMinigameCommands(
         val target = EntityArgument.getPlayer(context, "player")
         this.uhc.resetPlayerHealth(target)
         return context.source.success("Successfully reset ${target.scoreboardName}'s health")
+    }
+
+    private fun resetPlayerNerf(context: CommandContext<CommandSourceStack>): Int {
+        val target = EntityArgument.getPlayer(context, "player")
+        this.uhc.resetPlayerNerf(target)
+        return context.source.success("Successfully reset ${target.scoreboardName}'s nerf")
     }
 
     private fun startBoundaries(context: CommandContext<CommandSourceStack>): Int {

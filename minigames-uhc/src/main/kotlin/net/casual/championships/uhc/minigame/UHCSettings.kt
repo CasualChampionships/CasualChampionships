@@ -222,4 +222,13 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         value = false
         defaults.options(this)
     })
+
+    var nerfedPlayerDamage by this.register(float64 {
+        name = "nerfed_player_damage"
+        display = Items.WOODEN_SWORD.named("Nerged player damage")
+        value = -2.0
+        option("minus_1", Items.GREEN_STAINED_GLASS_PANE.named("Minus 1"), -1.0)
+        option("minus_2", Items.YELLOW_STAINED_GLASS_PANE.named("Minus 2"), -2.0)
+        option("minus_4", Items.RED_STAINED_GLASS_PANE.named("Minus 4"), -4.0)
+    })
 }
