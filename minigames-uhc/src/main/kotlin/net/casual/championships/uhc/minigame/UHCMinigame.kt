@@ -310,8 +310,7 @@ class UHCMinigame(
 
         val boundary = level.levelBoundary ?: return
 
-        // Blocks per millisecond
-        val shrinkingSpeed = this.boundaryPhase.getSpeed(level)
+        val shrinkingSpeed = this.boundaryPhase.getSpeedInBlocksPerTick(level)
         if (shrinkingSpeed > 0) {
             val box = boundary.getAABB()
             event.cancel(BlockPos.containing(
@@ -322,7 +321,7 @@ class UHCMinigame(
             return
         }
 
-        val margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
+        val margin = shrinkingSpeed * this.settings.portalEscapeTime.ticks
         if (margin >= boundary.getSize().x * 0.5) {
             val (x, y, z) = boundary.getCenter()
             // The border would reach size 0 within 30 seconds
@@ -704,14 +703,13 @@ class UHCMinigame(
     }
 
     private fun isPositionValidForPortal(level: ServerLevel, position: BlockPos, boundary: LevelBoundary): Boolean {
-        // Blocks per millisecond
-        val shrinkingSpeed = this.boundaryPhase.getSpeed(level)
+        val shrinkingSpeed = this.boundaryPhase.getSpeedInBlocksPerTick(level)
         if (shrinkingSpeed <= 0) {
             // The border is static or expanding
             return boundary.contains(position) == BoundaryShape.Containment.Full
         }
 
-        val margin = shrinkingSpeed * this.settings.portalEscapeTime.milliseconds
+        val margin = shrinkingSpeed * this.settings.portalEscapeTime.ticks
         val size = boundary.getSize()
         val xMargin = margin.coerceAtMost(size.x * 0.5 - 1)
         val yMargin = margin.coerceAtMost(size.y * 0.5 - 1)

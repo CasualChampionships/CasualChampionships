@@ -3,6 +3,7 @@ package net.casual.championships.uhc.border
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.time.MinecraftTimeDuration
+import net.casual.arcade.utils.time.MinecraftTimeUnit
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.levelgen.Heightmap
@@ -22,7 +23,7 @@ sealed class UHCBoundaryPhase(
         return LevelBoundary.SizeAndCenter(this.getEndSize(level), this.getEndCenter(level))
     }
 
-    fun getSpeed(level: ServerLevel): Double {
+    fun getSpeedInBlocksPerTick(level: ServerLevel): Double {
         val start = this.getStartSize(level)
         val end = this.getEndSize(level)
         val dx = abs(start.x - end.x)
