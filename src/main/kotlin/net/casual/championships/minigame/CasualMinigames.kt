@@ -43,10 +43,7 @@ import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.set
 import net.casual.arcade.utils.toSmallCaps
 import net.casual.championships.CasualMod
-import net.casual.championships.commands.CasualCommand
-import net.casual.championships.commands.MinesweeperCommand
-import net.casual.championships.commands.RenameCommand
-import net.casual.championships.commands.ViewCommand
+import net.casual.championships.commands.*
 import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualTeamReadyHandler
 import net.casual.championships.common.util.CommonConfig
@@ -127,7 +124,7 @@ object CasualMinigames {
         CasualLobbyMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
 
         GlobalEventHandler.Server.register<ServerRegisterCommandEvent> { event ->
-            event.register(MinesweeperCommand, CasualCommand, ViewCommand, RenameCommand)
+            event.register(MinesweeperCommand, CasualCommand, ViewCommand, ReplayCommand, RenameCommand)
         }
 
         GlobalEventHandler.Server.register<PlayerRequestLoginEvent> { event ->
