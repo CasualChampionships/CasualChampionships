@@ -12,6 +12,7 @@ import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.events.*
+import net.casual.arcade.minigame.extensions.PlayerMovementRestrictionExtension.Companion.unrestrictMovement
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.settings.MinigameSettings
@@ -248,6 +249,7 @@ class DuelMinigame(
     private fun onMinigameRemovePlayer(event: MinigameRemovePlayerEvent) {
         event.player.unboostHealth()
         event.player.removeAllEffects()
+        event.player.unrestrictMovement()
     }
 
     @Listener

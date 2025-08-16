@@ -12,14 +12,17 @@ import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.minigame.data.module.MinigameWorldData
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
+import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.codec.CodecProvider
 import net.casual.arcade.utils.encodedOptionalFieldOf
 import net.casual.arcade.utils.file.ReadableArchive
+import net.casual.arcade.utils.toKey
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CommonConfig
 import net.casual.championships.duel.arena.DuelArenasTemplate
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePackHost
+import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
@@ -39,9 +42,14 @@ class CasualLobbyMinigameFactory(
         this.initializeModules(context.server)
 
         val data = this.modules.get<CasualLobbyData>()!!
+
+        val dimension = ResourceUtils.random().toKey(Registries.DIMENSION)
+        val path = context.server.getDimensionPath(dimension)
+        this.modules.get<MinigameWorldData>()!!.extract(path)
+
         val level = CustomLevelBuilder.build(context.server) {
             spoofedDimensionKey(CasualMod.id("lobby"))
-            randomDimensionKey()
+            dimensionKey(dimension)
             dimensionType(BuiltinDimensionTypes.OVERWORLD)
             chunkGenerator(VoidChunkGenerator(context.server, data.biome))
             defaultLevelProperties()
@@ -59,8 +67,6 @@ class CasualLobbyMinigameFactory(
             }
         }
 
-        val path = context.server.getDimensionPath(level.dimension())
-        this.modules.get<MinigameWorldData>()!!.extract(path)
 
         val minigame = CasualLobbyMinigame(
             context.server,
