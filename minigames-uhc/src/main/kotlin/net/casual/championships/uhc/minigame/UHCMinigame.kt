@@ -303,7 +303,6 @@ class UHCMinigame(
 
         val boundary = level.levelBoundary ?: return
 
-        // Blocks per tick
         val shrinkingSpeed = this.boundaryPhase.getSpeedInBlocksPerTick(level)
         if (shrinkingSpeed > 0) {
             val box = boundary.getAABB()
@@ -697,7 +696,6 @@ class UHCMinigame(
     }
 
     private fun isPositionValidForPortal(level: ServerLevel, position: BlockPos, boundary: LevelBoundary): Boolean {
-        // Blocks per tick
         val shrinkingSpeed = this.boundaryPhase.getSpeedInBlocksPerTick(level)
         if (shrinkingSpeed <= 0) {
             // The border is static or expanding
