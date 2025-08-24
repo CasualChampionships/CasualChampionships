@@ -1,6 +1,6 @@
 package net.casual.championships.common.event
 
-import net.casual.arcade.events.common.Event
+import net.casual.arcade.events.threading.AsyncEvent
 import net.minecraft.core.Holder
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.ServerLevelAccessor
@@ -13,4 +13,4 @@ data class ChunkGenerationMobSpawnEvent(
     val chunkPos: ChunkPos,
     val settings: MobSpawnSettings,
     var probability: Float
-): Event
+): AsyncEvent

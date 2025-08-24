@@ -13,6 +13,7 @@ import net.casual.arcade.events.server.block.BrewingStandBrewEvent
 import net.casual.arcade.events.server.entity.EntityBeforeLootEvent
 import net.casual.arcade.events.server.level.LevelLootEvent
 import net.casual.arcade.events.server.player.*
+import net.casual.arcade.events.threading.ThreadingTarget
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
@@ -698,7 +699,7 @@ class UHCMinigame(
         event.lootMultiplier *= MOB_LOOT_MULTIPLIER
     }
 
-    @Listener(requiresMainThread = false)
+    @Listener(strategy = ThreadingTarget.UseCurrentThread)
     private fun onChunkGenerationMobSpawn(event: ChunkGenerationMobSpawnEvent) {
         event.probability *= MOB_SPAWN_PROBABILITY
     }
