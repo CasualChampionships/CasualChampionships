@@ -23,12 +23,13 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Scoreboard
 import net.minecraft.world.scores.Team
-import org.jetbrains.exposed.dao.IntEntityClass
-import org.jetbrains.exposed.sql.Transaction
-import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.dao.IntEntityClass
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import kotlin.jvm.optionals.getOrNull
+import kotlin.time.ExperimentalTime
 import net.casual.database.Minigame as DatabaseMinigame
 
 class DatabaseDataManager(
@@ -212,6 +213,7 @@ class DatabaseDataManager(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun getOrCreateMinigame(minigame: Minigame): DatabaseMinigame {
         val databaseMinigame = DatabaseMinigame.findById(minigame.uuid)
         if (databaseMinigame != null) {

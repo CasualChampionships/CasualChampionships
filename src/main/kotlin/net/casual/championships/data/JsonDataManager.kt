@@ -42,27 +42,27 @@ class JsonDataManager: DataManager {
     }
 
     private fun syncMinigameData(minigame: Minigame) {
-        val serialized = minigame.data.toJson()
-        CompletableFuture.runAsync {
-            try {
-                val format = SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
-                val currentDate = format.format(Date())
-                if (!stats.exists()) {
-                    stats.createDirectories()
-                }
-                var path = stats.resolve("${minigame.id} $currentDate.json")
-                if (path.exists()) {
-                    path = stats.resolve("${minigame.id} (${minigame.uuid}) $currentDate.json")
-                }
-                path.bufferedWriter().use {
-                    JsonUtils.encode(serialized, it)
-                }
-            } catch (e: Exception) {
-                CasualMod.logger.error("Failed to write stats!", e)
-                // So we have it somewhere!
-                CasualMod.logger.error(JsonUtils.GSON.toJson(serialized))
-            }
-        }
+        // val serialized = minigame.data.toJson()
+        // CompletableFuture.runAsync {
+        //     try {
+        //         val format = SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+        //         val currentDate = format.format(Date())
+        //         if (!stats.exists()) {
+        //             stats.createDirectories()
+        //         }
+        //         var path = stats.resolve("${minigame.id} $currentDate.json")
+        //         if (path.exists()) {
+        //             path = stats.resolve("${minigame.id} (${minigame.uuid}) $currentDate.json")
+        //         }
+        //         path.bufferedWriter().use {
+        //             JsonUtils.encode(serialized, it)
+        //         }
+        //     } catch (e: Exception) {
+        //         CasualMod.logger.error("Failed to write stats!", e)
+        //         // So we have it somewhere!
+        //         CasualMod.logger.error(JsonUtils.GSON.toJson(serialized))
+        //     }
+        // }
     }
 
     private companion object {

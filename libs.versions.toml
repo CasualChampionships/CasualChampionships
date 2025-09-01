@@ -6,22 +6,22 @@ fabric-api      = "0.129.0+1.21.8"
 fabric-kotlin   = "1.13.5+kotlin.2.2.10"
 map-canvas      = "0.5.1+1.21.5"
 arcade          = "0.6.1-beta.16+1.21.8"
-casual-database = "0.2.0"
+casual-database = "0.3.0"
 voicechat-api   = "2.5.31"
 
 # Plugins
 fabric-loom = "1.11-SNAPSHOT"
 
 [libraries]
-minecraft       = { module = "com.mojang:minecraft"                         , version.ref = "minecraft" }
-fabric-loader   = { module = "net.fabricmc:fabric-loader"                   , version.ref = "fabric-loader" }
-fabric-api      = { module = "net.fabricmc.fabric-api:fabric-api"           , version.ref = "fabric-api" }
-fabric-kotlin   = { module = "net.fabricmc:fabric-language-kotlin"          , version.ref = "fabric-kotlin" }
-map-canvas      = { module = "eu.pb4:map-canvas-api"                        , version.ref = "map-canvas" }
-arcade          = { module = "net.casualchampionships:arcade"               , version.ref = "arcade" }
-arcade-datagen  = { module = "net.casualchampionships:arcade-datagen"       , version.ref = "arcade" }
-casual-database = { module = "net.casual-championships:casual-database-core", version.ref = "casual-database" }
-voicechat-api   = { module = "de.maxhenkel.voicechat:voicechat-api"         , version.ref = "voicechat-api" }
+minecraft       = { module = "com.mojang:minecraft"                        , version.ref = "minecraft" }
+fabric-loader   = { module = "net.fabricmc:fabric-loader"                  , version.ref = "fabric-loader" }
+fabric-api      = { module = "net.fabricmc.fabric-api:fabric-api"          , version.ref = "fabric-api" }
+fabric-kotlin   = { module = "net.fabricmc:fabric-language-kotlin"         , version.ref = "fabric-kotlin" }
+map-canvas      = { module = "eu.pb4:map-canvas-api"                       , version.ref = "map-canvas" }
+arcade          = { module = "net.casualchampionships:arcade"              , version.ref = "arcade" }
+arcade-datagen  = { module = "net.casualchampionships:arcade-datagen"      , version.ref = "arcade" }
+casual-database = { module = "net.casualchampionships:casual-database-core", version.ref = "casual-database" }
+voicechat-api   = { module = "de.maxhenkel.voicechat:voicechat-api"        , version.ref = "voicechat-api" }
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
