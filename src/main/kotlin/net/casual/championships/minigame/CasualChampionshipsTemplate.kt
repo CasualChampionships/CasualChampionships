@@ -8,8 +8,8 @@ import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.template.minigame.SimpleMinigamesTemplate
 import net.casual.arcade.resources.pack.PackInfo
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
-import net.casual.arcade.utils.codec.CodecProvider
 import net.casual.arcade.utils.encodedOptionalFieldOf
+import net.casual.arcade.utils.serialization.codec.CodecProvider
 import net.casual.championships.CasualMod
 import net.casual.championships.resources.CasualResourcePackHost
 import net.minecraft.resources.ResourceLocation

@@ -3,10 +3,10 @@ package net.casual.championships.minigame.lobby
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import net.casual.arcade.minigame.data.MinigameDataModule
-import net.casual.arcade.utils.codec.ArcadeExtraCodecs
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.file.ReadableArchive.Companion.parseJson
 import net.casual.arcade.utils.math.location.Location
+import net.casual.arcade.utils.serialization.codec.ArcadeExtraCodecs
 import net.casual.championships.CasualMod
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
