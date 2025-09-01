@@ -23,7 +23,6 @@ import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
-import net.casual.arcade.minigame.stats.StatType
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.minigame.utils.MinigameUtils.isMinigameAdminOrHasPermission
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
@@ -259,15 +258,15 @@ class CasualLobbyMinigame(
     @Listener
     private fun onPlayerTick(event: PlayerTickEvent) {
         val player = event.player
-        val stat = this.stats.getOrCreateStat(player, MINESWEEPER_RECORD_STAT)
-        val ticks = this.stats.getOrCreateStat(player, MINESWEEPER_RECORD_TICKS_STAT)
-        if (stat.value == this.minesweeperRecord) {
-            ticks.increment()
-            if (ticks.value.Ticks >= 10.Minutes) {
+        val pb = this.stats.getOrCreateStat(player, LobbyStats.MINESWEEPER_RECORD)
+        val held = this.stats.getOrCreateStat(player, LobbyStats.MINESWEEPER_RECORD_HELD)
+        if (pb.value == this.minesweeperRecord) {
+            held.increment()
+            if (held.value.Ticks >= 10.Minutes) {
                 player.grantAdvancement(LobbyAdvancements.GAMER)
             }
         } else {
-            ticks.modify { 0 }
+            held.modify { 0 }
         }
     }
 
@@ -275,7 +274,7 @@ class CasualLobbyMinigame(
     private fun onPlayerAttack(event: PlayerTryAttackEvent) {
         val (player, target) = event
         if (target is ServerPlayer && this.players.isAdmin(target)) {
-            val stat = this.stats.getOrCreateStat(player, ATTACK_ADMIN_STAT)
+            val stat = this.stats.getOrCreateStat(player, LobbyStats.ATTACK_ADMIN)
             stat.increment()
             if (stat.value >= 50) {
                 player.grantAdvancement(LobbyAdvancements.ADMIN_ABUSE)
@@ -298,7 +297,7 @@ class CasualLobbyMinigame(
         val minY = this.area.getEntityBoundingBox().minY + 5
         if (event.player.y < minY) {
             event.player.grantAdvancement(LobbyAdvancements.UH_OH)
-            val stat = this.stats.getOrCreateStat(event.player, LEFT_LOBBY_STAT)
+            val stat = this.stats.getOrCreateStat(event.player, LobbyStats.LEFT_LOBBY)
             stat.increment()
             if (stat.value >= 20) {
                 // event.player.grantAdvancement(LobbyAdvancements.YOU_SHALL_NOT_LEAVE)
@@ -314,7 +313,7 @@ class CasualLobbyMinigame(
         }
 
         val millis = duration.inWholeMilliseconds.toInt()
-        val stat = this.stats.getOrCreateStat(player, MINESWEEPER_RECORD_STAT)
+        val stat = this.stats.getOrCreateStat(player, LobbyStats.MINESWEEPER_RECORD)
         if (millis < stat.value) {
             stat.modify { millis }
         }
@@ -637,11 +636,6 @@ class CasualLobbyMinigame(
 
     companion object {
         private val SHAPES = listOf(Shape.LARGE_BALL, Shape.STAR, Shape.BURST)
-
-        private val MINESWEEPER_RECORD_STAT = StatType.int32(CasualMod.id("minesweeper_record"), Int.MAX_VALUE)
-        private val MINESWEEPER_RECORD_TICKS_STAT = StatType.int32(CasualMod.id("minesweeper_record_ticks"))
-        private val LEFT_LOBBY_STAT = StatType.int32(CasualMod.id("left_lobby"))
-        private val ATTACK_ADMIN_STAT = StatType.int32(CasualMod.id("attack_admin"))
 
         private val FORMAT = DecimalFormat("#.00")
 

@@ -7,6 +7,7 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.UHCItems
 import net.casual.championships.uhc.utils.UHCComponents
+import net.casual.championships.uhc.utils.UHCStats
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.chat.Component
@@ -32,6 +33,7 @@ object UHCMod: ModInitializer {
     override fun onInitialize() {
         UHCMapRenderer.noop()
         UHCItems.noop()
+        UHCStats.noop()
     }
 
     internal fun id(path: String): ResourceLocation {

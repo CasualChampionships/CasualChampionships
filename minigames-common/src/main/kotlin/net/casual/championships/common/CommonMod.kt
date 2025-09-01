@@ -61,6 +61,7 @@ object CommonMod: ModInitializer {
         CommonItems.noop()
         CommonEntities.noop()
         CommonSounds.noop()
+        CommonStats.noop()
 
         AntiCheat.registerEvents()
 
