@@ -7,16 +7,16 @@ import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.utils.ComponentUtils.gold
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.arcade.utils.component.gold
+import net.casual.arcade.utils.component.red
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.resetToDefault
@@ -108,13 +108,13 @@ enum class UHCPhase(
             minigame.onStartBoundary()
 
             val minutes = duration.minutes
-            minigame.chat.broadcastGame(CommonComponents.BORDER_INITIAL_GRACE.generate(minutes).gold().mini())
+            minigame.chat.broadcastGame(CommonComponents.BORDER_INITIAL_GRACE.generate(minutes).gold().withMiniFont())
         }
 
         override fun end(minigame: UHCMinigame, next: Phase<UHCMinigame>) {
             if (this < next) {
                 minigame.chat.broadcastGame(
-                    CommonComponents.BORDER_GRACE_OVER.red().mini(),
+                    CommonComponents.BORDER_GRACE_OVER.red().withMiniFont(),
                     sound = Sound(CommonSounds.GAME_BORDER_MOVING)
                 )
                 minigame.settings.canPvp.set(true)
@@ -145,7 +145,7 @@ enum class UHCPhase(
             minigame.winners.addAll(team.players)
 
             for (player in minigame.players) {
-                player.sendTitle(CommonComponents.GAME_WON.generate(team.name).color(team).mini())
+                player.sendTitle(CommonComponents.GAME_WON.generate(team.name).color(team).withMiniFont())
             }
 
             // TODO: Better winning screen

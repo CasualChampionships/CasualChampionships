@@ -10,16 +10,16 @@ import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.yellow
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.TeamUtils.color
+import net.casual.arcade.utils.component.yellow
 import net.casual.arcade.utils.isOf
 import net.casual.championships.common.CommonMod
-import net.casual.championships.uhc.utils.UHCComponents
-import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.border.UHCBoundaryManager
+import net.casual.championships.uhc.minigame.UHCMinigame
+import net.casual.championships.uhc.utils.UHCComponents
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
 import net.minecraft.core.component.DataComponents
@@ -86,7 +86,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
             }
 
             val canvas = DrawableCanvas.create()
-            val formattedDimension = Component.literal(dimensionName).mini().yellow()
+            val formattedDimension = Component.literal(dimensionName).withMiniFont().yellow()
             CanvasData(
                 canvas,
                 model,
@@ -150,7 +150,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         }
 
         val roundedStartSize = startSize.roundToInt()
-        sizeIcon.text = Component.literal("$roundedStartSize x $roundedStartSize").mini().yellow()
+        sizeIcon.text = Component.literal("$roundedStartSize x $roundedStartSize").withMiniFont().yellow()
 
         for (players in level.players()) {
             if (this.isPlayerValidForIcon(players, level, center.x, center.z, startSize)) {

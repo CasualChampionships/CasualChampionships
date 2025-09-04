@@ -4,8 +4,8 @@ import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.managers.MinigameTeamManager
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.ComponentUtils.mini
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.visuals.elements.UniversalElement
@@ -26,12 +26,12 @@ class SpectatorAndAdminTeamsComponentElement(
             }
 
             Component.empty()
-                .append(CommonComponents.ADMINS.mini())
+                .append(CommonComponents.ADMINS.withMiniFont())
                 .append("\n")
                 .append(this.formatPlayerHeads(teams.getAdminTeam().getOnlinePlayers()))
         } else if (!teams.hasAdmins()) {
             Component.empty()
-                .append(CommonComponents.SPECTATORS.mini())
+                .append(CommonComponents.SPECTATORS.withMiniFont())
                 .append("\n")
                 .append(this.formatPlayerHeads(teams.getSpectatorTeam().getOnlinePlayers()))
         } else {
@@ -42,12 +42,12 @@ class SpectatorAndAdminTeamsComponentElement(
             val adminLength = this.calculateHeadsLength(admins.size)
 
             Component.empty()
-                .append(CommonComponents.SPECTATORS.mini())
+                .append(CommonComponents.SPECTATORS.withMiniFont())
                 .append(": ")
                 .append(this.formatPlayerHeads(spectators))
                 .append("\n")
                 .append(ComponentUtils.widthDifferenceBetween(CommonComponents.SPECTATORS, CommonComponents.ADMINS))
-                .append(CommonComponents.ADMINS.mini())
+                .append(CommonComponents.ADMINS.withMiniFont())
                 .append(": ")
                 .append(this.formatPlayerHeads(admins))
                 .append(SpacingFontResources.spaced(spectatorLength - adminLength))

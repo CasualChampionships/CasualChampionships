@@ -6,7 +6,7 @@ import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.settings.display.DisplayableSettingsDefaults
 import net.casual.arcade.minigame.settings.display.MenuGameSetting
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.visuals.screen.SelectionGuiBuilder
 import net.casual.arcade.visuals.screen.SelectionGuiStyle
@@ -41,11 +41,11 @@ open class CasualSettings(
         }
 
         override fun options(builder: MenuGameSettingBuilder<Boolean>, enabled: ItemStack, disabled: ItemStack) {
-            builder.option("enabled", TICK_SELECTED.named(ENABLED.mini()), true) { setting, _, _ ->
-                if (setting.get()) TICK_SELECTED.named(ENABLED.mini()) else TICK.named(ENABLE.mini())
+            builder.option("enabled", TICK_SELECTED.named(ENABLED.withMiniFont()), true) { setting, _, _ ->
+                if (setting.get()) TICK_SELECTED.named(ENABLED.withMiniFont()) else TICK.named(ENABLE.withMiniFont())
             }
-            builder.option("disabled", CROSS_SELECTED.named(DISABLED.mini()), false) { setting, _, _ ->
-                if (setting.get()) CROSS.named(DISABLE.mini()) else CROSS_SELECTED.named(DISABLED.mini())
+            builder.option("disabled", CROSS_SELECTED.named(DISABLED.withMiniFont()), false) { setting, _, _ ->
+                if (setting.get()) CROSS.named(DISABLE.withMiniFont()) else CROSS_SELECTED.named(DISABLED.withMiniFont())
             }
         }
     }

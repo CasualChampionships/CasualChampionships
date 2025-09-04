@@ -26,16 +26,8 @@ import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.minigame.utils.MinigameUtils.isMinigameAdminOrHasPermission
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.scheduler.MinecraftScheduler
-import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.command
-import net.casual.arcade.utils.ComponentUtils.gold
-import net.casual.arcade.utils.ComponentUtils.green
-import net.casual.arcade.utils.ComponentUtils.lime
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.red
-import net.casual.arcade.utils.ComponentUtils.shadowless
-import net.casual.arcade.utils.ComponentUtils.yellow
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.PlayerUtils.sendSound
@@ -46,6 +38,7 @@ import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.chat.ChatFormatter
+import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.math.location.LocationWithLevel
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.set
@@ -478,7 +471,7 @@ class CasualLobbyMinigame(
 
         val requester = DuelRequester(initiator, duelers)
         if (requesting.isEmpty() && !initiator.isMinigameAdminOrHasPermission(4)) {
-            requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").mini().red(), initiator)
+            requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").withMiniFont().red(), initiator)
             return
         }
 
@@ -486,7 +479,7 @@ class CasualLobbyMinigame(
         checker.arePlayersReady(requesting).then {
             started = startDuelWith(started, initiator, duelers, setOf(), requester, settings, false)
         }
-        val startAnyways = Component.translatable("casual.duel.clickToStart").mini().green().function { context ->
+        val startAnyways = Component.translatable("casual.duel.clickToStart").withMiniFont().green().function { context ->
             val unready = checker.getUnreadyPlayers(context.server)
             started = startDuelWith(started, initiator, duelers, unready, requester, settings, true)
         }
@@ -504,12 +497,12 @@ class CasualLobbyMinigame(
     ): Boolean {
         if (started) {
             if (forced) {
-                requester.broadcastTo(Component.translatable("casual.duel.alreadyStarted").mini().red(), initiator)
+                requester.broadcastTo(Component.translatable("casual.duel.alreadyStarted").withMiniFont().red(), initiator)
             }
             return true
         }
         if (!this.players.has(initiator) || this.phase >= LobbyPhase.Readying) {
-            requester.broadcastTo(Component.translatable("casual.duel.cannotDuelNow").mini().red(), initiator)
+            requester.broadcastTo(Component.translatable("casual.duel.cannotDuelNow").withMiniFont().red(), initiator)
             initiator.grantAdvancement(LobbyAdvancements.NOT_NOW)
             return false
         }
@@ -521,7 +514,7 @@ class CasualLobbyMinigame(
         ready.removeIf { !this.players.has(it) }
 
         if (ready.size <= 1 && !initiator.isMinigameAdminOrHasPermission(4)) {
-            requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").mini().red(), initiator)
+            requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").withMiniFont().red(), initiator)
             return false
         }
 
@@ -540,7 +533,7 @@ class CasualLobbyMinigame(
         })
 
         this.players.transferTo(duel, ready, keepSpectating = false)
-        duel.chat.broadcastGame(Component.translatable("casual.duel.starting").mini().green())
+        duel.chat.broadcastGame(Component.translatable("casual.duel.starting").withMiniFont().green())
         duel.start()
 
         val players = if (ready.size > 4) {
@@ -548,7 +541,7 @@ class CasualLobbyMinigame(
         } else {
             ready.joinToString(" & ") { it.scoreboardName }
         }
-        val aboutToDuel = Component.translatable("casual.duel.aboutToDuel", players).mini()
+        val aboutToDuel = Component.translatable("casual.duel.aboutToDuel", players).withMiniFont()
         for (player in this.players) {
             if (ready.contains(player)) {
                 continue
@@ -557,7 +550,7 @@ class CasualLobbyMinigame(
 
             val clickToSpectate = Component.empty().append("[")
                 .append(Component.translatable("casual.duel.clickToSpectate"))
-                .append("]").command("/duel view ${ready.first().scoreboardName}").lime().mini()
+                .append("]").command("/duel view ${ready.first().scoreboardName}").lime().withMiniFont()
             requester.broadcastTo(clickToSpectate, player)
         }
 
@@ -598,11 +591,11 @@ class CasualLobbyMinigame(
     @Suppress("UnstableApiUsage")
     private fun createSidebar(): Sidebar {
         val name = CasualMinigames.getMinigames().event.name.replace('_', ' ')
-        val title = Component.literal("Casual Championships").mini().bold().gold()
+        val title = Component.literal("Casual Championships").withMiniFont().bold().gold()
         val sidebar = DynamicSidebar(ComponentElements.of(title))
         val event = SidebarComponent.withCustomScore(
-            Component.literal(" Event:").mini().red().bold(),
-            Component.literal("$name ").mini().gold()
+            Component.literal(" Event:").withMiniFont().red().bold(),
+            Component.literal("$name ").withMiniFont().gold()
         )
 
         val teammates = TeammatesSidebarElements(Component.literal(" "), Component.literal(" "), false)
@@ -613,8 +606,8 @@ class CasualLobbyMinigame(
             val online = playing.sumOf { it.getOnlineCount() }
             val expected = playing.sumOf { it.players.size }
             SidebarComponent.withCustomScore(
-                Component.literal(" Players: ").mini().lime().bold(),
-                Component.literal("$online/$expected ").mini().yellow()
+                Component.literal(" Players: ").withMiniFont().lime().bold(),
+                Component.literal("$online/$expected ").withMiniFont().yellow()
             )
         }
         sidebar.setRows(PlayerSpecificElement.composed(players) { player ->

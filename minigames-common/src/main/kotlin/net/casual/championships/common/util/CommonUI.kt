@@ -3,14 +3,14 @@ package net.casual.championships.common.util
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.managers.MinigameChatManager
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.gold
-import net.casual.arcade.utils.ComponentUtils.lime
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.TeamUtils.getHexColor
 import net.casual.arcade.utils.chat.ChatFormatter
+import net.casual.arcade.utils.component.bold
+import net.casual.arcade.utils.component.gold
+import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
@@ -38,9 +38,9 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.component.DyedItemColor
 
 object CommonUI {
-    val INFO_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Info]").gold().bold().mini())
-    val GAME_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Game]").lime().bold().mini())
-    val READY_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Ready]").lime().bold().mini())
+    val INFO_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Info]").gold().bold().withMiniFont())
+    val GAME_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Game]").lime().bold().withMiniFont())
+    val READY_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Ready]").lime().bold().withMiniFont())
 
     fun MinigameChatManager.broadcastInfo(
         component: Component,
@@ -122,7 +122,7 @@ object CommonUI {
             }
             val formatted = Component.literal("$ping").withStyle(colour)
             Component.empty()
-                .append(Component.translatable("casual.tab.ping", formatted).mini())
+                .append(Component.translatable("casual.tab.ping", formatted).withMiniFont())
                 .append("\n")
                 .append(hostedByKiwiTech)
         }
@@ -145,7 +145,7 @@ object CommonUI {
                 flag.set(DataComponents.DYED_COLOR, DyedItemColor(color))
                 flag.hideTooltip(DataComponents.DYED_COLOR)
             }
-            flag.set(DataComponents.CUSTOM_NAME, it.formattedDisplayName.mini())
+            flag.set(DataComponents.CUSTOM_NAME, it.formattedDisplayName.withMiniFont())
             TeamSelectorGui.Selection(it, flag)
         }
         return TeamSelectorGui(player, selections)

@@ -6,8 +6,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import net.casual.arcade.commands.function
 import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.utils.ComponentUtils.lime
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.arcade.utils.component.lime
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityAnchorArgument
 import net.minecraft.network.chat.Component

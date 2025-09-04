@@ -2,13 +2,13 @@ package net.casual.championships.duel.ui
 
 import eu.pb4.sgui.api.elements.GuiElement
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.grey
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.white
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.lore
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.PlayerUtils.levelServer
+import net.casual.arcade.utils.component.gray
+import net.casual.arcade.utils.component.white
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.ui.CommonSimpleGui
@@ -33,27 +33,27 @@ class DuelConfigurationGui(
 
     init {
         val settings = DisplayItems.GEAR
-        settings.named(Component.literal("Settings").mini())
+        settings.named(Component.literal("Settings").withMiniFont())
         this.setSlot(47, settings) { ->
             DuelSettingsGui(this.player, this.settings, this).open()
         }
 
         val players = ItemStack(CommonItems.FORWARD_FACING_PLAYER_HEAD)
-        players.named(Component.literal("Select Players").mini())
+        players.named(Component.literal("Select Players").withMiniFont())
         this.setSlot(51, players) { ->
             DuelPlayerSelectionGui(this.player, this).open()
         }
 
         val confirm = DisplayItems.TICK
-        confirm.named(CommonComponents.CONFIRM.mini())
+        confirm.named(CommonComponents.CONFIRM.withMiniFont())
         this.confirm = GuiElement(confirm) { _, _, _, _ ->
             val playerList = this.player.levelServer.playerList
             this.start.invoke(this.player, this.selectedPlayers.mapNotNull(playerList::getPlayer), this.settings)
             this.close()
         }
         val waiting = DisplayItems.GREY_TICK
-        waiting.named(CommonComponents.CONFIRM.mini())
-        waiting.lore(Component.literal("Select players to start!").grey().mini())
+        waiting.named(CommonComponents.CONFIRM.withMiniFont())
+        waiting.lore(Component.literal("Select players to start!").gray().withMiniFont())
         this.waiting = GuiElement(waiting, GuiElement.EMPTY_CALLBACK)
 
         this.updateConfirm()

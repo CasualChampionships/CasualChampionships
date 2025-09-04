@@ -1,8 +1,8 @@
 package net.casual.championships.uhc.utils
 
-import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.color
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.utils.component.bold
+import net.casual.arcade.utils.component.color
 import net.casual.championships.common.minigame.rules.Rules
 import net.casual.championships.common.minigame.rules.RulesProvider
 import net.casual.championships.common.util.RuleUtils
@@ -34,16 +34,16 @@ object UHCRules: RulesProvider {
             rule {
                 title = RuleUtils.formatTitle(Component.translatable("uhc.rules.reminders"))
                 entry {
-                    val teamglow = Component.literal("/uhc teamglow").mini().bold().color(0x65b7db)
-                    val fullbright = Component.literal("/uhc fullbright").mini().bold().color(0x65b7db)
-                    val pos = Component.literal("/uhc pos").mini().bold().color(0x65b7db)
+                    val teamglow = Component.literal("/uhc teamglow").withMiniFont().bold().color(0x65b7db)
+                    val fullbright = Component.literal("/uhc fullbright").withMiniFont().bold().color(0x65b7db)
+                    val pos = Component.literal("/uhc pos").withMiniFont().bold().color(0x65b7db)
                     line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.1", teamglow)))
                     line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.2", fullbright)))
                     line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.3", pos)))
                 }
                 entry {
-                    val prefix = Component.literal("!").mini().bold().color(0x65b7db)
-                    val chat = Component.literal("/chat").mini().bold().color(0x65b7db)
+                    val prefix = Component.literal("!").withMiniFont().bold().color(0x65b7db)
+                    val chat = Component.literal("/chat").withMiniFont().bold().color(0x65b7db)
                     line(RuleUtils.formatLine(Component.translatable("uhc.rules.reminders.4", prefix, chat)))
                 }
             }
@@ -53,8 +53,8 @@ object UHCRules: RulesProvider {
     }
 
     fun getSpectatorRules(): List<MutableComponent> {
-        val s = Component.literal("/s").mini().bold().color(0x65b7db)
-        val sneak = Component.keybind("key.sneak").mini().bold().color(0x65b7db)
+        val s = Component.literal("/s").withMiniFont().bold().color(0x65b7db)
+        val sneak = Component.keybind("key.sneak").withMiniFont().bold().color(0x65b7db)
         return listOf(
             RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.1")),
             RuleUtils.formatLine(Component.translatable("uhc.rules.spectators.2", s)),

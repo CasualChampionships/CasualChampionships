@@ -1,7 +1,7 @@
 package net.casual.championships.common.items
 
 import eu.pb4.polymer.core.api.utils.PolymerUtils
-import net.casual.arcade.utils.ComponentUtils.gold
+import net.casual.arcade.utils.component.gold
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer

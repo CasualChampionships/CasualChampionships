@@ -22,15 +22,7 @@ import net.casual.arcade.minigame.utils.MinigameRegistries
 import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.minigame.utils.MinigameUtils.broadcastChangesToAdmin
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
-import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.color
-import net.casual.arcade.utils.ComponentUtils.green
-import net.casual.arcade.utils.ComponentUtils.isEmpty
-import net.casual.arcade.utils.ComponentUtils.lime
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.red
-import net.casual.arcade.utils.ComponentUtils.white
-import net.casual.arcade.utils.ComponentUtils.yellow
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.PlayerUtils.broadcastToOps
 import net.casual.arcade.utils.PlayerUtils.getChatUsername
@@ -38,8 +30,9 @@ import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.chat.PlayerChatFormatter
 import net.casual.arcade.utils.chat.PlayerFormattedChat
-import net.casual.arcade.utils.codec.CodecProvider.Companion.register
+import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
 import net.casual.arcade.utils.set
 import net.casual.arcade.utils.toSmallCaps
 import net.casual.championships.CasualMod
@@ -255,7 +248,7 @@ object CasualMinigames {
             it.team.nameTagVisibility = Team.Visibility.NEVER
         }
         minigame.chat.systemChatFormatter = ChatFormatter {
-            ChatFormatter.SYSTEM.format(Component.empty().append(it).mini())
+            ChatFormatter.SYSTEM.format(Component.empty().append(it).withMiniFont())
         }
         minigame.chat.globalChatFormatter = object: PlayerChatFormatter {
             override fun format(player: ServerPlayer, message: PlayerFormattedChat): PlayerFormattedChat {
@@ -437,7 +430,7 @@ object CasualMinigames {
             if (removed.isNotEmpty()) {
                 component.append(Component.literal("\nRemoved: ").red()).append(removed.joinToString { it })
             }
-            server.playerList.players.broadcastToOps(component.mini())
+            server.playerList.players.broadcastToOps(component.withMiniFont())
         }, server)
     }
 

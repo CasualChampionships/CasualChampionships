@@ -1,10 +1,10 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.color
-import net.casual.arcade.utils.ComponentUtils.lime
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.component.bold
+import net.casual.arcade.utils.component.color
+import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.championships.common.minigame.rules.Rules
 import net.minecraft.network.chat.Component
@@ -35,10 +35,10 @@ object RuleUtils {
     }
 
     fun formatTitle(component: MutableComponent): MutableComponent {
-        return component.mini().bold().lime()
+        return component.withMiniFont().bold().lime()
     }
 
     fun formatLine(component: MutableComponent): MutableComponent {
-        return component.mini().color(0x92ddfe)
+        return component.withMiniFont().color(0x92ddfe)
     }
 }

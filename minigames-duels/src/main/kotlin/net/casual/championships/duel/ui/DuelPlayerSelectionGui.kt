@@ -1,12 +1,12 @@
 package net.casual.championships.duel.ui
 
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.white
-import net.casual.arcade.utils.ComponentUtils.yellow
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.utils.component.white
+import net.casual.arcade.utils.component.yellow
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.ui.CommonSimpleGui
@@ -62,7 +62,7 @@ class DuelPlayerSelectionGui(
             if (this.configuration.isPlayerSelected(player.uuid)) {
                 this.setSlot(slot - 9, DisplayItems.GREEN_HIGHLIGHT.hideTooltip())
             }
-            val name = Component.literal(player.scoreboardName).yellow().mini()
+            val name = Component.literal(player.scoreboardName).yellow().withMiniFont()
             this.setSlot(slot, head.named(name)) { _, _, _, _ ->
                 if (this.configuration.toggleSelection(player.uuid)) {
                     this.setSlot(slot - 9, DisplayItems.GREEN_HIGHLIGHT.hideTooltip())

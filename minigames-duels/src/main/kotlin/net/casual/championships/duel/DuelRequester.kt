@@ -4,9 +4,9 @@ import net.casual.arcade.commands.function
 import net.casual.arcade.minigame.ready.ReadyHandler
 import net.casual.arcade.minigame.ready.ReadyState
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.lime
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.red
+import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.utils.component.lime
+import net.casual.arcade.utils.component.red
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.Nameable
@@ -37,19 +37,19 @@ class DuelRequester(
                     .append("]")
                     .function { notReady.invoke() }
                     .red()
-            ).mini()
+            ).withMiniFont()
         this.broadcastTo(message, receiver)
     }
 
     override fun onReady(readier: ServerPlayer, previous: ReadyState): Boolean {
-        val message = Component.translatable("casual.duel.accepted", this.format(readier)).lime().mini()
+        val message = Component.translatable("casual.duel.accepted", this.format(readier)).lime().withMiniFont()
         this.broadcast(message)
         return true
     }
 
     override fun onNotReady(readier: ServerPlayer, previous: ReadyState): Boolean {
         if (previous != ReadyState.Ready) {
-            val message = Component.translatable("casual.duel.declined", this.format(readier)).red().mini()
+            val message = Component.translatable("casual.duel.declined", this.format(readier)).red().withMiniFont()
             this.broadcast(message)
             return true
         }

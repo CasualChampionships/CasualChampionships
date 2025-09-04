@@ -1,6 +1,6 @@
 package net.casual.championships.common.ui.bossbar
 
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TimeUtils.formatHHMMSS
 import net.casual.arcade.visuals.bossbar.TimerBossbar
 import net.casual.championships.common.util.CommonComponents
@@ -11,10 +11,10 @@ import net.minecraft.world.BossEvent
 class LobbyBossbar: TimerBossbar() {
     override fun getTitle(player: ServerPlayer): Component {
         if (this.complete || !this.hasDuration) {
-            return CommonComponents.STARTING_SOON_BACKGROUNDED.generate().mini()
+            return CommonComponents.STARTING_SOON_BACKGROUNDED.generate().withMiniFont()
         }
         val time = this.getRemainingDuration().formatHHMMSS()
-        return CommonComponents.STARTING_IN_BACKGROUNDED.generate(time).mini()
+        return CommonComponents.STARTING_IN_BACKGROUNDED.generate(time).withMiniFont()
     }
 
     override fun getColour(player: ServerPlayer): BossEvent.BossBarColor {

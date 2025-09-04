@@ -5,11 +5,11 @@ import com.google.common.cache.CacheLoader
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.color
-import net.casual.arcade.utils.ComponentUtils.greyscale
-import net.casual.arcade.utils.ComponentUtils.italicise
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TeamUtils.color
+import net.casual.arcade.utils.component.color
+import net.casual.arcade.utils.component.grayscale
+import net.casual.arcade.utils.component.italicize
 import net.casual.arcade.visuals.tab.PlayerListEntries
 import net.casual.arcade.visuals.tab.TeamListEntries
 import net.minecraft.network.chat.Component
@@ -28,7 +28,7 @@ open class CasualPlayerListEntries(
     }
 
     override fun formatTeamName(server: MinecraftServer, team: PlayerTeam): MutableComponent {
-        return super.formatTeamName(server, team).color(team).mini()
+        return super.formatTeamName(server, team).color(team).withMiniFont()
     }
 
     override fun createPlayerEntry(
@@ -43,7 +43,7 @@ open class CasualPlayerListEntries(
                 name.color(team)
                 PlayerHeadComponents.getHeadOrDefault(player)
             } else {
-                name.italicise().color(0x919191)
+                name.italicize().color(0x919191)
                 GREYSCALE_CACHE.get(username).getNow(PlayerHeadComponents.get().getDefault())
             }
         } else {
@@ -51,7 +51,7 @@ open class CasualPlayerListEntries(
             GREYSCALE_CACHE.get(username).getNow(PlayerHeadComponents.get().getDefault())
         }
         return PlayerListEntries.Entry.fromComponent(
-            Component.empty().append(head).append(SpacingFontResources.spaced(2)).append(name.mini())
+            Component.empty().append(head).append(SpacingFontResources.spaced(2)).append(name.withMiniFont())
         )
     }
 
@@ -60,7 +60,7 @@ open class CasualPlayerListEntries(
             .expireAfterAccess(Duration.ofSeconds(60))
             .build(object: CacheLoader<String, CompletableFuture<Component>>() {
                 override fun load(key: String): CompletableFuture<Component> {
-                    return PlayerHeadComponents.get().getHead(key).thenApply { it.greyscale() }
+                    return PlayerHeadComponents.get().getHead(key).thenApply { it.grayscale() }
                 }
             })
     }

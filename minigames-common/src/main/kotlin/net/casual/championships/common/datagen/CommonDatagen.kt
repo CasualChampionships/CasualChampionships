@@ -8,7 +8,7 @@ import net.casual.arcade.datagen.language.WidthDifferenceGenerator
 import net.casual.arcade.datagen.resource.ArcadeResourceGenerator
 import net.casual.arcade.minigame.managers.chat.MinigameChatMode.*
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.championships.common.CommonMod
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.client.Minecraft
@@ -30,35 +30,35 @@ class CommonDatagen: ArcadeResourceGenerator {
     override fun run(client: Minecraft) {
         val generator = LanguageGenerator(SUPPORTED_LANGUAGES).apply {
             add(CentredSpacingGenerator(
-                CommonComponents.STARTING_IN.generate("00:00:00").mini(),
+                CommonComponents.STARTING_IN.generate("00:00:00").withMiniFont(),
                 CommonComponents.Hud.BACKGROUND_240
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.TIME_ELAPSED.generate("00:00:00").mini(),
+                CommonComponents.TIME_ELAPSED.generate("00:00:00").withMiniFont(),
                 CommonComponents.Hud.BACKGROUND_240
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.GRACE.generate("00:00").mini(),
+                CommonComponents.GRACE.generate("00:00").withMiniFont(),
                 CommonComponents.Hud.BACKGROUND_180
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.GLOWING.generate("00:00").mini(),
+                CommonComponents.GLOWING.generate("00:00").withMiniFont(),
                 CommonComponents.Hud.BACKGROUND_180
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.STARTING_SOON.mini(),
+                CommonComponents.STARTING_SOON.withMiniFont(),
                 CommonComponents.Hud.BACKGROUND_240
             ))
             add(WidthDifferenceGenerator(
-                CommonComponents.SPECTATORS.mini(),
-                CommonComponents.ADMINS.mini()
+                CommonComponents.SPECTATORS.withMiniFont(),
+                CommonComponents.ADMINS.withMiniFont()
             ))
 
             for (direction in Direction8.entries) {
                 add(NegativeWidthGenerator(CommonComponents.direction(direction)))
             }
 
-            val modes = listOf(Global, Admin, Spectator, OwnTeam).map { it.name.copy().mini() }
+            val modes = listOf(Global, Admin, Spectator, OwnTeam).map { it.name.copy().withMiniFont() }
             for (mode in modes) {
                 add(NegativeWidthGenerator(mode))
             }

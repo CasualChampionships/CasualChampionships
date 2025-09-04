@@ -2,7 +2,7 @@ package net.casual.championships.minigame.lobby
 
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.visuals.tab.PlayerListEntries
 import net.casual.championships.common.ui.tab.CasualPlayerListEntries
@@ -33,7 +33,7 @@ class CasualLobbyPlayerListEntries(
                 .append(DuelRequester.DUEL_PREFIX)
                 .append(SpacingFontResources.spaced(2))
                 .append(PlayerHeadComponents.getHeadOrDefault(player))
-                .append(SpacingFontResources.spaced(2)).append(Component.literal(username).color(team).mini())
+                .append(SpacingFontResources.spaced(2)).append(Component.literal(username).color(team).withMiniFont())
         )
     }
 }

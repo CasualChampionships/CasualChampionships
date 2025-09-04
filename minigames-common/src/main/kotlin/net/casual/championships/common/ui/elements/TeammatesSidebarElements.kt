@@ -2,14 +2,14 @@ package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.italicise
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.wrap
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.PlayerUtils.player
 import net.casual.arcade.utils.TeamUtils.color
+import net.casual.arcade.utils.component.bold
+import net.casual.arcade.utils.component.italicize
+import net.casual.arcade.utils.component.wrap
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
 import net.casual.championships.common.util.CommonComponents
@@ -35,8 +35,8 @@ class TeammatesSidebarElements(
                 Component.empty()
                     .append(this.buffer)
                     .append(Component.literal("Team: ").bold())
-                    .append(Component.literal(team.name).color(team).italicise())
-                    .mini()
+                    .append(Component.literal(team.name).color(team).italicize())
+                    .withMiniFont()
             ))
         }
 
@@ -51,7 +51,7 @@ class TeammatesSidebarElements(
             .append(this.playerBuffer)
             .append(PlayerHeadComponents.getHeadOrDefault(username))
             .append(" ")
-            .append(Component.literal(username).mini().color(team))
+            .append(Component.literal(username).withMiniFont().color(team))
         val teammate = server.player(username)
             ?: return SidebarComponent.withCustomScore(formatted, CommonComponents.Hud.NO_CONNECTION.wrap().append(this.buffer))
 
@@ -62,7 +62,7 @@ class TeammatesSidebarElements(
             return SidebarComponent.withCustomScore(formatted, CommonComponents.Hud.UNAVAILABLE.wrap().append(this.buffer))
         }
         val health = " %04.1f".format(teammate.health / 2.0)
-        val score = Component.literal(health).mini().append(SpacingFontResources.spaced(1)).append(CommonComponents.Hud.HARDCORE_HEART)
+        val score = Component.literal(health).withMiniFont().append(SpacingFontResources.spaced(1)).append(CommonComponents.Hud.HARDCORE_HEART)
         return SidebarComponent.withCustomScore(formatted, score.append(this.buffer))
     }
 }

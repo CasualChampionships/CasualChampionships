@@ -3,10 +3,10 @@ package net.casual.championships.common.ui.bossbar
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.stats.ArcadeStats
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.shadowless
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatHHMMSS
+import net.casual.arcade.utils.component.shadowless
 import net.casual.arcade.visuals.bossbar.CustomBossbar
 import net.casual.championships.common.util.CommonComponents
 import net.minecraft.network.chat.Component
@@ -21,17 +21,17 @@ class ActiveBossbar(
             .append(SpacingFontResources.spaced(-5))
             .append(CommonComponents.Hud.BACKGROUND_40.copy().shadowless())
             .append(SpacingFontResources.spaced(-27))
-            .append(Component.literal("%02d".format(this.owner.players.playingPlayerCount)).mini())
+            .append(Component.literal("%02d".format(this.owner.players.playingPlayerCount)).withMiniFont())
             .append(CommonComponents.Hud.PLAYER_COUNT)
             .append(SpacingFontResources.spaced(43))
         val end = Component.empty()
             .append(SpacingFontResources.spaced(37))
             .append(CommonComponents.Hud.BACKGROUND_40.copy().shadowless())
             .append(SpacingFontResources.spaced(-27))
-            .append(Component.literal("%02d".format(this.owner.stats.getOrCreateStat(player, ArcadeStats.KILLS).value)).mini())
+            .append(Component.literal("%02d".format(this.owner.stats.getOrCreateStat(player, ArcadeStats.KILLS).value)).withMiniFont())
             .append(SpacingFontResources.spaced(1))
             .append(CommonComponents.Hud.KILLS_COUNT)
-        val middle = CommonComponents.TIME_ELAPSED_BACKGROUNDED.generate(this.owner.uptime.Ticks.formatHHMMSS()).mini()
+        val middle = CommonComponents.TIME_ELAPSED_BACKGROUNDED.generate(this.owner.uptime.Ticks.formatHHMMSS()).withMiniFont()
         return start.append(middle).append(end)
     }
 

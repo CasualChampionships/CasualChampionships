@@ -16,10 +16,7 @@ import net.casual.arcade.minigame.extensions.PlayerMovementRestrictionExtension.
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.settings.MinigameSettings
-import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.color
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.suggestCommand
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.LootTableUtils
 import net.casual.arcade.utils.LootTableUtils.addItem
@@ -36,6 +33,9 @@ import net.casual.arcade.utils.PlayerUtils.resetHealth
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.arcade.utils.component.bold
+import net.casual.arcade.utils.component.color
+import net.casual.arcade.utils.component.suggestCommand
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.teleportTo
 import net.casual.championships.common.items.PlayerHeadItem
@@ -239,7 +239,7 @@ class DuelMinigame(
 
     @Listener
     private fun onMinigameAddPlayer(event: MinigameAddNewPlayerEvent) {
-        val leave = Component.literal("/duel leave").mini()
+        val leave = Component.literal("/duel leave").withMiniFont()
             .bold().color(0x65b7db).suggestCommand("/duel leave")
         val message = RuleUtils.formatLine(Component.translatable("casual.duel.leaveDuel", leave))
         this.chat.broadcastInfo(message, listOf(event.player))

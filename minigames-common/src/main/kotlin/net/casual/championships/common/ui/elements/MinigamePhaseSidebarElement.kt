@@ -1,8 +1,8 @@
 package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.utils.ComponentUtils.green
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.utils.component.green
 import net.casual.arcade.visuals.elements.UniversalElement
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.minecraft.network.chat.Component
@@ -14,8 +14,8 @@ class MinigamePhaseSidebarElement(
 ): UniversalElement<SidebarComponent> {
     override fun get(server: MinecraftServer): SidebarComponent {
         return SidebarComponent.withCustomScore(
-            Component.empty().append(this.buffer).append("Phase:").mini(),
-            Component.literal(this.minigame.phase.id).append(this.buffer).green().mini()
+            Component.empty().append(this.buffer).append("Phase:").withMiniFont(),
+            Component.literal(this.minigame.phase.id).append(this.buffer).green().withMiniFont()
         )
     }
 }

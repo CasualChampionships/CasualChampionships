@@ -29,15 +29,10 @@ import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.replay.recorder.player.ReplayPlayerRecorders
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
+import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.resources.utils.withMiniShiftedDownFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.join
-import net.casual.arcade.utils.ComponentUtils.lime
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.red
-import net.casual.arcade.utils.ComponentUtils.withMiniShiftedDownFont
-import net.casual.arcade.utils.ComponentUtils.wrap
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.int
 import net.casual.arcade.utils.JsonUtils.obj
@@ -67,6 +62,7 @@ import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatMMSS
+import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.isOf
 import net.casual.arcade.utils.math.location.Location.Companion.withRotation
@@ -215,13 +211,13 @@ class UHCMinigame(
 
     fun onPauseBoundary() {
         this.lastBoundaryTime = this.uptime.Ticks
-        this.chat.broadcastGame(component = CommonComponents.BORDER_PAUSED.mini().red())
+        this.chat.broadcastGame(component = CommonComponents.BORDER_PAUSED.withMiniFont().red())
     }
 
     fun onResumeBoundary() {
         this.lastBoundaryTime = this.uptime.Ticks
         this.chat.broadcastGame(
-            component = CommonComponents.BORDER_RESUMED.mini().red(),
+            component = CommonComponents.BORDER_RESUMED.withMiniFont().red(),
             sound = Sound(CommonSounds.GAME_BORDER_MOVING)
         )
     }
@@ -371,7 +367,7 @@ class UHCMinigame(
             val interval = 20.Minutes.ticks
             if (this.uptime % interval == interval - 1) {
                 val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
-                this.chat.broadcastInfo(rules.mini(), listOf(player))
+                this.chat.broadcastInfo(rules.withMiniFont(), listOf(player))
             }
 
             val gui = GuiHelpers.getCurrentGui(player)
@@ -648,7 +644,7 @@ class UHCMinigame(
 
         val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
         this.scheduler.schedule(1.Ticks) {
-            this.chat.broadcastInfo(rules.mini(), listOf(player))
+            this.chat.broadcastInfo(rules.withMiniFont(), listOf(player))
         }
     }
 
@@ -750,7 +746,7 @@ class UHCMinigame(
         if (team !== null && !this.teams.isTeamEliminated(team) && team.getOnlinePlayers().none(this.players::isPlaying)) {
             this.teams.addEliminatedTeam(team)
             this.chat.broadcastWithSound(
-                CommonComponents.HAS_BEEN_ELIMINATED.generate(team.name).color(team).bold().mini(),
+                CommonComponents.HAS_BEEN_ELIMINATED.generate(team.name).color(team).bold().withMiniFont(),
                 Sound(CommonSounds.TEAM_ELIMINATION)
             )
         }
@@ -795,7 +791,7 @@ class UHCMinigame(
         if (this.uptime % 200 == 0) {
             player.sendTitle(
                 Component.empty(),
-                CommonComponents.INSIDE_BORDER.generate(CommonComponents.direction(direction).lime()).mini()
+                CommonComponents.INSIDE_BORDER.generate(CommonComponents.direction(direction).lime()).withMiniFont()
             )
         }
     }
@@ -826,7 +822,7 @@ class UHCMinigame(
         if (this.uptime % 200 == 0) {
             player.sendTitle(
                 Component.empty(),
-                CommonComponents.INSIDE_BORDER.generate(CommonComponents.direction(direction).lime()).mini()
+                CommonComponents.INSIDE_BORDER.generate(CommonComponents.direction(direction).lime()).withMiniFont()
             )
         }
     }
@@ -885,7 +881,7 @@ class UHCMinigame(
                 components.addRow(phase.get(player))
                 components.addRow(SidebarComponent.EMPTY)
                 components.addRow(SidebarComponent.withNoScore(
-                    Component.empty().append(SpacingFontResources.spaced(2)).append("Mobcaps:").mini()
+                    Component.empty().append(SpacingFontResources.spaced(2)).append("Mobcaps:").withMiniFont()
                 ))
                 components.addRow(mobcaps.get(player))
                 components.addRow(SidebarComponent.EMPTY)
@@ -969,13 +965,13 @@ class UHCMinigame(
             if (boundary.shape.getStatus().isMoving()) {
                 val remainingTime = boundaryPhase.getDuration(settings.borderTime) - (uptime.Ticks - lastBoundaryTime)
                 return SidebarComponent.withCustomScore(
-                    this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderPausingIn").mini()),
-                    Component.literal(remainingTime.formatMMSS()).withStyle(colorTime(remainingTime)).mini().append(this.buffer)
+                    this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderPausingIn").withMiniFont()),
+                    Component.literal(remainingTime.formatMMSS()).withStyle(colorTime(remainingTime)).withMiniFont().append(this.buffer)
                 )
             }
             if (isFinalStage(level)) {
                 return SidebarComponent.withNoScore(
-                    this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderFinished").mini())
+                    this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderFinished").withMiniFont())
                 )
             }
 
@@ -985,8 +981,8 @@ class UHCMinigame(
             }
             val remainingTime = cooldown - (uptime.Ticks - lastBoundaryTime)
             return SidebarComponent.withCustomScore(
-                this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderMovingIn").mini()),
-                Component.literal(remainingTime.formatMMSS()).withStyle(colorTime(remainingTime)).append(buffer).mini()
+                this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderMovingIn").withMiniFont()),
+                Component.literal(remainingTime.formatMMSS()).withStyle(colorTime(remainingTime)).append(buffer).withMiniFont()
             )
         }
 

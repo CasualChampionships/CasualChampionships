@@ -5,12 +5,10 @@ import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Compan
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.enumeration
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.string
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ItemUtils.hideAttributeTooltips
+import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
-import net.casual.championships.duel.arena.DuelArenaTemplate
 import net.casual.championships.common.items.DisplayItems.ARENA
 import net.casual.championships.common.items.DisplayItems.FLAG
 import net.casual.championships.common.items.DisplayItems.GLOWING
@@ -32,6 +30,7 @@ import net.casual.championships.common.items.DisplayItems.TWO_TIMES_SELECTED
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.duel.arena.DuelArenaSize
 import net.casual.championships.duel.arena.DuelArenaSize.*
+import net.casual.championships.duel.arena.DuelArenaTemplate
 import net.casual.championships.duel.arena.DuelArenasTemplate
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
@@ -42,10 +41,10 @@ import kotlin.enums.enumEntries
 
 class DuelSettings(
     val arenas: List<DuelArenasTemplate>
-): DisplayableSettings(CasualSettings.Defaults(Component.translatable("casual.gui.duel.settings").mini())) {
+): DisplayableSettings(CasualSettings.Defaults(Component.translatable("casual.gui.duel.settings").withMiniFont())) {
     val displayableTeams = bool {
         name = "teams"
-        val flag = FLAG.named(Component.translatable("casual.gui.duel.settings.teams").mini())
+        val flag = FLAG.named(Component.translatable("casual.gui.duel.settings.teams").withMiniFont())
         flag.set(DataComponents.DYED_COLOR, DyedItemColor(0xFF0000))
         flag.hideTooltip(DataComponents.DYED_COLOR)
         display = flag
@@ -56,7 +55,7 @@ class DuelSettings(
 
     val displayableHealth = float64 {
         name = "health"
-        display = HEALTH_BOOST.named(Component.translatable("casual.gui.duel.settings.health").mini())
+        display = HEALTH_BOOST.named(Component.translatable("casual.gui.duel.settings.health").withMiniFont())
             .potion(Potions.HEALING)
             .hideTooltip(DataComponents.POTION_CONTENTS)
         value = 1.0
@@ -74,7 +73,7 @@ class DuelSettings(
 
     val displayableNaturalRegen = bool {
         name = "natural_regeneration"
-        display = NATURAL_REGEN.named(Component.translatable("casual.gui.duel.settings.naturalRegeneration").mini())
+        display = NATURAL_REGEN.named(Component.translatable("casual.gui.duel.settings.naturalRegeneration").withMiniFont())
         value = false
         defaults.options(this)
     }
@@ -82,7 +81,7 @@ class DuelSettings(
 
     val displayableGlowing = bool {
         name = "glowing"
-        display = GLOWING.named(Component.translatable("casual.gui.duel.settings.glowing").mini())
+        display = GLOWING.named(Component.translatable("casual.gui.duel.settings.glowing").withMiniFont())
         value = false
         defaults.options(this)
     }
@@ -90,7 +89,7 @@ class DuelSettings(
 
     val displayablePlayerDropHeads = bool {
         name = "player_drops_head"
-        display = Items.PLAYER_HEAD.named(Component.translatable("casual.gui.duel.settings.playerHeadDrops").mini())
+        display = Items.PLAYER_HEAD.named(Component.translatable("casual.gui.duel.settings.playerHeadDrops").withMiniFont())
         value = true
         defaults.options(this)
     }
@@ -98,7 +97,7 @@ class DuelSettings(
 
     val displayableArena = string {
         name = "arena"
-        display = ARENA.named(Component.translatable("casual.gui.duel.settings.arena").mini())
+        display = ARENA.named(Component.translatable("casual.gui.duel.settings.arena").withMiniFont())
         value = arenas.randomOrNull()?.name ?: ""
         for (arena in arenas) {
             option(arena.name, arena.display, arena.name)
@@ -108,7 +107,7 @@ class DuelSettings(
 
     val displayableArenaSize = enumeration<DuelArenaSize> {
         name = "arena_size"
-        display = GREEN_DIAGONAL.named(Component.translatable("casual.gui.duel.settings.arenaSize").mini())
+        display = GREEN_DIAGONAL.named(Component.translatable("casual.gui.duel.settings.arenaSize").withMiniFont())
         value = enumEntries<DuelArenaSize>().random()
         option("small", ONE_TIMES.named("Small"), Small) { setting, _, _ ->
             (if (setting.get() == Small) SMALL_SELECTED else SMALL).named("Small")

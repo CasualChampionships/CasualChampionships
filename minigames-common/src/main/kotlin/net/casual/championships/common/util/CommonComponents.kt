@@ -3,15 +3,15 @@ package net.casual.championships.common.util
 import net.casual.arcade.resources.font.FontResources
 import net.casual.arcade.resources.font.IndexedFontResources
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
+import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.resources.utils.withSpacingFont
 import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.ComponentUtils.crimson
-import net.casual.arcade.utils.ComponentUtils.lime
-import net.casual.arcade.utils.ComponentUtils.mini
-import net.casual.arcade.utils.ComponentUtils.shadowless
 import net.casual.arcade.utils.ComponentUtils.translatable
 import net.casual.arcade.utils.ComponentUtils.translatableWithArgs
-import net.casual.arcade.utils.ComponentUtils.white
-import net.casual.arcade.utils.ComponentUtils.withSpacingFont
+import net.casual.arcade.utils.component.crimson
+import net.casual.arcade.utils.component.lime
+import net.casual.arcade.utils.component.shadowless
+import net.casual.arcade.utils.component.white
 import net.casual.championships.common.CommonMod
 import net.minecraft.core.Direction
 import net.minecraft.core.Direction8
@@ -98,11 +98,11 @@ object CommonComponents {
     val GRACE = translatableWithArgs("casual.game.grace")
     val GLOWING = translatableWithArgs("casual.game.glowing")
 
-    val STARTING_IN_BACKGROUNDED = backgrounded(STARTING_IN, Hud.BACKGROUND_240) { mini() }
-    val STARTING_SOON_BACKGROUNDED = backgrounded({ STARTING_SOON }, Hud.BACKGROUND_240) { mini() }
-    val TIME_ELAPSED_BACKGROUNDED = backgrounded(TIME_ELAPSED, Hud.BACKGROUND_240) { mini() }
-    val GRACE_BACKGROUNDED = backgrounded(GRACE, Hud.BACKGROUND_180) { mini() }
-    val GLOWING_BACKGROUNDED = backgrounded(GLOWING, Hud.BACKGROUND_180) { mini() }
+    val STARTING_IN_BACKGROUNDED = backgrounded(STARTING_IN, Hud.BACKGROUND_240) { withMiniFont() }
+    val STARTING_SOON_BACKGROUNDED = backgrounded({ STARTING_SOON }, Hud.BACKGROUND_240) { withMiniFont() }
+    val TIME_ELAPSED_BACKGROUNDED = backgrounded(TIME_ELAPSED, Hud.BACKGROUND_240) { withMiniFont() }
+    val GRACE_BACKGROUNDED = backgrounded(GRACE, Hud.BACKGROUND_180) { withMiniFont() }
+    val GLOWING_BACKGROUNDED = backgrounded(GLOWING, Hud.BACKGROUND_180) { withMiniFont() }
 
     fun backgrounded(
         generator: ComponentUtils.ComponentGenerator,

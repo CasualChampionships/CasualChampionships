@@ -1,9 +1,9 @@
 package net.casual.championships.common.ui.tab
 
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.utils.ComponentUtils.color
-import net.casual.arcade.utils.ComponentUtils.italicise
-import net.casual.arcade.utils.ComponentUtils.mini
+import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.utils.component.color
+import net.casual.arcade.utils.component.italicize
 import net.casual.arcade.visuals.tab.PlayerListEntries
 import net.casual.arcade.visuals.tab.VanillaPlayerListEntries
 import net.minecraft.network.chat.Component
@@ -17,9 +17,9 @@ class SimpleCasualPlayerListEntries(
     override fun getEntryAt(index: Int): PlayerListEntries.Entry {
         val entry = super.getEntryAt(index)
         val player = this.getPlayerAt(index)
-        var display = Component.empty().append(entry.display).mini()
+        var display = Component.empty().append(entry.display).withMiniFont()
         if (this.minigame.players.isSpectating(player)) {
-            display = Component.literal(player.scoreboardName).color(0x919191).italicise().mini()
+            display = Component.literal(player.scoreboardName).color(0x919191).italicize().withMiniFont()
         }
         return entry.copy(display = display)
     }

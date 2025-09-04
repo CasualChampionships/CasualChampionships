@@ -8,8 +8,8 @@ import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.utils.ComponentUtils.white
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.utils.component.white
 import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.items.DisplayItems
 import net.casual.championships.common.items.MinesweeperItems

@@ -1,10 +1,10 @@
 package net.casual.championships.minigame.lobby
 
 import eu.pb4.sgui.api.gui.HotbarGui
-import net.casual.arcade.utils.ComponentUtils.bold
-import net.casual.arcade.utils.ComponentUtils.red
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.utils.component.bold
+import net.casual.arcade.utils.component.red
 import net.casual.arcade.utils.math.location.Location
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.visuals.screen.setSlot
