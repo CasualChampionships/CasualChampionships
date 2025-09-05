@@ -48,8 +48,8 @@ import net.casual.championships.data.DataManager
 import net.casual.championships.data.DatabaseDataManager
 import net.casual.championships.data.JsonDataManager
 import net.casual.championships.data.MultiDataManager
-import net.casual.championships.duel.DuelMinigame
-import net.casual.championships.duel.DuelMinigameFactory
+import net.casual.championships.duel.minigame.DuelMinigame
+import net.casual.championships.duel.minigame.DuelMinigameFactory
 import net.casual.championships.events.CasualConfigReloaded
 import net.casual.championships.minigame.lobby.CasualLobbyMinigameFactory
 import net.casual.championships.resources.CasualResourcePackHost

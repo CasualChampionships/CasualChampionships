@@ -3,7 +3,6 @@ package net.casual.championships.uhc.border
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.time.MinecraftTimeDuration
-import net.casual.arcade.utils.time.MinecraftTimeUnit
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.levelgen.Heightmap

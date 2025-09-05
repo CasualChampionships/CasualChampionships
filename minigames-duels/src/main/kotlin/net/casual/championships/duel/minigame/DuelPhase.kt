@@ -1,4 +1,4 @@
-package net.casual.championships.duel
+package net.casual.championships.duel.minigame
 
 import net.casual.arcade.minigame.extensions.PlayerMovementRestrictionExtension.Companion.restrictMovement
 import net.casual.arcade.minigame.extensions.PlayerMovementRestrictionExtension.Companion.unrestrictMovement
@@ -15,6 +15,7 @@ import net.casual.arcade.utils.set
 import net.casual.championships.common.ui.bossbar.ActiveBossbar
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualStats
+import net.casual.championships.common.util.CasualUtils
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.world.level.GameRules
@@ -98,7 +99,7 @@ enum class DuelPhase(
                 }
             }
             if (winner == null) {
-                CasualDuelMod.logger.warn("Couldn't find winner for duel!")
+                CasualUtils.logger.warn("Couldn't find winner for duel!")
                 winner = Component.literal("Unknown").withStyle(ChatFormatting.OBFUSCATED)
             }
 

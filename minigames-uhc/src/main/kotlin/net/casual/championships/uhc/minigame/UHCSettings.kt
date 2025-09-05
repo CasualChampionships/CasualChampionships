@@ -5,7 +5,7 @@ import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Compan
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.enumeration
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.time
-import net.casual.arcade.utils.ItemUtils.hideAttributeTooltips
+import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.TimeUtils.Minutes
@@ -16,6 +16,7 @@ import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.uhc.border.UHCBoundaryPhase
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
@@ -100,7 +101,8 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
 
     var health by this.register(float64 {
         name = "health"
-        display = Items.POTION.named("Health").potion(Potions.HEALING).hideAttributeTooltips()
+        display = Items.POTION.named("Health").potion(Potions.HEALING)
+            .hideTooltip(DataComponents.ATTRIBUTE_MODIFIERS)
         value = 1.0
         option("triple", Items.GREEN_STAINED_GLASS_PANE.named("Triple"), 2.0)
         option("double", Items.YELLOW_STAINED_GLASS_PANE.named("Double"), 1.0)
@@ -137,7 +139,8 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
 
     var opPotions by this.register(bool {
         name = "op_potions"
-        display = Items.SPLASH_POTION.named("OP Potions").potion(Potions.STRONG_HARMING).hideAttributeTooltips()
+        display = Items.SPLASH_POTION.named("OP Potions").potion(Potions.STRONG_HARMING)
+            .hideTooltip(DataComponents.ATTRIBUTE_MODIFIERS)
         value = false
         defaults.options(this)
     })
@@ -151,7 +154,8 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
 
     var soloBuff by this.register(bool {
         name = "solo_buff"
-        display = Items.LINGERING_POTION.named("Solo Buff").potion(Potions.REGENERATION).hideAttributeTooltips()
+        display = Items.LINGERING_POTION.named("Solo Buff").potion(Potions.REGENERATION)
+            .hideTooltip(DataComponents.ATTRIBUTE_MODIFIERS)
         value = true
         defaults.options(this)
     })

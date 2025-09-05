@@ -2,6 +2,7 @@ package net.casual.championships.uhc.recipe
 
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.recipe.CraftingRecipeBuilder
+import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.CasualUHC
 import net.casual.championships.uhc.item.UHCItems
 import net.minecraft.core.RegistryAccess
@@ -17,7 +18,7 @@ object FlowerPowerRecipe {
     fun getOrCreate(access: RegistryAccess): RecipeHolder<ShapedRecipe> {
         if (!this::instance.isInitialized) {
             this.instance = CraftingRecipeBuilder.shaped(access) {
-                key(CasualUHC.id("flower_power"))
+                key(casual("flower_power"))
                 category = CraftingBookCategory.MISC
                 height = 3
                 width = 3

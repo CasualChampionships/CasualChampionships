@@ -1,4 +1,4 @@
-package net.casual.championships.duel
+package net.casual.championships.duel.minigame
 
 import net.casual.arcade.minigame.settings.display.DisplayableSettings
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.bool

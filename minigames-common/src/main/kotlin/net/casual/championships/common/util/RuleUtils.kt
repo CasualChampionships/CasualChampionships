@@ -41,5 +41,11 @@ fun MinigameRules.Builder.formatTitle(component: MutableComponent): MutableCompo
 
 @Suppress("UnusedReceiverParameter")
 fun MinigameRuleEntry.Builder.formatLine(component: MutableComponent): MutableComponent {
-    return component.withMiniFont().color(0x92ddfe)
+    return RuleUtils.formatLine(component)
+}
+
+object RuleUtils {
+    fun formatLine(component: MutableComponent): MutableComponent {
+        return component.withMiniFont().color(0x92ddfe)
+    }
 }

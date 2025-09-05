@@ -31,13 +31,8 @@ object CasualUHC: ModInitializer {
     }
 
     override fun onInitialize() {
-        UHCMapRenderer.noop()
-        UHCItems.noop()
-        UHCStats.noop()
-    }
-
-    @Deprecated("")
-    internal fun id(path: String): ResourceLocation {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path)
+        UHCMapRenderer.load()
+        UHCItems.load()
+        UHCStats.load()
     }
 }

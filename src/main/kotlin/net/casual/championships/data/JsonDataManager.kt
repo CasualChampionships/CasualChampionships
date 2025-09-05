@@ -2,19 +2,12 @@ package net.casual.championships.data
 
 import com.mojang.authlib.GameProfile
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.utils.JsonUtils
-import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CasualUtils
-import net.casual.championships.duel.DuelMinigame
+import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.scores.PlayerTeam
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.CompletableFuture
-import kotlin.io.path.bufferedWriter
-import kotlin.io.path.createDirectories
-import kotlin.io.path.exists
 
 class JsonDataManager: DataManager {
     override fun getParticipants(): CompletableFuture<Set<GameProfile>> {

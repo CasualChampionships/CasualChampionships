@@ -2,6 +2,7 @@ package net.casual.championships.uhc.minigame
 
 import com.google.gson.JsonObject
 import eu.pb4.sgui.api.GuiHelpers
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
@@ -1001,8 +1002,8 @@ class UHCMinigame(
         private const val MOB_SPAWN_PROBABILITY = 1.0F / 2.0F
         private val MOB_LOOT_MULTIPLIER = (1.0F / MOB_SPAWN_PROBABILITY).roundToInt()
 
-        private val NERFED_DAMAGE_MODIFIER = CasualUHC.id("nerfed_damage")
+        private val NERFED_DAMAGE_MODIFIER = casual("nerfed_damage")
 
-        val ID = CasualUHC.id("uhc_minigame")
+        val ID = casual("uhc_minigame")
     }
 }

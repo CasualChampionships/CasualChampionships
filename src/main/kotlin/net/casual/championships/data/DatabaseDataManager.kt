@@ -9,7 +9,7 @@ import net.casual.arcade.utils.TeamUtils.setHexColor
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CasualStats
-import net.casual.championships.duel.DuelMinigame
+import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.utils.UHCStats
 import net.casual.database.*

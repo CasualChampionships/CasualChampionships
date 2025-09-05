@@ -1,4 +1,4 @@
-package net.casual.championships.duel
+package net.casual.championships.duel.minigame
 
 import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
 import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
@@ -43,6 +43,7 @@ import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.RuleUtils
+import net.casual.championships.common.util.casual
 import net.casual.championships.duel.arena.DuelArena
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -277,10 +278,10 @@ class DuelMinigame(
 
     companion object {
         private var table: LootTable? = null
-        val ID = CasualDuelMod.id("duel_minigame")
+        val ID = casual("duel_minigame")
 
         private fun getOrCreateLootTable(provider: HolderLookup.Provider): LootTable {
-            var table = this.table
+            var table = table
             if (table != null) {
                 return table
             }
@@ -461,7 +462,7 @@ class DuelMinigame(
                     }
                 }
             }
-            this.table = table
+            Companion.table = table
             return table
         }
     }

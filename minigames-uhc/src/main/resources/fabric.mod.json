@@ -16,7 +16,7 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "CasualUHC"
+        "value": "net.casual.championships.uhc.CasualUHC"
       }
     ],
     "voicechat": [

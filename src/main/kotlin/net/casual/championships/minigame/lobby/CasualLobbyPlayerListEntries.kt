@@ -6,7 +6,7 @@ import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.visuals.tab.PlayerListEntries
 import net.casual.championships.common.ui.tab.CasualPlayerListEntries
-import net.casual.championships.duel.DuelRequester
+import net.casual.championships.duel.utils.DuelRequester
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer

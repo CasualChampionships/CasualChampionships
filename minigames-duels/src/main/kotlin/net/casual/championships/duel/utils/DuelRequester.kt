@@ -1,4 +1,4 @@
-package net.casual.championships.duel
+package net.casual.championships.duel.utils
 
 import net.casual.arcade.commands.function
 import net.casual.arcade.minigame.ready.ReadyHandler

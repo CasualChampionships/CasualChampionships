@@ -3,21 +3,18 @@ package net.casual.championships.uhc.compat
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
-import de.maxhenkel.voicechat.api.Group
-import de.maxhenkel.voicechat.api.VoicechatApi
-import de.maxhenkel.voicechat.api.VoicechatPlugin
-import de.maxhenkel.voicechat.api.VoicechatServerApi
+import de.maxhenkel.voicechat.api.*
 import de.maxhenkel.voicechat.api.events.EventRegistration
 import de.maxhenkel.voicechat.api.events.PlayerConnectedEvent
 import net.casual.arcade.commands.*
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
+import net.casual.arcade.events.server.player.PlayerEvent
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.player.PlayerTeamLeaveEvent
 import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.championships.uhc.CasualUHC
-import net.casual.championships.uhc.event.PlayerVoicechatConnectedEvent
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
@@ -26,6 +23,8 @@ import net.minecraft.world.scores.Team
 import java.util.*
 import kotlin.collections.HashMap
 
+// TODO: Maybe we separate this out into common to add
+//   support for voicechat in other minigames?
 object UHCVoicePlugin: VoicechatPlugin {
     private lateinit var api: VoicechatServerApi
 
@@ -143,4 +142,9 @@ object UHCVoicePlugin: VoicechatPlugin {
         player.setVoicechatGroup(group)
         return context.source.success("Successfully added ${player.scoreboardName} to $groupName")
     }
+
+    private data class PlayerVoicechatConnectedEvent(
+        override val player: ServerPlayer,
+        val connection: VoicechatConnection
+    ): PlayerEvent
 }

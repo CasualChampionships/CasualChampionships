@@ -1,7 +1,7 @@
 package net.casual.championships.data
 
 import com.mojang.authlib.GameProfile
-import net.casual.championships.duel.DuelMinigame
+import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.Util
 import net.minecraft.server.MinecraftServer

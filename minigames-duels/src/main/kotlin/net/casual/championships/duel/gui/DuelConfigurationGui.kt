@@ -1,4 +1,4 @@
-package net.casual.championships.duel.ui
+package net.casual.championships.duel.gui
 
 import eu.pb4.sgui.api.elements.GuiElement
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
@@ -14,7 +14,7 @@ import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.ui.CasualSimpleGui
 import net.casual.championships.common.util.CasualComponents
-import net.casual.championships.duel.DuelSettings
+import net.casual.championships.duel.minigame.DuelSettings
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.inventory.MenuType

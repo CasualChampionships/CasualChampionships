@@ -77,11 +77,9 @@ object UHCBoundaryManager {
 
         uhc.onPauseBoundary()
         val cooldown = current.getCooldown(uhc.settings.borderTime)
-        val index = UHCBoundaryPhase.entries.indexOf(current)
-        require(index >= 0) { "Boundary phase was not registered!?" }
         uhc.scheduler.schedulePhased(cooldown, MinigameTask(uhc) { minigame ->
             minigame.onResumeBoundary()
-            this.move(minigame, UHCBoundaryPhase.entries[index].getNextStage())
+            this.move(minigame, minigame.boundaryPhase.getNextStage())
         })
     }
 

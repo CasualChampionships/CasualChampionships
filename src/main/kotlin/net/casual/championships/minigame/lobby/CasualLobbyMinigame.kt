@@ -65,12 +65,12 @@ import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
-import net.casual.championships.duel.DuelMinigame
-import net.casual.championships.duel.DuelMinigameFactory
-import net.casual.championships.duel.DuelRequester
-import net.casual.championships.duel.DuelSettings
+import net.casual.championships.duel.minigame.DuelMinigame
+import net.casual.championships.duel.minigame.DuelMinigameFactory
+import net.casual.championships.duel.utils.DuelRequester
+import net.casual.championships.duel.minigame.DuelSettings
 import net.casual.championships.duel.arena.DuelArenasTemplate
-import net.casual.championships.duel.ui.DuelConfigurationGui
+import net.casual.championships.duel.gui.DuelConfigurationGui
 import net.casual.championships.minigame.CasualMinigames
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.SharedSuggestionProvider

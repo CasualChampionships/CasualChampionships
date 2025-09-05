@@ -1,4 +1,4 @@
-package net.casual.championships.duel
+package net.casual.championships.duel.minigame
 
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
@@ -23,7 +23,8 @@ class DuelMinigameFactory(private val settings: DuelSettings): MinigameFactory {
 
         override val CODEC: MapCodec<out DuelMinigameFactory> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
-                DuelArenasTemplate.CODEC.listOf().xmap(::DuelSettings, DuelSettings::arenas).fieldOf("arenas").forGetter(DuelMinigameFactory::settings)
+                DuelArenasTemplate.CODEC.listOf().xmap(::DuelSettings, DuelSettings::arenas).fieldOf("arenas").forGetter(
+                    DuelMinigameFactory::settings)
             ).apply(instance, ::DuelMinigameFactory)
         }
     }

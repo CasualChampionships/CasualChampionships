@@ -10,7 +10,12 @@
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "net.casual.championships.duel.CasualDuels"
+      }
+    ]
   },
   "mixins": [
 

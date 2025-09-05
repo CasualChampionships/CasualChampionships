@@ -2,6 +2,7 @@ package net.casual.championships.uhc.utils
 
 import net.casual.arcade.minigame.stats.StatType
 import net.casual.arcade.minigame.utils.MinigameRegistries
+import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.CasualUHC
 import net.minecraft.core.Holder
 import net.minecraft.core.Registry
@@ -15,13 +16,13 @@ object UHCStats {
 
     val NETHER_WART_MINED = this.register("nether_wart_mined", StatType.int32())
 
-    internal fun noop() {
+    internal fun load() {
 
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun <T: Any> register(name: String, type: StatType<T>): Holder.Reference<StatType<T>> {
-        return Registry.registerForHolder(MinigameRegistries.STAT_TYPES, CasualUHC.id(name), type)
+        return Registry.registerForHolder(MinigameRegistries.STAT_TYPES, casual(name), type)
             as Holder.Reference<StatType<T>>
     }
 }

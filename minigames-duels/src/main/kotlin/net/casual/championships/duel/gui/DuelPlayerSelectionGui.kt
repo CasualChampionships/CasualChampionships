@@ -1,4 +1,4 @@
-package net.casual.championships.duel.ui
+package net.casual.championships.duel.gui
 
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
