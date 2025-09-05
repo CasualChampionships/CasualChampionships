@@ -31,9 +31,12 @@ import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.chat.PlayerChatFormatter
 import net.casual.arcade.utils.chat.PlayerFormattedChat
 import net.casual.arcade.utils.component.*
+import net.casual.arcade.utils.convertCasing
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
 import net.casual.arcade.utils.set
+import net.casual.arcade.utils.string.SmallCapsTitleCase
+import net.casual.arcade.utils.string.TitleCase
 import net.casual.arcade.utils.toSmallCaps
 import net.casual.championships.CasualMod
 import net.casual.championships.commands.*
@@ -333,41 +336,15 @@ object CasualMinigames {
     }
 
     private fun getMOTD(): Component {
-        return Component.empty().apply {
-            append(Component.literal("╔").color(0x009BFF))
-            append(Component.literal("═").color(0x19A5FF))
-            append(Component.literal("═").color(0x33AFFF))
-            append(Component.literal("═").color(0x4DB9FF))
-            append(Component.literal("═").color(0x66C3FF))
-            append(Component.literal("═").color(0x80CDFF))
-            append(Component.literal("\uD83D\uDDE1").yellow())
-            append(" ")
-            append(Component.literal("C${"asual".toSmallCaps()} C${"hampionships".toSmallCaps()}").bold().color(0xFFAC1C))
-            append(" ")
-            append(Component.literal("\uD83C\uDFF9").yellow())
-            append(Component.literal("═").color(0x80CDFF))
-            append(Component.literal("═").color(0x66C3FF))
-            append(Component.literal("═").color(0x4DB9FF))
-            append(Component.literal("═").color(0x33AFFF))
-            append(Component.literal("═").color(0x19A5FF))
-            append(Component.literal("╗").color(0x009BFF))
-            append("\n")
+        return Component {
+            val title = literal("\uD83D\uDDE1").yellow() + " " +
+                literal("Casual Championships".convertCasing(TitleCase, SmallCapsTitleCase)).bold().color(0xFFAC1C) +
+                " " + literal("\uD83C\uDFF9").yellow()
+            val subtitle = literal("   be prepared".toSmallCaps()).lime() + wrap() +
+                literal(" ◆ ").white() + literal("let the chaos ensue    ".toSmallCaps()).lime()
 
-            append(Component.literal("╚").color(0x009BFF))
-            append(Component.literal("═").color(0x19A5FF))
-            append(Component.literal("═").color(0x33AFFF))
-
-            append("   ")
-            append(Component.literal("be prepared".toSmallCaps()).lime())
-            append(" ")
-            append(Component.literal("◆").white())
-            append(" ")
-            append(Component.literal("let the chaos ensue".toSmallCaps()).lime())
-            append("    ")
-
-            append(Component.literal("═").color(0x33AFFF))
-            append(Component.literal("═").color(0x19A5FF))
-            append(Component.literal("╝").color(0x009BFF))
+            empty() + literal("╔═════", 0x009BFF, 0x80CDFF) + title + literal("═════╗", 0x80CDFF, 0x009BFF) + nl +
+                literal("╚══", 0x009BFF, 0x33AFFF) + subtitle + literal("══╝", 0x33AFFF, 0x009BFF)
         }
     }
 
