@@ -8,8 +8,10 @@ import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.arcade.utils.component.Component
+import net.casual.arcade.utils.component.plus
 import net.casual.arcade.visuals.elements.UniversalElement
-import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
@@ -20,40 +22,36 @@ class SpectatorAndAdminTeamsComponentElement(
 ): UniversalElement<Optional<Component>> {
     override fun get(server: MinecraftServer): Optional<Component> {
         val teams = this.minigame.teams
-        val component = if (!teams.hasSpectators()) {
-            if (!teams.hasAdmins()) {
-                return Optional.empty()
-            }
-
-            Component.empty()
-                .append(CommonComponents.ADMINS.withMiniFont())
-                .append("\n")
-                .append(this.formatPlayerHeads(teams.getAdminTeam().getOnlinePlayers()))
-        } else if (!teams.hasAdmins()) {
-            Component.empty()
-                .append(CommonComponents.SPECTATORS.withMiniFont())
-                .append("\n")
-                .append(this.formatPlayerHeads(teams.getSpectatorTeam().getOnlinePlayers()))
-        } else {
-            val spectators = teams.getSpectatorTeam().getOnlinePlayers()
-            val admins = teams.getAdminTeam().getOnlinePlayers()
-
-            val spectatorLength = this.calculateHeadsLength(spectators.size)
-            val adminLength = this.calculateHeadsLength(admins.size)
-
-            Component.empty()
-                .append(CommonComponents.SPECTATORS.withMiniFont())
-                .append(": ")
-                .append(this.formatPlayerHeads(spectators))
-                .append("\n")
-                .append(ComponentUtils.widthDifferenceBetween(CommonComponents.SPECTATORS, CommonComponents.ADMINS))
-                .append(CommonComponents.ADMINS.withMiniFont())
-                .append(": ")
-                .append(this.formatPlayerHeads(admins))
-                .append(SpacingFontResources.spaced(spectatorLength - adminLength))
-
+        val formatted = when {
+            teams.hasSpectators() && teams.hasAdmins() -> this.formatSpectatorsAndAdmins(teams)
+            teams.hasAdmins() -> this.formatAdmins(teams)
+            teams.hasSpectators() -> this.formatSpectators(teams)
+            else -> return Optional.empty()
         }
-        return Optional.of(component)
+        return Optional.of(formatted)
+    }
+
+    private fun formatAdmins(teams: MinigameTeamManager) = Component {
+        empty() + CasualComponents.ADMINS.withMiniFont() + nl +
+            formatPlayerHeads(teams.getAdminTeam().getOnlinePlayers())
+    }
+
+    private fun formatSpectators(teams: MinigameTeamManager) = Component {
+        empty() + CasualComponents.SPECTATORS.withMiniFont() + nl +
+            formatPlayerHeads(teams.getSpectatorTeam().getOnlinePlayers())
+    }
+
+    private fun formatSpectatorsAndAdmins(teams: MinigameTeamManager) = Component {
+        val spectators = teams.getSpectatorTeam().getOnlinePlayers()
+        val admins = teams.getAdminTeam().getOnlinePlayers()
+
+        val spectatorLength = calculateHeadsLength(spectators.size)
+        val adminLength = calculateHeadsLength(admins.size)
+
+        empty() + CasualComponents.SPECTATORS.withMiniFont() + ": " + formatPlayerHeads(spectators) + nl +
+            ComponentUtils.widthDifferenceBetween(CasualComponents.SPECTATORS, CasualComponents.ADMINS) +
+            CasualComponents.ADMINS.withMiniFont() + ": " + formatPlayerHeads(admins) +
+            SpacingFontResources.spaced(spectatorLength - adminLength)
     }
 
     private fun formatPlayerHeads(players: Iterable<ServerPlayer>): Component {

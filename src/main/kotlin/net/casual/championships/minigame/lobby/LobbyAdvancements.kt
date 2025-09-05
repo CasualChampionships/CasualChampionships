@@ -4,7 +4,7 @@ import net.casual.arcade.utils.AdvancementUtils.setTitleAndDesc
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.advancement.AdvancementCollection
 import net.casual.championships.CasualMod
-import net.casual.championships.common.items.MinesweeperItems
+import net.casual.championships.common.ui.minesweeper.MinesweeperItems
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.core.ClientAsset
 import net.minecraft.resources.ResourceLocation

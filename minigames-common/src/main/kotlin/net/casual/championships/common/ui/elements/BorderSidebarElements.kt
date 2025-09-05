@@ -7,7 +7,7 @@ import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.visuals.elements.LevelSpecificElement
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.sidebar.SidebarComponent
-import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.util.CasualComponents
 import net.minecraft.ChatFormatting.*
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
@@ -17,15 +17,15 @@ class BorderStatusElement(private val buffer: Component): LevelSpecificElement<S
     override fun get(level: ServerLevel): SidebarComponent {
         val phase = ((level.server.tickCount / 3) % 5) + 1
         val border = when (level.levelBoundary?.getStatus()) {
-            BoundaryShape.Status.Shrinking -> CommonComponents.Border.red(phase)
-            BoundaryShape.Status.Growing -> CommonComponents.Border.green(phase)
-            else -> CommonComponents.Border.blue(phase)
+            BoundaryShape.Status.Shrinking -> CasualComponents.Border.red(phase)
+            BoundaryShape.Status.Growing -> CasualComponents.Border.green(phase)
+            else -> CasualComponents.Border.blue(phase)
         }
         val display = Component.empty()
             .append(this.buffer)
             .append(border)
             .append(SpacingFontResources.spaced(4))
-            .append(CommonComponents.BORDER_INFO.withMiniFont())
+            .append(CasualComponents.BORDER_INFO.withMiniFont())
         return SidebarComponent.withNoScore(display)
     }
 }
@@ -39,7 +39,7 @@ class BorderDistanceElement(private val buffer: Component): PlayerSpecificElemen
 
         val percent = distanceToBorder / (boundary.getSize().x / 2.0)
         val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
-        val display = Component.empty().append(this.buffer).append(" ").append(CommonComponents.BORDER_DISTANCE.withMiniFont())
+        val display = Component.empty().append(this.buffer).append(" ").append(CasualComponents.BORDER_DISTANCE.withMiniFont())
         val score = Component.literal(distanceToBorder.toString()).append(this.buffer).withStyle(colour)
         return SidebarComponent.withCustomScore(display, score.withMiniFont())
     }
@@ -47,7 +47,7 @@ class BorderDistanceElement(private val buffer: Component): PlayerSpecificElemen
 
 class BorderSizeElement(private val buffer: Component): LevelSpecificElement<SidebarComponent> {
     override fun get(level: ServerLevel): SidebarComponent {
-        val display = Component.empty().append(this.buffer).append(" ").append(CommonComponents.BORDER_RADIUS.withMiniFont())
+        val display = Component.empty().append(this.buffer).append(" ").append(CasualComponents.BORDER_RADIUS.withMiniFont())
         val score = Component.literal(((level.levelBoundary?.getSize()?.x ?: 0.0) / 2.0).toInt().toString()).append(this.buffer)
         return SidebarComponent.withCustomScore(display, score.withMiniFont())
     }

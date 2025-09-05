@@ -1,0 +1,59 @@
+package net.casual.championships.common.anticheat.fbp
+
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
+import net.casual.arcade.events.GlobalEventHandler
+import net.casual.arcade.events.ListenerRegistry.Companion.register
+import net.casual.arcade.events.server.level.LevelTickEvent
+import net.casual.arcade.extensions.Extension
+import net.casual.arcade.extensions.event.LevelExtensionEvent
+import net.casual.arcade.extensions.utils.getExtension
+import net.casual.championships.common.anticheat.fbp.WorldBlockTrackerExtension.Companion.blockTracker
+import net.minecraft.core.BlockPos
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.level.block.state.BlockState
+
+internal class WorldBlockTrackerExtension: Extension {
+    private val tracker = Array(TICKS_TO_STORE_CHANGES) { Long2ObjectOpenHashMap<BlockState>() }
+    private var blockChangesIndex = 0
+
+    fun tick() {
+        this.blockChangesIndex = (this.blockChangesIndex + 1) % TICKS_TO_STORE_CHANGES
+        this.tracker[this.blockChangesIndex].clear()
+    }
+
+    fun track(pos: BlockPos, oldState: BlockState) {
+        this.tracker[blockChangesIndex].put(pos.asLong(), oldState)
+    }
+
+    fun getTrackedStatesInLastNTicks(pos: BlockPos, n: Int = TICKS_TO_STORE_CHANGES): List<BlockState> {
+        require(n <= TICKS_TO_STORE_CHANGES) {
+            "Cannot get block changes more than $TICKS_TO_STORE_CHANGES ticks ago"
+        }
+
+        val result = ArrayList<BlockState>(0)
+        for (i in 0 until n) {
+            val map = this.tracker[Math.floorMod(blockChangesIndex - i, TICKS_TO_STORE_CHANGES)]
+            val state = map[pos.asLong()]
+            if (state != null) {
+                result.add(state)
+            }
+        }
+        return result
+    }
+
+    companion object {
+        const val TICKS_TO_STORE_CHANGES = 20
+
+        val ServerLevel.blockTracker
+            get() = this.getExtension<WorldBlockTrackerExtension>()
+
+        fun registerEvents() {
+            GlobalEventHandler.Server.register<LevelExtensionEvent> { event ->
+                event.addExtension(WorldBlockTrackerExtension())
+            }
+            GlobalEventHandler.Server.register<LevelTickEvent> { (level) ->
+                level.blockTracker.tick()
+            }
+        }
+    }
+}

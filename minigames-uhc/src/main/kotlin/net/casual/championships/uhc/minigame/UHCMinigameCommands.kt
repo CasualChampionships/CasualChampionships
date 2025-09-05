@@ -9,8 +9,8 @@ import net.casual.arcade.commands.*
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.teleportTo
-import net.casual.championships.common.util.CommonCommands
-import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.util.CasualCommands
+import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
@@ -24,13 +24,13 @@ class UHCMinigameCommands(
     override fun register(dispatcher: CommandDispatcher<CommandSourceStack>, buildContext: CommandBuildContext) {
         super.register(dispatcher, buildContext)
         dispatcher.register(CommandTree.buildLiteral("s") {
-            executes { CommonCommands.openSpectatingScreen(uhc, it) }
+            executes { CasualCommands.openSpectatingScreen(uhc, it) }
             argument("player", EntityArgument.player()) {
                 executes(::teleportToPlayer)
             }
         })
         dispatcher.register(CommandTree.buildLiteral("pos") {
-            executes { CommonCommands.broadcastPositionToTeammates(uhc, it) }
+            executes { CasualCommands.broadcastPositionToTeammates(uhc, it) }
         })
     }
 
@@ -71,19 +71,19 @@ class UHCMinigameCommands(
                 }
             }
             literal("fullbright") {
-                executes { CommonCommands.toggleFullbright(uhc, it) }
+                executes { CasualCommands.toggleFullbright(uhc, it) }
             }
             literal("teamglow") {
-                executes { CommonCommands.toggleTeamGlow(uhc, it) }
+                executes { CasualCommands.toggleTeamGlow(uhc, it) }
             }
             literal("spectate") {
-                executes { CommonCommands.openSpectatingScreen(uhc, it) }
+                executes { CasualCommands.openSpectatingScreen(uhc, it) }
                 argument("player", EntityArgument.player()) {
                     executes(::teleportToPlayer)
                 }
             }
             literal("pos") {
-                executes { CommonCommands.broadcastPositionToTeammates(uhc, it) }
+                executes { CasualCommands.broadcastPositionToTeammates(uhc, it) }
             }
         }
     }
@@ -97,7 +97,7 @@ class UHCMinigameCommands(
 
         val server = context.source.server
         server.scoreboard.addPlayerToTeam(target.scoreboardName, team)
-        target.sendSystemMessage(CommonComponents.ADDED_TO_TEAM.generate(team.formattedDisplayName))
+        target.sendSystemMessage(CasualComponents.ADDED_TO_TEAM.generate(team.formattedDisplayName))
 
         this.uhc.players.setPlaying(target)
 
@@ -147,7 +147,7 @@ class UHCMinigameCommands(
         val target = EntityArgument.getPlayer(context, "player")
         val player = context.source.playerOrException
         if (!this.uhc.players.isSpectating(player)) {
-            return context.source.fail(CommonComponents.NOT_SPECTATING)
+            return context.source.fail(CasualComponents.NOT_SPECTATING)
         }
         player.teleportTo(target.locationWithLevel)
         return Command.SINGLE_SUCCESS

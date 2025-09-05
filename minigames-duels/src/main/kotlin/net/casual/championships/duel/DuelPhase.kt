@@ -13,8 +13,8 @@ import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.resetToDefault
 import net.casual.arcade.utils.set
 import net.casual.championships.common.ui.bossbar.ActiveBossbar
-import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonStats
+import net.casual.championships.common.util.CasualComponents
+import net.casual.championships.common.util.CasualStats
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.world.level.GameRules
@@ -79,14 +79,14 @@ enum class DuelPhase(
                 val winners = minigame.teams.getPlayingTeams().firstOrNull()
                 if (winners != null) {
                     for (winner in winners.getOnlinePlayers()) {
-                        minigame.stats.getOrCreateStat(winner, CommonStats.WON).modify { true }
+                        minigame.stats.getOrCreateStat(winner, CasualStats.WON).modify { true }
                     }
                 }
                 winners?.formattedDisplayName
             } else {
                 val winner = minigame.players.playing.firstOrNull()
                 if (winner != null) {
-                    minigame.stats.getOrCreateStat(winner, CommonStats.WON).modify { true }
+                    minigame.stats.getOrCreateStat(winner, CasualStats.WON).modify { true }
                     val named = Component.literal(winner.scoreboardName)
                     val team = winner.team
                     if (team != null) {
@@ -102,7 +102,7 @@ enum class DuelPhase(
                 winner = Component.literal("Unknown").withStyle(ChatFormatting.OBFUSCATED)
             }
 
-            val title = CommonComponents.GAME_WON.generate(winner)
+            val title = CasualComponents.GAME_WON.generate(winner)
             for (player in minigame.players) {
                 player.sendTitle(title)
             }

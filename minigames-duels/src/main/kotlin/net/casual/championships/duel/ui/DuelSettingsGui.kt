@@ -5,9 +5,9 @@ import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.component.white
 import net.casual.arcade.visuals.screen.setSlot
-import net.casual.championships.common.items.DisplayItems
-import net.casual.championships.common.ui.CommonSimpleGui
-import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.items.CasualGuiItems
+import net.casual.championships.common.ui.CasualSimpleGui
+import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.duel.DuelSettings
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -17,13 +17,13 @@ class DuelSettingsGui(
     player: ServerPlayer,
     private val settings: DuelSettings,
     private val configuration: DuelConfigurationGui
-): CommonSimpleGui(MenuType.GENERIC_9x6, player, true) {
+): CasualSimpleGui(MenuType.GENERIC_9x6, player, true) {
     init {
         this.setParent(this.configuration)
 
         this.title = Component.empty()
             .append(SpacingFontResources.spaced(-8))
-            .append(CommonComponents.Gui.DUEL_SETTINGS.copy().white())
+            .append(CasualComponents.Gui.DUEL_SETTINGS.copy().white())
 
         this.createHorizontalSetting(19, this.settings.displayableTeams)
         this.createHorizontalSetting(28, this.settings.displayableGlowing)
@@ -34,7 +34,7 @@ class DuelSettingsGui(
         this.createVerticalSetting(24, this.settings.displayableArena)
         this.createVerticalSetting(25, this.settings.displayableArenaSize)
 
-        this.setSlot(58, DisplayItems.RED_BACK.hideTooltip()) { ->
+        this.setSlot(58, CasualGuiItems.RED_BACK.hideTooltip()) { ->
             this.openParentOrClose()
         }
     }

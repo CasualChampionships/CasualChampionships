@@ -9,53 +9,56 @@ import net.casual.arcade.datagen.resource.ArcadeResourceGenerator
 import net.casual.arcade.minigame.managers.chat.MinigameChatMode.*
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.withMiniFont
-import net.casual.championships.common.CommonMod
-import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.CasualCommon
+import net.casual.championships.common.util.CasualComponents
+import net.casual.championships.common.util.CasualUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.core.Direction8
+import org.jetbrains.annotations.ApiStatus.Internal
 
+@Internal
 class CommonDatagen: ArcadeResourceGenerator {
     companion object {
         private val SUPPORTED_LANGUAGES = listOf("en_us")
     }
 
     override fun id(): String {
-        return CommonMod.MOD_ID
+        return CasualCommon.MOD_ID
     }
 
     override fun resources(): Collection<ResourcePackCreator> {
-        return CommonMod.COMMON_PACKS.map(NamedResourcePackCreator::getCreator)
+        return CasualCommon.COMMON_PACKS.map(NamedResourcePackCreator::getCreator)
     }
 
     override fun run(client: Minecraft) {
         val generator = LanguageGenerator(SUPPORTED_LANGUAGES).apply {
             add(CentredSpacingGenerator(
-                CommonComponents.STARTING_IN.generate("00:00:00").withMiniFont(),
-                CommonComponents.Hud.BACKGROUND_240
+                CasualComponents.STARTING_IN.generate("00:00:00").withMiniFont(),
+                CasualComponents.Hud.BACKGROUND_240
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.TIME_ELAPSED.generate("00:00:00").withMiniFont(),
-                CommonComponents.Hud.BACKGROUND_240
+                CasualComponents.TIME_ELAPSED.generate("00:00:00").withMiniFont(),
+                CasualComponents.Hud.BACKGROUND_240
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.GRACE.generate("00:00").withMiniFont(),
-                CommonComponents.Hud.BACKGROUND_180
+                CasualComponents.GRACE.generate("00:00").withMiniFont(),
+                CasualComponents.Hud.BACKGROUND_180
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.GLOWING.generate("00:00").withMiniFont(),
-                CommonComponents.Hud.BACKGROUND_180
+                CasualComponents.GLOWING.generate("00:00").withMiniFont(),
+                CasualComponents.Hud.BACKGROUND_180
             ))
             add(CentredSpacingGenerator(
-                CommonComponents.STARTING_SOON.withMiniFont(),
-                CommonComponents.Hud.BACKGROUND_240
+                CasualComponents.STARTING_SOON.withMiniFont(),
+                CasualComponents.Hud.BACKGROUND_240
             ))
             add(WidthDifferenceGenerator(
-                CommonComponents.SPECTATORS.withMiniFont(),
-                CommonComponents.ADMINS.withMiniFont()
+                CasualComponents.SPECTATORS.withMiniFont(),
+                CasualComponents.ADMINS.withMiniFont()
             ))
 
             for (direction in Direction8.entries) {
-                add(NegativeWidthGenerator(CommonComponents.direction(direction)))
+                add(NegativeWidthGenerator(CasualComponents.direction(direction)))
             }
 
             val modes = listOf(Global, Admin, Spectator, OwnTeam).map { it.name.copy().withMiniFont() }
@@ -67,7 +70,7 @@ class CommonDatagen: ArcadeResourceGenerator {
         try {
             generator.replaceLangs(client, this.getDataPath().resolve("lang"))
         } catch (e: Throwable) {
-            CommonMod.logger.error("Failed to replace lags", e)
+            CasualUtils.logger.error("Failed to replace lags", e)
         }
     }
 }

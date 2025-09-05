@@ -8,8 +8,9 @@ import net.casual.arcade.minigame.task.impl.BossbarTask
 import net.casual.arcade.scheduler.task.SavableTask
 import net.casual.arcade.scheduler.task.Task
 import net.casual.arcade.scheduler.task.serialization.TaskSerializationContext
-import net.casual.championships.common.CommonMod
+import net.casual.championships.common.CasualCommon
 import net.casual.championships.common.ui.bossbar.GlowingBossBar
+import net.casual.championships.common.util.casual
 
 class GlowingBossbarTask(
     minigame: Minigame
@@ -21,7 +22,7 @@ class GlowingBossbarTask(
     }
 
     companion object: MinigameTaskFactory<Minigame> {
-        override val id = CommonMod.id("glowing_boss_bar_task")
+        override val id = casual("glowing_boss_bar_task")
 
         override fun create(context: MinigameTaskCreationContext<Minigame>): Task {
             return GlowingBossbarTask(context.minigame).readData(context)

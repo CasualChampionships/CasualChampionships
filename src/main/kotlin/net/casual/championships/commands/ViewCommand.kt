@@ -7,7 +7,7 @@ import net.casual.arcade.commands.CommandTree
 import net.casual.arcade.commands.argument
 import net.casual.arcade.commands.literal
 import net.casual.arcade.commands.requiresPermission
-import net.casual.championships.common.util.CommonUI
+import net.casual.championships.common.util.CasualGuiUtils
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
@@ -26,7 +26,7 @@ object ViewCommand: CommandTree {
 
     private fun viewPlayerInventory(context: CommandContext<CommandSourceStack>): Int {
         val target = EntityArgument.getPlayer(context, "target")
-        val gui = CommonUI.createPlayerInventoryViewGui(target, context.source.playerOrException)
+        val gui = CasualGuiUtils.createPlayerInventoryViewGui(target, context.source.playerOrException)
         gui.open()
         return Command.SINGLE_SUCCESS
     }

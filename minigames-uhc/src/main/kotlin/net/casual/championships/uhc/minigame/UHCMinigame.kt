@@ -84,19 +84,20 @@ import net.casual.championships.common.event.TippedArrowTradeOfferEvent
 import net.casual.championships.common.event.portal.EntityPortalEntryPositionEvent
 import net.casual.championships.common.event.portal.PortalCreateValidPositionEvent
 import net.casual.championships.common.event.portal.PortalFindValidPositionEvent
-import net.casual.championships.common.items.PlayerHeadItem
-import net.casual.championships.common.minigame.rules.RulesProvider
-import net.casual.championships.common.recipes.GoldenHeadRecipe
+import net.casual.championships.common.items.CasualItems
+import net.casual.championships.common.items.minigame.PlayerHeadItem
+import net.casual.championships.common.minigame.rules.MinigameRulesProvider
+import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
 import net.casual.championships.common.ui.bossbar.ActiveBossbar
 import net.casual.championships.common.ui.elements.MinigamePhaseSidebarElement
 import net.casual.championships.common.ui.elements.MobcapSidebarElement
 import net.casual.championships.common.ui.elements.PerformanceSidebarElement
 import net.casual.championships.common.ui.elements.TeammatesSidebarElements
 import net.casual.championships.common.util.*
-import net.casual.championships.common.util.CommonUI.broadcastGame
-import net.casual.championships.common.util.CommonUI.broadcastInfo
-import net.casual.championships.common.util.CommonUI.broadcastWithSound
-import net.casual.championships.uhc.UHCMod
+import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
+import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
+import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
+import net.casual.championships.uhc.CasualUHC
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBoundaryManager
@@ -109,7 +110,7 @@ import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
 import net.casual.championships.uhc.utils.UHCComponents
 import net.casual.championships.uhc.utils.UHCDimensions
-import net.casual.championships.uhc.utils.UHCRules
+import net.casual.championships.uhc.utils.UHCMinigameRules
 import net.casual.championships.uhc.utils.UHCStats
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags
 import net.minecraft.ChatFormatting
@@ -166,7 +167,7 @@ class UHCMinigame(
     private val dimensions: UHCDimensions,
     private val nerfedPlayers: Set<UUID>,
     private val factory: UHCMinigameFactory? = null
-): Minigame(server, uuid), RulesProvider by UHCRules {
+): Minigame(server, uuid), MinigameRulesProvider by UHCMinigameRules {
     override val id = ID
 
     private var lastBoundaryTime = 0.Ticks
@@ -211,20 +212,20 @@ class UHCMinigame(
 
     fun onPauseBoundary() {
         this.lastBoundaryTime = this.uptime.Ticks
-        this.chat.broadcastGame(component = CommonComponents.BORDER_PAUSED.withMiniFont().red())
+        this.chat.broadcastGame(component = CasualComponents.BORDER_PAUSED.withMiniFont().red())
     }
 
     fun onResumeBoundary() {
         this.lastBoundaryTime = this.uptime.Ticks
         this.chat.broadcastGame(
-            component = CommonComponents.BORDER_RESUMED.withMiniFont().red(),
-            sound = Sound(CommonSounds.GAME_BORDER_MOVING)
+            component = CasualComponents.BORDER_RESUMED.withMiniFont().red(),
+            sound = Sound(CasualSounds.GAME_BORDER_MOVING)
         )
     }
 
     fun weAreInTheEndgameNow() {
         for (player in this.players) {
-            player.sendSound(CommonSounds.GAME_GRACE_END)
+            player.sendSound(CasualSounds.GAME_GRACE_END)
         }
         if (this.settings.endGameGlow) {
             this.settings.glowing = true
@@ -366,8 +367,7 @@ class UHCMinigame(
         } else if (!player.isCreative) {
             val interval = 20.Minutes.ticks
             if (this.uptime % interval == interval - 1) {
-                val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
-                this.chat.broadcastInfo(rules.withMiniFont(), listOf(player))
+                this.chat.broadcastInfo(UHCMinigameRules.getFormattedSpectatorRules(), listOf(player))
             }
 
             val gui = GuiHelpers.getCurrentGui(player)
@@ -507,12 +507,12 @@ class UHCMinigame(
 
     @Listener(phase = BuiltInEventPhases.POST)
     private fun onPlayerJump(event: PlayerJumpEvent) {
-        this.stats.getOrCreateStat(event.player, CommonStats.JUMPS).increment()
+        this.stats.getOrCreateStat(event.player, CasualStats.JUMPS).increment()
     }
 
     @Listener
     private fun onPlayerUseItem(event: PlayerItemUseEvent) {
-        if (event.stack.isOf(CommonItems.PLAYER_HEAD) || event.stack.isOf(CommonItems.GOLDEN_HEAD)) {
+        if (event.stack.isOf(CasualItems.PLAYER_HEAD) || event.stack.isOf(CasualItems.GOLDEN_HEAD)) {
             this.stats.getOrCreateStat(event.player, UHCStats.HEADS_CONSUMED).increment()
         }
     }
@@ -558,7 +558,7 @@ class UHCMinigame(
         this.mapRenderer.stopWatching(player)
 
         if (!ReplayPlayerRecorders.has(player) && this.settings.replay) {
-            val directory = CommonConfig.resolve("replays")
+            val directory = CasualUtils.resolve("replays")
                 .resolve("uhc")
                 .resolve(player.scoreboardName)
                 .createDirectories()
@@ -599,8 +599,8 @@ class UHCMinigame(
         team?.nameTagVisibility = Team.Visibility.NEVER
         team?.collisionRule = Team.CollisionRule.ALWAYS
 
-        this.tags.add(player, CommonTags.HAS_PARTICIPATED)
-        this.tags.add(player, CommonTags.HAS_TEAM_GLOW)
+        this.tags.add(player, CasualTags.HAS_PARTICIPATED)
+        this.tags.add(player, CasualTags.HAS_TEAM_GLOW)
 
         player.addEffect(
             MobEffectInstance(MobEffects.RESISTANCE, 2000, 255, true, false)
@@ -636,15 +636,14 @@ class UHCMinigame(
         player.extendedGameMode = ExtendedGameMode.AdventureSpectator
 
         this.effects.addFullbright(player)
-        this.tags.remove(player, CommonTags.HAS_TEAM_GLOW)
+        this.tags.remove(player, CasualTags.HAS_TEAM_GLOW)
 
         if (!this.levels.has(player.level())) {
             player.teleportTo(this.overworld.asLocation(Vec3(0.0, 128.0, 0.0)))
         }
 
-        val rules = UHCRules.getSpectatorRules().join(Component.literal("\n\n"))
         this.scheduler.schedule(1.Ticks) {
-            this.chat.broadcastInfo(rules.withMiniFont(), listOf(player))
+            this.chat.broadcastInfo(UHCMinigameRules.getFormattedSpectatorRules(), listOf(player))
         }
     }
 
@@ -746,8 +745,8 @@ class UHCMinigame(
         if (team !== null && !this.teams.isTeamEliminated(team) && team.getOnlinePlayers().none(this.players::isPlaying)) {
             this.teams.addEliminatedTeam(team)
             this.chat.broadcastWithSound(
-                CommonComponents.HAS_BEEN_ELIMINATED.generate(team.name).color(team).bold().withMiniFont(),
-                Sound(CommonSounds.TEAM_ELIMINATION)
+                CasualComponents.HAS_BEEN_ELIMINATED.generate(team.name).color(team).bold().withMiniFont(),
+                Sound(CasualSounds.TEAM_ELIMINATION)
             )
         }
 
@@ -791,7 +790,7 @@ class UHCMinigame(
         if (this.uptime % 200 == 0) {
             player.sendTitle(
                 Component.empty(),
-                CommonComponents.INSIDE_BORDER.generate(CommonComponents.direction(direction).lime()).withMiniFont()
+                CasualComponents.INSIDE_BORDER.generate(CasualComponents.direction(direction).lime()).withMiniFont()
             )
         }
     }
@@ -822,7 +821,7 @@ class UHCMinigame(
         if (this.uptime % 200 == 0) {
             player.sendTitle(
                 Component.empty(),
-                CommonComponents.INSIDE_BORDER.generate(CommonComponents.direction(direction).lime()).withMiniFont()
+                CasualComponents.INSIDE_BORDER.generate(CasualComponents.direction(direction).lime()).withMiniFont()
             )
         }
     }
@@ -861,7 +860,7 @@ class UHCMinigame(
     private fun createSidebar(): DynamicSidebar {
         val sidebar = DynamicSidebar(ComponentElements.of(UHCComponents.Bitmap.TITLE))
         val buffer = SpacingFontResources.spaced(4)
-        val border = CommonUI.getBorderSidebarElements(buffer)
+        val border = CasualGuiUtils.getBorderSidebarElements(buffer)
         val pause = BorderMovingInfo(buffer).cached()
         val teammates = TeammatesSidebarElements(Component.empty(), buffer, true)
         val performance = PerformanceSidebarElement(SpacingFontResources.spaced(2)).cached()
@@ -898,7 +897,7 @@ class UHCMinigame(
     }
 
     private fun updateHUD(player: ServerPlayer) {
-        val direction = CommonComponents.direction(Direction.orderedByNearest(player).filter { it.axis != Direction.Axis.Y }[0])
+        val direction = CasualComponents.direction(Direction.orderedByNearest(player).filter { it.axis != Direction.Axis.Y }[0])
         val position = "(${player.blockX}, ${player.blockY}, ${player.blockZ})"
         val shift = position.length - 7
 
@@ -909,7 +908,7 @@ class UHCMinigame(
                 append(SpacingFontResources.spaced(shift * 6))
                 append(ComponentUtils.negativeWidthOf(mode.name))
                 append(SpacingFontResources.spaced(-11))
-                append(CommonComponents.Hud.EPIC_CHAT_ICON_M54)
+                append(CasualComponents.Hud.EPIC_CHAT_ICON_M54)
                 append(SpacingFontResources.spaced(1))
                 append(Component.empty().append(mode.name).withMiniShiftedDownFont(63))
 
@@ -932,7 +931,7 @@ class UHCMinigame(
         if (!this.settings.friendlyPlayerGlow) {
             return false
         }
-        if (!this.tags.has(observer, CommonTags.HAS_TEAM_GLOW)) {
+        if (!this.tags.has(observer, CasualTags.HAS_TEAM_GLOW)) {
             return false
         }
         return observee.team != null && observee.team === observer.team
@@ -1002,8 +1001,8 @@ class UHCMinigame(
         private const val MOB_SPAWN_PROBABILITY = 1.0F / 2.0F
         private val MOB_LOOT_MULTIPLIER = (1.0F / MOB_SPAWN_PROBABILITY).roundToInt()
 
-        private val NERFED_DAMAGE_MODIFIER = UHCMod.id("nerfed_damage")
+        private val NERFED_DAMAGE_MODIFIER = CasualUHC.id("nerfed_damage")
 
-        val ID = UHCMod.id("uhc_minigame")
+        val ID = CasualUHC.id("uhc_minigame")
     }
 }

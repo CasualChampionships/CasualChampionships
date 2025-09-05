@@ -4,7 +4,7 @@ import net.casual.arcade.utils.AdvancementUtils.setTitleAndDesc
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.advancement.AdvancementCollection
-import net.casual.championships.uhc.UHCMod.id
+import net.casual.championships.uhc.CasualUHC.id
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.core.ClientAsset
 import net.minecraft.resources.ResourceLocation

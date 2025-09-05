@@ -8,7 +8,7 @@ import net.casual.arcade.utils.TeamUtils.getHexColor
 import net.casual.arcade.utils.TeamUtils.setHexColor
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.CasualMod
-import net.casual.championships.common.util.CommonStats
+import net.casual.championships.common.util.CasualStats
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.utils.UHCStats
@@ -99,19 +99,19 @@ class DatabaseDataManager(
 
                 this.syncPlayerAdvancements(uhc, player)
                 this.getOrCreatePlayerStats(UHCPlayerStats, player) {
-                    won = tracker.getStatValueOrDefault(CommonStats.WON)
+                    won = tracker.getStatValueOrDefault(CasualStats.WON)
                     died = tracker.getStatValueOrDefault(ArcadeStats.DEATHS) > 0
                     kills = tracker.getStatValueOrDefault(ArcadeStats.KILLS)
                     damageTaken = tracker.getStatValueOrDefault(ArcadeStats.DAMAGE_TAKEN)
                     damageDealt = tracker.getStatValueOrDefault(ArcadeStats.DAMAGE_DEALT)
                     damageHealed = tracker.getStatValueOrDefault(ArcadeStats.DAMAGE_HEALED)
                     headsConsumed = tracker.getStatValueOrDefault(UHCStats.HEADS_CONSUMED)
-                    aliveTime = tracker.getStatValueOrDefault(CommonStats.ALIVE_TIME).Ticks.duration
-                    crouchTime = tracker.getStatValueOrDefault(CommonStats.CROUCH_TIME).Ticks.duration
-                    jumps = tracker.getStatValueOrDefault(CommonStats.JUMPS)
+                    aliveTime = tracker.getStatValueOrDefault(CasualStats.ALIVE_TIME).Ticks.duration
+                    crouchTime = tracker.getStatValueOrDefault(CasualStats.CROUCH_TIME).Ticks.duration
+                    jumps = tracker.getStatValueOrDefault(CasualStats.JUMPS)
                     relogs = tracker.getStatValueOrDefault(ArcadeStats.RELOGS)
-                    blocksMined = tracker.getStatValueOrDefault(CommonStats.BLOCKS_MINED)
-                    blocksPlaced = tracker.getStatValueOrDefault(CommonStats.BLOCKS_PLACED)
+                    blocksMined = tracker.getStatValueOrDefault(CasualStats.BLOCKS_MINED)
+                    blocksPlaced = tracker.getStatValueOrDefault(CasualStats.BLOCKS_PLACED)
                 }
             }
         }
@@ -131,7 +131,7 @@ class DatabaseDataManager(
 
                 this.syncPlayerAdvancements(duel, player)
                 this.getOrCreatePlayerStats(DuelPlayerStats, player) {
-                    won = tracker.getStatValueOrDefault(CommonStats.WON)
+                    won = tracker.getStatValueOrDefault(CasualStats.WON)
                     kills = tracker.getStatValueOrDefault(ArcadeStats.KILLS)
                     damageTaken = tracker.getStatValueOrDefault(ArcadeStats.DAMAGE_TAKEN)
                     damageDealt = tracker.getStatValueOrDefault(ArcadeStats.DAMAGE_DEALT)

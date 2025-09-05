@@ -16,7 +16,7 @@ import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.player.PlayerTeamLeaveEvent
 import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
-import net.casual.championships.uhc.UHCMod
+import net.casual.championships.uhc.CasualUHC
 import net.casual.championships.uhc.event.PlayerVoicechatConnectedEvent
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.commands.CommandSourceStack
@@ -30,7 +30,7 @@ object UHCVoicePlugin: VoicechatPlugin {
     private lateinit var api: VoicechatServerApi
 
     override fun getPluginId(): String {
-        return UHCMod.MOD_ID
+        return CasualUHC.MOD_ID
     }
 
     override fun initialize(api: VoicechatApi) {

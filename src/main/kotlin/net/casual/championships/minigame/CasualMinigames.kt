@@ -42,11 +42,8 @@ import net.casual.championships.CasualMod
 import net.casual.championships.commands.*
 import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualTeamReadyHandler
-import net.casual.championships.common.util.CommonConfig
-import net.casual.championships.common.util.CommonSounds
-import net.casual.championships.common.util.CommonUI
-import net.casual.championships.common.util.CommonUI.broadcastWithSound
-import net.casual.championships.common.util.PerformanceUtils
+import net.casual.championships.common.util.*
+import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
 import net.casual.championships.data.DataManager
 import net.casual.championships.data.DatabaseDataManager
 import net.casual.championships.data.JsonDataManager
@@ -76,7 +73,7 @@ import kotlin.io.path.writer
 
 @Suppress("UnstableApiUsage")
 object CasualMinigames {
-    private val path: Path = CommonConfig.resolve("event")
+    private val path: Path = CasualUtils.resolve("event")
     internal val winners = HashSet<String>()
 
     private var minigames: SequentialMinigames? = null
@@ -227,7 +224,7 @@ object CasualMinigames {
             this.getDataManager().syncDuelData(minigame)
         }
         this.setCasualUI(minigame)
-        minigame.ui.setPlayerListDisplay(CommonUI.createSimpleTabDisplay(minigame))
+        minigame.ui.setPlayerListDisplay(CasualGuiUtils.createSimpleTabDisplay(minigame))
 
         minigame.resources.add(CasualResourcePackHost.createResourcesFromPacks {
             minigame.duelSettings.getArenaTemplate().additionalPacks()
@@ -236,14 +233,14 @@ object CasualMinigames {
 
     internal fun setCasualUI(minigame: Minigame) {
         minigame.settings.broadcastChangesToAdmin()
-        minigame.ui.setPlayerListDisplay(CommonUI.createTeamMinigameTabDisplay(minigame))
+        minigame.ui.setPlayerListDisplay(CasualGuiUtils.createTeamMinigameTabDisplay(minigame))
         minigame.ui.readier = ReadyChecker(
             MinigamePlayerReadyHandler(minigame),
             CasualTeamReadyHandler(minigame)
         )
         minigame.ui.countdown = CasualCountdown
 
-        minigame.ui.addNametag(CommonUI.createPlayingNameTag())
+        minigame.ui.addNametag(CasualGuiUtils.createPlayingNameTag())
         minigame.events.register<MinigameAddPlayerEvent> {
             it.player.team?.nameTagVisibility = Team.Visibility.NEVER
         }
@@ -271,7 +268,7 @@ object CasualMinigames {
         minigame.events.register<MinigamePauseEvent> {
             minigame.chat.broadcastWithSound(
                 Component.literal("Minigame is now paused"),
-                Sound(CommonSounds.GAME_PAUSED)
+                Sound(CasualSounds.GAME_PAUSED)
             )
         }
     }

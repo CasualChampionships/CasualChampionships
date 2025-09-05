@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import net.casual.arcade.minigame.area.StructureArea
 import net.casual.arcade.utils.StructureUtils
-import net.casual.championships.common.util.CommonConfig
+import net.casual.championships.common.util.CasualUtils
 import net.minecraft.server.level.ServerLevel
 
 class DuelArenaTemplate(val name: String) {
@@ -22,7 +22,7 @@ class DuelArenaTemplate(val name: String) {
     }
 
     companion object {
-        private val arenas = CommonConfig.resolve("arenas")
+        private val arenas = CasualUtils.resolve("arenas")
 
         val CODEC: Codec<DuelArenaTemplate> = RecordCodecBuilder.create { instance ->
             instance.group(

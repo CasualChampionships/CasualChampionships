@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import net.casual.championships.CasualMod
-import net.casual.championships.common.util.CommonConfig
+import net.casual.championships.common.util.CasualUtils
 import org.apache.commons.lang3.SerializationException
 import java.io.IOException
 import kotlin.io.path.createDirectories
@@ -23,7 +23,7 @@ data class CasualConfig(
 ) {
     @OptIn(ExperimentalSerializationApi::class)
     companion object {
-        private val config = CommonConfig.resolve("config.json")
+        private val config = CasualUtils.resolve("config.json")
 
         private val json = Json {
             encodeDefaults = true

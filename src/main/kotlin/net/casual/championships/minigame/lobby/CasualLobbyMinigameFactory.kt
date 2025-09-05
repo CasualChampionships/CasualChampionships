@@ -18,7 +18,7 @@ import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.serialization.codec.CodecProvider
 import net.casual.arcade.utils.toKey
 import net.casual.championships.CasualMod
-import net.casual.championships.common.util.CommonConfig
+import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.duel.arena.DuelArenasTemplate
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.resources.CasualResourcePackHost
@@ -96,7 +96,7 @@ class CasualLobbyMinigameFactory(
     }
 
     companion object: CodecProvider<CasualLobbyMinigameFactory> {
-        private val lobbies = CommonConfig.resolve("lobbies")
+        private val lobbies = CasualUtils.resolve("lobbies")
 
         override val ID: ResourceLocation = CasualLobbyMinigame.ID
 

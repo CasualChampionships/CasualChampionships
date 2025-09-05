@@ -10,10 +10,10 @@ import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.component.gray
 import net.casual.arcade.utils.component.white
 import net.casual.arcade.visuals.screen.setSlot
-import net.casual.championships.common.items.DisplayItems
-import net.casual.championships.common.ui.CommonSimpleGui
-import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonItems
+import net.casual.championships.common.items.CasualGuiItems
+import net.casual.championships.common.items.CasualItems
+import net.casual.championships.common.ui.CasualSimpleGui
+import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.duel.DuelSettings
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -26,45 +26,45 @@ class DuelConfigurationGui(
     private val settings: DuelSettings,
     private val players: () -> List<ServerPlayer>,
     private val start: (ServerPlayer, List<ServerPlayer>, DuelSettings) -> Unit
-): CommonSimpleGui(MenuType.GENERIC_9x6, player, true) {
+): CasualSimpleGui(MenuType.GENERIC_9x6, player, true) {
     private val selectedPlayers = HashSet<UUID>()
     private val confirm: GuiElement
     private val waiting: GuiElement
 
     init {
-        val settings = DisplayItems.GEAR
+        val settings = CasualGuiItems.GEAR
         settings.named(Component.literal("Settings").withMiniFont())
         this.setSlot(47, settings) { ->
             DuelSettingsGui(this.player, this.settings, this).open()
         }
 
-        val players = ItemStack(CommonItems.FORWARD_FACING_PLAYER_HEAD)
+        val players = ItemStack(CasualItems.FORWARD_FACING_PLAYER_HEAD)
         players.named(Component.literal("Select Players").withMiniFont())
         this.setSlot(51, players) { ->
             DuelPlayerSelectionGui(this.player, this).open()
         }
 
-        val confirm = DisplayItems.TICK
-        confirm.named(CommonComponents.CONFIRM.withMiniFont())
+        val confirm = CasualGuiItems.TICK
+        confirm.named(CasualComponents.CONFIRM.withMiniFont())
         this.confirm = GuiElement(confirm) { _, _, _, _ ->
             val playerList = this.player.levelServer.playerList
             this.start.invoke(this.player, this.selectedPlayers.mapNotNull(playerList::getPlayer), this.settings)
             this.close()
         }
-        val waiting = DisplayItems.GREY_TICK
-        waiting.named(CommonComponents.CONFIRM.withMiniFont())
+        val waiting = CasualGuiItems.GREY_TICK
+        waiting.named(CasualComponents.CONFIRM.withMiniFont())
         waiting.lore(Component.literal("Select players to start!").gray().withMiniFont())
         this.waiting = GuiElement(waiting, GuiElement.EMPTY_CALLBACK)
 
         this.updateConfirm()
 
-        this.setSlot(58, DisplayItems.RED_BACK.hideTooltip()) { ->
+        this.setSlot(58, CasualGuiItems.RED_BACK.hideTooltip()) { ->
             this.close()
         }
 
         this.title = Component.empty()
             .append(SpacingFontResources.spaced(-8))
-            .append(CommonComponents.Gui.DUELS.copy().white())
+            .append(CasualComponents.Gui.DUELS.copy().white())
     }
 
     fun getAvailablePlayers(): List<ServerPlayer> {

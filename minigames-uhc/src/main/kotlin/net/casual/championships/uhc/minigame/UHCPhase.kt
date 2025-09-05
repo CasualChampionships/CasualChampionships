@@ -26,11 +26,11 @@ import net.casual.arcade.visuals.predicate.EntityObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.championships.common.task.GracePeriodBossbarTask
-import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonPredicates
-import net.casual.championships.common.util.CommonSounds
-import net.casual.championships.common.util.CommonUI
-import net.casual.championships.common.util.CommonUI.broadcastGame
+import net.casual.championships.common.util.CasualComponents
+import net.casual.championships.common.util.CasualPredicates
+import net.casual.championships.common.util.CasualSounds
+import net.casual.championships.common.util.CasualGuiUtils
+import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
@@ -87,11 +87,11 @@ enum class UHCPhase(
             val observeeNotSpectating = PlayerObserverPredicate { observee, _ ->
                 !minigame.players.isSpectating(observee)
             }
-            minigame.ui.addNametag(CommonUI.createPlayingNameTag(
+            minigame.ui.addNametag(CasualGuiUtils.createPlayingNameTag(
                 EntityObserverPredicate.visibleObservee().toPlayer().and(observeeNotSpectating)
             ))
-            minigame.ui.addNametag(CommonUI.createPlayingHealthTag(
-                CommonPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(observeeNotSpectating)
+            minigame.ui.addNametag(CasualGuiUtils.createPlayingHealthTag(
+                CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(observeeNotSpectating)
             ))
         }
     },
@@ -108,14 +108,14 @@ enum class UHCPhase(
             minigame.onStartBoundary()
 
             val minutes = duration.minutes
-            minigame.chat.broadcastGame(CommonComponents.BORDER_INITIAL_GRACE.generate(minutes).gold().withMiniFont())
+            minigame.chat.broadcastGame(CasualComponents.BORDER_INITIAL_GRACE.generate(minutes).gold().withMiniFont())
         }
 
         override fun end(minigame: UHCMinigame, next: Phase<UHCMinigame>) {
             if (this < next) {
                 minigame.chat.broadcastGame(
-                    CommonComponents.BORDER_GRACE_OVER.red().withMiniFont(),
-                    sound = Sound(CommonSounds.GAME_BORDER_MOVING)
+                    CasualComponents.BORDER_GRACE_OVER.red().withMiniFont(),
+                    sound = Sound(CasualSounds.GAME_BORDER_MOVING)
                 )
                 minigame.settings.canPvp.set(true)
             }
@@ -145,7 +145,7 @@ enum class UHCPhase(
             minigame.winners.addAll(team.players)
 
             for (player in minigame.players) {
-                player.sendTitle(CommonComponents.GAME_WON.generate(team.name).color(team).withMiniFont())
+                player.sendTitle(CasualComponents.GAME_WON.generate(team.name).color(team).withMiniFont())
             }
 
             // TODO: Better winning screen

@@ -57,14 +57,14 @@ import net.casual.championships.CasualMod
 import net.casual.championships.commands.MinesweeperCommand
 import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.minigame.CasualSettings
-import net.casual.championships.common.minigame.rules.RulesProvider
+import net.casual.championships.common.minigame.rules.MinigameRulesProvider
 import net.casual.championships.common.ui.bossbar.LobbyBossbar
 import net.casual.championships.common.ui.elements.TeammatesSidebarElements
-import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonSounds
-import net.casual.championships.common.util.CommonUI
-import net.casual.championships.common.util.CommonUI.broadcastGame
-import net.casual.championships.common.util.CommonUI.broadcastWithSound
+import net.casual.championships.common.util.CasualComponents
+import net.casual.championships.common.util.CasualSounds
+import net.casual.championships.common.util.CasualGuiUtils
+import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
+import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.duel.DuelMinigameFactory
 import net.casual.championships.duel.DuelRequester
@@ -143,7 +143,7 @@ class CasualLobbyMinigame(
         this.registerCommands()
 
         val display = PlayerListDisplay(CasualLobbyPlayerListEntries(this))
-        CommonUI.addCasualFooterAndHeader(this, display)
+        CasualGuiUtils.addCasualFooterAndHeader(this, display)
         this.ui.setPlayerListDisplay(display)
 
         this.advancements.addAll(LobbyAdvancements)
@@ -177,7 +177,7 @@ class CasualLobbyMinigame(
         if (this.shouldWelcomePlayers) {
             player.setTitleAnimation(stay = 5.Seconds)
             player.sendTitle(
-                CommonComponents.Text.WELCOME_TO_CASUAL_CHAMPIONSHIPS.copy().shadowless()
+                CasualComponents.Text.WELCOME_TO_CASUAL_CHAMPIONSHIPS.copy().shadowless()
             )
         }
 
@@ -196,7 +196,7 @@ class CasualLobbyMinigame(
         if (!this.hasSeenFireworks.contains(player.uuid) && CasualMinigames.hasWinner()) {
             player.afterPacksLoad {
                 this.hasSeenFireworks.add(player.uuid)
-                player.sendSound(CommonSounds.GAME_WON)
+                player.sendSound(CasualSounds.GAME_WON)
                 this.scheduler.schedule(10.Seconds) {
                     this.spawnFireworkDisplays(player, this.scheduler)
                 }
@@ -237,7 +237,7 @@ class CasualLobbyMinigame(
     private fun onServerTick(event: ServerTickEvent) {
         if (this.bossbar.getRemainingDuration() == 25.Seconds) {
             for (player in this.players) {
-                player.sendSound(CommonSounds.WAITING, SoundSource.MASTER)
+                player.sendSound(CasualSounds.WAITING, SoundSource.MASTER)
             }
         }
 
@@ -312,10 +312,10 @@ class CasualLobbyMinigame(
         }
 
         val formatted = FORMAT.format(duration.toDouble(DurationUnit.SECONDS))
-        player.sendSystemMessage(CommonComponents.MINESWEEPER_WON.generate(formatted))
+        player.sendSystemMessage(CasualComponents.MINESWEEPER_WON.generate(formatted))
         if (millis < this.minesweeperRecord) {
             this.minesweeperRecord = millis
-            val message = CommonComponents.MINESWEEPER_RECORD.generate(player.scoreboardName, formatted)
+            val message = CasualComponents.MINESWEEPER_RECORD.generate(player.scoreboardName, formatted)
             this.chat.broadcast(message)
         }
     }
@@ -358,7 +358,7 @@ class CasualLobbyMinigame(
 
     override fun startNextMinigame() {
         val minigame = this.next
-        if (minigame !is RulesProvider) {
+        if (minigame !is MinigameRulesProvider) {
             super.startNextMinigame()
             return
         }

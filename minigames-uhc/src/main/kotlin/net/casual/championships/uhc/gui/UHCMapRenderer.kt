@@ -16,7 +16,8 @@ import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.component.yellow
 import net.casual.arcade.utils.isOf
-import net.casual.championships.common.CommonMod
+import net.casual.championships.common.CasualCommon
+import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.utils.UHCComponents
@@ -344,9 +345,9 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
     )
 
     companion object {
-        private val OVERWORLD_ID = CommonMod.id("gui/overworld_map")
-        private val NETHER_ID = CommonMod.id("gui/nether_map")
-        private val END_ID = CommonMod.id("gui/end_map")
+        private val OVERWORLD_ID = casual("gui/overworld_map")
+        private val NETHER_ID = casual("gui/nether_map")
+        private val END_ID = casual("gui/end_map")
 
         fun noop() {
 

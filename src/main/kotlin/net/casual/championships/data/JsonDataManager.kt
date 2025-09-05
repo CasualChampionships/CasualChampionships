@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.utils.JsonUtils
 import net.casual.championships.CasualMod
-import net.casual.championships.common.util.CommonConfig
+import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.duel.DuelMinigame
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.server.MinecraftServer
@@ -66,6 +66,6 @@ class JsonDataManager: DataManager {
     }
 
     private companion object {
-        val stats = CommonConfig.resolve("stats")
+        val stats = CasualUtils.resolve("stats")
     }
 }

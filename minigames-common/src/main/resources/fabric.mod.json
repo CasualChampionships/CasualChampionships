@@ -16,7 +16,7 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "net.casual.championships.common.CommonMod"
+        "value": "net.casual.championships.common.CasualCommon"
       }
     ],
     "arcade-datagen": [

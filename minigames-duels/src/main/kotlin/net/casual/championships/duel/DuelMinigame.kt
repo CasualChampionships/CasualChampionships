@@ -38,10 +38,10 @@ import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.suggestCommand
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.teleportTo
-import net.casual.championships.common.items.PlayerHeadItem
-import net.casual.championships.common.recipes.GoldenHeadRecipe
-import net.casual.championships.common.util.CommonItems
-import net.casual.championships.common.util.CommonUI.broadcastInfo
+import net.casual.championships.common.items.CasualItems
+import net.casual.championships.common.items.minigame.PlayerHeadItem
+import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
+import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.RuleUtils
 import net.casual.championships.duel.arena.DuelArena
 import net.minecraft.core.BlockPos
@@ -342,10 +342,10 @@ class DuelMinigame(
                         count(between(1, 2))
                         setWeight(4)
                     }
-                    addItem(CommonItems.PLAYER_HEAD) {
+                    addItem(CasualItems.PLAYER_HEAD) {
                         setWeight(2)
                     }
-                    addItem(CommonItems.GOLDEN_HEAD) {
+                    addItem(CasualItems.GOLDEN_HEAD) {
                         setWeight(1)
                     }
                 }

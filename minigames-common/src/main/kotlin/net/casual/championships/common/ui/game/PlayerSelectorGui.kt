@@ -12,10 +12,10 @@ import net.casual.arcade.utils.component.yellow
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.visuals.screen.setSlot
-import net.casual.championships.common.items.DisplayItems
-import net.casual.championships.common.ui.CommonSimpleGui
-import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonItems
+import net.casual.championships.common.items.CasualGuiItems
+import net.casual.championships.common.items.CasualItems
+import net.casual.championships.common.ui.CasualSimpleGui
+import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.inventory.MenuType
@@ -23,14 +23,14 @@ import net.minecraft.world.inventory.MenuType
 class PlayerSelectorGui(
     player: ServerPlayer,
     profiles: List<GameProfile>
-): CommonSimpleGui(MenuType.GENERIC_9x6, player, true) {
+): CasualSimpleGui(MenuType.GENERIC_9x6, player, true) {
     init {
         this.title = Component.empty()
             .append(SpacingFontResources.spaced(-8))
-            .append(CommonComponents.Gui.TEAM_PLAYER_SELECTOR.copy().white())
+            .append(CasualComponents.Gui.TEAM_PLAYER_SELECTOR.copy().white())
 
         for ((i, profile) in profiles.take(5).withIndex()) {
-            val head = ItemUtils.createPlayerHead(profile, CommonItems.FORWARD_FACING_PLAYER_HEAD)
+            val head = ItemUtils.createPlayerHead(profile, CasualItems.FORWARD_FACING_PLAYER_HEAD)
             val name = Component.literal(profile.name).yellow().withMiniFont()
             this.setSlot(47 + i, head.named(name)) { ->
                 val selected = this.player.levelServer.playerList.getPlayer(profile.id)
@@ -40,7 +40,7 @@ class PlayerSelectorGui(
             }
         }
 
-        this.setSlot(58, DisplayItems.RED_BACK.hideTooltip()) { ->
+        this.setSlot(58, CasualGuiItems.RED_BACK.hideTooltip()) { ->
             this.openParentOrClose()
         }
     }

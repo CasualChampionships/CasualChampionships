@@ -1,6 +1,6 @@
 package net.casual.championships.uhc.item
 
-import net.casual.championships.uhc.UHCMod.id
+import net.casual.championships.uhc.CasualUHC.id
 import net.minecraft.core.Registry
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries

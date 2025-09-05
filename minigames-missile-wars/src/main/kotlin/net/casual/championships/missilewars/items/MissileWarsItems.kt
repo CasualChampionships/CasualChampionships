@@ -1,7 +1,7 @@
 package net.casual.championships.missilewars.items
 
 import net.casual.arcade.items.ItemStackFactory
-import net.casual.championships.common.CommonMod.id
+import net.casual.championships.common.CasualCommon.id
 import net.casual.championships.missilewars.MissileWarsMod
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
