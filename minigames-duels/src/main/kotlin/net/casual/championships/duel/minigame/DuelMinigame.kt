@@ -274,6 +274,7 @@ class DuelMinigame(
         val dimension = casual(UUID.randomUUID().toString()).toKey(Registries.DIMENSION)
         this.duelArena.world.extract(this.server.getDimensionPath(dimension))
         val level = CustomLevelBuilder.build(this.server) {
+            spoofedDimensionKey(casual("duel"))
             dimensionKey(dimension)
             dimensionType(BuiltinDimensionTypes.OVERWORLD)
             chunkGenerator(VoidChunkGenerator(server))
