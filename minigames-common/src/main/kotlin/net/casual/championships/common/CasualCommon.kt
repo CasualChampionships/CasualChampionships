@@ -4,6 +4,7 @@ import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils
 import net.casual.arcade.dimensions.utils.DimensionRegistries
 import net.casual.arcade.resources.ArcadeResourcePacks
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
+import net.casual.arcade.resources.utils.ResourcePackUtils.addAssetsFrom
 import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFrom
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
@@ -30,9 +31,8 @@ object CasualCommon: ModInitializer {
     private val container = FabricLoader.getInstance().getModContainer(MOD_ID).get()
 
     private val COMMON_PACK = NamedResourcePackCreator.named("common") {
-        addAssetSource(CasualUtils.MOD_ID)
-        addLangsFromData(MOD_ID)
-        addLangsFrom("minecraft", container.findPath("data/minecraft/lang").get())
+        addAssetsFrom(container)
+        addLangsFromData(MOD_ID, container)
         addFont(CasualComponents.Hud)
         addFont(CasualComponents.Gui)
         addFont(CasualComponents.Text)

@@ -166,7 +166,7 @@ object CasualMinigames {
             this.writeMinigameEventData(this.getMinigames().getData())
         }
 
-        GlobalEventHandler.Server.register<CasualConfigReloadedEvent> { (_, config) ->
+        GlobalEventHandler.Server.register<CasualConfigReloadedEvent>(priority = 10_000) { (_, config) ->
             val minigames = this.getMinigames()
             minigames.event = this.readMinigameEvent()
             minigames.reloadLobby()
