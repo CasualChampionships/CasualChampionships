@@ -5,6 +5,7 @@ import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.advancement.AdvancementCollection
 import net.casual.championships.CasualMod
 import net.casual.championships.common.ui.minesweeper.MinesweeperItems
+import net.casual.championships.common.util.casual
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.core.ClientAsset
 import net.minecraft.resources.ResourceLocation
@@ -12,7 +13,7 @@ import net.minecraft.world.item.Items
 
 object LobbyAdvancements: AdvancementCollection() {
     val ROOT = register {
-        id = CasualMod.id("root")
+        id = casual("lobby_root")
         display(Items.GOLDEN_APPLE)
         setTitleAndDesc("lobby.advancements.root")
         background = ClientAsset(ResourceLocation.withDefaultNamespace("gui/advancements/backgrounds/adventure"))
@@ -20,7 +21,7 @@ object LobbyAdvancements: AdvancementCollection() {
 
     val UH_OH = register {
         parent(ROOT)
-        id = CasualMod.id("uh_oh")
+        id = casual("uh_oh")
         display(Items.BARRIER)
         setTitleAndDesc("lobby.advancements.uhOh")
         toast()
@@ -29,7 +30,7 @@ object LobbyAdvancements: AdvancementCollection() {
 
     val PARKOUR_MASTER = register {
         parent(UH_OH)
-        id = CasualMod.id("parkour_master")
+        id = casual("parkour_master")
         display(Items.NETHERITE_BOOTS)
         setTitleAndDesc("lobby.advancements.parkourMaster")
         type = AdvancementType.CHALLENGE
@@ -39,7 +40,7 @@ object LobbyAdvancements: AdvancementCollection() {
 
     val NOT_NOW = register {
         parent(ROOT)
-        id = CasualMod.id("not_now")
+        id = casual("not_now")
         display(Items.NETHERITE_SWORD)
         setTitleAndDesc("lobby.advancements.notNow")
         announce()
@@ -47,7 +48,7 @@ object LobbyAdvancements: AdvancementCollection() {
 
     val OFFICIALLY_BORED = register {
         parent(ROOT)
-        id = CasualMod.id("officially_bored")
+        id = casual("officially_bored")
         display(Items.COMMAND_BLOCK)
         setTitleAndDesc("lobby.advancements.officiallyBored")
         toast()
@@ -56,7 +57,7 @@ object LobbyAdvancements: AdvancementCollection() {
 
     val ADMIN_ABUSE = register {
         parent(OFFICIALLY_BORED)
-        id = CasualMod.id("admin_abuse")
+        id = casual("admin_abuse")
         display(ItemUtils.createPlayerHead("senseiwells"))
         setTitleAndDesc("lobby.advancements.adminAbuse")
         toast()
@@ -65,7 +66,7 @@ object LobbyAdvancements: AdvancementCollection() {
 
     val GAMER = register {
         parent(ROOT)
-        id = CasualMod.id("gamer")
+        id = casual("gamer")
         display(MinesweeperItems.FLAG_COUNTER)
         setTitleAndDesc("lobby.advancements.gamer")
         toast()
@@ -74,7 +75,7 @@ object LobbyAdvancements: AdvancementCollection() {
 
     val YOU_SHALL_NOT_LEAVE = register {
         parent(ROOT)
-        id = CasualMod.id("you_shall_not_leave")
+        id = casual("you_shall_not_leave")
         display(Items.STRUCTURE_VOID)
         setTitleAndDesc("lobby.advancements.youShallNotLeave")
         toast()

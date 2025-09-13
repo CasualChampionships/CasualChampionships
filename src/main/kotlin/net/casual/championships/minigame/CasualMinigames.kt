@@ -44,13 +44,9 @@ import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualTeamReadyHandler
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
-import net.casual.championships.data.DataManager
-import net.casual.championships.data.DatabaseDataManager
-import net.casual.championships.data.JsonDataManager
-import net.casual.championships.data.MultiDataManager
+import net.casual.championships.data.*
 import net.casual.championships.duel.minigame.DuelMinigame
-import net.casual.championships.duel.minigame.DuelMinigameFactory
-import net.casual.championships.events.CasualConfigReloaded
+import net.casual.championships.events.CasualConfigReloadedEvent
 import net.casual.championships.minigame.lobby.CasualLobbyMinigameFactory
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.uhc.minigame.UHCMinigame
@@ -113,7 +109,6 @@ object CasualMinigames {
 
         // TODO: Move these?
         UHCMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
-        DuelMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
         CasualLobbyMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
 
         GlobalEventHandler.Server.register<ServerRegisterCommandEvent> { event ->
@@ -149,7 +144,7 @@ object CasualMinigames {
                 this.getMinigames().setData(data)
             }
 
-            if (this.dataManager !is JsonDataManager) {
+            if (this.dataManager !is EmptyDataManager) {
                 it.server.playerList.setUsingWhiteList(true)
             }
             this.createTeams(it.server)
@@ -171,7 +166,7 @@ object CasualMinigames {
             this.writeMinigameEventData(this.getMinigames().getData())
         }
 
-        GlobalEventHandler.Server.register<CasualConfigReloaded> { (config) ->
+        GlobalEventHandler.Server.register<CasualConfigReloadedEvent> { (_, config) ->
             val minigames = this.getMinigames()
             minigames.event = this.readMinigameEvent()
             minigames.reloadLobby()
@@ -227,7 +222,7 @@ object CasualMinigames {
         minigame.ui.setPlayerListDisplay(CasualGuiUtils.createSimpleTabDisplay(minigame))
 
         minigame.resources.add(CasualResourcePackHost.createResourcesFromPacks {
-            minigame.duelSettings.getArenaTemplate().additionalPacks()
+            minigame.duelArena.data.packs
         })
     }
 
@@ -411,14 +406,11 @@ object CasualMinigames {
     private fun createDataManager(config: CasualConfig): DataManager {
         val login = config.database
         if (login.url.isEmpty()) {
-            return JsonDataManager()
+            return EmptyDataManager
         }
         val location = if (config.dev) "${login.name}_debug" else login.name
         val database = CasualDatabase(login.url + "/$location", login.username, login.password)
         database.initialize()
-        return MultiDataManager.of(
-            DatabaseDataManager(this.getMinigames().event.name, database),
-            JsonDataManager()
-        )
+        return DatabaseDataManager(this.getMinigames().event.name, database)
     }
 }

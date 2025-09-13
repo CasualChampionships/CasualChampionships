@@ -67,7 +67,7 @@ object CasualCommand: CommandTree {
     }
 
     private fun reloadConfig(context: CommandContext<CommandSourceStack>): Int {
-        CasualMod.reload()
+        CasualMod.reload(context.source.server)
         return context.source.success("Successfully reloaded config", true)
     }
 

@@ -30,8 +30,6 @@ enum class DuelPhase(
 ): Phase<DuelMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
-            minigame.arena.area.replace()
-
             minigame.levels.setGameRules {
                 resetToDefault()
                 set(GameRules.RULE_DO_IMMEDIATE_RESPAWN, true)
@@ -44,7 +42,7 @@ enum class DuelPhase(
 
             minigame.ui.addBossbar(ActiveBossbar(minigame))
 
-            minigame.arena.teleporter.teleport(minigame.level, minigame.players.playing, minigame.duelSettings.teams)
+            minigame.duelArena.data.teleporter.teleport(minigame.level, minigame.players.playing, minigame.duelSettings.teams)
 
             minigame.settings.canInteractAll = false
             minigame.settings.canAttackEntities.set(false)

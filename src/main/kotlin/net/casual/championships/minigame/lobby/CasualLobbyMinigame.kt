@@ -19,7 +19,6 @@ import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.lobby.LobbyMinigame
 import net.casual.arcade.minigame.lobby.LobbyPhase
 import net.casual.arcade.minigame.ready.ReadyChecker
-import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
@@ -65,11 +64,11 @@ import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
+import net.casual.championships.common.util.casual
+import net.casual.championships.duel.arena.DuelArenasDataModule
 import net.casual.championships.duel.minigame.DuelMinigame
-import net.casual.championships.duel.minigame.DuelMinigameFactory
 import net.casual.championships.duel.utils.DuelRequester
 import net.casual.championships.duel.minigame.DuelSettings
-import net.casual.championships.duel.arena.DuelArenasTemplate
 import net.casual.championships.duel.gui.DuelConfigurationGui
 import net.casual.championships.minigame.CasualMinigames
 import net.minecraft.commands.CommandSourceStack
@@ -97,7 +96,6 @@ class CasualLobbyMinigame(
     server: MinecraftServer,
     uuid: UUID,
     spawn: LocationWithLevel<ServerLevel>,
-    private val duelArenaTemplates: List<DuelArenasTemplate>,
     private val modules: MinigameDataModules,
     private val factory: CasualLobbyMinigameFactory
 ): LobbyMinigame(server, uuid, EmptyLobbyArea(spawn.level), spawn) {
@@ -292,9 +290,9 @@ class CasualLobbyMinigame(
             event.player.grantAdvancement(LobbyAdvancements.UH_OH)
             val stat = this.stats.getOrCreateStat(event.player, LobbyStats.LEFT_LOBBY)
             stat.increment()
-            if (stat.value >= 20) {
+            // if (stat.value >= 20) {
                 // event.player.grantAdvancement(LobbyAdvancements.YOU_SHALL_NOT_LEAVE)
-            }
+            // }
         }
     }
 
@@ -432,7 +430,9 @@ class CasualLobbyMinigame(
             player.grantAdvancement(LobbyAdvancements.NOT_NOW)
             return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
         }
-        val settings = DuelSettings(this.duelArenaTemplates)
+        val arenas = this.modules.get<DuelArenasDataModule>() ?:
+            return context.source.fail("Lobby has no duel arenas available!")
+        val settings = DuelSettings(arenas.all())
         val gui = DuelConfigurationGui(player, settings, this.players::all, this::requestDuelWith)
         gui.open()
         return Command.SINGLE_SUCCESS
@@ -518,7 +518,7 @@ class CasualLobbyMinigame(
             return false
         }
 
-        val duel = DuelMinigameFactory(settings).create(MinigameCreationContext(initiator.levelServer))
+        val duel = DuelMinigame(initiator.levelServer, UUID.randomUUID(), settings, settings.getSelectedArena())
         this.duels.add(duel)
         duel.events.register<MinigameCloseEvent> { this.duels.remove(duel) }
 
@@ -577,8 +577,8 @@ class CasualLobbyMinigame(
                     val index = Random.nextInt(data.fireworkColors.size)
                     explosion {
                         shape(shape)
-                        addPrimaryColours(data.fireworkColors[index])
-                        addFadeColours(data.fireworkColors[index])
+                        addPrimaryColors(data.fireworkColors[index])
+                        addFadeColors(data.fireworkColors[index])
                         trail()
                         twinkle()
                     }
@@ -632,6 +632,6 @@ class CasualLobbyMinigame(
 
         private val FORMAT = DecimalFormat("#.00")
 
-        val ID = CasualMod.id("lobby")
+        val ID = casual("lobby")
     }
 }

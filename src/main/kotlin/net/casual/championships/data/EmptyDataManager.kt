@@ -7,7 +7,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.world.scores.PlayerTeam
 import java.util.concurrent.CompletableFuture
 
-class EmptyDataManager: DataManager {
+object EmptyDataManager: DataManager {
     override fun getParticipants(): CompletableFuture<Set<GameProfile>> {
         return CompletableFuture.completedFuture(setOf())
     }

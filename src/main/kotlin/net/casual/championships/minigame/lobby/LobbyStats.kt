@@ -12,7 +12,7 @@ object LobbyStats {
     val LEFT_LOBBY = this.register("left_lobby", StatType.int32())
     val ATTACK_ADMIN = this.register("attack_admin", StatType.int32())
 
-    internal fun noop() {
+    internal fun load() {
 
     }
 

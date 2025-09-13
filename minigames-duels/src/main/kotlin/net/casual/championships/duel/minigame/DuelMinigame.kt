@@ -1,6 +1,8 @@
 package net.casual.championships.duel.minigame
 
+import net.casual.arcade.dimensions.level.CustomLevel
 import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
+import net.casual.arcade.dimensions.utils.getDimensionPath
 import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
@@ -38,17 +40,19 @@ import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.suggestCommand
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.teleportTo
+import net.casual.arcade.utils.toKey
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.RuleUtils
 import net.casual.championships.common.util.casual
-import net.casual.championships.duel.arena.DuelArena
+import net.casual.championships.duel.arena.DuelArenasDataModule
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
@@ -70,7 +74,8 @@ import kotlin.random.Random
 class DuelMinigame(
     server: MinecraftServer,
     uuid: UUID,
-    val duelSettings: DuelSettings
+    val duelSettings: DuelSettings,
+    val duelArena: DuelArenasDataModule.DuelArena
 ): Minigame(server, uuid) {
     override val id = ID
 
@@ -78,9 +83,7 @@ class DuelMinigame(
     private val modifiableBlocks = HashSet<BlockPos>()
     private var emptyTicks = 0
 
-    internal val arena by lazy { this.createArena() }
-    val level: ServerLevel
-        get() = this.arena.area.level
+    val level: ServerLevel = this.createLevel()
 
     override val settings = MinigameSettings(this)
 
@@ -101,7 +104,8 @@ class DuelMinigame(
             this.players.isPlaying(observee) && (this.players.isSpectating(observer) || this.duelSettings.glowing)
         }, false)
 
-        this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.level, this.arena.area.getBoundingBox().center)
+
+        this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.level, this.duelArena.data.spawn)
     }
 
     @Listener
@@ -209,7 +213,7 @@ class DuelMinigame(
         event.player.setGameMode(GameType.SPECTATOR)
 
         if (event.player.level() != this.level) {
-            this.arena.teleporter.teleportEntities(this.level, listOf(event.player))
+            this.duelArena.data.teleporter.teleportEntities(this.level, listOf(event.player))
         }
     }
 
@@ -266,14 +270,16 @@ class DuelMinigame(
         }
     }
 
-    private fun createArena(): DuelArena {
+    private fun createLevel(): CustomLevel {
+        val dimension = casual(UUID.randomUUID().toString()).toKey(Registries.DIMENSION)
+        this.duelArena.world.extract(this.server.getDimensionPath(dimension))
         val level = CustomLevelBuilder.build(this.server) {
-            randomDimensionKey()
+            dimensionKey(dimension)
             dimensionType(BuiltinDimensionTypes.OVERWORLD)
             chunkGenerator(VoidChunkGenerator(server))
         }
         this.levels.add(level)
-        return this.duelSettings.getArenaTemplate().create(level)
+        return level
     }
 
     companion object {

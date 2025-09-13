@@ -5,7 +5,7 @@ import net.casual.championships.common.items.CasualGuiItems.modelled
 import net.casual.championships.common.items.CasualItems
 import net.minecraft.world.item.ItemStack
 
-internal object MinesweeperItems {
+object MinesweeperItems {
     private val modeller = ItemStackFactory.modeller(CasualItems.DUMMY)
     val UNKNOWN by modeller.modelled("minesweeper/unknown")
     val ONE by modeller.modelled("minesweeper/1")

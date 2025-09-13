@@ -38,7 +38,7 @@ object CasualCommon: ModInitializer {
         addFont(CasualComponents.Text)
         addFont(CasualComponents.Border)
         addSounds(CasualSounds)
-        addMissingItemModels(CasualUtils.MOD_ID)
+        addMissingItemModels(CasualUtils.MOD_ID, container)
         packDescription = Component.literal("Common resources used in CasualChampionships")
     }
 

@@ -30,8 +30,7 @@ import net.casual.championships.common.items.CasualGuiItems.TWO_TIMES_SELECTED
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.duel.arena.DuelArenaSize
 import net.casual.championships.duel.arena.DuelArenaSize.*
-import net.casual.championships.duel.arena.DuelArenaTemplate
-import net.casual.championships.duel.arena.DuelArenasTemplate
+import net.casual.championships.duel.arena.DuelArenasDataModule
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Items
@@ -40,7 +39,7 @@ import net.minecraft.world.item.component.DyedItemColor
 import kotlin.enums.enumEntries
 
 class DuelSettings(
-    val arenas: List<DuelArenasTemplate>
+    private val arenas: Collection<DuelArenasDataModule.ResolvedArenas>
 ): DisplayableSettings(CasualSettings.Defaults(Component.translatable("casual.gui.duel.settings").withMiniFont())) {
     val displayableTeams = bool {
         name = "teams"
@@ -121,8 +120,8 @@ class DuelSettings(
     }
     var arenaSize by this.register(this.displayableArenaSize)
 
-    fun getArenaTemplate(): DuelArenaTemplate {
+    fun getSelectedArena(): DuelArenasDataModule.DuelArena {
         val arena = this.arenas.first { it.name == this.arena }
-        return arena.getArenaTemplateFor(this.arenaSize)
+        return arena.arenas[this.arenaSize]!!
     }
 }

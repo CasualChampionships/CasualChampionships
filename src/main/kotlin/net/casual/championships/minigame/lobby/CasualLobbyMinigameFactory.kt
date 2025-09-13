@@ -9,6 +9,7 @@ import net.casual.arcade.dimensions.utils.getDimensionPath
 import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
 import net.casual.arcade.minigame.data.MinigameDataModules
 import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
+import net.casual.arcade.minigame.data.MinigameDataModules.Companion.with
 import net.casual.arcade.minigame.data.module.MinigameWorldData
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
@@ -19,8 +20,9 @@ import net.casual.arcade.utils.serialization.codec.CodecProvider
 import net.casual.arcade.utils.toKey
 import net.casual.championships.CasualMod
 import net.casual.championships.common.util.CasualUtils
-import net.casual.championships.duel.arena.DuelArenasTemplate
+import net.casual.championships.common.util.casual
 import net.casual.championships.minigame.CasualMinigames
+import net.casual.championships.minigame.duel.CasualDuelArenas
 import net.casual.championships.resources.CasualResourcePackHost
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation
@@ -29,8 +31,7 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import java.util.*
 
 class CasualLobbyMinigameFactory(
-    private val name: Optional<String>,
-    private val duelArenas: List<DuelArenasTemplate>
+    private val name: Optional<String>
 ): MinigameFactory {
     private lateinit var modules: MinigameDataModules
 
@@ -48,7 +49,7 @@ class CasualLobbyMinigameFactory(
         this.modules.get<MinigameWorldData>()!!.extract(path)
 
         val level = CustomLevelBuilder.build(context.server) {
-            spoofedDimensionKey(CasualMod.id("lobby"))
+            spoofedDimensionKey(casual("lobby"))
             dimensionKey(dimension)
             dimensionType(BuiltinDimensionTypes.OVERWORLD)
             chunkGenerator(VoidChunkGenerator(context.server, data.biome))
@@ -72,7 +73,6 @@ class CasualLobbyMinigameFactory(
             context.server,
             context.uuid,
             data.spawn.get().with(level),
-            this.duelArenas,
             this.modules,
             this
         )
@@ -93,6 +93,8 @@ class CasualLobbyMinigameFactory(
             CasualMod.logger.error("No lobby specified for event!")
             this.modules = MinigameDataModules.empty()
         }
+
+        this.modules = CasualDuelArenas.with(this.modules)
     }
 
     companion object: CodecProvider<CasualLobbyMinigameFactory> {
@@ -102,8 +104,7 @@ class CasualLobbyMinigameFactory(
 
         override val CODEC: MapCodec<out CasualLobbyMinigameFactory> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
-                Codec.STRING.optionalFieldOf("lobby").forGetter(CasualLobbyMinigameFactory::name),
-                DuelArenasTemplate.CODEC.listOf().encodedOptionalFieldOf("duel_arenas", listOf()).forGetter(CasualLobbyMinigameFactory::duelArenas)
+                Codec.STRING.optionalFieldOf("lobby").forGetter(CasualLobbyMinigameFactory::name)
             ).apply(instance, ::CasualLobbyMinigameFactory)
         }
     }

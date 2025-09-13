@@ -11,6 +11,7 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.encodedOptionalFieldOf
 import net.casual.arcade.utils.serialization.codec.CodecProvider
 import net.casual.championships.CasualMod
+import net.casual.championships.common.util.casual
 import net.casual.championships.resources.CasualResourcePackHost
 import net.minecraft.resources.ResourceLocation
 
@@ -35,7 +36,7 @@ class CasualChampionshipsTemplate(
     }
 
     companion object: CodecProvider<CasualChampionshipsTemplate> {
-        override val ID: ResourceLocation = CasualMod.id("championships")
+        override val ID: ResourceLocation = casual("championships")
 
         override val CODEC: MapCodec<CasualChampionshipsTemplate> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
