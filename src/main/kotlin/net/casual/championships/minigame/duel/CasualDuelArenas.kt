@@ -12,7 +12,7 @@ import net.casual.championships.events.CasualConfigReloadedEvent
 import net.minecraft.server.MinecraftServer
 
 object CasualDuelArenas {
-    private val path = CasualUtils.resolve("arenas_v2")
+    private val path = CasualUtils.resolve("duel_arenas")
 
     private var arenas: DuelArenasDataModule? = null
 
@@ -22,10 +22,10 @@ object CasualDuelArenas {
     }
 
     internal fun registerEvents() {
-        GlobalEventHandler.Server.register<ServerStartEvent> { (server) ->
+        GlobalEventHandler.Server.register<ServerStartEvent>(priority = -1_000) { (server) ->
             this.load(server)
         }
-        GlobalEventHandler.Server.register<CasualConfigReloadedEvent> { (server) ->
+        GlobalEventHandler.Server.register<CasualConfigReloadedEvent>(priority = -1_000) { (server) ->
             this.load(server)
         }
     }
