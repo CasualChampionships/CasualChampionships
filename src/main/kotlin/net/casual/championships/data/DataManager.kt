@@ -7,6 +7,8 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.world.scores.PlayerTeam
 import java.util.concurrent.CompletableFuture
 
+@Suppress("DEPRECATED_JAVA_ANNOTATION")
+@java.lang.Deprecated
 interface DataManager {
     fun getParticipants(): CompletableFuture<Set<GameProfile>>
 

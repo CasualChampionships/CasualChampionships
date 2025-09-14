@@ -10,7 +10,7 @@ import net.casual.arcade.resources.pack.PackInfo
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.encodedOptionalFieldOf
 import net.casual.arcade.utils.serialization.codec.CodecProvider
-import net.casual.championships.CasualMod
+import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.casual
 import net.casual.championships.resources.CasualResourcePackHost
 import net.minecraft.resources.ResourceLocation
@@ -27,7 +27,7 @@ class CasualChampionshipsTemplate(
         val resources = CasualResourcePackHost.createResourcesFromPacks { this.additionalPacks }
         val packs = ArrayList<PackInfo>(resources.getPacks())
         return CasualResourcePackHost.getCommonPacks().mapTo(packs) {
-            it.toPackInfo(!CasualMod.config.dev)
+            it.toPackInfo(!CasualChampionships.config.dev)
         }
     }
 

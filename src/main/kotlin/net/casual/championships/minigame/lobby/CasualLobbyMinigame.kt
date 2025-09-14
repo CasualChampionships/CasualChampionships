@@ -52,7 +52,7 @@ import net.casual.arcade.visuals.sidebar.Sidebar
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
 import net.casual.arcade.visuals.tab.PlayerListDisplay
-import net.casual.championships.CasualMod
+import net.casual.championships.CasualChampionships
 import net.casual.championships.commands.MinesweeperCommand
 import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.minigame.CasualSettings
@@ -205,12 +205,12 @@ class CasualLobbyMinigame(
     @Listener
     private fun onMinigameAddAdmin(event: MinigameAddAdminEvent) {
         val player = event.player
-        if (CasualMod.config.dev) {
+        if (CasualChampionships.config.dev) {
             player.sendSystemMessage(Component.literal("Minigames are in dev mode!").red())
         } else {
             player.sendSystemMessage(Component.literal("Minigames are NOT in dev mode!").red())
         }
-        val location = if (CasualMod.config.dev) "${CasualMod.config.database.name}_debug" else CasualMod.config.database.name
+        val location = if (CasualChampionships.config.dev) "${CasualChampionships.config.database.name}_debug" else CasualChampionships.config.database.name
         player.sendSystemMessage(Component.literal("Minigames are using $location database!").red())
     }
 

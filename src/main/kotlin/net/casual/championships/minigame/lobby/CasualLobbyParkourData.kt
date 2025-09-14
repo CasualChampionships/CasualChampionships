@@ -7,7 +7,7 @@ import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.file.ReadableArchive.Companion.parseJson
 import net.casual.arcade.utils.math.location.Location
 import net.casual.arcade.utils.serialization.codec.ArcadeExtraCodecs
-import net.casual.championships.CasualMod
+import net.casual.championships.common.util.casual
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.resources.ResourceLocation
@@ -61,7 +61,7 @@ class CasualLobbyParkourData(
             ).apply(instance, ::CasualLobbyParkourData)
         }
 
-        override val id: ResourceLocation = CasualMod.id("lobby_parkour_data")
+        override val id: ResourceLocation = casual("lobby_parkour_data")
 
         override fun get(archive: ReadableArchive, server: MinecraftServer): MinigameDataModule {
             return archive.parseJson(LOBBY_PARKOUR_DATA, CODEC).getOrThrow()

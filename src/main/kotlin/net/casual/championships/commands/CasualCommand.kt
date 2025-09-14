@@ -5,7 +5,7 @@ import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.CommandTree
 import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
-import net.casual.championships.CasualMod
+import net.casual.championships.CasualChampionships
 import net.casual.championships.minigame.CasualMinigames
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
@@ -67,7 +67,7 @@ object CasualCommand: CommandTree {
     }
 
     private fun reloadConfig(context: CommandContext<CommandSourceStack>): Int {
-        CasualMod.reload(context.source.server)
+        CasualChampionships.reload(context.source.server)
         return context.source.success("Successfully reloaded config", true)
     }
 

@@ -9,16 +9,14 @@ import net.casual.arcade.dimensions.utils.getDimensionPath
 import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
 import net.casual.arcade.minigame.data.MinigameDataModules
 import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
-import net.casual.arcade.minigame.data.MinigameDataModules.Companion.with
 import net.casual.arcade.minigame.data.module.MinigameWorldData
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.utils.ResourceUtils
-import net.casual.arcade.utils.encodedOptionalFieldOf
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.serialization.codec.CodecProvider
 import net.casual.arcade.utils.toKey
-import net.casual.championships.CasualMod
+import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.common.util.casual
 import net.casual.championships.minigame.CasualMinigames
@@ -90,7 +88,7 @@ class CasualLobbyMinigameFactory(
             val archive = ReadableArchive.from(path)
             this.modules = MinigameDataModules.from(archive, server)
         } else {
-            CasualMod.logger.error("No lobby specified for event!")
+            CasualChampionships.logger.error("No lobby specified for event!")
             this.modules = MinigameDataModules.empty()
         }
 

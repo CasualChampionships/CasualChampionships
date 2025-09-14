@@ -13,7 +13,7 @@ import net.casual.arcade.resources.pack.PackInfo
 import net.casual.arcade.resources.utils.ResourcePackUtils.addPack
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.TeamUtils.getHexColor
-import net.casual.championships.CasualMod
+import net.casual.championships.CasualChampionships
 import net.casual.championships.common.CasualCommon
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.uhc.CasualUHC
@@ -54,7 +54,7 @@ object CasualResourcePackHost {
         return object: MinigameResources {
             override fun getPacks(): Collection<PackInfo> {
                 return packs.invoke().mapNotNull { pack ->
-                    getHostedPack(pack)?.toPackInfo(!CasualMod.config.dev)
+                    getHostedPack(pack)?.toPackInfo(!CasualChampionships.config.dev)
                 }
             }
         }
@@ -68,7 +68,7 @@ object CasualResourcePackHost {
             var original = colors.inverse()[color]
             if (original == null) {
                 if (index >= 16) {
-                    CasualMod.logger.error("Tried to load more team colors than were available!!")
+                    CasualChampionships.logger.error("Tried to load more team colors than were available!!")
                     continue
                 }
                 original = ChatFormatting.entries[index++]

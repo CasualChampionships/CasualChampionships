@@ -38,7 +38,7 @@ import net.casual.arcade.utils.set
 import net.casual.arcade.utils.string.SmallCapsTitleCase
 import net.casual.arcade.utils.string.TitleCase
 import net.casual.arcade.utils.toSmallCaps
-import net.casual.championships.CasualMod
+import net.casual.championships.CasualChampionships
 import net.casual.championships.commands.*
 import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualTeamReadyHandler
@@ -135,7 +135,7 @@ object CasualMinigames {
             it.server.gameRules.set(GameRules.RULE_LOCATOR_BAR, false, it.server)
             it.server.setMessageOfTheDay(this.getMOTD())
 
-            this.dataManager = createDataManager(CasualMod.config)
+            this.dataManager = createDataManager(CasualChampionships.config)
 
         }
         GlobalEventHandler.Server.register<ServerStartEvent>(Int.MAX_VALUE) {
@@ -193,10 +193,10 @@ object CasualMinigames {
         setCasualUI(minigame)
 
         minigame.resources.add(
-            MinigameResources.of(CasualResourcePackHost.uhc.toPackInfo(!CasualMod.config.dev))
+            MinigameResources.of(CasualResourcePackHost.uhc.toPackInfo(!CasualChampionships.config.dev))
         )
         minigame.resources.add(
-            MinigameResources.of(CasualResourcePackHost.boundary.toPackInfo(!CasualMod.config.dev))
+            MinigameResources.of(CasualResourcePackHost.boundary.toPackInfo(!CasualChampionships.config.dev))
         )
 
         minigame.events.register<MinigameCloseEvent> {
@@ -208,7 +208,7 @@ object CasualMinigames {
             getDataManager().syncUHCData(minigame)
         }
 
-        minigame.settings.replay = !CasualMod.config.dev
+        minigame.settings.replay = !CasualChampionships.config.dev
     }
 
     private fun modifyDuelMinigame(minigame: DuelMinigame) {
@@ -276,14 +276,14 @@ object CasualMinigames {
             }
             val result = MinigamesTemplate.CODEC.parse(JsonOps.INSTANCE, json)
             val event = result.resultOrPartial {
-                CasualMod.logger.error(it)
+                CasualChampionships.logger.error(it)
             }
             if (event.isPresent) {
                 return event.get()
             } else {
                 val error = result.error()
                 if (error.isPresent) {
-                    CasualMod.logger.error(error.get().message())
+                    CasualChampionships.logger.error(error.get().message())
                 }
             }
         }

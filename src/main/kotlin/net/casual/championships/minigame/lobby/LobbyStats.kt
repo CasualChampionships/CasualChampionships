@@ -2,7 +2,7 @@ package net.casual.championships.minigame.lobby
 
 import net.casual.arcade.minigame.stats.StatType
 import net.casual.arcade.minigame.utils.MinigameRegistries
-import net.casual.championships.CasualMod
+import net.casual.championships.common.util.casual
 import net.minecraft.core.Holder
 import net.minecraft.core.Registry
 
@@ -18,7 +18,7 @@ object LobbyStats {
 
     @Suppress("UNCHECKED_CAST")
     private fun <T: Any> register(name: String, type: StatType<T>): Holder.Reference<StatType<T>> {
-        return Registry.registerForHolder(MinigameRegistries.STAT_TYPES, CasualMod.id(name), type)
+        return Registry.registerForHolder(MinigameRegistries.STAT_TYPES, casual(name), type)
             as Holder.Reference<StatType<T>>
     }
 }

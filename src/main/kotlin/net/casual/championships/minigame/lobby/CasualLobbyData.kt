@@ -7,7 +7,7 @@ import net.casual.arcade.utils.encodedOptionalFieldOf
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.file.ReadableArchive.Companion.parseJson
 import net.casual.arcade.utils.math.location.providers.LocationProvider
-import net.casual.championships.CasualMod
+import net.casual.championships.common.util.casual
 import net.minecraft.core.Vec3i
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
@@ -49,7 +49,7 @@ class CasualLobbyData(
             ).apply(instance, ::CasualLobbyData)
         }
 
-        override val id: ResourceLocation = CasualMod.id("lobby_data")
+        override val id: ResourceLocation = casual("lobby_data")
 
         override fun get(archive: ReadableArchive, server: MinecraftServer): MinigameDataModule {
             return archive.parseJson(LOBBY_DATA, CODEC, server).getOrThrow()
