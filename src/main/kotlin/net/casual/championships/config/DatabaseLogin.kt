@@ -1,4 +1,4 @@
-package net.casual.championships.util
+package net.casual.championships.config
 
 import kotlinx.serialization.Serializable
 

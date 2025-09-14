@@ -68,7 +68,7 @@ object CasualResourcePackHost {
             var original = colors.inverse()[color]
             if (original == null) {
                 if (index >= 16) {
-                    CasualChampionships.logger.error("Tried to load more team colors than were available!!")
+                    CasualUtils.logger.error("Tried to load more team colors than were available!!")
                     continue
                 }
                 original = ChatFormatting.entries[index++]

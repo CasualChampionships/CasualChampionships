@@ -46,12 +46,12 @@ import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
 import net.casual.championships.data.*
 import net.casual.championships.duel.minigame.DuelMinigame
-import net.casual.championships.events.CasualConfigReloadedEvent
+import net.casual.championships.events.CasualChampionshipsReloadEvent
 import net.casual.championships.minigame.lobby.CasualLobbyMinigameFactory
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.minigame.UHCMinigameFactory
-import net.casual.championships.util.CasualConfig
+import net.casual.championships.config.CasualConfig
 import net.casual.championships.util.CasualTeamUtils.getOrCreateAdminTeam
 import net.casual.championships.util.CasualTeamUtils.getOrCreateSpectatorTeam
 import net.casual.database.CasualDatabase
@@ -166,7 +166,7 @@ object CasualMinigames {
             this.writeMinigameEventData(this.getMinigames().getData())
         }
 
-        GlobalEventHandler.Server.register<CasualConfigReloadedEvent>(priority = 10_000) { (_, config) ->
+        GlobalEventHandler.Server.register<CasualChampionshipsReloadEvent>(priority = 10_000) { (_, config) ->
             val minigames = this.getMinigames()
             minigames.event = this.readMinigameEvent()
             minigames.reloadLobby()
@@ -227,45 +227,7 @@ object CasualMinigames {
     }
 
     internal fun setCasualUI(minigame: Minigame) {
-        minigame.settings.broadcastChangesToAdmin()
-        minigame.ui.setPlayerListDisplay(CasualGuiUtils.createTeamMinigameTabDisplay(minigame))
-        minigame.ui.readier = ReadyChecker(
-            MinigamePlayerReadyHandler(minigame),
-            CasualTeamReadyHandler(minigame)
-        )
-        minigame.ui.countdown = CasualCountdown
-
-        minigame.ui.addNametag(CasualGuiUtils.createPlayingNameTag())
-        minigame.events.register<MinigameAddPlayerEvent> {
-            it.player.team?.nameTagVisibility = Team.Visibility.NEVER
-        }
-        minigame.events.register<PlayerTeamJoinEvent> {
-            it.team.nameTagVisibility = Team.Visibility.NEVER
-        }
-        minigame.chat.systemChatFormatter = ChatFormatter {
-            ChatFormatter.SYSTEM.format(Component.empty().append(it).withMiniFont())
-        }
-        minigame.chat.globalChatFormatter = object: PlayerChatFormatter {
-            override fun format(player: ServerPlayer, message: PlayerFormattedChat): PlayerFormattedChat {
-                val team = player.team
-                val prefixed = when {
-                    !message.prefix.isEmpty() || team == null -> message
-                    else -> message.copy(prefix = team.formattedDisplayName)
-                }
-                return PlayerChatFormatter.Global.format(player, prefixed)
-            }
-        }
-
-        this.setPauseNotification(minigame)
-    }
-
-    private fun setPauseNotification(minigame: Minigame) {
-        minigame.events.register<MinigamePauseEvent> {
-            minigame.chat.broadcastWithSound(
-                Component.literal("Minigame is now paused"),
-                Sound(CasualSounds.GAME_PAUSED)
-            )
-        }
+        CasualGuiUtils.setMinigameUI(minigame)
     }
 
     private fun readMinigameEvent(): MinigamesTemplate {
@@ -276,14 +238,14 @@ object CasualMinigames {
             }
             val result = MinigamesTemplate.CODEC.parse(JsonOps.INSTANCE, json)
             val event = result.resultOrPartial {
-                CasualChampionships.logger.error(it)
+                CasualUtils.logger.error(it)
             }
             if (event.isPresent) {
                 return event.get()
             } else {
                 val error = result.error()
                 if (error.isPresent) {
-                    CasualChampionships.logger.error(error.get().message())
+                    CasualUtils.logger.error(error.get().message())
                 }
             }
         }

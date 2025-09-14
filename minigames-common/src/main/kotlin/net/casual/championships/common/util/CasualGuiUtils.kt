@@ -1,15 +1,25 @@
 package net.casual.championships.common.util
 
+import net.casual.arcade.events.ListenerRegistry.Companion.register
+import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
 import net.casual.arcade.minigame.Minigame
+import net.casual.arcade.minigame.events.MinigameAddPlayerEvent
+import net.casual.arcade.minigame.events.MinigamePauseEvent
 import net.casual.arcade.minigame.managers.MinigameChatManager
+import net.casual.arcade.minigame.ready.MinigamePlayerReadyHandler
+import net.casual.arcade.minigame.ready.ReadyChecker
+import net.casual.arcade.minigame.utils.MinigameUtils.broadcastChangesToAdmin
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.TeamUtils.getHexColor
 import net.casual.arcade.utils.chat.ChatFormatter
+import net.casual.arcade.utils.chat.PlayerChatFormatter
+import net.casual.arcade.utils.chat.PlayerFormattedChat
 import net.casual.arcade.utils.component.bold
 import net.casual.arcade.utils.component.gold
+import net.casual.arcade.utils.component.isEmpty
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.visuals.elements.ComponentElements
@@ -22,7 +32,9 @@ import net.casual.arcade.visuals.screen.PlayerInventoryViewGui
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.tab.PlayerListDisplay
 import net.casual.championships.common.items.CasualGuiItems
+import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualPlayerInventoryViewGui
+import net.casual.championships.common.ui.CasualTeamReadyHandler
 import net.casual.championships.common.ui.elements.*
 import net.casual.championships.common.ui.game.TeamSelectorGui
 import net.casual.championships.common.ui.tab.CasualPlayerListEntries
@@ -36,6 +48,7 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.component.DyedItemColor
+import net.minecraft.world.scores.Team
 
 object CasualGuiUtils {
     val INFO_ANNOUNCEMENT = ChatFormatter.createAnnouncement(Component.literal("[Info]").gold().bold().withMiniFont())
@@ -153,5 +166,43 @@ object CasualGuiUtils {
 
     fun createPlayerInventoryViewGui(observee: ServerPlayer, observer: ServerPlayer): PlayerInventoryViewGui {
         return CasualPlayerInventoryViewGui(observee, observer)
+    }
+
+    fun setMinigameUI(minigame: Minigame) {
+        minigame.settings.broadcastChangesToAdmin()
+        minigame.ui.setPlayerListDisplay(this.createTeamMinigameTabDisplay(minigame))
+        minigame.ui.readier = ReadyChecker(
+            MinigamePlayerReadyHandler(minigame),
+            CasualTeamReadyHandler(minigame)
+        )
+        minigame.ui.countdown = CasualCountdown
+
+        minigame.ui.addNametag(this.createPlayingNameTag())
+        minigame.events.register<MinigameAddPlayerEvent> {
+            it.player.team?.nameTagVisibility = Team.Visibility.NEVER
+        }
+        minigame.events.register<PlayerTeamJoinEvent> {
+            it.team.nameTagVisibility = Team.Visibility.NEVER
+        }
+        minigame.chat.systemChatFormatter = ChatFormatter {
+            ChatFormatter.SYSTEM.format(Component.empty().append(it).withMiniFont())
+        }
+        minigame.chat.globalChatFormatter = object: PlayerChatFormatter {
+            override fun format(player: ServerPlayer, message: PlayerFormattedChat): PlayerFormattedChat {
+                val team = player.team
+                val prefixed = when {
+                    !message.prefix.isEmpty() || team == null -> message
+                    else -> message.copy(prefix = team.formattedDisplayName)
+                }
+                return PlayerChatFormatter.Global.format(player, prefixed)
+            }
+        }
+
+        minigame.events.register<MinigamePauseEvent> {
+            minigame.chat.broadcastWithSound(
+                Component.literal("Minigame is now paused"),
+                Sound(CasualSounds.GAME_PAUSED)
+            )
+        }
     }
 }

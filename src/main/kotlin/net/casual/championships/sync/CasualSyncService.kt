@@ -2,8 +2,6 @@
 
 package net.casual.championships.sync
 
-import com.mojang.authlib.GameProfile
-import kotlinx.coroutines.Deferred
 import net.casual.arcade.minigame.Minigame
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.sync.data.SyncableMinigame
@@ -13,7 +11,7 @@ import net.casual.championships.sync.data.SyncableTeam
 import net.casual.championships.uhc.minigame.UHCMinigame
 import kotlin.time.ExperimentalTime
 
-fun CasualSyncService.syncMinigame(minigame: Minigame): Deferred<Boolean> {
+suspend fun CasualSyncService.syncMinigame(minigame: Minigame): Boolean {
     val syncer = when (minigame) {
         is UHCMinigame -> this::syncUHC
         is DuelMinigame -> this::syncDuel
@@ -34,11 +32,11 @@ fun CasualSyncService.syncMinigame(minigame: Minigame): Deferred<Boolean> {
 }
 
 interface CasualSyncService: AutoCloseable {
-    fun getParticipants(): Deferred<SyncableParticipants>
+    suspend fun getParticipants(): SyncableParticipants
 
-    fun getTeams(): Deferred<List<SyncableTeam>>
+    suspend fun getTeams(): List<SyncableTeam>
 
-    fun syncUHC(minigame: SyncableMinigame): Deferred<Boolean>
+    suspend fun syncUHC(minigame: SyncableMinigame): Boolean
 
-    fun syncDuel(minigame: SyncableMinigame): Deferred<Boolean>
+    suspend fun syncDuel(minigame: SyncableMinigame): Boolean
 }

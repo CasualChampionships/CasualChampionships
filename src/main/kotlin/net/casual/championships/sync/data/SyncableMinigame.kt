@@ -1,6 +1,5 @@
 package net.casual.championships.sync.data
 
-import net.casual.championships.sync.CasualSyncService.SyncablePlayer
 import net.minecraft.resources.ResourceLocation
 import java.util.*
 import kotlin.time.ExperimentalTime

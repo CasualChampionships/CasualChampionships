@@ -1,11 +1,12 @@
 package net.casual.championships.sync
 
 import com.mojang.authlib.GameProfile
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.casual.arcade.minigame.stats.ArcadeStats
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.CasualStats
+import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.sync.data.SyncableMinigame
 import net.casual.championships.sync.data.SyncableParticipants
 import net.casual.championships.sync.data.SyncableTeam
@@ -29,92 +30,79 @@ class CasualDatabaseSyncService(
     private val current: Event,
     private val database: CasualDatabase
 ): CasualSyncService {
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-
-    override fun getParticipants(): Deferred<SyncableParticipants> {
-        return this.asyncTransaction {
-            val profiles = buildSet {
-                for (player in database.getDiscordPlayers()) {
-                    if (player.team != null) {
-                        add(GameProfile(player.id.value, player.name))
-                    }
+    override suspend fun getParticipants(): SyncableParticipants = transaction {
+        val profiles = buildSet {
+            for (player in database.getDiscordPlayers()) {
+                if (player.team != null) {
+                    add(GameProfile(player.id.value, player.name))
                 }
             }
-            SyncableParticipants.Strict(profiles)
         }
+        SyncableParticipants.Strict(profiles)
     }
 
-    override fun getTeams(): Deferred<List<SyncableTeam>> {
-        return this.asyncTransaction {
-            val teams = this.database.getDiscordTeams()
-            buildList {
-                for (team in teams) {
-                    val prefix = Component.literal("[${team.prefix}] ")
-                    val syncable = SyncableTeam(team.name, prefix, team.color, team.players.map { it.name })
-                    add(syncable)
-                }
+    override suspend fun getTeams(): List<SyncableTeam> = transaction {
+        val teams = this.database.getDiscordTeams()
+        buildList {
+            for (team in teams) {
+                val prefix = Component.literal("[${team.prefix}] ")
+                val syncable = SyncableTeam(team.name, prefix, team.color, team.players.map { it.name })
+                add(syncable)
             }
         }
     }
 
-    override fun syncUHC(minigame: SyncableMinigame): Deferred<Boolean> {
-        return this.asyncTransaction {
-            CasualChampionships.logger.info("Synchronizing uhc stats for ${minigame.uuid}")
+    override suspend fun syncUHC(minigame: SyncableMinigame): Boolean = transaction {
+        CasualUtils.logger.info("Synchronizing uhc stats for ${minigame.uuid}")
 
-            val databaseMinigame = this.getOrCreateMinigame(minigame)
-            for ((profile, team, stats, advancements) in minigame.players) {
-                val player = this.getOrCreateMinigamePlayer(profile.id, team, databaseMinigame)
+        val databaseMinigame = this.getOrCreateMinigame(minigame)
+        for ((profile, team, stats, advancements) in minigame.players) {
+            val player = this.getOrCreateMinigamePlayer(profile.id, team, databaseMinigame)
 
-                this.syncPlayerAdvancements(minigame, player, advancements)
-                this.getOrCreatePlayerStats(UHCPlayerStats, player) {
-                    won = stats.getStatValueOrDefault(CasualStats.WON)
-                    died = stats.getStatValueOrDefault(ArcadeStats.DEATHS) > 0
-                    kills = stats.getStatValueOrDefault(ArcadeStats.KILLS)
-                    damageTaken = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_TAKEN)
-                    damageDealt = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_DEALT)
-                    damageHealed = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_HEALED)
-                    headsConsumed = stats.getStatValueOrDefault(UHCStats.HEADS_CONSUMED)
-                    aliveTime = stats.getStatValueOrDefault(CasualStats.ALIVE_TIME).Ticks.duration
-                    crouchTime = stats.getStatValueOrDefault(CasualStats.CROUCH_TIME).Ticks.duration
-                    jumps = stats.getStatValueOrDefault(CasualStats.JUMPS)
-                    relogs = stats.getStatValueOrDefault(ArcadeStats.RELOGS)
-                    blocksMined = stats.getStatValueOrDefault(CasualStats.BLOCKS_MINED)
-                    blocksPlaced = stats.getStatValueOrDefault(CasualStats.BLOCKS_PLACED)
-                }
+            this.syncPlayerAdvancements(minigame, player, advancements)
+            this.getOrCreatePlayerStats(UHCPlayerStats, player) {
+                won = stats.getStatValueOrDefault(CasualStats.WON)
+                died = stats.getStatValueOrDefault(ArcadeStats.DEATHS) > 0
+                kills = stats.getStatValueOrDefault(ArcadeStats.KILLS)
+                damageTaken = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_TAKEN)
+                damageDealt = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_DEALT)
+                damageHealed = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_HEALED)
+                headsConsumed = stats.getStatValueOrDefault(UHCStats.HEADS_CONSUMED)
+                aliveTime = stats.getStatValueOrDefault(CasualStats.ALIVE_TIME).Ticks.duration
+                crouchTime = stats.getStatValueOrDefault(CasualStats.CROUCH_TIME).Ticks.duration
+                jumps = stats.getStatValueOrDefault(CasualStats.JUMPS)
+                relogs = stats.getStatValueOrDefault(ArcadeStats.RELOGS)
+                blocksMined = stats.getStatValueOrDefault(CasualStats.BLOCKS_MINED)
+                blocksPlaced = stats.getStatValueOrDefault(CasualStats.BLOCKS_PLACED)
             }
-            true
         }
+        true
     }
 
-    override fun syncDuel(minigame: SyncableMinigame): Deferred<Boolean> {
-        return this.asyncTransaction {
-            CasualChampionships.logger.info("Synchronizing duel stats for ${minigame.uuid}")
-            val databaseMinigame = this.getOrCreateMinigame(minigame)
-            for ((profile, team, stats, advancements) in minigame.players) {
-                val player = this.getOrCreateMinigamePlayer(profile.id, team, databaseMinigame)
+    override suspend fun syncDuel(minigame: SyncableMinigame): Boolean = transaction {
+        CasualUtils.logger.info("Synchronizing duel stats for ${minigame.uuid}")
+        val databaseMinigame = this.getOrCreateMinigame(minigame)
+        for ((profile, team, stats, advancements) in minigame.players) {
+            val player = this.getOrCreateMinigamePlayer(profile.id, team, databaseMinigame)
 
-                this.syncPlayerAdvancements(minigame, player, advancements)
-                this.getOrCreatePlayerStats(DuelPlayerStats, player) {
-                    won = stats.getStatValueOrDefault(CasualStats.WON)
-                    kills = stats.getStatValueOrDefault(ArcadeStats.KILLS)
-                    damageTaken = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_TAKEN)
-                    damageDealt = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_DEALT)
-                    damageHealed = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_HEALED)
-                }
+            this.syncPlayerAdvancements(minigame, player, advancements)
+            this.getOrCreatePlayerStats(DuelPlayerStats, player) {
+                won = stats.getStatValueOrDefault(CasualStats.WON)
+                kills = stats.getStatValueOrDefault(ArcadeStats.KILLS)
+                damageTaken = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_TAKEN)
+                damageDealt = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_DEALT)
+                damageHealed = stats.getStatValueOrDefault(ArcadeStats.DAMAGE_HEALED)
             }
-            true
         }
+        true
     }
 
     override fun close() {
         this.database.close()
-        this.coroutineScope.coroutineContext.cancel()
     }
 
-    private fun <T> asyncTransaction(statement: (Transaction) -> T): Deferred<T> {
-        return this.coroutineScope.async {
-            database.transaction(statement)
-        }
+    private suspend fun <T> transaction(statement: (Transaction) -> T) = withContext(Dispatchers.IO) {
+        database.transaction(statement)
     }
 
     private fun syncPlayerAdvancements(

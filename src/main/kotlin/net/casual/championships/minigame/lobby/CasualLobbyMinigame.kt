@@ -92,7 +92,7 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
-class CasualLobbyMinigame(
+class CasualLobbyMinigame constructor(
     server: MinecraftServer,
     uuid: UUID,
     spawn: LocationWithLevel<ServerLevel>,

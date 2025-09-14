@@ -88,7 +88,8 @@ class CasualLobbyMinigameFactory(
             val archive = ReadableArchive.from(path)
             this.modules = MinigameDataModules.from(archive, server)
         } else {
-            CasualChampionships.logger.error("No lobby specified for event!")
+            // FIXME: This should really just throw
+            CasualUtils.logger.error("No lobby specified for event!")
             this.modules = MinigameDataModules.empty()
         }
 

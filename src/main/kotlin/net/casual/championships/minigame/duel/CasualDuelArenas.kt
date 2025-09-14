@@ -8,7 +8,7 @@ import net.casual.arcade.minigame.data.MinigameDataModules.Companion.with
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.duel.arena.DuelArenasDataModule
-import net.casual.championships.events.CasualConfigReloadedEvent
+import net.casual.championships.events.CasualChampionshipsReloadEvent
 import net.minecraft.server.MinecraftServer
 
 object CasualDuelArenas {
@@ -23,14 +23,11 @@ object CasualDuelArenas {
 
     internal fun registerEvents() {
         GlobalEventHandler.Server.register<ServerStartEvent>(priority = -1_000) { (server) ->
-            this.load(server)
-        }
-        GlobalEventHandler.Server.register<CasualConfigReloadedEvent>(priority = -1_000) { (server) ->
-            this.load(server)
+            this.reload(server)
         }
     }
 
-    private fun load(server: MinecraftServer) {
+    internal fun reload(server: MinecraftServer) {
         try {
             val archive = ReadableArchive.from(this.path)
             this.arenas = DuelArenasDataModule.get(archive, server)

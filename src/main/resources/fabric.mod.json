@@ -17,7 +17,7 @@
     "server": [
       {
         "adapter": "kotlin",
-        "value": "CasualChampionships"
+        "value": "net.casual.championships.CasualChampionships"
       }
     ]
   },

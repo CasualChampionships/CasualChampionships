@@ -9,6 +9,7 @@ import net.casual.arcade.utils.TeamUtils.setHexColor
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.CasualStats
+import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.utils.UHCStats
@@ -89,7 +90,7 @@ class DatabaseDataManager(
             uhc.server.scoreboard.getPlayersTeam(it.name) to it
         }
         this.asyncTransaction {
-            CasualChampionships.logger.info("Synchronizing uhc stats for ${uhc.uuid}")
+            CasualUtils.logger.info("Synchronizing uhc stats for ${uhc.uuid}")
 
             val databaseMinigame = this.getOrCreateMinigame(uhc)
             for ((team, profile) in participants) {
@@ -122,7 +123,7 @@ class DatabaseDataManager(
             duel.server.scoreboard.getPlayersTeam(it.name) to it
         }
         this.asyncTransaction {
-            CasualChampionships.logger.info("Synchronizing duel stats for ${duel.uuid}")
+            CasualUtils.logger.info("Synchronizing duel stats for ${duel.uuid}")
             val databaseMinigame = this.getOrCreateMinigame(duel)
             for ((team, profile) in participants) {
                 team ?: continue
@@ -278,7 +279,7 @@ class DatabaseDataManager(
     private fun reloadTeam(discordTeam: DiscordTeam, players: List<DiscordPlayer>, scoreboard: Scoreboard) {
         val team = scoreboard.getPlayerTeam(discordTeam.name)
         if (team == null) {
-            CasualChampionships.logger.error("Failed to reload team ${discordTeam.name}, no such team available")
+            CasualUtils.logger.error("Failed to reload team ${discordTeam.name}, no such team available")
             return
         }
         for (player in team.players.toList()) {
