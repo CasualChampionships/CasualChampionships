@@ -67,6 +67,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.reader
 import kotlin.io.path.writer
 
+@java.lang.Deprecated
 @Suppress("UnstableApiUsage")
 object CasualMinigames {
     private val path: Path = CasualUtils.resolve("event")

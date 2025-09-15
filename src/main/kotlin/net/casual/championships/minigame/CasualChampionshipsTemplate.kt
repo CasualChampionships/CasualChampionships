@@ -15,6 +15,7 @@ import net.casual.championships.common.util.casual
 import net.casual.championships.resources.CasualResourcePackHost
 import net.minecraft.resources.ResourceLocation
 
+@java.lang.Deprecated
 class CasualChampionshipsTemplate(
     name: String = "default",
     lobby: MinigameFactory = LobbyMinigameFactory.DEFAULT,

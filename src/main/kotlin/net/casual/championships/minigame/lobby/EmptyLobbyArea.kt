@@ -9,6 +9,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox
 import net.minecraft.world.phys.AABB
 import java.util.function.Predicate
 
+@java.lang.Deprecated
 @Suppress("NonExtendableApiUsage")
 class EmptyLobbyArea(override val level: ServerLevel): PlaceableArea {
     override fun getBoundingBox(): BoundingBox {

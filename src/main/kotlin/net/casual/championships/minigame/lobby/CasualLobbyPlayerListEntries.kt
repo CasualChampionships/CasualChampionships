@@ -12,6 +12,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.PlayerTeam
 
+@java.lang.Deprecated
 class CasualLobbyPlayerListEntries(
     private val minigame: CasualLobbyMinigame
 ): CasualPlayerListEntries(minigame) {

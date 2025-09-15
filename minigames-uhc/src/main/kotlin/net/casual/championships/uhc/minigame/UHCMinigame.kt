@@ -443,6 +443,7 @@ class UHCMinigame(
     private fun onBlockMined(event: PlayerBlockMinedEvent) {
         val (player, _, state, be) = event
 
+        // TODO: This belongs in the advancement manager
         if (state.isOf(Blocks.SPAWNER) && be is SpawnerBlockEntity) {
             val spawnerValueOutput = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING)
             be.spawner.save(spawnerValueOutput)

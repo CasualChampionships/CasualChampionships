@@ -8,7 +8,12 @@ import net.casual.arcade.events.server.ServerStartEvent
 import net.casual.arcade.minigame.data.MinigameDataModule.Provider.Companion.register
 import net.casual.arcade.minigame.utils.MinigameRegistries
 import net.casual.arcade.utils.ArcadeUtils
+import net.casual.arcade.utils.component.*
+import net.casual.arcade.utils.convertCasing
 import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
+import net.casual.arcade.utils.string.SmallCapsTitleCase
+import net.casual.arcade.utils.string.TitleCase
+import net.casual.arcade.utils.toSmallCaps
 import net.casual.championships.commands.*
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.config.CasualConfig
@@ -27,6 +32,7 @@ import net.casual.database.CasualDatabase
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.ModContainer
+import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 
 object CasualChampionships: DedicatedServerModInitializer {
@@ -40,7 +46,7 @@ object CasualChampionships: DedicatedServerModInitializer {
     var sync: CasualSyncService = CasualNoopSyncService
         private set
 
-    val minigames = CasualMinigameManager(this::sync, CasualUtils.resolve("event_v2"))
+    val minigames = CasualMinigameManager(this, CasualUtils.resolve("event_v2"))
 
     override fun onInitializeServer() {
         CasualUtils.logger.info("Starting CasualChampionships... Version: ${container.metadata.version}")
@@ -71,6 +77,17 @@ object CasualChampionships: DedicatedServerModInitializer {
         this.minigames.reload(server)
 
         this.reloadSyncService()
+    }
+
+    fun getMessageOfTheDay(): Component {
+        return Component {
+            val cc = literal("Casual Championships".convertCasing(TitleCase, SmallCapsTitleCase)).bold().color(0xFFAC1C)
+            val title = literal("\uD83D\uDDE1").yellow() + " " + cc + " " + literal("\uD83C\uDFF9").yellow()
+            val subtitle = literal("   be prepared".toSmallCaps()).lime() + wrap() +
+                literal(" ◆ ").white() + literal("let the chaos ensue    ".toSmallCaps()).lime()
+            empty() + literal("╔═════", 0x009BFF, 0x80CDFF) + title + literal("═════╗", 0x80CDFF, 0x009BFF) + nl +
+                literal("╚══", 0x009BFF, 0x33AFFF) + subtitle + literal("══╝", 0x33AFFF, 0x009BFF)
+        }
     }
 
     private fun onServerStart(event: ServerStartEvent) {

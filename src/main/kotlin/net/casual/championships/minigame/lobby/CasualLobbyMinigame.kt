@@ -94,6 +94,7 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
+@java.lang.Deprecated
 class CasualLobbyMinigame constructor(
     server: MinecraftServer,
     uuid: UUID,

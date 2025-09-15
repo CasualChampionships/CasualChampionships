@@ -5,12 +5,16 @@ import com.mojang.serialization.DataResult
 import net.casual.arcade.events.ListenerRegistry
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerSaveEvent
+import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.player.PlayerChatEvent
 import net.casual.arcade.events.server.player.PlayerJoinEvent
 import net.casual.arcade.events.server.player.PlayerRequestLoginEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.Minigames
-import net.casual.arcade.minigame.events.*
+import net.casual.arcade.minigame.events.MinigameAddAdminEvent
+import net.casual.arcade.minigame.events.MinigameCloseEvent
+import net.casual.arcade.minigame.events.MinigameCompleteEvent
+import net.casual.arcade.minigame.events.MinigameInitializeEvent
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.minigame.utils.MinigameResources.Companion.sendTo
@@ -25,6 +29,8 @@ import net.casual.arcade.utils.PlayerUtils.getChatUsername
 import net.casual.arcade.utils.PlayerUtils.username
 import net.casual.arcade.utils.TeamUtils.getOrCreateTeam
 import net.casual.arcade.utils.TeamUtils.setHexColor
+import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.green
 import net.casual.arcade.utils.component.plus
@@ -38,7 +44,6 @@ import net.casual.championships.minigame.event.EventConfiguration
 import net.casual.championships.minigame.event.EventState
 import net.casual.championships.minigame.lobby_v2.CasualLobbyMinigame
 import net.casual.championships.resources.CasualResourcePackHost
-import net.casual.championships.sync.CasualSyncService
 import net.casual.championships.sync.data.SyncableParticipants
 import net.casual.championships.sync.data.SyncableTeam
 import net.casual.championships.sync.syncMinigame
@@ -51,24 +56,17 @@ import net.minecraft.world.scores.Scoreboard
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
-import kotlin.collections.LinkedHashSet
 import kotlin.jvm.optionals.getOrNull
-import kotlin.reflect.KProperty0
 
 class CasualMinigameManager(
-    sync: KProperty0<CasualSyncService>,
+    private val championships: CasualChampionships,
     private val path: Path
 ) {
     private val packs = ArrayList<PackInfo>()
-    private val winners = LinkedHashSet<String>()
-
-    private val sync by sync
 
     private lateinit var config: EventConfiguration
 
-    private lateinit var lobby: Minigame
+    private lateinit var lobby: CasualLobbyMinigame
     private var minigame: Minigame? = null
 
     /**
@@ -88,6 +86,15 @@ class CasualMinigameManager(
      */
     val current: Minigame
         get() = this.getCurrentMinigame()
+
+    /**
+     * Whether the current minigame is the lobby.
+     *
+     * @return Whether the current minigame is the lobby.
+     */
+    fun isInLobby(): Boolean {
+        return this.current == this.lobby
+    }
 
     /**
      * Returns everyone back to the lobby and
@@ -128,6 +135,7 @@ class CasualMinigameManager(
         registry.register<PlayerJoinEvent>(::onPlayerJoin)
         registry.register<PlayerChatEvent>(::onPlayerChat)
         registry.register<ServerSaveEvent>(::onServerSave)
+        registry.register<ServerTickEvent>(::onServerTick)
     }
 
     // This should be called *after* minigames have been loaded
@@ -206,7 +214,7 @@ class CasualMinigameManager(
     }
 
     private suspend fun createTeams(server: MinecraftServer) {
-        val teams = this.sync.getTeams()
+        val teams = this.championships.sync.getTeams()
         val scoreboard = server.scoreboard
         for (team in scoreboard.playerTeams.toList()) {
             scoreboard.removePlayerTeam(team)
@@ -232,7 +240,7 @@ class CasualMinigameManager(
     }
 
     private suspend fun reloadTeams(server: MinecraftServer) {
-        val teams = this.sync.getTeams()
+        val teams = this.championships.sync.getTeams()
         val scoreboard = server.scoreboard
         for (team in teams) {
             val playerTeam = scoreboard.getPlayerTeam(team.name) ?: continue
@@ -254,7 +262,7 @@ class CasualMinigameManager(
     }
 
     private suspend fun reloadWhitelist(server: MinecraftServer) {
-        val participants = this.sync.getParticipants()
+        val participants = this.championships.sync.getParticipants()
         val whitelist = server.playerList.whiteList
         if (participants is SyncableParticipants.Strict) {
             for (entry in whitelist.entries.toList()) {
@@ -302,6 +310,7 @@ class CasualMinigameManager(
         when (val minigame = event.minigame) {
             is UHCMinigame -> this.modifyUHCMinigame(minigame)
             is DuelMinigame -> this.modifyDuelMinigame(minigame)
+            is CasualLobbyMinigame -> this.modifyLobbyMinigame(minigame)
         }
     }
 
@@ -324,6 +333,15 @@ class CasualMinigameManager(
         this.writeEventState()
     }
 
+    private fun onServerTick(event: ServerTickEvent) {
+        if (this.isInLobby()) {
+            val uptime = this.lobby.uptime
+            if (uptime.Ticks > 60.Seconds && uptime % 30.Seconds.ticks == 0) {
+                this.reloadPlayers(event.server)
+            }
+        }
+    }
+
     private fun modifyUHCMinigame(minigame: UHCMinigame) {
         PerformanceUtils.reduceMinigameMobcap(minigame)
         PerformanceUtils.disableEntityAI(minigame)
@@ -341,8 +359,8 @@ class CasualMinigameManager(
             this.returnToLobby()
         }
         minigame.events.register<MinigameCompleteEvent> {
-            this.winners.clear()
-            this.winners.addAll(minigame.winners)
+            this.lobby.winners.clear()
+            this.lobby.winners.addAll(minigame.winners)
         }
 
         minigame.settings.replay = !CasualChampionships.config.dev
@@ -358,9 +376,26 @@ class CasualMinigameManager(
         })
     }
 
+    private fun modifyLobbyMinigame(minigame: CasualLobbyMinigame) {
+        minigame.events.register<MinigameAddAdminEvent>(::outputAdminLogs)
+    }
+
+    private fun outputAdminLogs(event: MinigameAddAdminEvent) {
+        val player = event.player
+        val dev = this.championships.config.dev
+        val database = this.championships.config.database.name
+        val message = when {
+            dev -> Component.literal("Minigames are in dev mode!").red()
+            else -> Component.literal("Minigames are NOT in dev mode!").red()
+        }
+        player.sendSystemMessage(message)
+        val location = if (dev) "${database}_debug" else database
+        player.sendSystemMessage(Component.literal("Minigames are using $location database!").red())
+    }
+
     private fun registerSyncMinigameStats(minigame: Minigame) {
         minigame.events.register<MinigameCompleteEvent> {
-            minigame.server.launch { sync.syncMinigame(minigame) }
+            minigame.server.launch { championships.sync.syncMinigame(minigame) }
         }
     }
 
