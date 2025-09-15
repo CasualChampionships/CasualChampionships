@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.lobby
+package net.casual.championships.minigame.lobby_v2.modules
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
@@ -45,7 +45,7 @@ class CasualLobbyParkourData(
                     Location.CODEC.fieldOf("spawn").forGetter(Checkpoint::spawn),
                     ArcadeExtraCodecs.AABB.fieldOf("collision").forGetter(Checkpoint::collision),
                     ComponentSerialization.CODEC.fieldOf("title").forGetter(Checkpoint::title)
-                ).apply(instance, ::Checkpoint)
+                ).apply(instance, CasualLobbyParkourData::Checkpoint)
             }
         }
     }

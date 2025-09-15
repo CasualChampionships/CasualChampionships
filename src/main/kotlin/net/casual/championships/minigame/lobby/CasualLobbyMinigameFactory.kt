@@ -16,11 +16,11 @@ import net.casual.arcade.utils.ResourceUtils
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.serialization.codec.CodecProvider
 import net.casual.arcade.utils.toKey
-import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.common.util.casual
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.minigame.duel.CasualDuelArenas
+import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyData
 import net.casual.championships.resources.CasualResourcePackHost
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation
@@ -28,6 +28,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import java.util.*
 
+@java.lang.Deprecated
 class CasualLobbyMinigameFactory(
     private val name: Optional<String>
 ): MinigameFactory {
@@ -50,7 +51,7 @@ class CasualLobbyMinigameFactory(
             spoofedDimensionKey(casual("lobby"))
             dimensionKey(dimension)
             dimensionType(BuiltinDimensionTypes.OVERWORLD)
-            chunkGenerator(VoidChunkGenerator(context.server, data.biome))
+            chunkGenerator(VoidChunkGenerator(context.server))
             defaultLevelProperties()
             persistence(LevelPersistence.Temporary)
             if (data.timeOfDay.isEmpty) {

@@ -71,6 +71,8 @@ import net.casual.championships.duel.utils.DuelRequester
 import net.casual.championships.duel.minigame.DuelSettings
 import net.casual.championships.duel.gui.DuelConfigurationGui
 import net.casual.championships.minigame.CasualMinigames
+import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyData
+import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyParkourData
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.EntityArgument

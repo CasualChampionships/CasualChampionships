@@ -10,19 +10,19 @@ import net.casual.arcade.events.server.player.PlayerJoinEvent
 import net.casual.arcade.events.server.player.PlayerRequestLoginEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.Minigames
-import net.casual.arcade.minigame.events.MinigameCloseEvent
-import net.casual.arcade.minigame.events.MinigameCompleteEvent
-import net.casual.arcade.minigame.events.MinigameInitializeEvent
+import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.minigame.utils.MinigameResources.Companion.sendTo
-import net.casual.arcade.minigame.utils.MinigameUtils.transferAdminAndSpectatorTeamsTo
+import net.casual.arcade.resources.pack.PackInfo
+import net.casual.arcade.resources.utils.ResourcePackUtils.sendResourcePack
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.scheduler.coroutine.launch
 import net.casual.arcade.utils.ArcadeUtils
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.PlayerUtils.getChatUsername
+import net.casual.arcade.utils.PlayerUtils.username
 import net.casual.arcade.utils.TeamUtils.getOrCreateTeam
 import net.casual.arcade.utils.TeamUtils.setHexColor
 import net.casual.arcade.utils.component.Component
@@ -61,6 +61,7 @@ class CasualMinigameManager(
     sync: KProperty0<CasualSyncService>,
     private val path: Path
 ) {
+    private val packs = ArrayList<PackInfo>()
     private val winners = LinkedHashSet<String>()
 
     private val sync by sync
@@ -88,6 +89,13 @@ class CasualMinigameManager(
     val current: Minigame
         get() = this.getCurrentMinigame()
 
+    /**
+     * Returns everyone back to the lobby and
+     * closes the current minigame.
+     *
+     * This will have no effect if the current
+     * minigame is the lobby.
+     */
     fun returnToLobby() {
         val current = this.current
         if (current != this.lobby) {
@@ -96,8 +104,21 @@ class CasualMinigameManager(
         }
     }
 
-    fun reloadResources() {
-        this.current.resources.sendTo(this.current.players)
+    /**
+     * Resends all resources to players.
+     */
+    fun reloadPlayerResources() {
+        for (player in this.current.players) {
+            this.current.resources.sendTo(player)
+            this.packs.forEach { pack -> player.sendResourcePack(pack) }
+        }
+    }
+
+    /**
+     * Reloads the next minigame.
+     */
+    fun reloadMinigame() {
+        this.reloadMinigame(this.current.server)
     }
 
     internal fun registerEvents(registry: ListenerRegistry) {
@@ -119,6 +140,10 @@ class CasualMinigameManager(
 
         this.reloadConfiguration()
         this.reloadState()
+        if (this.minigame == null) {
+            this.reloadMinigame(server)
+        }
+        this.reloadResourcePacks()
 
         this.lobby = this.createLobby(server)
     }
@@ -127,6 +152,8 @@ class CasualMinigameManager(
         this.reloadPlayers(server)
         this.reloadConfiguration()
         this.reloadLobby(server)
+        this.reloadMinigame(server)
+        this.reloadResourcePacks()
     }
 
     private fun reloadPlayers(server: MinecraftServer) {
@@ -150,6 +177,20 @@ class CasualMinigameManager(
         this.minigame = minigame
     }
 
+    private fun reloadMinigame(server: MinecraftServer) {
+        this.minigame?.close()
+        val minigame = this.config.minigame.create(MinigameCreationContext(server))
+        minigame.tryInitialize()
+        this.minigame = minigame
+    }
+
+    private fun reloadResourcePacks() {
+        this.packs.clear()
+        // This is kinda yucky
+        CasualResourcePackHost.getCommonPacks().mapTo(this.packs) { hosted -> hosted.toPackInfo() }
+        this.packs.addAll(CasualResourcePackHost.createResourcesFromPacks { this.config.packs }.getPacks())
+    }
+
     private fun reloadLobby(server: MinecraftServer) {
         val previous = this.lobby
         this.lobby = this.createLobby(server)
@@ -158,7 +199,10 @@ class CasualMinigameManager(
     }
 
     private fun createLobby(server: MinecraftServer): CasualLobbyMinigame {
-        return CasualLobbyMinigame.create(this.config.lobby, this::minigame, MinigameCreationContext(server))
+        val lobby = CasualLobbyMinigame.create(this.config.lobby, this::minigame, MinigameCreationContext(server))
+        lobby.resources.add(CasualResourcePackHost.createResourcesFromPacks { lobby.getAdditionalPacks() })
+        CasualGuiUtils.setMinigameUI(lobby)
+        return lobby
     }
 
     private suspend fun createTeams(server: MinecraftServer) {
@@ -183,7 +227,7 @@ class CasualMinigameManager(
         }
 
         if (CasualResourcePackHost.loadTeamColors(updated)) {
-            this.reloadResources()
+            this.reloadPlayerResources()
         }
     }
 
@@ -266,7 +310,9 @@ class CasualMinigameManager(
     }
 
     private fun onPlayerJoin(event: PlayerJoinEvent) {
-        this.current.players.add(event.player)
+        val (player) = event
+        this.packs.forEach { pack -> player.sendResourcePack(pack) }
+        this.current.players.add(player, admin = this.config.operators.contains(player.username))
     }
 
     private fun onPlayerChat(event: PlayerChatEvent) {
@@ -304,10 +350,6 @@ class CasualMinigameManager(
 
     private fun modifyDuelMinigame(minigame: DuelMinigame) {
         this.registerSyncMinigameStats(minigame)
-        // TODO: This should be handled by the lobby
-        // minigame.events.register<MinigameCloseEvent> {
-        //     minigame.players.transferTo(this.minigame)
-        // }
         CasualGuiUtils.setMinigameUI(minigame)
         minigame.ui.setPlayerListDisplay(CasualGuiUtils.createSimpleTabDisplay(minigame))
 

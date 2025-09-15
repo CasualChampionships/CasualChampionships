@@ -14,6 +14,7 @@ import net.minecraft.commands.arguments.EntityArgument
 
 @Suppress("UnstableApiUsage")
 object CasualCommand: CommandTree {
+    // FIXME: Redo this command tree to use arcade's DSL
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return Commands.literal("casual").requiresAdminOrPermission().then(
             Commands.literal("team").then(

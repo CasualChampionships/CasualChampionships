@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 
+@java.lang.Deprecated
 class CasualLobbyParkourHotbarGui(
     player: ServerPlayer,
     private val exit: Location

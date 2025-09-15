@@ -13,10 +13,9 @@ import net.casual.championships.commands.*
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.config.CasualConfig
 import net.casual.championships.minigame.CasualMinigameManager
-import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.minigame.duel.CasualDuelArenas
-import net.casual.championships.minigame.lobby.CasualLobbyData
-import net.casual.championships.minigame.lobby.CasualLobbyParkourData
+import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyData
+import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyParkourData
 import net.casual.championships.minigame.lobby.LobbyStats
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.sync.CasualDatabaseSyncService
@@ -61,7 +60,7 @@ object CasualChampionships: DedicatedServerModInitializer {
         CasualLobbyParkourData.register(MinigameRegistries.MINIGAME_DATA_MODULE_PROVIDER)
 
         this.minigames.registerEvents(GlobalEventHandler.Server)
-        GlobalEventHandler.Server.register<ServerStartEvent>(priority = 0, listener = ::onServerStart)
+        GlobalEventHandler.Server.register<ServerStartEvent>(priority = 10_000, listener = ::onServerStart)
         GlobalEventHandler.Server.register<ServerRegisterCommandEvent>(::onServerRegisterCommand)
     }
 
