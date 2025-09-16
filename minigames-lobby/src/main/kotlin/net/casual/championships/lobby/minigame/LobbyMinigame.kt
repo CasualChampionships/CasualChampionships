@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.lobby_v2
+package net.casual.championships.lobby.minigame
 
 import net.casual.arcade.dimensions.level.CustomLevel
 import net.casual.arcade.dimensions.level.LevelPersistence
@@ -6,7 +6,6 @@ import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
 import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
-import net.casual.arcade.events.server.player.PlayerTickEvent
 import net.casual.arcade.events.server.player.PlayerVoidDamageEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.annotation.Listener
@@ -17,13 +16,14 @@ import net.casual.arcade.minigame.data.module.MinigameWorldData
 import net.casual.arcade.minigame.events.MinigameAddNewPlayerEvent
 import net.casual.arcade.minigame.events.MinigameAddPlayerEvent
 import net.casual.arcade.minigame.events.MinigameInitializeEvent
+import net.casual.arcade.minigame.events.MinigameSetPhaseEvent
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGameMode
 import net.casual.arcade.minigame.managers.MinigameLevelManager.SpawnLocation
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.settings.MinigameSettings
-import net.casual.arcade.minigame.stats.Stat.Companion.increment
+import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.minigame.utils.MinigameUtils.countdown
 import net.casual.arcade.minigame.utils.MinigameUtils.transferAdminAndSpectatorTeamsTo
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
@@ -39,6 +39,7 @@ import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
+import net.casual.arcade.utils.PlayerUtils.username
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.component.shadowless
@@ -51,9 +52,13 @@ import net.casual.championships.common.minigame.rules.MinigameRulesProvider
 import net.casual.championships.common.ui.bossbar.LobbyBossbar
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
-import net.casual.championships.minigame.lobby.LobbyAdvancements
-import net.casual.championships.minigame.lobby.LobbyStats
-import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyData
+import net.casual.championships.lobby.advancement.LobbyAdvancementManager
+import net.casual.championships.lobby.advancement.LobbyAdvancements
+import net.casual.championships.lobby.gui.LobbyPlayerListEntries
+import net.casual.championships.lobby.minigame.command.DuelCommand
+import net.casual.championships.lobby.minigame.command.LobbyCommand
+import net.casual.championships.lobby.minigame.command.MinesweeperCommand
+import net.casual.championships.lobby.minigame.modules.LobbyData
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Vec3i
 import net.minecraft.core.registries.Registries
@@ -72,18 +77,18 @@ import java.io.IOException
 import java.util.*
 import kotlin.reflect.KProperty0
 
-class CasualLobbyMinigame(
+class LobbyMinigame(
     server: MinecraftServer,
     uuid: UUID,
     next: KProperty0<Minigame?>,
     val modules: MinigameDataModules
 ): Minigame(server, uuid) {
-    private val lobbyData: CasualLobbyData
-        get() = this.modules.get<CasualLobbyData>() ?: CasualLobbyData.DEFAULT
+    private val lobbyData: LobbyData
+        get() = this.modules.get<LobbyData>() ?: LobbyData.DEFAULT
 
-    private val fireworks = CasualLobbyFireworks(this, this.lobbyData)
-    private val parkour = CasualLobbyParkour(this)
-    val duels = CasualLobbyDuels(this)
+    private val fireworks = LobbyFireworks(this, this.lobbyData)
+    private val parkour = LobbyParkour(this)
+    val duels = LobbyDuels(this)
 
     val level: ServerLevel = this.createLevel()
     val bossbar = LobbyBossbar()
@@ -96,7 +101,12 @@ class CasualLobbyMinigame(
     override val id: ResourceLocation = ID
 
     fun teleport(player: ServerPlayer) {
-        player.teleportTo(this.lobbyData.spawn.get().with(this.level))
+        val location = when {
+            this.winners.isEmpty() -> this.lobbyData.spawn.get()
+            this.winners.contains(player.username) -> this.lobbyData.podium.get()
+            else -> this.lobbyData.podiumView.get()
+        }
+        player.teleportTo(location.with(this.level))
     }
 
     fun getAllTeams(): Set<PlayerTeam> {
@@ -126,7 +136,7 @@ class CasualLobbyMinigame(
         this.players.transferTo(next, players)
         next.start()
 
-        this.setPhase(CasualLobbyPhase.Waiting)
+        this.setPhase(LobbyPhase.Waiting)
     }
 
     fun playRulesForNextMinigame(): Completable {
@@ -159,7 +169,7 @@ class CasualLobbyMinigame(
     }
 
     override fun phases(): Collection<Phase<out Minigame>> {
-        return CasualLobbyPhase.entries
+        return LobbyPhase.entries
     }
 
     @Listener
@@ -169,17 +179,20 @@ class CasualLobbyMinigame(
 
         this.parkour.initialize()
 
+        this.commands.register(DuelCommand(this))
         this.commands.register(LobbyCommand(this))
+        this.commands.register(MinesweeperCommand(this))
 
-        val display = PlayerListDisplay(CasualLobbyPlayerListEntries(this))
+        val display = PlayerListDisplay(LobbyPlayerListEntries(this))
         CasualGuiUtils.addCasualFooterAndHeader(this, display)
         this.ui.setPlayerListDisplay(display)
 
+        this.addEventListener(LobbyAdvancementManager(this))
         this.advancements.addAll(LobbyAdvancements)
 
         this.ui.addBossbar(this.bossbar)
 
-        // this.ui.setSidebar(this.createSidebar())
+        this.registerProperties()
 
         this.settings.pauseOnServerStop = false
         this.settings.canPvp.set(false)
@@ -230,7 +243,7 @@ class CasualLobbyMinigame(
             team.collisionRule = Team.CollisionRule.NEVER
         }
 
-        if (!this.tags.has(player, SEEN_FIREWORKS)) {
+        if (!this.tags.has(player, SEEN_FIREWORKS) && this.winners.isNotEmpty()) {
             player.afterPacksLoad { this.playFireworksFor(player) }
         }
     }
@@ -246,16 +259,7 @@ class CasualLobbyMinigame(
 
     @Listener
     private fun onPlayerVoidDamage(event: PlayerVoidDamageEvent) {
-        val (player) = event
-        player.grantAdvancement(LobbyAdvancements.UH_OH)
-
-        val stat = this.stats.getOrCreateStat(player, LobbyStats.LEFT_LOBBY)
-        stat.increment()
-        if (stat.value >= 20) {
-            player.grantAdvancement(LobbyAdvancements.YOU_SHALL_NOT_LEAVE)
-        }
-
-        this.teleport(player)
+        this.teleport(event.player)
         event.cancel()
     }
 
@@ -267,23 +271,15 @@ class CasualLobbyMinigame(
     }
 
     @Listener
-    private fun onPlayerTick(event: PlayerTickEvent) {
-        val player = event.player
-        val pb = this.stats.getOrCreateStat(player, LobbyStats.MINESWEEPER_RECORD)
-        val held = this.stats.getOrCreateStat(player, LobbyStats.MINESWEEPER_RECORD_HELD)
-        // TODO:
-        // if (pb.value == this.minesweeperRecord) {
-        //     held.increment()
-        //     if (held.value.Ticks >= 10.Minutes) {
-        //         player.grantAdvancement(LobbyAdvancements.GAMER)
-        //     }
-        // } else {
-        //     held.modify { 0 }
-        // }
+    private fun onMinigamePhaseSet(event: MinigameSetPhaseEvent) {
+        if (event.phase >= LobbyPhase.Readying) {
+            this.duels.close()
+        }
     }
 
-    @Listener
-
+    private fun registerProperties() {
+        this.property("next_minigame") { this.next?.id?.toString() }
+    }
 
     private fun playFireworksFor(player: ServerPlayer) {
         this.tags.add(player, SEEN_FIREWORKS)
@@ -346,7 +342,7 @@ class CasualLobbyMinigame(
 
         val ID = casual("lobby")
 
-        fun create(lobby: String, next: KProperty0<Minigame?>, context: MinigameCreationContext): CasualLobbyMinigame {
+        fun create(lobby: String, next: KProperty0<Minigame?>, context: MinigameCreationContext): LobbyMinigame {
             val server = context.server
             val modules = try {
                 val archive = ReadableArchive.from(this.lobbies.resolve(lobby))
@@ -355,7 +351,7 @@ class CasualLobbyMinigame(
                 CasualUtils.logger.error("Failed to read lobby $lobby", exception)
                 MinigameDataModules.empty()
             }
-            return CasualLobbyMinigame(server, context.uuid, next, modules)
+            return LobbyMinigame(server, context.uuid, next, modules)
         }
     }
 }

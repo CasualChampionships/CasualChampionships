@@ -1,18 +1,18 @@
-package net.casual.championships.minigame.lobby_v2
+package net.casual.championships.lobby.minigame
 
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.visuals.entity.firework.VirtualFirework
-import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyData
+import net.casual.championships.lobby.minigame.modules.LobbyData
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.component.FireworkExplosion.Shape
 import kotlin.random.Random
 
-class CasualLobbyFireworks(
-    private val lobby: CasualLobbyMinigame,
-    private val data: CasualLobbyData
+class LobbyFireworks(
+    private val lobby: LobbyMinigame,
+    private val data: LobbyData
 ) {
     fun spawnFireworkDisplayFor(player: ServerPlayer) {
         this.lobby.scheduler.scheduleInLoop(

@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.lobby_v2
+package net.casual.championships.lobby.minigame
 
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.minigame.events.MinigameCloseEvent
@@ -7,8 +7,8 @@ import net.casual.championships.duel.minigame.DuelMinigame
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.PlayerTeam
 
-class CasualLobbyDuels(
-    private val lobby: CasualLobbyMinigame
+class LobbyDuels(
+    private val lobby: LobbyMinigame
 ) {
     private val duels = ArrayList<DuelMinigame>()
 

@@ -1,0 +1,175 @@
+package net.casual.championships.lobby.minigame.command
+
+import com.mojang.brigadier.Command
+import com.mojang.brigadier.builder.LiteralArgumentBuilder
+import com.mojang.brigadier.context.CommandContext
+import net.casual.arcade.commands.*
+import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
+import net.casual.arcade.minigame.lobby.LobbyPhase
+import net.casual.arcade.minigame.ready.ReadyChecker
+import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
+import net.casual.arcade.minigame.utils.MinigameUtils.isMinigameAdminOrHasPermission
+import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.utils.PlayerUtils.grantAdvancement
+import net.casual.arcade.utils.PlayerUtils.levelServer
+import net.casual.arcade.utils.component.command
+import net.casual.arcade.utils.component.green
+import net.casual.arcade.utils.component.lime
+import net.casual.arcade.utils.component.red
+import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
+import net.casual.arcade.utils.teleportTo
+import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
+import net.casual.championships.duel.arena.DuelArenasDataModule
+import net.casual.championships.duel.gui.DuelConfigurationGui
+import net.casual.championships.duel.minigame.DuelMinigame
+import net.casual.championships.duel.minigame.DuelSettings
+import net.casual.championships.duel.utils.DuelRequester
+import net.casual.championships.lobby.advancement.LobbyAdvancements
+import net.casual.championships.lobby.minigame.LobbyMinigame
+import net.minecraft.commands.CommandBuildContext
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.commands.arguments.EntityArgument
+import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
+import java.util.*
+
+// TODO: Rewrite this
+class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
+    override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
+        return CommandTree.buildLiteral("duel") {
+            executes(::startDuel)
+        }
+    }
+
+    private fun startDuel(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+        if (this.lobby.phase >= LobbyPhase.Readying) {
+            player.grantAdvancement(LobbyAdvancements.NOT_NOW)
+            return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
+        }
+        val arenas = this.lobby.modules.get<DuelArenasDataModule>() ?:
+            return context.source.fail("Lobby has no duel arenas available!")
+        val settings = DuelSettings(arenas.all())
+        val gui = DuelConfigurationGui(player, settings, this.lobby.players::all, this::requestDuelWith)
+        gui.open()
+        return Command.SINGLE_SUCCESS
+    }
+
+    private fun viewDueler(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+
+        val dueler = EntityArgument.getPlayer(context, "player")
+        val minigame = dueler.getMinigame()
+        if (minigame !is DuelMinigame) {
+            return context.source.fail(Component.translatable("casual.duel.playerNotDueling"))
+        }
+
+        if (!this.lobby.duels.hasDuel(minigame)) {
+            return context.source.fail("This shouldn't happen, please tell sensei!")
+        }
+
+        minigame.players.add(player, true, this.lobby.players.isAdmin(player))
+        player.teleportTo(dueler.locationWithLevel)
+        return context.source.success(Component.translatable("casual.duel.teleportingToDuel"))
+    }
+
+    private fun requestDuelWith(
+        initiator: ServerPlayer,
+        players: Collection<ServerPlayer>,
+        settings: DuelSettings
+    ) {
+        var started = false
+
+        val duelers = HashSet(players)
+        duelers.removeIf { !this.lobby.players.has(it) }
+        duelers.add(initiator)
+
+        val requesting = duelers.filter { it !== initiator }
+
+        val requester = DuelRequester(initiator, duelers)
+        if (requesting.isEmpty() && !initiator.isMinigameAdminOrHasPermission(4)) {
+            requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").withMiniFont().red(), initiator)
+            return
+        }
+
+        val checker = ReadyChecker(requester)
+        checker.arePlayersReady(requesting).then {
+            started = startDuelWith(started, initiator, duelers, setOf(), requester, settings, false)
+        }
+        val startAnyways = Component.translatable("casual.duel.clickToStart").withMiniFont().green().function { context ->
+            val unready = checker.getUnreadyPlayers(context.server)
+            started = startDuelWith(started, initiator, duelers, unready, requester, settings, true)
+        }
+        requester.broadcastTo(startAnyways, initiator)
+    }
+
+    private fun startDuelWith(
+        started: Boolean,
+        initiator: ServerPlayer,
+        duelers: HashSet<ServerPlayer>,
+        unready: Collection<ServerPlayer>,
+        requester: DuelRequester,
+        settings: DuelSettings,
+        forced: Boolean
+    ): Boolean {
+        if (started) {
+            if (forced) {
+                requester.broadcastTo(Component.translatable("casual.duel.alreadyStarted").withMiniFont().red(), initiator)
+            }
+            return true
+        }
+        if (!this.lobby.players.has(initiator) || this.lobby.phase >= LobbyPhase.Readying) {
+            requester.broadcastTo(Component.translatable("casual.duel.cannotDuelNow").withMiniFont().red(), initiator)
+            initiator.grantAdvancement(LobbyAdvancements.NOT_NOW)
+            return false
+        }
+
+        val ready = HashSet(duelers)
+        if (!this.lobby.players.isAdmin(initiator)) {
+            ready.removeAll(unready.toSet())
+        }
+        ready.removeIf { !this.lobby.players.has(it) }
+
+        if (ready.size <= 1 && !initiator.isMinigameAdminOrHasPermission(4)) {
+            requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").withMiniFont().red(), initiator)
+            return false
+        }
+
+        val duel = DuelMinigame(initiator.levelServer, UUID.randomUUID(), settings, settings.getSelectedArena())
+        this.lobby.duels.startDuel(duel)
+
+        duel.commands.register(CommandTree.buildLiteral("duel") {
+            literal("leave") {
+                executes { context ->
+                    val player = context.source.playerOrException
+                    duel.players.transferTo(lobby, player, keepSpectating = false)
+                    context.source.success("Returning to Lobby...")
+                }
+            }
+        })
+
+        this.lobby.players.transferTo(duel, ready, keepSpectating = false)
+        duel.chat.broadcastGame(Component.translatable("casual.duel.starting").withMiniFont().green())
+        duel.start()
+
+        val players = if (ready.size > 4) {
+            ready.take(4).joinToString(" & ") { it.scoreboardName }
+        } else {
+            ready.joinToString(" & ") { it.scoreboardName }
+        }
+        val aboutToDuel = Component.translatable("casual.duel.aboutToDuel", players).withMiniFont()
+        for (player in this.lobby.players) {
+            if (ready.contains(player)) {
+                continue
+            }
+            requester.broadcastTo(aboutToDuel, player)
+
+            val clickToSpectate = Component.empty().append("[")
+                .append(Component.translatable("casual.duel.clickToSpectate"))
+                .append("]").command("/duel view ${ready.first().scoreboardName}").lime().withMiniFont()
+            requester.broadcastTo(clickToSpectate, player)
+        }
+
+        return true
+    }
+}

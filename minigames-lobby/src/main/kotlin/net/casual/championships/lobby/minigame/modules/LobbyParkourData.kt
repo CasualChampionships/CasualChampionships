@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.lobby_v2.modules
+package net.casual.championships.lobby.minigame.modules
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
@@ -15,7 +15,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 
-class CasualLobbyParkourData(
+class LobbyParkourData(
     val exit: Location,
     val areas: List<AABB>,
     val checkpoints: List<Checkpoint>
@@ -45,7 +45,7 @@ class CasualLobbyParkourData(
                     Location.CODEC.fieldOf("spawn").forGetter(Checkpoint::spawn),
                     ArcadeExtraCodecs.AABB.fieldOf("collision").forGetter(Checkpoint::collision),
                     ComponentSerialization.CODEC.fieldOf("title").forGetter(Checkpoint::title)
-                ).apply(instance, CasualLobbyParkourData::Checkpoint)
+                ).apply(instance, LobbyParkourData::Checkpoint)
             }
         }
     }
@@ -55,10 +55,10 @@ class CasualLobbyParkourData(
 
         private val CODEC = RecordCodecBuilder.create { instance ->
             instance.group(
-                Location.CODEC.fieldOf("exit").forGetter(CasualLobbyParkourData::exit),
-                ArcadeExtraCodecs.AABB.listOf().fieldOf("areas").forGetter(CasualLobbyParkourData::areas),
-                Checkpoint.CODEC.listOf().fieldOf("checkpoints").forGetter(CasualLobbyParkourData::checkpoints)
-            ).apply(instance, ::CasualLobbyParkourData)
+                Location.CODEC.fieldOf("exit").forGetter(LobbyParkourData::exit),
+                ArcadeExtraCodecs.AABB.listOf().fieldOf("areas").forGetter(LobbyParkourData::areas),
+                Checkpoint.CODEC.listOf().fieldOf("checkpoints").forGetter(LobbyParkourData::checkpoints)
+            ).apply(instance, ::LobbyParkourData)
         }
 
         override val id: ResourceLocation = casual("lobby_parkour_data")

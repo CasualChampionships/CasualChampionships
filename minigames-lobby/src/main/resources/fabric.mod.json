@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "casual-lobby",
+  "version": "${version}",
+  "name": "Casual Lobby",
+  "description": "This is the implementation of the Duels minigame for CasualChampionship.",
+  "authors": [
+    "Sensei"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "net.casual.championships.lobby.CasualLobby"
+      }
+    ]
+  },
+  "mixins": [
+
+  ],
+  "depends": {
+
+  }
+}

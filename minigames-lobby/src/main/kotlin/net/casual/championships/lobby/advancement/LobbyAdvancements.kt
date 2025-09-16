@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.lobby
+package net.casual.championships.lobby.advancement
 
 import net.casual.arcade.utils.AdvancementUtils.setTitleAndDesc
 import net.casual.arcade.utils.ItemUtils
@@ -10,7 +10,6 @@ import net.minecraft.core.ClientAsset
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Items
 
-@java.lang.Deprecated
 object LobbyAdvancements: AdvancementCollection() {
     val ROOT = register {
         id = casual("lobby_root")

@@ -1,11 +1,11 @@
-package net.casual.championships.minigame.lobby_v2
+package net.casual.championships.lobby.minigame
 
 import net.casual.arcade.minigame.phase.Phase
 import net.minecraft.world.scores.Team
 
-enum class CasualLobbyPhase(override val id: String): Phase<CasualLobbyMinigame> {
+enum class LobbyPhase(override val id: String): Phase<LobbyMinigame> {
     Waiting("waiting") {
-        override fun initialize(minigame: CasualLobbyMinigame) {
+        override fun initialize(minigame: LobbyMinigame) {
             minigame.ui.addBossbar(minigame.bossbar)
             for (team in minigame.teams.getAllTeams()) {
                 team.collisionRule = Team.CollisionRule.NEVER
@@ -14,7 +14,7 @@ enum class CasualLobbyPhase(override val id: String): Phase<CasualLobbyMinigame>
     },
     Readying("readying"),
     Countdown("countdown") {
-        override fun start(minigame: CasualLobbyMinigame, previous: Phase<CasualLobbyMinigame>) {
+        override fun start(minigame: LobbyMinigame, previous: Phase<LobbyMinigame>) {
             minigame.ui.removeBossbar(minigame.bossbar)
             for (team in minigame.teams.getAllTeams()) {
                 team.collisionRule = Team.CollisionRule.ALWAYS

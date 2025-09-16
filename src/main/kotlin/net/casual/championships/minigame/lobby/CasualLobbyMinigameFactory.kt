@@ -20,7 +20,7 @@ import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.common.util.casual
 import net.casual.championships.minigame.CasualMinigames
 import net.casual.championships.minigame.duel.CasualDuelArenas
-import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyData
+import net.casual.championships.lobby.minigame.modules.LobbyData
 import net.casual.championships.resources.CasualResourcePackHost
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation
@@ -41,7 +41,7 @@ class CasualLobbyMinigameFactory(
     override fun create(context: MinigameCreationContext): CasualLobbyMinigame {
         this.initializeModules(context.server)
 
-        val data = this.modules.get<CasualLobbyData>()!!
+        val data = this.modules.get<LobbyData>()!!
 
         val dimension = ResourceUtils.random().toKey(Registries.DIMENSION)
         val path = context.server.getDimensionPath(dimension)

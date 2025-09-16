@@ -17,10 +17,10 @@ import net.casual.arcade.utils.toSmallCaps
 import net.casual.championships.commands.*
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.config.CasualConfig
+import net.casual.championships.lobby.minigame.modules.LobbyData
+import net.casual.championships.lobby.minigame.modules.LobbyParkourData
 import net.casual.championships.minigame.CasualMinigameManager
 import net.casual.championships.minigame.duel.CasualDuelArenas
-import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyData
-import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyParkourData
 import net.casual.championships.minigame.lobby.LobbyStats
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.sync.CasualDatabaseSyncService
@@ -51,19 +51,18 @@ object CasualChampionships: DedicatedServerModInitializer {
     override fun onInitializeServer() {
         CasualUtils.logger.info("Starting CasualChampionships... Version: ${container.metadata.version}")
 
-        CasualRegistration.register()
+        // CasualRegistration.register()
 
         CasualResourcePackHost.registerEvents()
         // CasualMinigames.registerEvents()
         CasualDuelArenas.registerEvents()
-        LobbyStats.load()
+        // LobbyStats.load()
 
 
         // TODO: We should register these somewhere else...
         UHCMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
-
-        CasualLobbyData.register(MinigameRegistries.MINIGAME_DATA_MODULE_PROVIDER)
-        CasualLobbyParkourData.register(MinigameRegistries.MINIGAME_DATA_MODULE_PROVIDER)
+        LobbyData.register(MinigameRegistries.MINIGAME_DATA_MODULE_PROVIDER)
+        LobbyParkourData.register(MinigameRegistries.MINIGAME_DATA_MODULE_PROVIDER)
 
         this.minigames.registerEvents(GlobalEventHandler.Server)
         GlobalEventHandler.Server.register<ServerStartEvent>(priority = 10_000, listener = ::onServerStart)

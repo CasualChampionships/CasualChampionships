@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.lobby_v2
+package net.casual.championships.lobby.minigame.command
 
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.IntegerArgumentType
@@ -13,16 +13,18 @@ import net.casual.arcade.minigame.lobby.LobbyPhase
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.scheduler.task.Completable.Companion.thenOrNow
 import net.casual.arcade.utils.PlayerUtils.ops
-import net.casual.arcade.utils.component.Component
-import net.casual.arcade.utils.component.green
-import net.casual.arcade.utils.component.join
-import net.casual.arcade.utils.component.plus
+import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.time.MinecraftTimeUnit
+import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.network.chat.Component
 
-class LobbyCommand(val lobby: CasualLobbyMinigame): CommandTree {
+class LobbyCommand(val lobby: LobbyMinigame): CommandTree {
+    init {
+        this.lobby.bossbar.then(this::onBossbarComplete)
+    }
+
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("lobby") {
             requiresAdminOrPermission()
@@ -136,16 +138,26 @@ class LobbyCommand(val lobby: CasualLobbyMinigame): CommandTree {
         this.lobby.chat.broadcastTo(component, admins)
     }
 
+    private fun onBossbarComplete() {
+        val component = Component {
+            translatable("minigame.lobby.ready.finishedWaiting") + nl +
+                literal("[Click to ready teams]").lime().command("/lobby ready teams") + nl +
+                literal("[Click to ready players]").lime().command("/lobby ready players")
+        }
+
+        this.lobby.chat.broadcastTo(component, this.lobby.players.admins)
+    }
+
     @Suppress("unused_parameter")
     private fun playRulesThenCountdown(context: HiddenCommandContext) {
         this.lobby.playRulesForNextMinigame().thenOrNow {
-            this.lobby.setPhase(CasualLobbyPhase.Countdown)
+            this.lobby.setPhase(LobbyPhase.Countdown)
         }
     }
 
     @Suppress("unused_parameter")
     private fun skipRulesThenCountdown(context: HiddenCommandContext) {
-        this.lobby.setPhase(CasualLobbyPhase.Countdown)
+        this.lobby.setPhase(LobbyPhase.Countdown)
     }
 
     companion object {

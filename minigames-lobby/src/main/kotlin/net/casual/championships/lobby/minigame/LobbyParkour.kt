@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.lobby_v2
+package net.casual.championships.lobby.minigame
 
 import eu.pb4.sgui.api.GuiHelpers
 import eu.pb4.sgui.api.gui.HotbarGui
@@ -16,25 +16,25 @@ import net.casual.arcade.utils.component.red
 import net.casual.arcade.utils.math.location.Location
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.visuals.screen.setSlot
-import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyParkourData
-import net.casual.championships.minigame.lobby.LobbyAdvancements
+import net.casual.championships.lobby.advancement.LobbyAdvancements
+import net.casual.championships.lobby.minigame.modules.LobbyParkourData
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.item.Items
 import java.util.UUID
 
-class CasualLobbyParkour(
-    private val lobby: CasualLobbyMinigame
+class LobbyParkour(
+    private val lobby: LobbyMinigame
 ) {
     private val parkourers = Object2IntOpenHashMap<UUID>()
 
     fun initialize() {
-        val data = this.lobby.modules.get<CasualLobbyParkourData>() ?: return
+        val data = this.lobby.modules.get<LobbyParkourData>() ?: return
         this.lobby.events.register<ServerTickEvent> { this.tick(data) }
     }
 
-    private fun tick(data: CasualLobbyParkourData) {
+    private fun tick(data: LobbyParkourData) {
         for (player in this.lobby.players) {
             val isParkouring = data.isWithinParkourArea(player.position())
             val wasParkouring = this.parkourers.containsKey(player.uuid)

@@ -58,12 +58,12 @@ object CasualCommand: CommandTree {
     }
 
     private fun createTeams(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.createTeams(context.source.server)
+        CasualChampionships.minigames.createTeams()
         return 1
     }
 
     private fun reloadTeams(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.reloadTeams(context.source.server)
+        CasualChampionships.minigames.reloadTeams()
         return 1
     }
 
@@ -73,17 +73,17 @@ object CasualCommand: CommandTree {
     }
 
     private fun reloadResources(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.reloadResourcePacks()
+        CasualChampionships.minigames.reloadPlayerResources()
         return context.source.success("Resending resources...")
     }
 
     private fun returnToLobby(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.getMinigames().returnToLobby()
+        CasualChampionships.minigames.returnToLobby()
         return context.source.success("Returning to lobby...")
     }
 
     private fun floodgates(context: CommandContext<CommandSourceStack>, open: Boolean): Int {
-        CasualMinigames.floodgates = open
+        CasualChampionships.minigames.floodgates = open
         return context.source.success("Successfully ${if (open) "opened" else "closed"} the floodgates", true)
     }
 }

@@ -35,14 +35,17 @@ import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.green
 import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.component.red
+import net.casual.arcade.utils.convertCasing
+import net.casual.arcade.utils.string.SnakeCase
 import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.PerformanceUtils
 import net.casual.championships.duel.minigame.DuelMinigame
+import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.casual.championships.minigame.event.EventConfiguration
 import net.casual.championships.minigame.event.EventState
-import net.casual.championships.minigame.lobby_v2.CasualLobbyMinigame
+import net.casual.championships.minigame.lobby_v2.LobbySidebar
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.sync.data.SyncableParticipants
 import net.casual.championships.sync.data.SyncableTeam
@@ -66,7 +69,7 @@ class CasualMinigameManager(
 
     private lateinit var config: EventConfiguration
 
-    private lateinit var lobby: CasualLobbyMinigame
+    private lateinit var lobby: LobbyMinigame
     private var minigame: Minigame? = null
 
     /**
@@ -126,6 +129,22 @@ class CasualMinigameManager(
      */
     fun reloadMinigame() {
         this.reloadMinigame(this.current.server)
+    }
+
+    /**
+     * Reloads the current teams, syncing from the sync service.
+     */
+    fun reloadTeams() {
+        val server = this.current.server
+        server.launch { reloadTeams(server) }
+    }
+
+    /**
+     * Re-creates all teams, syncing from the sync service.
+     */
+    fun createTeams() {
+        val server = this.current.server
+        server.launch { createTeams(server) }
     }
 
     internal fun registerEvents(registry: ListenerRegistry) {
@@ -206,10 +225,10 @@ class CasualMinigameManager(
         previous.close()
     }
 
-    private fun createLobby(server: MinecraftServer): CasualLobbyMinigame {
-        val lobby = CasualLobbyMinigame.create(this.config.lobby, this::minigame, MinigameCreationContext(server))
+    private fun createLobby(server: MinecraftServer): LobbyMinigame {
+        val lobby = LobbyMinigame.create(this.config.lobby, this::minigame, MinigameCreationContext(server))
         lobby.resources.add(CasualResourcePackHost.createResourcesFromPacks { lobby.getAdditionalPacks() })
-        CasualGuiUtils.setMinigameUI(lobby)
+        this.modifyLobbyMinigame(lobby)
         return lobby
     }
 
@@ -310,7 +329,6 @@ class CasualMinigameManager(
         when (val minigame = event.minigame) {
             is UHCMinigame -> this.modifyUHCMinigame(minigame)
             is DuelMinigame -> this.modifyDuelMinigame(minigame)
-            is CasualLobbyMinigame -> this.modifyLobbyMinigame(minigame)
         }
     }
 
@@ -376,8 +394,10 @@ class CasualMinigameManager(
         })
     }
 
-    private fun modifyLobbyMinigame(minigame: CasualLobbyMinigame) {
+    private fun modifyLobbyMinigame(minigame: LobbyMinigame) {
         minigame.events.register<MinigameAddAdminEvent>(::outputAdminLogs)
+        minigame.ui.setSidebar(LobbySidebar.create(this.event.replace('_', ' '), minigame))
+        CasualGuiUtils.setMinigameUI(minigame)
     }
 
     private fun outputAdminLogs(event: MinigameAddAdminEvent) {

@@ -71,8 +71,8 @@ import net.casual.championships.duel.utils.DuelRequester
 import net.casual.championships.duel.minigame.DuelSettings
 import net.casual.championships.duel.gui.DuelConfigurationGui
 import net.casual.championships.minigame.CasualMinigames
-import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyData
-import net.casual.championships.minigame.lobby_v2.modules.CasualLobbyParkourData
+import net.casual.championships.lobby.minigame.modules.LobbyData
+import net.casual.championships.lobby.minigame.modules.LobbyParkourData
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.EntityArgument
@@ -159,7 +159,7 @@ class CasualLobbyMinigame constructor(
             set(GameRules.RULE_LOCATOR_BAR, false)
         }
 
-        val parkour = this.modules.get<CasualLobbyParkourData>()
+        val parkour = this.modules.get<LobbyParkourData>()
         if (parkour != null) {
             this.events.register<ServerTickEvent> {
                 this.tickParkour(parkour)
@@ -321,7 +321,7 @@ class CasualLobbyMinigame constructor(
         }
     }
 
-    private fun tickParkour(data: CasualLobbyParkourData) {
+    private fun tickParkour(data: LobbyParkourData) {
         for (player in this.players) {
             val isParkouring = data.isWithinParkourArea(player.position())
             val wasParkouring = this.parkourers.containsKey(player.uuid)
@@ -386,7 +386,7 @@ class CasualLobbyMinigame constructor(
     }
 
     override fun teleportToSpawn(player: ServerPlayer) {
-        val data = this.modules.get<CasualLobbyData>()!!
+        val data = this.modules.get<LobbyData>()!!
 
         val location = if (CasualMinigames.isWinner(player)) {
             data.podium.get().with(this.area.level)
@@ -569,7 +569,7 @@ class CasualLobbyMinigame constructor(
     }
 
     private fun spawnFireworkDisplay(player: ServerPlayer) {
-        val data = this.modules.get<CasualLobbyData>()!!
+        val data = this.modules.get<LobbyData>()!!
         for (template in data.fireworkLocations) {
             val firingLocation = template.get().with(this.area.level)
             val firework = VirtualFirework.build(this.area.level) {

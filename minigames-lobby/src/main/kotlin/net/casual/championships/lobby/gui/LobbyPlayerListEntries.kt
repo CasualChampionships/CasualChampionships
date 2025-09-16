@@ -1,23 +1,21 @@
-package net.casual.championships.minigame.lobby_v2
+package net.casual.championships.lobby.gui
 
 import net.casual.arcade.resources.font.heads.PlayerHeadComponents
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.component.Component
-import net.casual.arcade.utils.component.literal
 import net.casual.arcade.utils.component.plus
 import net.casual.arcade.visuals.tab.PlayerListEntries
 import net.casual.championships.common.ui.tab.CasualPlayerListEntries
 import net.casual.championships.duel.utils.DuelRequester
-import net.minecraft.network.chat.Component
+import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.PlayerTeam
 
-class CasualLobbyPlayerListEntries(
-    private val minigame: CasualLobbyMinigame
+class LobbyPlayerListEntries(
+    private val minigame: LobbyMinigame
 ): CasualPlayerListEntries(minigame) {
     override fun getTeams(server: MinecraftServer): Collection<PlayerTeam> {
         return this.minigame.getAllTeams().sortedWith(NAME_ORDER)
