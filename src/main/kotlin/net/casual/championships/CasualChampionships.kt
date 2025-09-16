@@ -50,13 +50,8 @@ object CasualChampionships: DedicatedServerModInitializer {
     override fun onInitializeServer() {
         CasualUtils.logger.info("Starting CasualChampionships... Version: ${container.metadata.version}")
 
-        // CasualRegistration.register()
-
         CasualResourcePackHost.registerEvents()
-        // CasualMinigames.registerEvents()
         CasualDuelArenas.registerEvents()
-        // LobbyStats.load()
-
 
         // TODO: We should register these somewhere else...
         UHCMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)

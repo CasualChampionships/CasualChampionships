@@ -6,13 +6,10 @@ import net.casual.arcade.commands.CommandTree
 import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.championships.CasualChampionships
-import net.casual.championships.minigame.CasualMinigames
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
-import net.minecraft.commands.arguments.EntityArgument
 
-@Suppress("UnstableApiUsage")
 object CasualCommand: CommandTree {
     // FIXME: Redo this command tree to use arcade's DSL
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
@@ -37,22 +34,6 @@ object CasualCommand: CommandTree {
                 Commands.literal("open").executes { this.floodgates(it, true) }
             ).then(
                 Commands.literal("close").executes { this.floodgates(it, false) }
-            )
-        ).then(
-            Commands.literal("winners").then(
-                Commands.literal("clear").executes {
-                    CasualMinigames.winners.clear(); 1
-                }
-            ).then(
-                Commands.literal("add").then(
-                    Commands.argument("players", EntityArgument.players()).executes {
-                        val players = EntityArgument.getPlayers(it, "players")
-                        for (player in players) {
-                            CasualMinigames.winners.add(player.scoreboardName)
-                        }
-                        1
-                    }
-                )
             )
         )
     }

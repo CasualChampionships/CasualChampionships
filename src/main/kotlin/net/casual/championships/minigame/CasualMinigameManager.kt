@@ -27,7 +27,6 @@ import net.casual.arcade.utils.ArcadeUtils
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.PlayerUtils.getChatUsername
 import net.casual.arcade.utils.PlayerUtils.username
-import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.arcade.utils.TeamUtils.getOrCreateTeam
 import net.casual.arcade.utils.TeamUtils.setHexColor
 import net.casual.arcade.utils.TimeUtils.Seconds
@@ -36,8 +35,6 @@ import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.green
 import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.component.red
-import net.casual.arcade.utils.convertCasing
-import net.casual.arcade.utils.string.SnakeCase
 import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
@@ -46,7 +43,7 @@ import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.casual.championships.minigame.event.EventConfiguration
 import net.casual.championships.minigame.event.EventState
-import net.casual.championships.minigame.lobby_v2.LobbySidebar
+import net.casual.championships.minigame.lobby.LobbySidebar
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.sync.data.SyncableParticipants
 import net.casual.championships.sync.data.SyncableTeam

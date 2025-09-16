@@ -1,4 +1,4 @@
-package net.casual.championships.minigame.lobby_v2
+package net.casual.championships.minigame.lobby
 
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
