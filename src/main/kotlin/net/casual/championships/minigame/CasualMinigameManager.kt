@@ -135,17 +135,15 @@ class CasualMinigameManager(
     /**
      * Reloads the current teams, syncing from the sync service.
      */
-    fun reloadTeams() {
-        val server = this.current.server
-        server.launch { reloadTeams(server) }
+    suspend fun reloadTeams() {
+        this.reloadTeams(this.current.server)
     }
 
     /**
      * Re-creates all teams, syncing from the sync service.
      */
-    fun createTeams() {
-        val server = this.current.server
-        server.launch { createTeams(server) }
+    suspend fun createTeams() {
+        this.createTeams(this.current.server)
     }
 
     internal fun registerEvents(registry: ListenerRegistry) {
