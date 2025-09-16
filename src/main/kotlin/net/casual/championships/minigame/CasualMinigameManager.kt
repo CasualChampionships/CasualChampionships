@@ -113,6 +113,7 @@ class CasualMinigameManager(
         if (current != this.lobby) {
             current.players.transferTo(this.lobby)
             current.close()
+            this.reloadMinigame(this.lobby.server)
         }
     }
 
@@ -229,6 +230,7 @@ class CasualMinigameManager(
         val lobby = LobbyMinigames.create(this.config.lobby, this::minigame, MinigameCreationContext(server))
         lobby.resources.add(CasualResourcePackHost.createResourcesFromPacks { lobby.getAdditionalPacks() })
         this.modifyLobbyMinigame(lobby)
+        lobby.start()
         return lobby
     }
 
