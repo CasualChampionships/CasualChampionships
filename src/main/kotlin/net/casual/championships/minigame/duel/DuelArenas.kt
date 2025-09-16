@@ -11,7 +11,7 @@ import net.casual.championships.duel.arena.DuelArenasDataModule
 import net.minecraft.server.MinecraftServer
 
 object DuelArenas {
-    private val path = CasualUtils.resolve("duel_arenas")
+    private val path = CasualUtils.resolve("duel-arenas")
 
     private var arenas: DuelArenasDataModule? = null
 

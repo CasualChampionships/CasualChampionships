@@ -7,7 +7,6 @@ import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.casual.championships.minigame.duel.DuelArenas
-import java.io.IOException
 import kotlin.reflect.KProperty0
 
 object LobbyMinigames {
@@ -20,9 +19,9 @@ object LobbyMinigames {
     ): LobbyMinigame {
         val server = context.server
         val modules = try {
-            val archive = ReadableArchive.from(this.lobbies.resolve(lobby))
+            val archive = ReadableArchive.from(this.lobbies, lobby)
             MinigameDataModules.from(archive, server)
-        } catch (exception: IOException) {
+        } catch (exception: Exception) {
             CasualUtils.logger.error("Failed to read lobby $lobby", exception)
             MinigameDataModules.empty()
         }

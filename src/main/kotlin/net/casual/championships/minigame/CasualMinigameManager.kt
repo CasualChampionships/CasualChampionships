@@ -60,6 +60,7 @@ import net.minecraft.world.scores.Scoreboard
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.notExists
 import kotlin.jvm.optionals.getOrNull
 
 class CasualMinigameManager(
@@ -437,7 +438,11 @@ class CasualMinigameManager(
     }
 
     private fun readEventConfig(): EventConfiguration {
-        return when (val result = JsonUtils.decodeWith(EventConfiguration.CODEC, this.path.resolve("config.json"))) {
+        val path = this.path.resolve("config.json")
+        if (path.notExists()) {
+            JsonUtils.encodeWith(EventConfiguration(), EventConfiguration.CODEC, path)
+        }
+        return when (val result = JsonUtils.decodeWith(EventConfiguration.CODEC, path)) {
             is DataResult.Success -> result.value
             is DataResult.Error -> {
                 ArcadeUtils.logger.error("Failed to read event config: ${result.message()}")
