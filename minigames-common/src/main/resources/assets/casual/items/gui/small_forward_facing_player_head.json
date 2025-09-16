@@ -1,7 +1,7 @@
 {
   "model": {
     "type": "minecraft:special",
-    "base": "casual_common:item/gui/small_forward_facing_player_head",
+    "base": "casual:item/gui/small_forward_facing_player_head",
     "model": {
       "type": "minecraft:player_head"
     }

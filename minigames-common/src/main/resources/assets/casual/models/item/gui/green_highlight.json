@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "casual_common:item/gui/green_highlight"
+    "layer0": "casual:item/gui/green_highlight"
   },
   "display": {
     "gui": {

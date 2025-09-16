@@ -2,6 +2,6 @@
   "oversized_in_gui": true,
   "model": {
     "type": "minecraft:model",
-    "model": "casual_common:item/gui/green_highlight"
+    "model": "casual:item/gui/green_highlight"
   }
 }

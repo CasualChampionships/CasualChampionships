@@ -1,7 +1,7 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "casual_common:item/gui/flag",
+    "model": "casual:item/gui/flag",
     "tints": [
       {
         "type": "minecraft:constant",
