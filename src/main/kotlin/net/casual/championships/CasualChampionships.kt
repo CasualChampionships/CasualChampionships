@@ -5,11 +5,12 @@ import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerStartEvent
-import net.casual.arcade.utils.ArcadeUtils
+import net.casual.arcade.scheduler.coroutine.launch
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.championships.commands.*
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.config.CasualConfig
+import net.casual.championships.config.DatabaseLogin
 import net.casual.championships.minigame.CasualMinigameManager
 import net.casual.championships.minigame.duel.DuelArenas
 import net.casual.championships.resources.CasualResourcePackHost
@@ -17,7 +18,6 @@ import net.casual.championships.sync.CasualDatabaseSyncService
 import net.casual.championships.sync.CasualNoopSyncService
 import net.casual.championships.sync.CasualSyncService
 import net.casual.championships.util.CasualComponentUtils
-import net.casual.database.CasualDatabase
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.ModContainer
@@ -34,7 +34,7 @@ object CasualChampionships: DedicatedServerModInitializer {
     var sync: CasualSyncService = CasualNoopSyncService
         private set
 
-    val minigames = CasualMinigameManager(this, CasualUtils.resolve("event_v2"))
+    val minigames = CasualMinigameManager(this, CasualUtils.resolve("event"))
 
     override fun onInitializeServer() {
         CasualUtils.logger.info("Starting CasualChampionships... Version: ${container.metadata.version}")
@@ -53,13 +53,13 @@ object CasualChampionships: DedicatedServerModInitializer {
         DuelArenas.reload(server)
         this.minigames.reload(server)
 
-        this.reloadSyncService()
+        this.reloadSyncService(server)
     }
 
     private fun onServerStart(event: ServerStartEvent) {
         val (server) = event
         this.minigames.load(server)
-        this.reloadSyncService()
+        this.reloadSyncService(server)
 
         server.setMessageOfTheDay(CasualComponentUtils.getMessageOfTheDay())
     }
@@ -68,16 +68,24 @@ object CasualChampionships: DedicatedServerModInitializer {
         event.register(CasualCommand, ViewCommand, ReplayCommand, RenameCommand, MinesweeperCommand)
     }
 
-    private fun reloadSyncService() {
+    private fun reloadSyncService(server: MinecraftServer) {
         val login = this.config.database
-        if (login.url.isNotEmpty()) {
-            val location = if (this.config.dev) "${login.name}_debug" else login.name
-            val database = CasualDatabase(login.url + "/$location", login.username, login.password)
-            this.sync = CasualDatabaseSyncService.create(database, this.minigames.event)
+        if (login.url.isEmpty()) {
+            CasualUtils.logger.info("No sync service provided, defaulting to noop")
+            this.sync = CasualNoopSyncService
             return
         }
 
-        ArcadeUtils.logger.info("No sync service provided, defaulting to noop")
-        this.sync = CasualNoopSyncService
+        val location = if (this.config.dev) "${login.name}_debug" else login.name
+        this.loadDatabaseSync(server, login.copy(url = "${login.url}/$location"), this.minigames.event)
+    }
+
+    private fun loadDatabaseSync(server: MinecraftServer, login: DatabaseLogin, event: String) = server.launch {
+        try {
+            sync = CasualDatabaseSyncService.create(login, event)
+        } catch (exception: Exception) {
+            CasualUtils.logger.error("Failed to load database sync, falling back to noop", exception)
+            sync = CasualNoopSyncService
+        }
     }
 }

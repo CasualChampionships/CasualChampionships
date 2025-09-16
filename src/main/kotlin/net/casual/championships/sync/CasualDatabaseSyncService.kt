@@ -7,6 +7,7 @@ import net.casual.arcade.minigame.stats.ArcadeStats
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.common.util.CasualStats
 import net.casual.championships.common.util.CasualUtils
+import net.casual.championships.config.DatabaseLogin
 import net.casual.championships.sync.data.SyncableMinigame
 import net.casual.championships.sync.data.SyncableParticipants
 import net.casual.championships.sync.data.SyncableTeam
@@ -219,12 +220,14 @@ class CasualDatabaseSyncService(
             return CasualDatabaseSyncService(database.transaction { getOrCreateEvent(event) }, database)
         }
 
+        suspend fun create(login: DatabaseLogin, event: String): CasualDatabaseSyncService = withContext(Dispatchers.IO) {
+            val database = CasualDatabase(login.url, login.username, login.password)
+            create(database, event)
+        }
+
         private fun getOrCreateEvent(name: String): Event {
             val event = Event.find { Events.name eq name }.singleOrNull()
-            if (event != null) {
-                return event
-            }
-            return Event.new { this.name = name }
+            return event ?: Event.new { this.name = name }
         }
     }
 }
