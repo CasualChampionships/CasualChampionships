@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 
 @java.lang.Deprecated
-class CasualLobbyParkourHotbarGui(
+class CasualLobbyParkourHotbarGui constructor(
     player: ServerPlayer,
     private val exit: Location
 ): HotbarGui(player) {

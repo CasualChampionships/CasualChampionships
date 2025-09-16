@@ -108,7 +108,6 @@ object CasualMinigames {
     internal fun registerEvents() {
         GlobalEventHandler.Server.register<MinigameInitializeEvent> { event -> this.modifyMinigame(event.minigame) }
 
-        // TODO: Move these?
         UHCMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
         CasualLobbyMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
 

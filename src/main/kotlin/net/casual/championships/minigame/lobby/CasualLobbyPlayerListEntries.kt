@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.PlayerTeam
 
 @java.lang.Deprecated
-class CasualLobbyPlayerListEntries(
+class CasualLobbyPlayerListEntries constructor(
     private val minigame: CasualLobbyMinigame
 ): CasualPlayerListEntries(minigame) {
     override fun getTeams(server: MinecraftServer): Collection<PlayerTeam> {

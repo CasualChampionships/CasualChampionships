@@ -8,6 +8,7 @@ import net.casual.arcade.events.server.ServerStartEvent
 import net.casual.arcade.minigame.data.MinigameDataModule.Provider.Companion.register
 import net.casual.arcade.minigame.utils.MinigameRegistries
 import net.casual.arcade.utils.ArcadeUtils
+import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.convertCasing
 import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
@@ -21,13 +22,11 @@ import net.casual.championships.lobby.minigame.modules.LobbyData
 import net.casual.championships.lobby.minigame.modules.LobbyParkourData
 import net.casual.championships.minigame.CasualMinigameManager
 import net.casual.championships.minigame.duel.CasualDuelArenas
-import net.casual.championships.minigame.lobby.LobbyStats
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.sync.CasualDatabaseSyncService
 import net.casual.championships.sync.CasualNoopSyncService
 import net.casual.championships.sync.CasualSyncService
 import net.casual.championships.uhc.minigame.UHCMinigameFactory
-import net.casual.championships.util.CasualRegistration
 import net.casual.database.CasualDatabase
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.loader.api.FabricLoader
@@ -90,7 +89,9 @@ object CasualChampionships: DedicatedServerModInitializer {
     }
 
     private fun onServerStart(event: ServerStartEvent) {
-        this.minigames.load(event.server)
+        val (server) = event
+        server.setMessageOfTheDay(this.getMessageOfTheDay())
+        this.minigames.load(server)
         this.reloadSyncService()
     }
 

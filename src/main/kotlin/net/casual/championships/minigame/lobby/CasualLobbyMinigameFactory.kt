@@ -29,7 +29,7 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import java.util.*
 
 @java.lang.Deprecated
-class CasualLobbyMinigameFactory(
+class CasualLobbyMinigameFactory constructor(
     private val name: Optional<String>
 ): MinigameFactory {
     private lateinit var modules: MinigameDataModules
@@ -89,7 +89,6 @@ class CasualLobbyMinigameFactory(
             val archive = ReadableArchive.from(path)
             this.modules = MinigameDataModules.from(archive, server)
         } else {
-            // FIXME: This should really just throw
             CasualUtils.logger.error("No lobby specified for event!")
             this.modules = MinigameDataModules.empty()
         }

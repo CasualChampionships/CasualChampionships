@@ -27,6 +27,7 @@ import net.casual.arcade.utils.ArcadeUtils
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.PlayerUtils.getChatUsername
 import net.casual.arcade.utils.PlayerUtils.username
+import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
 import net.casual.arcade.utils.TeamUtils.getOrCreateTeam
 import net.casual.arcade.utils.TeamUtils.setHexColor
 import net.casual.arcade.utils.TimeUtils.Seconds
@@ -51,6 +52,8 @@ import net.casual.championships.sync.data.SyncableParticipants
 import net.casual.championships.sync.data.SyncableTeam
 import net.casual.championships.sync.syncMinigame
 import net.casual.championships.uhc.minigame.UHCMinigame
+import net.casual.championships.util.CasualTeamUtils.getOrCreateAdminTeam
+import net.casual.championships.util.CasualTeamUtils.getOrCreateSpectatorTeam
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.players.UserWhiteListEntry
@@ -160,10 +163,7 @@ class CasualMinigameManager(
     // This should be called *after* minigames have been loaded
     // so the state can reload minigames if necessary
     internal fun load(server: MinecraftServer) {
-        // TODO: - We need to set whitelist
-        //       - Set locator bar gamerule
-        //       - Set MOTD
-        server.launch { createTeams(server) }
+        server.playerList.setUsingWhiteList(true)
 
         this.reloadConfiguration()
         this.reloadState()
@@ -173,6 +173,9 @@ class CasualMinigameManager(
         this.reloadResourcePacks()
 
         this.lobby = this.createLobby(server)
+
+        // This must come last because we mutate minigames, which need to be loaded
+        server.launch { createTeams(server) }
     }
 
     internal fun reload(server: MinecraftServer) {
@@ -239,8 +242,8 @@ class CasualMinigameManager(
             scoreboard.removePlayerTeam(team)
         }
 
-        // TODO: - Set admin/spectator teams
-        //       - Update spectating admin status for players
+        this.current.teams.setAdminTeam(scoreboard.getOrCreateAdminTeam())
+        this.current.teams.setSpectatorTeam(scoreboard.getOrCreateSpectatorTeam())
 
         val updated = ArrayList<PlayerTeam>(teams.size)
         for (team in teams) {
@@ -251,6 +254,16 @@ class CasualMinigameManager(
             playerTeam.isAllowFriendlyFire = false
             playerTeam.collisionRule = Team.CollisionRule.ALWAYS
             updated.add(playerTeam)
+        }
+
+        for (player in this.current.players) {
+            val operator = this.config.operators.contains(player.username)
+            if (operator) {
+                this.current.players.addAdmin(player)
+            }
+            if (player.team == null || player.team == this.current.teams.getAdminTeam()) {
+                this.current.players.setSpectating(player)
+            }
         }
 
         if (CasualResourcePackHost.loadTeamColors(updated)) {
