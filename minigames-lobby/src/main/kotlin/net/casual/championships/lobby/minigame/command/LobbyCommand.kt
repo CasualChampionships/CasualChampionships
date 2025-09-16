@@ -9,13 +9,13 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import net.casual.arcade.commands.*
 import net.casual.arcade.commands.arguments.EnumArgument
 import net.casual.arcade.commands.hidden.HiddenCommandContext
-import net.casual.arcade.minigame.lobby.LobbyPhase
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.scheduler.task.Completable.Companion.thenOrNow
 import net.casual.arcade.utils.PlayerUtils.ops
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.time.MinecraftTimeUnit
 import net.casual.championships.lobby.minigame.LobbyMinigame
+import net.casual.championships.lobby.minigame.LobbyPhase
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.network.chat.Component
