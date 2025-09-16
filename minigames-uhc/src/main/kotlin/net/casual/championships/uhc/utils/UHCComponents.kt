@@ -2,7 +2,6 @@ package net.casual.championships.uhc.utils
 
 import net.casual.arcade.resources.font.FontResources
 import net.casual.championships.common.util.casual
-import net.casual.championships.uhc.CasualUHC
 
 object UHCComponents {
     object Bitmap: FontResources(casual("uhc_bitmap_font")) {

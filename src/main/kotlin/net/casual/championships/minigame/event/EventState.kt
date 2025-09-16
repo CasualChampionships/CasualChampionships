@@ -3,8 +3,7 @@ package net.casual.championships.minigame.event
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import net.minecraft.core.UUIDUtil
-import java.util.Optional
-import java.util.UUID
+import java.util.*
 
 class EventState(val minigameUUID: Optional<UUID>) {
     companion object {

@@ -21,7 +21,6 @@ import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.Team
 import java.util.*
-import kotlin.collections.HashMap
 
 // TODO: Maybe we separate this out into common to add
 //   support for voicechat in other minigames?

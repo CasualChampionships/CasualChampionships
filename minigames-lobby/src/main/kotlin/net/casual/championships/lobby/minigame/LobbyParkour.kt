@@ -22,7 +22,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.item.Items
-import java.util.UUID
+import java.util.*
 
 class LobbyParkour(
     private val lobby: LobbyMinigame

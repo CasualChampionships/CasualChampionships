@@ -1,6 +1,5 @@
 package net.casual.championships.common.util
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop
 import net.casual.arcade.utils.toKey
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.Registries

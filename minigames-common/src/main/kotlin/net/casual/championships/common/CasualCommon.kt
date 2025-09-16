@@ -6,7 +6,6 @@ import net.casual.arcade.resources.ArcadeResourcePacks
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.ResourcePackUtils.addAssetsFrom
 import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
-import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFrom
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
 import net.casual.arcade.resources.utils.ResourcePackUtils.addSounds
@@ -14,10 +13,10 @@ import net.casual.arcade.scheduler.task.utils.TaskRegistries
 import net.casual.championships.common.anticheat.CasualAntiCheat
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
-import net.casual.championships.common.util.level.ReducedMobSpawningRules
 import net.casual.championships.common.task.GlowingBossbarTask
 import net.casual.championships.common.task.GracePeriodBossbarTask
 import net.casual.championships.common.util.*
+import net.casual.championships.common.util.level.ReducedMobSpawningRules
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.core.Registry

@@ -27,10 +27,10 @@ import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.championships.common.task.GracePeriodBossbarTask
 import net.casual.championships.common.util.CasualComponents
-import net.casual.championships.common.util.CasualPredicates
-import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
+import net.casual.championships.common.util.CasualPredicates
+import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component

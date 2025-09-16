@@ -4,8 +4,8 @@ import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.ready.MinigameTeamReadyHandler
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.impl.Sound
-import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.CasualGuiUtils
+import net.casual.championships.common.util.CasualSounds
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 

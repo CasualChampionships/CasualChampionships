@@ -5,34 +5,22 @@ import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerStartEvent
-import net.casual.arcade.minigame.data.MinigameDataModule.Provider.Companion.register
-import net.casual.arcade.minigame.utils.MinigameRegistries
 import net.casual.arcade.utils.ArcadeUtils
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
-import net.casual.arcade.utils.component.*
-import net.casual.arcade.utils.convertCasing
-import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
-import net.casual.arcade.utils.string.SmallCapsTitleCase
-import net.casual.arcade.utils.string.TitleCase
-import net.casual.arcade.utils.toSmallCaps
 import net.casual.championships.commands.*
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.config.CasualConfig
-import net.casual.championships.lobby.minigame.modules.LobbyData
-import net.casual.championships.lobby.minigame.modules.LobbyParkourData
 import net.casual.championships.minigame.CasualMinigameManager
 import net.casual.championships.minigame.duel.DuelArenas
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.sync.CasualDatabaseSyncService
 import net.casual.championships.sync.CasualNoopSyncService
 import net.casual.championships.sync.CasualSyncService
-import net.casual.championships.uhc.minigame.UHCMinigameFactory
 import net.casual.championships.util.CasualComponentUtils
 import net.casual.database.CasualDatabase
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.ModContainer
-import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 
 object CasualChampionships: DedicatedServerModInitializer {

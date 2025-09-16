@@ -3,7 +3,6 @@ package net.casual.championships.uhc.recipe
 import net.casual.arcade.utils.recipe.CraftingRecipeBuilder
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.util.casual
-import net.casual.championships.uhc.CasualUHC
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.crafting.CraftingBookCategory

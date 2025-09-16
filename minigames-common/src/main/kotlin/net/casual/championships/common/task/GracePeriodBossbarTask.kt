@@ -8,7 +8,6 @@ import net.casual.arcade.minigame.task.impl.BossbarTask
 import net.casual.arcade.scheduler.task.SavableTask
 import net.casual.arcade.scheduler.task.Task
 import net.casual.arcade.scheduler.task.serialization.TaskSerializationContext
-import net.casual.championships.common.CasualCommon
 import net.casual.championships.common.ui.bossbar.GraceBossbar
 import net.casual.championships.common.util.casual
 

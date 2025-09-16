@@ -3,7 +3,6 @@ package net.casual.championships.uhc.utils
 import net.casual.arcade.minigame.stats.StatType
 import net.casual.arcade.minigame.utils.MinigameRegistries
 import net.casual.championships.common.util.casual
-import net.casual.championships.uhc.CasualUHC
 import net.minecraft.core.Holder
 import net.minecraft.core.Registry
 

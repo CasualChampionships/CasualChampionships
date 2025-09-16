@@ -2,7 +2,6 @@ package net.casual.championships.uhc.minigame
 
 import com.google.gson.JsonObject
 import eu.pb4.sgui.api.GuiHelpers
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
@@ -63,7 +62,10 @@ import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatMMSS
-import net.casual.arcade.utils.component.*
+import net.casual.arcade.utils.component.bold
+import net.casual.arcade.utils.component.lime
+import net.casual.arcade.utils.component.red
+import net.casual.arcade.utils.component.wrap
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.isOf
 import net.casual.arcade.utils.math.location.Location.Companion.withRotation
@@ -87,8 +89,8 @@ import net.casual.championships.common.event.portal.PortalCreateValidPositionEve
 import net.casual.championships.common.event.portal.PortalFindValidPositionEvent
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
-import net.casual.championships.common.minigame.rules.MinigameRulesProvider
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
+import net.casual.championships.common.minigame.rules.MinigameRulesProvider
 import net.casual.championships.common.ui.bossbar.ActiveBossbar
 import net.casual.championships.common.ui.elements.MinigamePhaseSidebarElement
 import net.casual.championships.common.ui.elements.MobcapSidebarElement
@@ -98,7 +100,6 @@ import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
-import net.casual.championships.uhc.CasualUHC
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBoundaryManager

@@ -7,7 +7,6 @@ import net.casual.arcade.events.server.level.LevelTickEvent
 import net.casual.arcade.extensions.Extension
 import net.casual.arcade.extensions.event.LevelExtensionEvent
 import net.casual.arcade.extensions.utils.getExtension
-import net.casual.championships.common.anticheat.fbp.WorldBlockTrackerExtension.Companion.blockTracker
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.state.BlockState

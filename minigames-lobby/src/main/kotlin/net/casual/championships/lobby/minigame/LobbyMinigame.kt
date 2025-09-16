@@ -21,7 +21,6 @@ import net.casual.arcade.minigame.gamemode.ExtendedGameMode
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGameMode
 import net.casual.arcade.minigame.managers.MinigameLevelManager.SpawnLocation
 import net.casual.arcade.minigame.phase.Phase
-import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.minigame.utils.MinigameUtils.countdown
@@ -44,7 +43,6 @@ import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.component.shadowless
 import net.casual.arcade.utils.component.wrap
-import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.visuals.tab.PlayerListDisplay
 import net.casual.championships.common.minigame.CasualSettings
@@ -73,7 +71,6 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
-import java.io.IOException
 import java.util.*
 import kotlin.reflect.KProperty0
 
