@@ -300,6 +300,7 @@ class LobbyMinigame(
             chunkGenerator(VoidChunkGenerator(server))
             defaultLevelProperties()
             persistence(LevelPersistence.Temporary)
+            viewDistance(20)
             weather {
                 if (data.raining) {
                     raining = true
