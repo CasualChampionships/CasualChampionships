@@ -338,20 +338,6 @@ class LobbyMinigame(
         private val SEEN_FIREWORKS = casual("seen_fireworks")
         private val WELCOMED = casual("welcomed")
 
-        private val lobbies = CasualUtils.resolve("lobbies")
-
         val ID = casual("lobby")
-
-        fun create(lobby: String, next: KProperty0<Minigame?>, context: MinigameCreationContext): LobbyMinigame {
-            val server = context.server
-            val modules = try {
-                val archive = ReadableArchive.from(this.lobbies.resolve(lobby))
-                MinigameDataModules.from(archive, server)
-            } catch (exception: IOException) {
-                CasualUtils.logger.error("Failed to read lobby $lobby", exception)
-                MinigameDataModules.empty()
-            }
-            return LobbyMinigame(server, context.uuid, next, modules)
-        }
     }
 }

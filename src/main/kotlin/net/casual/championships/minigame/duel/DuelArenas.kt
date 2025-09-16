@@ -8,10 +8,9 @@ import net.casual.arcade.minigame.data.MinigameDataModules.Companion.with
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.duel.arena.DuelArenasDataModule
-import net.casual.championships.events.CasualChampionshipsReloadEvent
 import net.minecraft.server.MinecraftServer
 
-object CasualDuelArenas {
+object DuelArenas {
     private val path = CasualUtils.resolve("duel_arenas")
 
     private var arenas: DuelArenasDataModule? = null

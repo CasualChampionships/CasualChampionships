@@ -1,17 +1,19 @@
 package net.casual.championships.uhc
 
+import net.casual.arcade.minigame.utils.MinigameRegistries
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
+import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.UHCItems
+import net.casual.championships.uhc.minigame.UHCMinigameFactory
 import net.casual.championships.uhc.utils.UHCComponents
 import net.casual.championships.uhc.utils.UHCStats
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -34,5 +36,7 @@ object CasualUHC: ModInitializer {
         UHCMapRenderer.load()
         UHCItems.load()
         UHCStats.load()
+
+        UHCMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
     }
 }
