@@ -26,7 +26,7 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.CreativeModeTab
 
 object CasualCommon: ModInitializer {
-    const val MOD_ID = "casual_common"
+    const val MOD_ID = "casual-common"
 
     private val container = FabricLoader.getInstance().getModContainer(MOD_ID).get()
 

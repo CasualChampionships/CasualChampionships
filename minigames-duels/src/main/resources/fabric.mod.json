@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "casual_duel",
+  "id": "casual-duel",
   "version": "${version}",
   "name": "Casual Duels",
   "description": "This is the implementation of the Duels minigame for CasualChampionship.",

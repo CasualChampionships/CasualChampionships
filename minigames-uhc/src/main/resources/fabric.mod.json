@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "casual_uhc",
+  "id": "casual-uhc",
   "version": "${version}",
   "name": "Casual UHC",
   "description": "This is the implementation of the UHC minigame for CasualChampionship.",
