@@ -39,12 +39,17 @@ import net.casual.arcade.utils.component.bold
 import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.suggestCommand
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
+import net.casual.arcade.utils.set
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.toKey
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
+import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
+import net.casual.championships.common.util.CasualPredicates
+import net.casual.championships.common.util.CasualPredicates.OBSERVEE_NOT_MINIGAME_SPECTATOR
+import net.casual.championships.common.util.CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
 import net.casual.championships.common.util.RuleUtils
 import net.casual.championships.common.util.casual
 import net.casual.championships.duel.arena.DuelArenasDataModule
@@ -64,6 +69,7 @@ import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.context.DirectionalPlaceContext
+import net.minecraft.world.level.GameRules
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
@@ -104,8 +110,11 @@ class DuelMinigame(
             this.players.isPlaying(observee) && (this.players.isSpectating(observer) || this.duelSettings.glowing)
         }, false)
 
-
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.level, this.duelArena.data.spawn)
+
+        this.ui.addNametag(CasualGuiUtils.createPlayingHealthTag(
+            VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
+        ))
     }
 
     @Listener

@@ -30,6 +30,8 @@ import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualPredicates
+import net.casual.championships.common.util.CasualPredicates.OBSERVEE_NOT_MINIGAME_SPECTATOR
+import net.casual.championships.common.util.CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
 import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
@@ -84,14 +86,11 @@ enum class UHCPhase(
             minigame.teams.hideNameTags()
 
             minigame.ui.removeAllNametags()
-            val observeeNotSpectating = PlayerObserverPredicate { observee, _ ->
-                !minigame.players.isSpectating(observee)
-            }
             minigame.ui.addNametag(CasualGuiUtils.createPlayingNameTag(
-                EntityObserverPredicate.visibleObservee().toPlayer().and(observeeNotSpectating)
+                EntityObserverPredicate.visibleObservee().toPlayer().and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
             ))
             minigame.ui.addNametag(CasualGuiUtils.createPlayingHealthTag(
-                CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(observeeNotSpectating)
+                VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
             ))
         }
     },
