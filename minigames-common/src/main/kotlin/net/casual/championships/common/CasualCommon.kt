@@ -21,7 +21,6 @@ import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.core.Registry
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.CreativeModeTab
 
 object CasualCommon: ModInitializer {
@@ -67,11 +66,6 @@ object CasualCommon: ModInitializer {
         // FIXME MOVE
         Registry.register(TaskRegistries.TASK_FACTORY, GracePeriodBossbarTask.id, GracePeriodBossbarTask)
         Registry.register(TaskRegistries.TASK_FACTORY, GlowingBossbarTask.id, GlowingBossbarTask)
-    }
-
-    @Deprecated("use casual() instead")
-    fun id(path: String): ResourceLocation {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path)
     }
 
     private fun registerSpawningRules() {
