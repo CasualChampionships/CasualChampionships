@@ -11,7 +11,6 @@ import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.minigame.utils.MinigameUtils.isMinigameAdminOrHasPermission
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.component.command
 import net.casual.arcade.utils.component.green
 import net.casual.arcade.utils.component.lime
@@ -33,11 +32,16 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import java.util.*
 
-// TODO: Rewrite this
 class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("duel") {
             executes(::startDuel)
+            literal("view") {
+                argument("player", EntityArgument.player()) {
+                    suggests { _ -> lobby.duels.getDuelingPlayerUsernames() }
+                    executes(::viewDueler)
+                }
+            }
         }
     }
 
@@ -47,11 +51,10 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
             player.grantAdvancement(LobbyAdvancements.NOT_NOW)
             return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
         }
-        val arenas = this.lobby.modules.get<DuelArenasDataModule>() ?:
-            return context.source.fail("Lobby has no duel arenas available!")
+        val arenas = this.lobby.modules.get<DuelArenasDataModule>()
+            ?: return context.source.fail("Lobby has no duel arenas available!")
         val settings = DuelSettings(arenas.all())
-        val gui = DuelConfigurationGui(player, settings, this.lobby.players::all, this::requestDuelWith)
-        gui.open()
+        DuelConfigurationGui(player, settings, this.lobby.players::all, this::requestDuelWith).open()
         return Command.SINGLE_SUCCESS
     }
 
@@ -84,7 +87,7 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
         duelers.removeIf { !this.lobby.players.has(it) }
         duelers.add(initiator)
 
-        val requesting = duelers.filter { it !== initiator }
+        val requesting = duelers.filter { it != initiator }
 
         val requester = DuelRequester(initiator, duelers)
         if (requesting.isEmpty() && !initiator.isMinigameAdminOrHasPermission(4)) {
@@ -135,19 +138,7 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
             return false
         }
 
-        val duel = DuelMinigame(initiator.levelServer, UUID.randomUUID(), settings, settings.getSelectedArena())
-        this.lobby.duels.startDuel(duel)
-
-        duel.commands.register(CommandTree.buildLiteral("duel") {
-            literal("leave") {
-                executes { context ->
-                    val player = context.source.playerOrException
-                    duel.players.transferTo(lobby, player, keepSpectating = false)
-                    context.source.success("Returning to Lobby...")
-                }
-            }
-        })
-
+        val duel = this.lobby.duels.createDuel(settings)
         this.lobby.players.transferTo(duel, ready, keepSpectating = false)
         duel.chat.broadcastGame(Component.translatable("casual.duel.starting").withMiniFont().green())
         duel.start()
