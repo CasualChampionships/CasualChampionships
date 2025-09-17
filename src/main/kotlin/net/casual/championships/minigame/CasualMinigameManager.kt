@@ -22,6 +22,7 @@ import net.casual.arcade.resources.pack.PackInfo
 import net.casual.arcade.resources.utils.ResourcePackUtils.sendResourcePack
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.coroutine.launch
 import net.casual.arcade.utils.ArcadeUtils
 import net.casual.arcade.utils.JsonUtils
@@ -113,7 +114,12 @@ class CasualMinigameManager(
         if (current != this.lobby) {
             current.players.transferTo(this.lobby)
             current.close()
-            this.reloadMinigame(this.lobby.server)
+
+            // We need to do this later, because the first minigame
+            // may not have fully closed yet...
+            GlobalTickedScheduler.later {
+                this.reloadMinigame(this.lobby.server)
+            }
         }
     }
 
