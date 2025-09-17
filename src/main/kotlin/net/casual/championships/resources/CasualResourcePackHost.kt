@@ -13,16 +13,16 @@ import net.casual.arcade.resources.pack.PackInfo
 import net.casual.arcade.resources.utils.ResourcePackUtils.addPack
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.TeamUtils.getHexColor
-import net.casual.championships.CasualMod
-import net.casual.championships.common.CommonMod
-import net.casual.championships.common.util.CommonConfig
-import net.casual.championships.uhc.UHCMod
+import net.casual.championships.CasualChampionships
+import net.casual.championships.common.CasualCommon
+import net.casual.championships.common.util.CasualUtils
+import net.casual.championships.uhc.CasualUHC
 import net.minecraft.ChatFormatting
 import net.minecraft.world.scores.PlayerTeam
 import kotlin.io.path.listDirectoryEntries
 
 object CasualResourcePackHost {
-    private val packs = CommonConfig.resolve("packs")
+    private val packs = CasualUtils.resolve("packs")
     private val generated = this.packs.resolve("generated")
 
     private val colors = Object2IntOpenHashMap<ChatFormatting>()
@@ -30,14 +30,14 @@ object CasualResourcePackHost {
     private val host = GlobalPackHost
     private val common = HashMap<String, HostedPackRef>()
 
-    val uhc: HostedPack by this.host(UHCMod.UHC_PACK)
+    val uhc: HostedPack by this.host(CasualUHC.UHC_PACK)
     val boundary: HostedPack by this.host(ArcadeResourcePacks.BOUNDARY_SHADER_PACK)
 
     init {
         for (pack in this.packs.listDirectoryEntries("*.zip")) {
             this.host.add(PathPack(pack))
         }
-        for (creator in CommonMod.COMMON_PACKS) {
+        for (creator in CasualCommon.COMMON_PACKS) {
             this.hostCommon(creator)
         }
     }
@@ -54,7 +54,7 @@ object CasualResourcePackHost {
         return object: MinigameResources {
             override fun getPacks(): Collection<PackInfo> {
                 return packs.invoke().mapNotNull { pack ->
-                    getHostedPack(pack)?.toPackInfo(!CasualMod.config.dev)
+                    getHostedPack(pack)?.toPackInfo(!CasualChampionships.config.dev)
                 }
             }
         }
@@ -68,7 +68,7 @@ object CasualResourcePackHost {
             var original = colors.inverse()[color]
             if (original == null) {
                 if (index >= 16) {
-                    CasualMod.logger.error("Tried to load more team colors than were available!!")
+                    CasualUtils.logger.error("Tried to load more team colors than were available!!")
                     continue
                 }
                 original = ChatFormatting.entries[index++]

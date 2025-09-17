@@ -12,7 +12,7 @@ import net.casual.arcade.utils.component.italicize
 import net.casual.arcade.utils.component.wrap
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
-import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
@@ -53,16 +53,16 @@ class TeammatesSidebarElements(
             .append(" ")
             .append(Component.literal(username).withMiniFont().color(team))
         val teammate = server.player(username)
-            ?: return SidebarComponent.withCustomScore(formatted, CommonComponents.Hud.NO_CONNECTION.wrap().append(this.buffer))
+            ?: return SidebarComponent.withCustomScore(formatted, CasualComponents.Hud.NO_CONNECTION.wrap().append(this.buffer))
 
         if (!this.health) {
             return SidebarComponent.withCustomScore(formatted.append(this.buffer), Component.empty())
         }
         if (!teammate.isSurvival || !teammate.isAlive) {
-            return SidebarComponent.withCustomScore(formatted, CommonComponents.Hud.UNAVAILABLE.wrap().append(this.buffer))
+            return SidebarComponent.withCustomScore(formatted, CasualComponents.Hud.UNAVAILABLE.wrap().append(this.buffer))
         }
         val health = " %04.1f".format(teammate.health / 2.0)
-        val score = Component.literal(health).withMiniFont().append(SpacingFontResources.spaced(1)).append(CommonComponents.Hud.HARDCORE_HEART)
+        val score = Component.literal(health).withMiniFont().append(SpacingFontResources.spaced(1)).append(CasualComponents.Hud.HARDCORE_HEART)
         return SidebarComponent.withCustomScore(formatted, score.append(this.buffer))
     }
 }

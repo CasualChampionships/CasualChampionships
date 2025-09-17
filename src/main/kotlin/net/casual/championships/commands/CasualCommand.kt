@@ -1,88 +1,92 @@
 package net.casual.championships.commands
 
+import com.mojang.brigadier.Command
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.CommandTree
+import net.casual.arcade.commands.literal
 import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
-import net.casual.championships.CasualMod
-import net.casual.championships.minigame.CasualMinigames
+import net.casual.arcade.scheduler.coroutine.launch
+import net.casual.championships.CasualChampionships
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
-import net.minecraft.commands.Commands
-import net.minecraft.commands.arguments.EntityArgument
 
-@Suppress("UnstableApiUsage")
 object CasualCommand: CommandTree {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
-        return Commands.literal("casual").requiresAdminOrPermission().then(
-            Commands.literal("team").then(
-                Commands.literal("create").executes(this::createTeams)
-            ).then(
-                Commands.literal("reload").executes(this::reloadTeams)
-            )
-        ).then(
-            Commands.literal("config").then(
-                Commands.literal("reload").executes(this::reloadConfig)
-            )
-        ).then(
-            Commands.literal("resources").then(
-                Commands.literal("reload").executes(this::reloadResources)
-            )
-        ).then(
-            Commands.literal("lobby").executes(this::returnToLobby)
-        ).then(
-            Commands.literal("floodgates").then(
-                Commands.literal("open").executes { this.floodgates(it, true) }
-            ).then(
-                Commands.literal("close").executes { this.floodgates(it, false) }
-            )
-        ).then(
-            Commands.literal("winners").then(
-                Commands.literal("clear").executes {
-                    CasualMinigames.winners.clear(); 1
-                }
-            ).then(
-                Commands.literal("add").then(
-                    Commands.argument("players", EntityArgument.players()).executes {
-                        val players = EntityArgument.getPlayers(it, "players")
-                        for (player in players) {
-                            CasualMinigames.winners.add(player.scoreboardName)
-                        }
-                        1
+        return CommandTree.buildLiteral("casual") {
+            requiresAdminOrPermission()
+            literal("reload") {
+                executes(::reloadAll)
+                literal("teams") {
+                    executes(::reloadTeams)
+                    literal("force") {
+                        executes(::createTeams)
                     }
-                )
-            )
-        )
+                }
+                literal("resources") {
+                    executes(::reloadResources)
+                }
+                literal("minigame") {
+                    executes(::reloadMinigame)
+                }
+            }
+            literal("lobby") {
+                executes(::returnToLobby)
+            }
+            literal("floodgates") {
+                literal("open") {
+                    executes { floodgates(it, true) }
+                }
+                literal("close") {
+                    executes { floodgates(it, false) }
+                }
+            }
+        }
     }
 
-    private fun createTeams(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.createTeams(context.source.server)
-        return 1
-    }
-
-    private fun reloadTeams(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.reloadTeams(context.source.server)
-        return 1
-    }
-
-    private fun reloadConfig(context: CommandContext<CommandSourceStack>): Int {
-        CasualMod.reload()
+    private fun reloadAll(context: CommandContext<CommandSourceStack>): Int {
+        CasualChampionships.reload(context.source.server)
         return context.source.success("Successfully reloaded config", true)
     }
 
+    private fun reloadTeams(context: CommandContext<CommandSourceStack>): Int {
+        val server = context.source.server
+        context.source.success("Reloading teams...")
+        server.launch {
+            CasualChampionships.minigames.reloadTeams()
+            context.source.success("Successfully reloaded teams")
+        }
+        return Command.SINGLE_SUCCESS
+    }
+
+    private fun createTeams(context: CommandContext<CommandSourceStack>): Int {
+        val server = context.source.server
+        context.source.success("Creating teams...")
+        server.launch {
+            CasualChampionships.minigames.createTeams()
+            context.source.success("Successfully created teams")
+        }
+        return Command.SINGLE_SUCCESS
+    }
+
     private fun reloadResources(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.reloadResourcePacks()
-        return context.source.success("Resending resources...")
+        CasualChampionships.minigames.reloadPlayerResources()
+        return context.source.success("Reloading resources...")
+    }
+
+    private fun reloadMinigame(context: CommandContext<CommandSourceStack>): Int {
+        CasualChampionships.minigames.reloadMinigame()
+        return context.source.success("Successfully reloaded minigame")
     }
 
     private fun returnToLobby(context: CommandContext<CommandSourceStack>): Int {
-        CasualMinigames.getMinigames().returnToLobby()
-        return context.source.success("Returning to lobby...")
+        CasualChampionships.minigames.returnToLobby()
+        return context.source.success("Successfully returned to lobby")
     }
 
     private fun floodgates(context: CommandContext<CommandSourceStack>, open: Boolean): Int {
-        CasualMinigames.floodgates = open
+        CasualChampionships.minigames.floodgates = open
         return context.source.success("Successfully ${if (open) "opened" else "closed"} the floodgates", true)
     }
 }

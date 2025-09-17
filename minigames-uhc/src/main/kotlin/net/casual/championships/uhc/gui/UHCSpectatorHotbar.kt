@@ -9,9 +9,9 @@ import net.casual.arcade.minigame.gamemode.ExtendedGameMode.NoClipSpectator
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.visuals.screen.setSlot
-import net.casual.championships.common.items.DisplayItems
-import net.casual.championships.common.util.CommonItems
-import net.casual.championships.common.util.CommonUI
+import net.casual.championships.common.items.CasualGuiItems
+import net.casual.championships.common.items.CasualItems
+import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
@@ -36,7 +36,7 @@ class UHCSpectatorHotbar(
             this.maps.add(i, element)
             this.addSlot(element)
         }
-        val switcher = DisplayItems.GAMEMODE_SWITCHER
+        val switcher = CasualGuiItems.GAMEMODE_SWITCHER
             .named(Component.translatable("casual.spectator.gamemodeSwitcher"))
         this.setSlot(7, switcher) { ->
             this.player.sendSound(SoundEvents.UI_BUTTON_CLICK)
@@ -80,11 +80,11 @@ class UHCSpectatorHotbar(
     }
 
     private fun setTeleportElement() {
-        val players = ItemStack(CommonItems.FORWARD_FACING_PLAYER_HEAD)
+        val players = ItemStack(CasualItems.FORWARD_FACING_PLAYER_HEAD)
             .named(Component.translatable("casual.spectator.teleport"))
         players.set(DataComponents.PROFILE, ResolvableProfile(this.uhc.players.allProfiles.random()))
         this.setSlot(8, players) { ->
-            val gui = CommonUI.createTeamSelectionGui(this.uhc, this.player)
+            val gui = CasualGuiUtils.createTeamSelectionGui(this.uhc, this.player)
             this.player.sendSound(SoundEvents.UI_BUTTON_CLICK)
             gui.setParent(this)
             gui.open()

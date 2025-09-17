@@ -7,14 +7,14 @@ import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.visuals.countdown.TitledCountdown
-import net.casual.championships.common.util.CommonComponents
-import net.casual.championships.common.util.CommonSounds
+import net.casual.championships.common.util.CasualComponents
+import net.casual.championships.common.util.CasualSounds
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 
 object CasualCountdown: TitledCountdown {
     override fun getCountdownTitle(current: Int): Component {
-        return CommonComponents.STARTING_IN.generate("").withMiniFont()
+        return CasualComponents.STARTING_IN.generate("").withMiniFont()
     }
 
     override fun getCountdownSubtitle(current: Int): Component {
@@ -29,19 +29,19 @@ object CasualCountdown: TitledCountdown {
 
     override fun getCountdownSound(current: Int): Sound? {
         if (current <= 3) {
-            return Sound(CommonSounds.COUNTDOWN_TICK_HIGH)
+            return Sound(CasualSounds.COUNTDOWN_TICK_HIGH)
         }
         if (current <= 10) {
-            return Sound(CommonSounds.COUNTDOWN_TICK_NORMAL)
+            return Sound(CasualSounds.COUNTDOWN_TICK_NORMAL)
         }
         return null
     }
 
     override fun afterCountdown(players: Collection<ServerPlayer>) {
-        val final = Sound(CommonSounds.COUNTDOWN_TICK_END)
+        val final = Sound(CasualSounds.COUNTDOWN_TICK_END)
         for (player in players) {
             player.setTitleAnimation()
-            player.sendTitle(CommonComponents.GOOD_LUCK.gold().bold().withMiniFont(), Component.empty())
+            player.sendTitle(CasualComponents.GOOD_LUCK.gold().bold().withMiniFont(), Component.empty())
             player.sendSound(final)
         }
     }

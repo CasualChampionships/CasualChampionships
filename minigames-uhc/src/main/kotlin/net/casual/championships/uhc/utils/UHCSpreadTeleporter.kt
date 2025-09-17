@@ -14,7 +14,7 @@ import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocat
 import net.casual.arcade.visuals.shapes.ShapePoints.Companion.points
 import net.casual.arcade.visuals.shapes.impl.LevelSurfaceShape
 import net.casual.arcade.visuals.shapes.impl.RegularPolygonShape
-import net.casual.championships.uhc.UHCMod
+import net.casual.championships.uhc.CasualUHC
 import net.minecraft.core.BlockPos
 import net.minecraft.core.BlockPos.MutableBlockPos
 import net.minecraft.core.Direction
@@ -33,7 +33,7 @@ import net.minecraft.world.scores.PlayerTeam
 import kotlin.math.max
 
 object UHCSpreadTeleporter: ShapedTeleporter() {
-    private val structurePath = UHCMod.container.findPath("structures").get()
+    private val structurePath = CasualUHC.container.findPath("structures").get()
     private val overworldSpawn by lazy { StructureUtils.read(structurePath.resolve("overworld_spawn.nbt")) }
     private val netherSpawn by lazy { StructureUtils.read(structurePath.resolve("nether_spawn.nbt")) }
     private val endSpawn by lazy { StructureUtils.read(structurePath.resolve("end_spawn.nbt")) }

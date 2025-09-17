@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "casual_uhc",
+  "id": "casual-uhc",
   "version": "${version}",
   "name": "Casual UHC",
   "description": "This is the implementation of the UHC minigame for CasualChampionship.",
@@ -16,7 +16,7 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "net.casual.championships.uhc.UHCMod"
+        "value": "net.casual.championships.uhc.CasualUHC"
       }
     ],
     "voicechat": [

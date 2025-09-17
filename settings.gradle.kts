@@ -2,6 +2,7 @@ rootProject.name = "CasualChampionships"
 
 include(":minigames-common")
 include(":minigames-duels")
+include(":minigames-lobby")
 include(":minigames-missile-wars")
 include(":minigames-uhc")
 

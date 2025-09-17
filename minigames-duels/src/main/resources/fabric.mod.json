@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "casual_duel",
+  "id": "casual-duel",
   "version": "${version}",
   "name": "Casual Duels",
   "description": "This is the implementation of the Duels minigame for CasualChampionship.",
@@ -10,7 +10,12 @@
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "net.casual.championships.duel.CasualDuels"
+      }
+    ]
   },
   "mixins": [
 

@@ -8,8 +8,8 @@ import net.casual.arcade.minigame.task.impl.BossbarTask
 import net.casual.arcade.scheduler.task.SavableTask
 import net.casual.arcade.scheduler.task.Task
 import net.casual.arcade.scheduler.task.serialization.TaskSerializationContext
-import net.casual.championships.common.CommonMod
 import net.casual.championships.common.ui.bossbar.GraceBossbar
+import net.casual.championships.common.util.casual
 
 class GracePeriodBossbarTask(
     minigame: Minigame
@@ -21,7 +21,7 @@ class GracePeriodBossbarTask(
     }
 
     companion object: MinigameTaskFactory<Minigame> {
-        override val id = CommonMod.id("grace_period_boss_bar_task")
+        override val id = casual("grace_period_boss_bar_task")
 
         override fun create(context: MinigameTaskCreationContext<Minigame>): Task {
             return GracePeriodBossbarTask(context.minigame).readData(context)

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "casual_common",
+  "id": "casual-common",
   "version": "${version}",
   "name": "CasualCommon",
   "description": "This mod provides common utilities and resources used in all the CasualChampionship minigames.",
@@ -16,7 +16,7 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "net.casual.championships.common.CommonMod"
+        "value": "net.casual.championships.common.CasualCommon"
       }
     ],
     "arcade-datagen": [

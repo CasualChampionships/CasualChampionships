@@ -23,8 +23,8 @@ import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.isInStructure
 import net.casual.championships.common.event.PlayerCheatEvent
-import net.casual.championships.common.util.CommonStats
-import net.casual.championships.common.util.CommonTags
+import net.casual.championships.common.util.CasualStats
+import net.casual.championships.common.util.CasualTags
 import net.casual.championships.uhc.minigame.GAME_OVER_ID
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.minigame.UHCPhase
@@ -58,13 +58,13 @@ class UHCAdvancementManager(
 
         for (player in winners) {
             player.grantAdvancement(UHCAdvancements.WINNER)
-            this.uhc.stats.getOrCreateStat(player, CommonStats.WON).modify { true }
+            this.uhc.stats.getOrCreateStat(player, CasualStats.WON).modify { true }
         }
 
         val lowest = DamageCounter(Float.POSITIVE_INFINITY)
         val highest = DamageCounter(Float.NEGATIVE_INFINITY)
         for (player in this.uhc.players) {
-            if (this.uhc.tags.has(player, CommonTags.HAS_PARTICIPATED)) {
+            if (this.uhc.tags.has(player, CasualTags.HAS_PARTICIPATED)) {
                 val current = this.uhc.stats.getOrCreateStat(player, ArcadeStats.DAMAGE_DEALT).value
                 if (lowest.damage > current) {
                     lowest.players.clear()
@@ -186,7 +186,7 @@ class UHCAdvancementManager(
         }
 
 
-        val blocksPlaced = this.uhc.stats.getOrCreateStat(event.player, CommonStats.BLOCKS_PLACED)
+        val blocksPlaced = this.uhc.stats.getOrCreateStat(event.player, CasualStats.BLOCKS_PLACED)
         blocksPlaced.increment()
         if (blocksPlaced.value >= 500) {
             event.player.grantAdvancement(UHCAdvancements.PRINTER_ISNT_ALLOWED)
@@ -197,7 +197,7 @@ class UHCAdvancementManager(
     private fun onPlayerBlockMined(event: PlayerBlockMinedEvent) {
         val (player, _, state) = event
 
-        val blocksMined = this.uhc.stats.getOrCreateStat(player, CommonStats.BLOCKS_MINED)
+        val blocksMined = this.uhc.stats.getOrCreateStat(player, CasualStats.BLOCKS_MINED)
         blocksMined.increment()
         if (blocksMined.value >= 2500) {
             player.grantAdvancement(UHCAdvancements.HUMAN_QUARRY)
@@ -276,9 +276,9 @@ class UHCAdvancementManager(
                 stat.modify { 0 }
             }
 
-            this.uhc.stats.getOrCreateStat(player, CommonStats.ALIVE_TIME).increment()
+            this.uhc.stats.getOrCreateStat(player, CasualStats.ALIVE_TIME).increment()
             if (player.isShiftKeyDown) {
-                val crouchTime = this.uhc.stats.getOrCreateStat(player, CommonStats.CROUCH_TIME)
+                val crouchTime = this.uhc.stats.getOrCreateStat(player, CasualStats.CROUCH_TIME)
                 crouchTime.increment()
                 if (crouchTime.value >= 30.Minutes.ticks) {
                     player.grantAdvancement(UHCAdvancements.DOES_YOUR_PINKIE_HURT_YET)

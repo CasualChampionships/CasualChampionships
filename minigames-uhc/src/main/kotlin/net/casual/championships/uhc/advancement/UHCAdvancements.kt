@@ -4,7 +4,7 @@ import net.casual.arcade.utils.AdvancementUtils.setTitleAndDesc
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.advancement.AdvancementCollection
-import net.casual.championships.uhc.UHCMod.id
+import net.casual.championships.common.util.casual
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.core.ClientAsset
 import net.minecraft.resources.ResourceLocation
@@ -13,7 +13,7 @@ import net.minecraft.world.item.alchemy.Potions
 
 object UHCAdvancements: AdvancementCollection() {
     val ROOT = register {
-        id = id("root")
+        id = casual("uhc_root")
         display(Items.GOLDEN_APPLE)
         setTitleAndDesc("uhc.advancements.root")
         background = ClientAsset(ResourceLocation.withDefaultNamespace("gui/advancements/backgrounds/adventure"))
@@ -21,7 +21,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val FIRST_BLOOD = register {
         parent(ROOT)
-        id = id("first_blood")
+        id = casual("first_blood")
         display(Items.IRON_SWORD)
         setTitleAndDesc("uhc.advancements.firstBlood")
         toast()
@@ -30,7 +30,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val OKAY_EZTAK = register {
         parent(FIRST_BLOOD)
-        id = id("okay_eztak")
+        id = casual("okay_eztak")
         display(ItemUtils.createPlayerHead("eztak_red"))
         setTitleAndDesc("uhc.advancements.okayEztak")
         toast()
@@ -39,7 +39,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val TELL_WITNESSES_THAT_I_WAS_MURDERED = register {
         parent(FIRST_BLOOD)
-        id = id("tell_witnesses_that_i_was_murdered")
+        id = casual("tell_witnesses_that_i_was_murdered")
         display(Items.EMERALD)
         setTitleAndDesc("uhc.advancements.tellWitnessesThatIWasMurdered")
         toast()
@@ -48,7 +48,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val HEAVY_HITTER = register {
         parent(FIRST_BLOOD)
-        id = id("heavy_hitter")
+        id = casual("heavy_hitter")
         display(Items.ANVIL)
         setTitleAndDesc("uhc.advancements.heavyHitter")
         type = AdvancementType.CHALLENGE
@@ -58,7 +58,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val WINNER = register {
         parent(FIRST_BLOOD)
-        id = id("winner")
+        id = casual("winner")
         display(Items.FIREWORK_ROCKET)
         setTitleAndDesc("uhc.advancements.winner")
         type = AdvancementType.CHALLENGE
@@ -68,7 +68,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val DEMOLITION_EXPERT = register {
         parent(ROOT)
-        id = id("demolition_expert")
+        id = casual("demolition_expert")
         display(Items.TNT)
         setTitleAndDesc("uhc.advancements.demolitionExpert")
         toast()
@@ -77,7 +77,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val PRINTER_ISNT_ALLOWED = register {
         parent(DEMOLITION_EXPERT)
-        id = id("printer_isnt_allowed")
+        id = casual("printer_isnt_allowed")
         display(Items.RED_GLAZED_TERRACOTTA)
         setTitleAndDesc("uhc.advancements.printerIsntAllowed")
         toast()
@@ -86,7 +86,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val HUMAN_QUARRY = register {
         parent(DEMOLITION_EXPERT)
-        id = id("human_quarry")
+        id = casual("human_quarry")
         display(Items.DIAMOND_PICKAXE)
         setTitleAndDesc("uhc.advancements.humanQuarry")
         toast()
@@ -95,7 +95,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val EARLY_EXIT = register {
         parent(ROOT)
-        id = id("early_exit")
+        id = casual("early_exit")
         display(Items.POISONOUS_POTATO)
         setTitleAndDesc("uhc.advancements.earlyExit")
         toast()
@@ -104,7 +104,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val WELL_THAT_WAS_A_BIT_SILLY = register {
         parent(EARLY_EXIT)
-        id = id("well_that_was_a_bit_silly")
+        id = casual("well_that_was_a_bit_silly")
         display(Items.BEDROCK)
         setTitleAndDesc("uhc.advancements.wellThatWasABitSilly")
         toast()
@@ -113,7 +113,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val SKILL_ISSUE = register {
         parent(EARLY_EXIT)
-        id = id("skill_issue")
+        id = casual("skill_issue")
         display(Items.BONE)
         setTitleAndDesc("uhc.advancements.skillIssue")
         toast()
@@ -122,7 +122,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val BEAR_CARED = register {
         parent(SKILL_ISSUE)
-        id = id("bear_cared")
+        id = casual("bear_cared")
         display(Items.SCULK_SENSOR)
         setTitleAndDesc("uhc.advancements.bearCared")
         toast()
@@ -131,7 +131,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val COW_MOMENT = register {
         parent(SKILL_ISSUE)
-        id = id("cow_moment")
+        id = casual("cow_moment")
         display(Items.CARVED_PUMPKIN)
         setTitleAndDesc("uhc.advancements.cowMoment")
         toast()
@@ -140,7 +140,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val WHERE_WAS_MY_PORTAL = register {
         parent(SKILL_ISSUE)
-        id = id("where_was_my_portal")
+        id = casual("where_was_my_portal")
         display(Items.CRYING_OBSIDIAN)
         setTitleAndDesc("uhc.advancements.whereWasMyPortal")
         toast()
@@ -149,7 +149,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val MOSTLY_HARMLESS = register {
         parent(EARLY_EXIT)
-        id = id("mostly_harmless")
+        id = casual("mostly_harmless")
         display(Items.FEATHER)
         setTitleAndDesc("uhc.advancements.mostlyHarmless")
         type = AdvancementType.CHALLENGE
@@ -159,7 +159,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val COMBAT_LOGGER = register {
         parent(ROOT)
-        id = id("combat_logger")
+        id = casual("combat_logger")
         display(Items.WOODEN_SWORD)
         setTitleAndDesc("uhc.advancements.combatLogger")
         toast()
@@ -168,7 +168,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val OK_WE_BELIEVE_YOU_NOW= register {
         parent(COMBAT_LOGGER)
-        id = id("ok_we_believe_you_now")
+        id = casual("ok_we_believe_you_now")
         display(Items.WOODEN_HOE)
         setTitleAndDesc("uhc.advancements.okWeBelieveYouNow")
         toast()
@@ -177,7 +177,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val NOT_DUSTLESS = register {
         parent(ROOT)
-        id = id("thats_not_dustless")
+        id = casual("thats_not_dustless")
         display(Items.REDSTONE)
         setTitleAndDesc("uhc.advancements.notDustless")
         toast()
@@ -186,7 +186,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val UPDATE_DEPRESSION = register {
         parent(NOT_DUSTLESS)
-        id = id("update_depression")
+        id = casual("update_depression")
         display(Items.POWERED_RAIL)
         setTitleAndDesc("uhc.advancements.updateDepression")
         toast()
@@ -195,7 +195,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val SLIMESTONER = register {
         parent(NOT_DUSTLESS)
-        id = id("slimestoner")
+        id = casual("slimestoner")
         display(Items.SLIME_BLOCK)
         setTitleAndDesc("uhc.advancements.slimestoner")
         toast()
@@ -204,7 +204,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val DOES_THIS_WORK_ON_PAPER = register {
         parent(SLIMESTONER)
-        id = id("does_this_work_on_paper")
+        id = casual("does_this_work_on_paper")
         display(Items.PAPER)
         setTitleAndDesc("uhc.advancements.doesThisWorkOnPaper")
         toast()
@@ -213,7 +213,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val STORAGE_TECH_IS_MY_PASSION = register {
         parent(NOT_DUSTLESS)
-        id = id("storage_tech_is_my_passion")
+        id = casual("storage_tech_is_my_passion")
         display(Items.HOPPER)
         setTitleAndDesc("uhc.advancements.storageTechIsMyPassion")
         toast()
@@ -222,7 +222,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val MAIN_STORAGE = register {
         parent(STORAGE_TECH_IS_MY_PASSION)
-        id = id("main_storage")
+        id = casual("main_storage")
         display(Items.CHEST)
         setTitleAndDesc("uhc.advancements.mainStorage")
         toast()
@@ -231,7 +231,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val BEE_NES = register {
         parent(NOT_DUSTLESS)
-        id = id("bee_nes")
+        id = casual("bee_nes")
         display(Items.BEE_NEST)
         setTitleAndDesc("uhc.advancements.beeNes")
         toast()
@@ -240,7 +240,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val FALLING_BLOCK = register {
         parent(NOT_DUSTLESS)
-        id = id("falling_block")
+        id = casual("falling_block")
         display(Items.SAND)
         setTitleAndDesc("uhc.advancements.fallingBlock")
         toast()
@@ -249,7 +249,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val WORLD_RECORD_PACE = register {
         parent(ROOT)
-        id = id("world_record_pace")
+        id = casual("world_record_pace")
         display = Items.SPLASH_POTION.defaultInstance.potion(Potions.SWIFTNESS)
         setTitleAndDesc("uhc.advancements.worldRecordPace")
         toast()
@@ -258,7 +258,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val SPEEDRUN_ANY_PERCENT = register {
         parent(WORLD_RECORD_PACE)
-        id = id("speedrun_any_percent")
+        id = casual("speedrun_any_percent")
         display = Items.END_PORTAL_FRAME.defaultInstance
         setTitleAndDesc("uhc.advancements.speedrunAnyPercent")
         toast()
@@ -267,7 +267,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val BRAVE_CHOICE = register {
         parent(SPEEDRUN_ANY_PERCENT)
-        id = id("brave_choice")
+        id = casual("brave_choice")
         display(Items.END_STONE)
         setTitleAndDesc("uhc.advancements.braveChoice")
         toast()
@@ -276,7 +276,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val DO_THE_IMPOSSIBLE = register {
         parent(BRAVE_CHOICE)
-        id = id("do_the_impossible")
+        id = casual("do_the_impossible")
         display = Items.DRAGON_HEAD.defaultInstance
         setTitleAndDesc("uhc.advancements.doTheImpossible")
         toast()
@@ -285,7 +285,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val EMBARRASSING = register {
         parent(ROOT)
-        id = id("thats_embarrassing")
+        id = casual("thats_embarrassing")
         display(Items.SWEET_BERRIES)
         setTitleAndDesc("uhc.advancements.thatsEmbarrassing")
         toast()
@@ -294,7 +294,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val FORGOT_YOUR_DOOR = register {
         parent(EMBARRASSING)
-        id = id("forgot_your_door")
+        id = casual("forgot_your_door")
         display(Items.OAK_DOOR)
         setTitleAndDesc("uhc.advancements.forgotYourDoor")
         toast()
@@ -303,7 +303,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val CONCRETE_SMELTER = register {
         parent(EMBARRASSING)
-        id = id("concrete_smelter")
+        id = casual("concrete_smelter")
         display(Items.PINK_CONCRETE_POWDER)
         setTitleAndDesc("uhc.advancements.concreteSmelter")
         toast()
@@ -312,7 +312,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val NO_ONE_ASKED = register {
         parent(EMBARRASSING)
-        id = id("no_one_asked")
+        id = casual("no_one_asked")
         display(Items.BLUE_BED)
         setTitleAndDesc("uhc.advancements.noOneAsked")
         toast()
@@ -321,7 +321,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val BROKEN_ANKLES = register {
         parent(EMBARRASSING)
-        id = id("broken_ankles")
+        id = casual("broken_ankles")
         display(Items.LEATHER_BOOTS)
         setTitleAndDesc("uhc.advancements.brokenAnkles")
         toast()
@@ -330,7 +330,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val ON_THE_EDGE = register {
         parent(BROKEN_ANKLES)
-        id = id("on_the_edge")
+        id = casual("on_the_edge")
         display = Items.SPLASH_POTION.defaultInstance.potion(Potions.STRONG_HARMING)
         setTitleAndDesc("uhc.advancements.onTheEdge")
         toast()
@@ -339,7 +339,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val DOES_YOUR_PINKIE_HURT_YET = register {
         parent(ON_THE_EDGE)
-        id = id("does_your_pinkie_hurt_yet")
+        id = casual("does_your_pinkie_hurt_yet")
         display = Items.POTION.defaultInstance.potion(Potions.INVISIBILITY)
         setTitleAndDesc("uhc.advancements.doesYourPinkieHurtYet")
         toast()
@@ -348,7 +348,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val BUSTED = register {
         parent(ROOT)
-        id = id("busted")
+        id = casual("busted")
         display(Items.STRUCTURE_VOID)
         setTitleAndDesc("uhc.advancements.busted")
         toast()
@@ -357,7 +357,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val HOWD_THAT_HAPPEN = register {
         parent(BUSTED)
-        id = id("howd_that_happen")
+        id = casual("howd_that_happen")
         display = Items.POTION.defaultInstance.potion(Potions.HEALING)
         setTitleAndDesc("uhc.advancements.howdThatHappen")
         toast()
@@ -366,7 +366,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val DREAM_LUCK = register {
         parent(BUSTED)
-        id = id("dream_luck")
+        id = casual("dream_luck")
         display(Items.ENCHANTED_GOLDEN_APPLE)
         setTitleAndDesc("uhc.advancements.dreamLuck")
         toast()
@@ -375,7 +375,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val PERFECTLY_BALANCED = register {
         parent(DREAM_LUCK)
-        id = id("perfectly_balanced")
+        id = casual("perfectly_balanced")
         display(Items.TOTEM_OF_UNDYING)
         setTitleAndDesc("uhc.advancements.perfectlyBalanced")
         toast()
@@ -384,7 +384,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val SOLOIST = register {
         parent(ROOT)
-        id = id("soloist")
+        id = casual("soloist")
         display(Items.PLAYER_HEAD)
         setTitleAndDesc("uhc.advancements.soloist")
         toast()
@@ -393,7 +393,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val TEAM_PLAYER = register {
         parent(SOLOIST)
-        id = id("team_player")
+        id = casual("team_player")
         display(Items.LIME_BANNER)
         setTitleAndDesc("uhc.advancements.teamPlayer")
         toast()
@@ -402,7 +402,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val LAST_MAN_STANDING = register {
         parent(SOLOIST)
-        id = id("last_man_standing")
+        id = casual("last_man_standing")
         display(Items.ARROW)
         setTitleAndDesc("uhc.advancements.lastManStanding")
         toast()
@@ -411,7 +411,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val LDAP = register {
         parent(ROOT)
-        id = id("ldap")
+        id = casual("ldap")
         display(Items.EMERALD_BLOCK)
         setTitleAndDesc("uhc.advancements.ldap")
         toast()
@@ -420,7 +420,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val BASICALLY = register {
         parent(LDAP)
-        id = id("basically")
+        id = casual("basically")
         display(Items.WHITE_WOOL)
         setTitleAndDesc("uhc.advancements.basically")
         toast()
@@ -429,7 +429,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val ADVANCEMENT_HUNTER = register {
         parent(ROOT)
-        id = id("advancement_hunter")
+        id = casual("advancement_hunter")
         display(Items.GOLD_BLOCK)
         setTitleAndDesc("uhc.advancements.advancementHunter")
         toast()
@@ -438,7 +438,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val WHATS_THAT_ABOUT_BARRIERS = register {
         parent(ADVANCEMENT_HUNTER)
-        id = id("whats_that_about_barriers")
+        id = casual("whats_that_about_barriers")
         display(Items.BARRIER)
         setTitleAndDesc("uhc.advancements.whatsThatAboutBarriers")
         toast()
@@ -447,7 +447,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val TRIAL_MEMBER = register {
         parent(ADVANCEMENT_HUNTER)
-        id = id("trial_member")
+        id = casual("trial_member")
         display(Items.OMINOUS_TRIAL_KEY)
         setTitleAndDesc("uhc.advancements.trialMember")
         toast()
@@ -456,7 +456,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val COOL_HOUSE_BRO = register {
         parent(ADVANCEMENT_HUNTER)
-        id = id("cool_house_bro")
+        id = casual("cool_house_bro")
         display(Items.DARK_OAK_PLANKS)
         setTitleAndDesc("uhc.advancements.coolHouseBro")
         toast()
@@ -465,7 +465,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val THE_END_IS_NEAR = register {
         parent(ADVANCEMENT_HUNTER)
-        id = id("the_end_is_near")
+        id = casual("the_end_is_near")
         display(Items.ENDER_EYE)
         setTitleAndDesc("uhc.advancements.theEndIsNear")
         toast()
@@ -474,7 +474,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val WART_HOARDER = register {
         parent(ROOT)
-        id = id("wart_hoarder")
+        id = casual("wart_hoarder")
         display(Items.NETHER_WART)
         setTitleAndDesc("uhc.advancements.wartHoarder")
         toast()
@@ -483,7 +483,7 @@ object UHCAdvancements: AdvancementCollection() {
 
     val SPAWNER_SABOTEUR = register {
         parent(WART_HOARDER)
-        id = id("spawner_saboteur")
+        id = casual("spawner_saboteur")
         display(Items.BLAZE_POWDER)
         setTitleAndDesc("uhc.advancements.spawnerSaboteur")
         toast()

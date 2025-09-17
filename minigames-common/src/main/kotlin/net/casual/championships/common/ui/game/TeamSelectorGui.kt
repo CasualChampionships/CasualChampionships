@@ -5,9 +5,9 @@ import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.component.white
 import net.casual.arcade.visuals.screen.setSlot
-import net.casual.championships.common.items.DisplayItems
-import net.casual.championships.common.ui.CommonSimpleGui
-import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.items.CasualGuiItems
+import net.casual.championships.common.ui.CasualSimpleGui
+import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.inventory.MenuType
@@ -17,11 +17,11 @@ import net.minecraft.world.scores.PlayerTeam
 class TeamSelectorGui(
     player: ServerPlayer,
     selections: List<Selection>
-): CommonSimpleGui(MenuType.GENERIC_9x6, player, true) {
+): CasualSimpleGui(MenuType.GENERIC_9x6, player, true) {
     init {
         this.title = Component.empty()
             .append(SpacingFontResources.spaced(-8))
-            .append(CommonComponents.Gui.TEAM_SELECTOR.copy().white())
+            .append(CasualComponents.Gui.TEAM_SELECTOR.copy().white())
 
         var row = 1
         var column = 1
@@ -40,7 +40,7 @@ class TeamSelectorGui(
             }
         }
 
-        this.setSlot(58, DisplayItems.RED_BACK.hideTooltip()) { ->
+        this.setSlot(58, CasualGuiItems.RED_BACK.hideTooltip()) { ->
             this.close()
         }
     }

@@ -1,7 +1,7 @@
 package net.casual.championships.missilewars.items
 
 import net.casual.arcade.items.ItemStackFactory
-import net.casual.championships.common.CommonMod.id
+import net.casual.championships.common.util.casual
 import net.casual.championships.missilewars.MissileWarsMod
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
@@ -20,7 +20,7 @@ object MissileWarsItems {
     }
 
     private fun register(path: String, provider: (Properties) -> Item): Item {
-        val key = ResourceKey.create(Registries.ITEM, id(path))
+        val key = ResourceKey.create(Registries.ITEM, casual(path))
         val properties = Properties().setId(key)
         return Registry.register(BuiltInRegistries.ITEM, key, provider.invoke(properties))
     }

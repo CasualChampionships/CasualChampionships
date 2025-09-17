@@ -138,5 +138,7 @@ class UHCMinigameFactory(
                 UUIDUtil.STRING_CODEC.setOf().lenientOptionalFieldOf("nerfed_players", emptySet()).forGetter(UHCMinigameFactory::nerfedPlayers)
             ).apply(instance, ::UHCMinigameFactory)
         }
+
+        val DEFAULT = UHCMinigameFactory(mapOf(), setOf())
     }
 }

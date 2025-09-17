@@ -69,87 +69,72 @@ contains all the automatically generated resource packs used during the event,
 you should not touch these.
 
 The `event` directory contains the current event data for CasualChampionships.
-You can modify `event.json`, by default, it will look like this:
+You can modify `config.json`, by default, it will look like this:
 ```json
 {
   "name": "default",
-  "type": "arcade:simple", 
-  "minigames": [], 
-  "repeat": true,
+  "minigame": {
+    "dimensions": {},
+    "type": "casual:uhc_minigame"
+  },
+  "additional_packs": [],
   "operators": [],
-  "lobby": {
-    "type": "arcade:lobby"
-  }
+  "lobby": "default"
 }
 ```
-The full details of this config will not be explained due to its complexity,
-but here are the basics. 
 
-This file declares the lobby for the event as well as the minigames (in sequential order)
-in which they will be played:
+This file declares the lobby for the event as well as the minigame which will be played:
 - `"name"` is the name of the event (used to identify the event when syncing to the database)
-- `"type"` denotes the type of the event
-- `"minigames"` a list of minigame definitions, these minigames will be played in-order
-- `"repeat"` whether to repeat the minigames after reaching the end of the list
-- `"operators"` a list of admins for the minigames
-- `"lobby"` is a lobby minigame definition
+- `"minigame"` the minigame definition, used to create a minigame for the event
+- `"additional_packs"` file names of additional resource packs, located in aforementioned packs directory
+- `"operators"` a list of admin usernames for the minigames
+- `"lobby"` the lobby to use for the event, located in the lobbies directory
 
-Let's first configure the type of our event to be `"casual:championships"`:
+Let's first get our lobby configured, we'll need to create a lobby, an example one can
+be found in [`docs/lobbies/example.zip`](./docs/lobbies/example.zip), you can customize
+it by providing a custom world folder and defining your own values in the 
+`casual_lobby_data.json` file.
+
+The `casual_lobby_parkour_data.json` file is optional, if you do remove the file, remember
+to remove the corresponding module in `minigame_data_modules.json`.
+
+Once you've created your lobby place it in `./config/casual-championships/lobbies/`, you
+can then reference it in the event configuration (exclude the `.zip`, if it's zipped).
 ```json5
 {
   // ...
-  "type": "casual:championships", 
+  "lobby": "example",
   // ...
 }
 ```
 
-We should also configure the lobby to be the casual lobby, we can do this by
-changing the following:
+By default, the minigame being played will be a UHC minigame. 
+We can add additional configurations, such as specifying the dimensions
+to use for the minigame, see the example below.
 ```json5
 {
   // ...
-  "lobby": {
-    "type": "casual:lobby"
+  "minigame": {
+    "type": "casual:uhc_minigame",
+    "dimensions": {
+      "minecraft:overworld": {
+        "seed": 1234567890,
+        "dimension": "casual:uhc_overworld"
+      },
+      "minecraft:the_nether": {
+        "seed": 987654321,
+        "dimension": "casual:uhc_nether"
+      },
+      "minecraft:the_end": {
+        "dimension": "casual:uhc_end"
+      }
+    }
   },
   // ...
 }
 ```
 
-Now, if we want to add the UHC minigame to the rotation of minigames, we can add a
-minigame definition:
-```json5
-{
-  // ...
-  "minigames": [
-    {
-      "type": "casual_uhc:uhc_minigame",
-      "dimensions": {
-        "minecraft:overworld": {
-          "seed": 1234567890,
-          "dimension": "casual:uhc_overworld"
-        },
-        "minecraft:the_nether": {
-          "seed": 987654321,
-          "dimension": "casual:uhc_nether"
-        },
-        "minecraft:the_end": {
-          "dimension": "casual:uhc_end"
-        }
-      }
-    }
-  ],
-  // ...
-}
-```
-For the UHC minigame definition we define its type to be `"casual_uhc:uhc_minigame"`,
-then we must specify its arguments which consist of the `"dimensions"` property.
-
-Here you must define the seed and the underlying dimension key for each of the three
-vanilla dimensions. 
-You may leave the seed and/or the dimension key undefined, in which case a random seed
-and random dimension id will be used respectively.
-
-Once you have configured this you can run `/casual config reload` or restart the server
+Once you have configured this you can run `/casual reload` or restart the server
 to allow these changes to take effect.
 
 ### Joining

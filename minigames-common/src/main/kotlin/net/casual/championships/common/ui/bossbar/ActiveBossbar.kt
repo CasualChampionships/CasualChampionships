@@ -8,7 +8,7 @@ import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatHHMMSS
 import net.casual.arcade.utils.component.shadowless
 import net.casual.arcade.visuals.bossbar.CustomBossbar
-import net.casual.championships.common.util.CommonComponents
+import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.BossEvent
@@ -19,19 +19,19 @@ class ActiveBossbar(
     override fun getTitle(player: ServerPlayer): Component {
         val start = Component.empty()
             .append(SpacingFontResources.spaced(-5))
-            .append(CommonComponents.Hud.BACKGROUND_40.copy().shadowless())
+            .append(CasualComponents.Hud.BACKGROUND_40.copy().shadowless())
             .append(SpacingFontResources.spaced(-27))
             .append(Component.literal("%02d".format(this.owner.players.playingPlayerCount)).withMiniFont())
-            .append(CommonComponents.Hud.PLAYER_COUNT)
+            .append(CasualComponents.Hud.PLAYER_COUNT)
             .append(SpacingFontResources.spaced(43))
         val end = Component.empty()
             .append(SpacingFontResources.spaced(37))
-            .append(CommonComponents.Hud.BACKGROUND_40.copy().shadowless())
+            .append(CasualComponents.Hud.BACKGROUND_40.copy().shadowless())
             .append(SpacingFontResources.spaced(-27))
             .append(Component.literal("%02d".format(this.owner.stats.getOrCreateStat(player, ArcadeStats.KILLS).value)).withMiniFont())
             .append(SpacingFontResources.spaced(1))
-            .append(CommonComponents.Hud.KILLS_COUNT)
-        val middle = CommonComponents.TIME_ELAPSED_BACKGROUNDED.generate(this.owner.uptime.Ticks.formatHHMMSS()).withMiniFont()
+            .append(CasualComponents.Hud.KILLS_COUNT)
+        val middle = CasualComponents.TIME_ELAPSED_BACKGROUNDED.generate(this.owner.uptime.Ticks.formatHHMMSS()).withMiniFont()
         return start.append(middle).append(end)
     }
 

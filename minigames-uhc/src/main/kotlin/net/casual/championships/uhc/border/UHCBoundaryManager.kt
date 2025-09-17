@@ -13,7 +13,7 @@ import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.utils.toIdString
 import net.casual.championships.common.task.GlowingBossbarTask
-import net.casual.championships.uhc.UHCMod
+import net.casual.championships.uhc.CasualUHC
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.phys.Vec3
@@ -63,7 +63,7 @@ object UHCBoundaryManager {
 
     private fun complete(uhc: UHCMinigame, current: UHCBoundaryPhase) {
         if (current.getNextStage() == current) {
-            UHCMod.logger.info("Completed boundary moving!")
+            CasualUHC.logger.info("Completed boundary moving!")
             return
         }
 
@@ -77,11 +77,9 @@ object UHCBoundaryManager {
 
         uhc.onPauseBoundary()
         val cooldown = current.getCooldown(uhc.settings.borderTime)
-        val index = UHCBoundaryPhase.entries.indexOf(current)
-        require(index >= 0) { "Boundary phase was not registered!?" }
         uhc.scheduler.schedulePhased(cooldown, MinigameTask(uhc) { minigame ->
             minigame.onResumeBoundary()
-            this.move(minigame, UHCBoundaryPhase.entries[index].getNextStage())
+            this.move(minigame, minigame.boundaryPhase.getNextStage())
         })
     }
 
@@ -89,7 +87,7 @@ object UHCBoundaryManager {
         for (level in uhc.levels) {
             val boundary = level.levelBoundary
             if (boundary == null) {
-                UHCMod.logger.warn("Dimension ${level.dimension().toIdString()} had no boundary to move!")
+                CasualUHC.logger.warn("Dimension ${level.dimension().toIdString()} had no boundary to move!")
                 continue
             }
 
