@@ -287,6 +287,9 @@ class DuelMinigame(
             dimensionKey(dimension)
             dimensionType(BuiltinDimensionTypes.OVERWORLD)
             chunkGenerator(VoidChunkGenerator(server))
+            gameRules {
+                set(GameRules.RULE_LOCATOR_BAR, false)
+            }
         }
         this.levels.add(level)
         return level
