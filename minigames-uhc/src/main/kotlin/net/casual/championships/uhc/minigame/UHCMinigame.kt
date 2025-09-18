@@ -442,31 +442,11 @@ class UHCMinigame(
 
     @Listener
     private fun onBlockMined(event: PlayerBlockMinedEvent) {
-        val (player, _, state, be) = event
-
-        // TODO: This belongs in the advancement manager
-        if (state.isOf(Blocks.SPAWNER) && be is SpawnerBlockEntity) {
-            val spawnerValueOutput = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING)
-            be.spawner.save(spawnerValueOutput)
-            val spawnerNbt = spawnerValueOutput.buildResult()
-            // This is so fucking cursed; I can't believe this is the best way to do this
-            val isBlazeSpawner = spawnerNbt.getCompound(BaseSpawner.SPAWN_DATA_TAG)
-                .flatMap { it.getCompound(SpawnData.ENTITY_TAG) }
-                .flatMap { EntityType.by(TagValueInput.create(ProblemReporter.DISCARDING, player.registryAccess(), it)) }
-                .map { it == EntityType.BLAZE }
-                .orElse(false)
-
-            if (isBlazeSpawner) {
-                player.grantAdvancement(UHCAdvancements.SPAWNER_SABOTEUR)
+        val (player, _, state, _) = event
+        if (this.settings.bloodDiamonds) {
+            if (state.isOf(BlockTags.DIAMOND_ORES)) {
+                player.hurtServer(player.level(), player.damageSources().magic(), 1.0F)
             }
-        }
-
-        if (!this.settings.bloodDiamonds) {
-            return
-        }
-
-        if (state.isOf(BlockTags.DIAMOND_ORES)) {
-            player.hurtServer(player.level(), player.damageSources().magic(), 1.0F)
         }
     }
 

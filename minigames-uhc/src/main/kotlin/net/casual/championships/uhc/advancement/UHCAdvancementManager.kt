@@ -22,6 +22,7 @@ import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.isInStructure
+import net.casual.arcade.utils.isOf
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.util.CasualStats
 import net.casual.championships.common.util.CasualTags
@@ -30,7 +31,9 @@ import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.minigame.UHCPhase
 import net.casual.championships.uhc.utils.UHCStats
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.util.ProblemReporter
 import net.minecraft.world.damagesource.DamageTypes
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.animal.IronGolem
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.monster.warden.Warden
@@ -38,12 +41,17 @@ import net.minecraft.world.entity.npc.Villager
 import net.minecraft.world.inventory.FurnaceMenu
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Items
+import net.minecraft.world.level.BaseSpawner
+import net.minecraft.world.level.SpawnData
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.ConcretePowderBlock
 import net.minecraft.world.level.block.FallingBlock
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
 import net.minecraft.world.level.block.state.properties.ChestType
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures
+import net.minecraft.world.level.storage.TagValueInput
+import net.minecraft.world.level.storage.TagValueOutput
 
 class UHCAdvancementManager(
     private val uhc: UHCMinigame
@@ -195,7 +203,7 @@ class UHCAdvancementManager(
 
     @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerBlockMined(event: PlayerBlockMinedEvent) {
-        val (player, _, state) = event
+        val (player, _, state, be) = event
 
         val blocksMined = this.uhc.stats.getOrCreateStat(player, CasualStats.BLOCKS_MINED)
         blocksMined.increment()
@@ -207,11 +215,27 @@ class UHCAdvancementManager(
             player.grantAdvancement(UHCAdvancements.BEE_NES)
         }
 
-        if (state.block === Blocks.NETHER_WART && player.isInStructure(BuiltinStructures.FORTRESS)) {
+        if (state.block == Blocks.NETHER_WART && player.isInStructure(BuiltinStructures.FORTRESS)) {
             val netherWartMined = this.uhc.stats.getOrCreateStat(player, UHCStats.NETHER_WART_MINED)
             netherWartMined.increment()
             if (netherWartMined.value > 11) {
                 player.grantAdvancement(UHCAdvancements.WART_HOARDER)
+            }
+        }
+
+        if (state.isOf(Blocks.SPAWNER) && be is SpawnerBlockEntity) {
+            val spawnerValueOutput = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING)
+            be.spawner.save(spawnerValueOutput)
+            val spawnerNbt = spawnerValueOutput.buildResult()
+            // This is so fucking cursed; I can't believe this is the best way to do this
+            val isBlazeSpawner = spawnerNbt.getCompound(BaseSpawner.SPAWN_DATA_TAG)
+                .flatMap { it.getCompound(SpawnData.ENTITY_TAG) }
+                .flatMap { EntityType.by(TagValueInput.create(ProblemReporter.DISCARDING, player.registryAccess(), it)) }
+                .map { it == EntityType.BLAZE }
+                .orElse(false)
+
+            if (isBlazeSpawner) {
+                player.grantAdvancement(UHCAdvancements.SPAWNER_SABOTEUR)
             }
         }
     }
