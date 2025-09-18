@@ -61,7 +61,8 @@
   "casual.game.direction.northWest": "North West",
 
   "casual.game.borderInfo": "Border Info",
-  "casual.game.borderDistance": "Distance",
+  "casual.game.borderHorizontalDistance": "Horz. Dist",
+  "casual.game.borderVerticalDistance": "Vert. Dist",
   "casual.game.borderRadius": "Radius",
   "casual.game.borderMovingIn": "Moving In",
   "casual.game.borderPausingIn": "Pausing In",

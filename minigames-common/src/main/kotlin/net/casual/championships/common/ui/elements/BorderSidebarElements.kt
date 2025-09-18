@@ -1,5 +1,6 @@
 package net.casual.championships.common.ui.elements
 
+import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
@@ -9,9 +10,11 @@ import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.championships.common.util.CasualComponents
 import net.minecraft.ChatFormatting.*
+import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import java.util.EnumSet
 
 class BorderStatusElement(private val buffer: Component): LevelSpecificElement<SidebarComponent> {
     override fun get(level: ServerLevel): SidebarComponent {
@@ -30,18 +33,29 @@ class BorderStatusElement(private val buffer: Component): LevelSpecificElement<S
     }
 }
 
-class BorderDistanceElement(private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
+class BorderHorizontalDistanceElement(private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
     override fun get(player: ServerPlayer): SidebarComponent {
         val boundary = player.level().levelBoundary ?: return SidebarComponent.EMPTY
-        val vectorToBorder = boundary.getDirectionFrom(player.position())
-        val multiplier = if (boundary.contains(player.position())) 1 else -1
-        val distanceToBorder = multiplier * vectorToBorder.length().toInt()
+        return boundary.getSidebarBoundaryDistance(
+            player, HORIZONTAL, this.buffer, CasualComponents.BORDER_HORIZONTAL_DISTANCE
+        )
+    }
 
-        val percent = distanceToBorder / (boundary.getSize().x / 2.0)
-        val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
-        val display = Component.empty().append(this.buffer).append(" ").append(CasualComponents.BORDER_DISTANCE.withMiniFont())
-        val score = Component.literal(distanceToBorder.toString()).append(this.buffer).withStyle(colour)
-        return SidebarComponent.withCustomScore(display, score.withMiniFont())
+    private companion object {
+        val HORIZONTAL: EnumSet<Direction.Axis> = EnumSet.of(Direction.Axis.X, Direction.Axis.Z)
+    }
+}
+
+class BorderVerticalDistanceElement(private val buffer: Component): PlayerSpecificElement<SidebarComponent> {
+    override fun get(player: ServerPlayer): SidebarComponent {
+        val boundary = player.level().levelBoundary ?: return SidebarComponent.EMPTY
+        return boundary.getSidebarBoundaryDistance(
+            player, VERTICAL, this.buffer, CasualComponents.BORDER_VERTICAL_DISTANCE
+        )
+    }
+
+    private companion object {
+        val VERTICAL: EnumSet<Direction.Axis> = EnumSet.of(Direction.Axis.Y)
     }
 }
 
@@ -51,4 +65,21 @@ class BorderSizeElement(private val buffer: Component): LevelSpecificElement<Sid
         val score = Component.literal(((level.levelBoundary?.getSize()?.x ?: 0.0) / 2.0).toInt().toString()).append(this.buffer)
         return SidebarComponent.withCustomScore(display, score.withMiniFont())
     }
+}
+
+private fun LevelBoundary.getSidebarBoundaryDistance(
+    player: ServerPlayer,
+    axes: EnumSet<Direction.Axis>,
+    buffer: Component,
+    name: Component
+): SidebarComponent {
+    val vectorToBorder = this.getDirectionFrom(player.position(), axes)
+    val multiplier = if (this.contains(player.position())) 1 else -1
+    val distanceToBorder = multiplier * vectorToBorder.length().toInt()
+
+    val percent = distanceToBorder / (this.getSize().x / 2.0)
+    val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
+    val display = Component.empty().append(buffer).append(" ").append(name).withMiniFont()
+    val score = Component.literal(distanceToBorder.toString()).append(buffer).withStyle(colour)
+    return SidebarComponent.withCustomScore(display, score.withMiniFont())
 }

@@ -77,7 +77,8 @@ object CasualComponents {
     val NORTH_WEST by translatable("casual.game.direction.northWest")
 
     val BORDER_INFO by translatable("casual.game.borderInfo")
-    val BORDER_DISTANCE by translatable("casual.game.borderDistance")
+    val BORDER_HORIZONTAL_DISTANCE by translatable("casual.game.borderHorizontalDistance")
+    val BORDER_VERTICAL_DISTANCE by translatable("casual.game.borderVerticalDistance")
     val BORDER_RADIUS by translatable("casual.game.borderRadius")
     val INSIDE_BORDER = translatableWithArgs("casual.game.insideBorder")
     val BORDER_INITIAL_GRACE = translatableWithArgs("casual.game.grace.first")

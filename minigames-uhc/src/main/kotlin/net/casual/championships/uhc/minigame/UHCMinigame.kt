@@ -29,6 +29,7 @@ import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.replay.recorder.player.ReplayPlayerRecorders
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
+import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.resources.utils.withMiniShiftedDownFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
@@ -62,10 +63,7 @@ import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatMMSS
-import net.casual.arcade.utils.component.bold
-import net.casual.arcade.utils.component.lime
-import net.casual.arcade.utils.component.red
-import net.casual.arcade.utils.component.wrap
+import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.isOf
 import net.casual.arcade.utils.math.location.Location.Companion.withRotation
@@ -82,6 +80,7 @@ import net.casual.arcade.visuals.shapes.impl.ArrowShape
 import net.casual.arcade.visuals.sidebar.DynamicSidebar
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
+import net.casual.arcade.visuals.sidebar.SidebarComponents.Companion.addRow
 import net.casual.championships.common.event.ChunkGenerationMobSpawnEvent
 import net.casual.championships.common.event.TippedArrowTradeOfferEvent
 import net.casual.championships.common.event.portal.EntityPortalEntryPositionEvent
@@ -863,9 +862,7 @@ class UHCMinigame(
                 components.addRow(performance.get(player))
                 components.addRow(phase.get(player))
                 components.addRow(SidebarComponent.EMPTY)
-                components.addRow(SidebarComponent.withNoScore(
-                    Component.empty().append(SpacingFontResources.spaced(2)).append("Mobcaps:").withMiniFont()
-                ))
+                components.addRow(Component { empty() + spaced(2.0F) + "Mobcaps:" }.withMiniFont())
                 components.addRow(mobcaps.get(player))
                 components.addRow(SidebarComponent.EMPTY)
             }
