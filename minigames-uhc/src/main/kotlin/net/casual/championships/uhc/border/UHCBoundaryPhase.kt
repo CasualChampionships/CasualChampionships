@@ -91,8 +91,7 @@ sealed class UHCBoundaryPhase(
 
     data object Sixth: UHCBoundaryPhase(5, 6.Minutes, 0.Minutes) {
         override fun getStartSize(level: ServerLevel): Vec3 {
-            val y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, 0, 0).toDouble()
-            val height = ((y - level.minY) + 10) * 2
+            val height = level.height * 2.0
             return Fifth.getEndSize(level).with(Direction.Axis.Y, height)
         }
 

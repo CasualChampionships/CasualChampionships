@@ -101,8 +101,7 @@ object CasualGuiUtils {
     fun getBorderSidebarElements(buffer: Component): Array<PlayerSpecificElement<SidebarComponent>> {
         return arrayOf(
             BorderStatusElement(buffer).cached(),
-            BorderHorizontalDistanceElement(buffer),
-            BorderVerticalDistanceElement(buffer),
+            BorderDistanceElement(buffer),
             BorderSizeElement(buffer).cached()
         )
     }
