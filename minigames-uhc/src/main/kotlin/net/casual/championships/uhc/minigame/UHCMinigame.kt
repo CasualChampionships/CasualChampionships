@@ -279,6 +279,7 @@ class UHCMinigame(
             this.recipes.add(FlowerPowerRecipe.getOrCreate(this.server.registryAccess()))
         }
         this.advancements.addAll(UHCAdvancements)
+        this.settings.enableChatCommand.set(true)
 
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.overworld)
 
