@@ -77,10 +77,13 @@ object CasualChampionships: DedicatedServerModInitializer {
         }
 
         val location = if (this.config.dev) "${login.name}_debug" else login.name
-        this.loadDatabaseSync(server, login.copy(url = "${login.url}/$location"), this.minigames.event)
+        server.launch {
+            loadDatabaseSync(login.copy(url = "${login.url}/$location"), minigames.event)
+            minigames.reloadTeams()
+        }
     }
 
-    private fun loadDatabaseSync(server: MinecraftServer, login: DatabaseLogin, event: String) = server.launch {
+    private suspend fun loadDatabaseSync(login: DatabaseLogin, event: String) {
         try {
             sync = CasualDatabaseSyncService.create(login, event)
         } catch (exception: Exception) {

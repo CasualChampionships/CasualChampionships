@@ -178,9 +178,6 @@ class CasualMinigameManager(
         this.reloadResourcePacks()
 
         this.lobby = this.createLobby(server)
-
-        // This must come last because we mutate minigames, which need to be loaded
-        server.launch { createTeams(server) }
     }
 
     internal fun reload(server: MinecraftServer) {
