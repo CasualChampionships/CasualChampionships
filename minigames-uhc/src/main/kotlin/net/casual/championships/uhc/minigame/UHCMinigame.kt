@@ -11,6 +11,7 @@ import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.block.BlockDropLootEvent
 import net.casual.arcade.events.server.block.BrewingStandBrewEvent
 import net.casual.arcade.events.server.entity.EntityBeforeLootEvent
+import net.casual.arcade.events.server.entity.EntityStartTrackingEvent
 import net.casual.arcade.events.server.level.LevelLootEvent
 import net.casual.arcade.events.server.player.*
 import net.casual.arcade.events.threading.ThreadingTarget
@@ -34,7 +35,6 @@ import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.resources.utils.withMiniShiftedDownFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.ItemUtils.addEnchantment
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.int
 import net.casual.arcade.utils.JsonUtils.obj
@@ -134,6 +134,9 @@ import net.minecraft.util.Mth
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.ai.attributes.AttributeModifier
+import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potion
@@ -685,6 +688,19 @@ class UHCMinigame(
     }
 
     @Listener
+    private fun onEntityTrack(event: EntityStartTrackingEvent) {
+        val (entity) = event
+        if (entity is LivingEntity && entity !is ServerPlayer) {
+            val scale = entity.attributes.getInstance(Attributes.SCALE)
+            if (scale != null && !scale.hasModifier(MOB_MASH)) {
+                val value = entity.random.nextDouble() - 0.4
+                val modifier = AttributeModifier(MOB_MASH, value, AttributeModifier.Operation.ADD_VALUE)
+                scale.addPermanentModifier(modifier)
+            }
+        }
+    }
+
+    @Listener
     private fun onEntityBeforeLoot(event: EntityBeforeLootEvent) {
         event.lootMultiplier *= MOB_LOOT_MULTIPLIER
     }
@@ -981,6 +997,7 @@ class UHCMinigame(
         private val MOB_LOOT_MULTIPLIER = (1.0F / MOB_SPAWN_PROBABILITY).roundToInt()
 
         private val NERFED_DAMAGE_MODIFIER = casual("nerfed_damage")
+        private val MOB_MASH = casual("mob_mash")
 
         val ID = casual("uhc_minigame")
     }

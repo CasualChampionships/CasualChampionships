@@ -7,6 +7,7 @@ import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Compan
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.time
 import net.casual.arcade.utils.ItemUtils.hideTooltip
+import net.casual.arcade.utils.ItemUtils.lore
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
 import net.casual.arcade.utils.TimeUtils.Minutes
@@ -18,6 +19,7 @@ import net.casual.championships.uhc.border.UHCBoundaryPhase
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
 import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
@@ -240,6 +242,7 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
     var tmcStarterPack by this.register(bool {
         name = "tmc_starter_pack"
         display = Items.RED_SHULKER_BOX.named("TMC Starter Pack")
+            .lore(Component.literal("Gives players a shulker box with redstone goodies"))
         value = false
         defaults.options(this)
     })
@@ -247,6 +250,7 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
     var handsFree by this.register(bool {
         name = "hands_free"
         display = Items.GOLDEN_PICKAXE.named("Hands Free")
+            .lore(Component.literal("Enables careful break"))
         value = false
         defaults.options(this)
     })
@@ -254,6 +258,15 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
     var lawsOfAviation by this.register(bool {
         name = "laws_of_aviation"
         display = Items.ELYTRA.named("Laws of Aviation")
+            .lore(Component.literal("Gives players a broken elytra with mending"))
+        value = false
+        defaults.options(this)
+    })
+
+    var mobMash by this.register(bool {
+        name = "mob_mash"
+        display = Items.CREEPER_HEAD.named("Mob Mash")
+            .lore(Component.literal("Randomizes mob sizes"))
         value = false
         defaults.options(this)
     })
