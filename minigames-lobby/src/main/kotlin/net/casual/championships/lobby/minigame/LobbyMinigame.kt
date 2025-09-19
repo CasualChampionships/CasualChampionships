@@ -38,7 +38,6 @@ import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
-import net.casual.arcade.utils.PlayerUtils.username
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.component.shadowless
@@ -91,16 +90,14 @@ class LobbyMinigame(
     val bossbar = LobbyBossbar()
     val next by next
 
-    // FIXME: We should have a better way of doing this
-    val winners = LinkedHashSet<String>()
-
     override val settings: MinigameSettings = CasualSettings(this)
     override val id: ResourceLocation = ID
 
     fun teleport(player: ServerPlayer) {
+        val winners = this.tags.getUUIDsFor(CasualTags.WON)
         val location = when {
-            this.winners.isEmpty() -> this.lobbyData.spawn.get()
-            this.winners.contains(player.username) -> this.lobbyData.podium.get()
+            winners.isEmpty() -> this.lobbyData.spawn.get()
+            winners.contains(player.uuid) -> this.lobbyData.podium.get()
             else -> this.lobbyData.podiumView.get()
         }
         player.teleportTo(location.with(this.level))
@@ -240,7 +237,8 @@ class LobbyMinigame(
             team.collisionRule = Team.CollisionRule.NEVER
         }
 
-        if (!this.tags.has(player, SEEN_FIREWORKS) && this.winners.isNotEmpty()) {
+        val winners = this.tags.getUUIDsFor(CasualTags.WON)
+        if (!this.tags.has(player, SEEN_FIREWORKS) && winners.isNotEmpty()) {
             player.afterPacksLoad { this.playFireworksFor(player) }
         }
     }

@@ -23,16 +23,15 @@ import net.casual.arcade.utils.resetToDefault
 import net.casual.arcade.utils.set
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate
-import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.championships.common.task.GracePeriodBossbarTask
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
-import net.casual.championships.common.util.CasualPredicates
 import net.casual.championships.common.util.CasualPredicates.OBSERVEE_NOT_MINIGAME_SPECTATOR
 import net.casual.championships.common.util.CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
 import net.casual.championships.common.util.CasualSounds
+import net.casual.championships.common.util.CasualTags
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
@@ -140,8 +139,10 @@ enum class UHCPhase(
             val team = teams.first()
 
             minigame.uhcAdvancements.grantFinalAdvancements(team.getOnlinePlayers())
-            minigame.winners.clear()
-            minigame.winners.addAll(team.players)
+
+            for (player in team.getOnlinePlayers()) {
+                minigame.tags.add(player, CasualTags.WON)
+            }
 
             for (player in minigame.players) {
                 player.sendTitle(CasualComponents.GAME_WON.generate(team.name).color(team).withMiniFont())

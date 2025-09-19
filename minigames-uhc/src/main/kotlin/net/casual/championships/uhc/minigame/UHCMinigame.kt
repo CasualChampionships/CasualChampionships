@@ -172,7 +172,6 @@ class UHCMinigame(
 
     val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)
-    val winners = HashSet<String>()
 
     override val settings = UHCSettings(this)
 

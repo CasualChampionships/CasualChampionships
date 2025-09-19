@@ -39,6 +39,7 @@ import net.casual.arcade.utils.component.red
 import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
+import net.casual.championships.common.util.CasualTags
 import net.casual.championships.common.util.PerformanceUtils
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.lobby.minigame.LobbyMinigame
@@ -395,8 +396,10 @@ class CasualMinigameManager(
             this.returnToLobby()
         }
         minigame.events.register<MinigameCompleteEvent> {
-            this.lobby.winners.clear()
-            this.lobby.winners.addAll(minigame.winners)
+            this.lobby.tags.clear(CasualTags.WON)
+            for (winner in minigame.tags.getUUIDsFor(CasualTags.WON)) {
+                this.lobby.tags.add(winner, CasualTags.WON)
+            }
         }
 
         minigame.settings.replay = !CasualChampionships.config.dev
