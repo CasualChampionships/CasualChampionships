@@ -34,6 +34,7 @@ import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.resources.utils.withMiniShiftedDownFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ComponentUtils
+import net.casual.arcade.utils.ItemUtils.addEnchantment
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.int
 import net.casual.arcade.utils.JsonUtils.obj
@@ -607,6 +608,13 @@ class UHCMinigame(
 
         if (this.settings.tmcStarterPack) {
             player.inventory.add(TMCStarterPack.create())
+        }
+
+        if (this.settings.lawsOfAviation) {
+            val elytra = ItemStack(Items.ELYTRA)
+            elytra.set(DataComponents.DAMAGE, 431)
+            elytra.enchant(this.server.registryAccess().getOrThrow(Enchantments.MENDING), 1)
+            player.inventory.add(elytra)
         }
     }
 

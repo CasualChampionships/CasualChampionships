@@ -250,4 +250,11 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         value = false
         defaults.options(this)
     })
+
+    var lawsOfAviation by this.register(bool {
+        name = "laws_of_aviation"
+        display = Items.ELYTRA.named("Laws of Aviation")
+        value = false
+        defaults.options(this)
+    })
 }
