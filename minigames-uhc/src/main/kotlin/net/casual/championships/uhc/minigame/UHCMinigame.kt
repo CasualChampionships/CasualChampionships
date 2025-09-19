@@ -724,7 +724,7 @@ class UHCMinigame(
         if (this.settings.mobMash && entity is LivingEntity && entity !is ServerPlayer) {
             val scale = entity.attributes.getInstance(Attributes.SCALE)
             if (scale != null && !scale.hasModifier(MOB_MASH)) {
-                val value = entity.random.nextDouble() - 0.4
+                val value = if (entity.random.nextDouble() < 0.02) 9.0 else entity.random.nextDouble() - 0.4
                 val modifier = AttributeModifier(MOB_MASH, value, AttributeModifier.Operation.ADD_VALUE)
                 scale.addPermanentModifier(modifier)
             }
