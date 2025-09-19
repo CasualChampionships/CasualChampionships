@@ -9,7 +9,8 @@
     "event.PortalForcerMixin",
     "event.TippedArrowForItemsAndEmeraldsMixin",
     "gui.ChestBlockMixin",
-    "gui.ChestMenuMixin"
+    "gui.ChestMenuMixin",
+    "minigame.EntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

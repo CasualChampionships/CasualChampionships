@@ -270,4 +270,12 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         value = false
         defaults.options(this)
     })
+
+    var helpingHand by this.register(bool {
+        name = "helping_hand"
+        display = Items.LEAD.named("Helping Hand")
+            .lore(Component.literal("Allows players to pick up other players"))
+        value = false
+        defaults.options(this)
+    })
 }

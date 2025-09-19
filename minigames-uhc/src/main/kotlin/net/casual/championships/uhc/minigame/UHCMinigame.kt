@@ -34,11 +34,10 @@ import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.resources.utils.withMiniShiftedDownFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.utils.ComponentUtils
+import net.casual.arcade.utils.*
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.JsonUtils.int
 import net.casual.arcade.utils.JsonUtils.obj
-import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.MathUtils.component1
 import net.casual.arcade.utils.MathUtils.component2
 import net.casual.arcade.utils.MathUtils.component3
@@ -67,11 +66,9 @@ import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatMMSS
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.impl.Sound
-import net.casual.arcade.utils.isOf
 import net.casual.arcade.utils.math.location.Location.Companion.withRotation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
-import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.LevelSpecificElement
@@ -423,12 +420,43 @@ class UHCMinigame(
     }
 
     @Listener
+    private fun onPlayerInteract(event: PlayerEntityInteractionEvent) {
+        val (player, target) = event
+        if (this.settings.helpingHand && player.mainHandItem.isEmpty && target is ServerPlayer) {
+            if (player.team == target.team) {
+                target.startRiding(player)
+            }
+        }
+    }
+
+    @Listener
+    private fun onPlayerAttack(event: PlayerTryAttackEvent) {
+        val (player, target) = event
+        if (this.settings.helpingHand && player.mainHandItem.isEmpty && target.vehicle == player) {
+            target.stopRiding()
+            val direction = player.lookAngle.normalize()
+            val modified = MathUtils.min(direction, Vec3(5.0, 0.5, 5.0))
+                .add(player.deltaMovement)
+            target.setVelocityAndMark(modified.x, modified.y, modified.z)
+            event.cancel()
+        }
+    }
+
+    @Listener
+    private fun onPlayerLeave(event: PlayerLeaveEvent) {
+        if (event.player.vehicle is ServerPlayer) {
+            event.player.stopRiding()
+        }
+    }
+
+    @Listener
     private fun onMinigamePlayerRemoved(event: MinigameRemovePlayerEvent) {
         val player = event.player
         player.unboostHealth()
         player.resetHunger()
         player.resetExperience()
         player.clearPlayerInventory()
+        player.stopRiding()
         ReplayPlayerRecorders.get(player).forEach { it.stop() }
     }
 
