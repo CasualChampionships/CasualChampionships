@@ -105,6 +105,7 @@ import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.border.UHCBoundaryPhase
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbar
+import net.casual.championships.uhc.item.TMCStarterPack
 import net.casual.championships.uhc.minigame.UHCPhase.GameOver
 import net.casual.championships.uhc.minigame.UHCPhase.Initializing
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
@@ -601,6 +602,10 @@ class UHCMinigame(
             player.inventory.add(ItemStack(Items.STONE_AXE))
             player.inventory.add(ItemStack(Items.BUNDLE))
             player.inventory.add(ItemStack(Items.APPLE, 5))
+        }
+
+        if (this.settings.tmcStarterPack) {
+            player.inventory.add(TMCStarterPack.create())
         }
     }
 

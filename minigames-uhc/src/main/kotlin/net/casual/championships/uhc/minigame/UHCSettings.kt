@@ -236,4 +236,11 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         option("minus_30_percent", Items.YELLOW_STAINED_GLASS_PANE.named("Minus 30%"), 0.3F)
         option("minus_50_percent", Items.RED_STAINED_GLASS_PANE.named("Minus 50%"), 0.5F)
     })
+
+    var tmcStarterPack by this.register(bool {
+        name = "tmc_starter_pack"
+        display = Items.RED_SHULKER_BOX.named("TMC Starter Pack")
+        value = false
+        defaults.options(this)
+    })
 }
