@@ -690,7 +690,7 @@ class UHCMinigame(
     @Listener
     private fun onEntityTrack(event: EntityStartTrackingEvent) {
         val (entity) = event
-        if (entity is LivingEntity && entity !is ServerPlayer) {
+        if (this.settings.mobMash && entity is LivingEntity && entity !is ServerPlayer) {
             val scale = entity.attributes.getInstance(Attributes.SCALE)
             if (scale != null && !scale.hasModifier(MOB_MASH)) {
                 val value = entity.random.nextDouble() - 0.4
