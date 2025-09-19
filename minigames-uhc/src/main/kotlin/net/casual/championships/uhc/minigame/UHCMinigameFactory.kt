@@ -99,13 +99,12 @@ class UHCMinigameFactory(
             this.createLevelWithPersistence(levels, VanillaDimension.Nether, dimensionsCopy),
             this.createLevelWithPersistence(levels, VanillaDimension.End, dimensionsCopy),
         )
-        val nerfedPlayersCopy = HashSet(this.nerfedPlayers)
         return UHCMinigame(
             context.server,
             context.uuid,
+            this.nerfedPlayers,
             dimensions,
-            nerfedPlayersCopy,
-            UHCMinigameFactory(dimensionsCopy, nerfedPlayersCopy)
+            UHCMinigameFactory(dimensionsCopy, this.nerfedPlayers)
         )
     }
 

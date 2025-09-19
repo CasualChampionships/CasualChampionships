@@ -161,8 +161,8 @@ import kotlin.math.roundToInt
 class UHCMinigame(
     server: MinecraftServer,
     uuid: UUID,
+    nerfedPlayers: Set<UUID>,
     private val dimensions: UHCDimensions,
-    private val nerfedPlayers: Set<UUID>,
     private val factory: UHCMinigameFactory? = null
 ): Minigame(server, uuid), MinigameRulesProvider by UHCMinigameRules {
     override val id = ID
@@ -191,6 +191,10 @@ class UHCMinigame(
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
 
         this.levels.addAll(this.dimensions.map { it.level })
+
+        for (player in nerfedPlayers) {
+            this.tags.add(player, NERFED)
+        }
     }
 
     fun resetPlayerHealth(player: ServerPlayer) {
@@ -414,7 +418,7 @@ class UHCMinigame(
 
     @Listener
     private fun onPlayerAttack(event: PlayerAttackEvent) {
-        if (this.nerfedPlayers.contains(event.player.uuid) && event.target is ServerPlayer) {
+        if (this.tags.has(event.player, NERFED) && event.target is ServerPlayer) {
             event.damage *= 1 - this.settings.nerfedPlayerDamage
         }
     }
@@ -996,8 +1000,8 @@ class UHCMinigame(
         private const val MOB_SPAWN_PROBABILITY = 1.0F / 2.0F
         private val MOB_LOOT_MULTIPLIER = (1.0F / MOB_SPAWN_PROBABILITY).roundToInt()
 
-        private val NERFED_DAMAGE_MODIFIER = casual("nerfed_damage")
         private val MOB_MASH = casual("mob_mash")
+        private val NERFED = casual("nerfed")
 
         val ID = casual("uhc_minigame")
     }
