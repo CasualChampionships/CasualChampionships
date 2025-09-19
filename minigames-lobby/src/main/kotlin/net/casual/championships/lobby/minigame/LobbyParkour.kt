@@ -30,6 +30,8 @@ class LobbyParkour(
     private val parkourers = Object2IntOpenHashMap<UUID>()
 
     fun initialize() {
+        this.lobby.effects.setInvisiblePredicate(this::checkInvisibility, true)
+
         val data = this.lobby.modules.get<LobbyParkourData>() ?: return
         this.lobby.events.register<ServerTickEvent> { this.tick(data) }
     }
@@ -68,6 +70,16 @@ class LobbyParkour(
                 player.teleportTo(checkpoint.spawn)
             }
         }
+    }
+
+    private fun checkInvisibility(observee: ServerPlayer, observer: ServerPlayer): Boolean {
+        if (observee == observer) {
+            return false
+        }
+        if (!this.parkourers.containsKey(observee.uuid) || !this.parkourers.containsKey(observer.uuid)) {
+            return false
+        }
+        return observer.closerThan(observee, 5.0)
     }
 
     private class ParkourHotbarGui(

@@ -177,7 +177,9 @@ object CasualGuiUtils {
         )
         minigame.ui.countdown = CasualCountdown
 
-        minigame.ui.addNametag(this.createPlayingNameTag())
+        minigame.ui.addNametag(this.createPlayingNameTag { observee, observer ->
+            !observee.isInvisible && !minigame.effects.isInvisibleFor(observee, observer)
+        })
         minigame.events.register<MinigameAddPlayerEvent> {
             it.player.team?.nameTagVisibility = Team.Visibility.NEVER
         }
