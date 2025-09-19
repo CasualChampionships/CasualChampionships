@@ -45,6 +45,7 @@ import net.casual.arcade.utils.MathUtils.isAbove
 import net.casual.arcade.utils.MathUtils.isBelow
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
+import net.casual.arcade.utils.PlayerUtils.dropItemStackIntoInventory
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.grantAllRecipesSilently
@@ -664,6 +665,14 @@ class UHCMinigame(
         for (teammate in team.getOnlinePlayers()) {
             this.effects.forceUpdate(teammate, player)
             this.effects.forceUpdate(player, teammate)
+        }
+    }
+
+    @Listener
+    private fun onPlayerBlockDropLoot(event: PlayerBlockDropLootEvent) {
+        val (player) = event
+        if (this.settings.handsFree && player.isShiftKeyDown) {
+            event.drops.forEach { player.dropItemStackIntoInventory(it) { } }
         }
     }
 

@@ -243,4 +243,11 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         value = false
         defaults.options(this)
     })
+
+    var handsFree by this.register(bool {
+        name = "hands_free"
+        display = Items.GOLDEN_PICKAXE.named("Hands Free")
+        value = false
+        defaults.options(this)
+    })
 }
