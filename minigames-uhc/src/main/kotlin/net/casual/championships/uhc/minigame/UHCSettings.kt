@@ -3,6 +3,7 @@ package net.casual.championships.uhc.minigame
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.bool
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.enumeration
+import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float32
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.time
 import net.casual.arcade.utils.ItemUtils.hideTooltip
@@ -227,12 +228,12 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         defaults.options(this)
     })
 
-    var nerfedPlayerDamage by this.register(float64 {
+    var nerfedPlayerDamage by this.register(float32 {
         name = "nerfed_player_damage"
         display = Items.WOODEN_SWORD.named("Nerfed player damage")
-        value = -2.0
-        option("minus_1", Items.GREEN_STAINED_GLASS_PANE.named("Minus 1"), -1.0)
-        option("minus_2", Items.YELLOW_STAINED_GLASS_PANE.named("Minus 2"), -2.0)
-        option("minus_4", Items.RED_STAINED_GLASS_PANE.named("Minus 4"), -4.0)
+        value = 0.3F
+        option("minus_10_percent", Items.GREEN_STAINED_GLASS_PANE.named("Minus 10%"), 0.1F)
+        option("minus_30_percent", Items.YELLOW_STAINED_GLASS_PANE.named("Minus 30%"), 0.3F)
+        option("minus_50_percent", Items.RED_STAINED_GLASS_PANE.named("Minus 50%"), 0.5F)
     })
 }

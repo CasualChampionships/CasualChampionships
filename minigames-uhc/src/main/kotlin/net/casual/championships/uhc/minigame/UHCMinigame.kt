@@ -128,13 +128,9 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.BlockTags
 import net.minecraft.util.Mth
-import net.minecraft.util.ProblemReporter
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.ai.attributes.AttributeModifier
-import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potion
@@ -142,15 +138,9 @@ import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.item.crafting.SingleRecipeInput
 import net.minecraft.world.item.enchantment.Enchantments
-import net.minecraft.world.level.BaseSpawner
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
-import net.minecraft.world.level.SpawnData
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.entity.SpawnerBlockEntity
 import net.minecraft.world.level.levelgen.Heightmap
-import net.minecraft.world.level.storage.TagValueInput
-import net.minecraft.world.level.storage.TagValueOutput
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
@@ -200,11 +190,6 @@ class UHCMinigame(
     fun resetPlayerHealth(player: ServerPlayer) {
         player.boostHealth(this.settings.health)
         player.resetHealth()
-    }
-
-    fun resetPlayerNerf(player: ServerPlayer) {
-        val instance = player.attributes.getInstance(Attributes.ATTACK_DAMAGE) ?: return
-        instance.removeModifier(NERFED_DAMAGE_MODIFIER)
     }
 
     fun onStartBoundary() {
@@ -365,7 +350,6 @@ class UHCMinigame(
         if (!this.players.isSpectating(player)) {
             this.updateBoundaryInfo(player)
             this.updatePedalToTheMetal(player)
-            this.updatePlayerNerfs(player)
         } else if (!player.isCreative) {
             val interval = 20.Minutes.ticks
             if (this.uptime % interval == interval - 1) {
@@ -420,6 +404,13 @@ class UHCMinigame(
     @Listener
     private fun onTippedArrowTradeOffer(event: TippedArrowTradeOfferEvent) {
         event.potion = this.replacePotion(event.potion)
+    }
+
+    @Listener
+    private fun onPlayerAttack(event: PlayerAttackEvent) {
+        if (this.nerfedPlayers.contains(event.player.uuid) && event.target is ServerPlayer) {
+            event.damage *= 1 - this.settings.nerfedPlayerDamage
+        }
     }
 
     @Listener
@@ -823,21 +814,6 @@ class UHCMinigame(
         player.addEffect(MobEffectInstance(
             MobEffects.SPEED, 5.Seconds.ticks + 5, 0, false, false, false
         ))
-    }
-
-    private fun updatePlayerNerfs(player: ServerPlayer) {
-        if (!this.nerfedPlayers.contains(player.uuid)) {
-            return
-        }
-
-        val instance = player.attributes.getInstance(Attributes.ATTACK_DAMAGE) ?: return
-        if (instance.hasModifier(NERFED_DAMAGE_MODIFIER)) {
-            return
-        }
-
-        instance.addPermanentModifier(
-            AttributeModifier(NERFED_DAMAGE_MODIFIER, this.settings.nerfedPlayerDamage, AttributeModifier.Operation.ADD_VALUE)
-        )
     }
 
     private fun createSidebar(): DynamicSidebar {
