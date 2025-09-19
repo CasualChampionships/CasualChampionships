@@ -256,7 +256,9 @@ class CasualMinigameManager(
             playerTeam.setHexColor(team.color)
             playerTeam.isAllowFriendlyFire = false
             playerTeam.collisionRule = Team.CollisionRule.ALWAYS
-            updated.add(playerTeam)
+            if (!this.current.teams.isSpectatorTeam(playerTeam)) {
+                updated.add(playerTeam)
+            }
         }
 
         for (player in this.current.players) {
