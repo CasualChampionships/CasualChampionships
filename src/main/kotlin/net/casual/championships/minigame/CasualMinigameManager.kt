@@ -302,13 +302,13 @@ class CasualMinigameManager(
     private suspend fun reloadWhitelist(server: MinecraftServer) {
         val participants = this.championships.sync.getParticipants()
         val whitelist = server.playerList.whiteList
+        val previous = whitelist.userList.toSet()
         if (participants is SyncableParticipants.Strict) {
             for (entry in whitelist.entries.toList()) {
                 server.playerList.whiteList.remove(entry)
             }
         }
 
-        val previous = whitelist.userList.toSet()
         val added = HashSet<String>()
         val removed = previous - participants.profiles.map(GameProfile::getName).toSet()
         for (profile in participants.profiles) {
