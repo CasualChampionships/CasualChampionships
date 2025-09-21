@@ -6,15 +6,12 @@ import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.level.LevelBlockChangedEvent
 import net.casual.arcade.events.server.player.PlayerBlockPlacedEvent
 import net.casual.arcade.utils.ItemUtils.isOf
-import net.casual.arcade.utils.PlayerUtils.broadcastToOps
-import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.isOf
 import net.casual.championships.common.anticheat.AntiCheatType
 import net.casual.championships.common.anticheat.fbp.WorldBlockTrackerExtension.Companion.blockTracker
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.BlockTags

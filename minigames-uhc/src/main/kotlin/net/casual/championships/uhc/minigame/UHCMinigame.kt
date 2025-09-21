@@ -44,7 +44,6 @@ import net.casual.arcade.utils.MathUtils.component3
 import net.casual.arcade.utils.MathUtils.isAbove
 import net.casual.arcade.utils.MathUtils.isBelow
 import net.casual.arcade.utils.PlayerUtils.boostHealth
-import net.casual.arcade.utils.PlayerUtils.broadcastToOps
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.dropItemStackIntoInventory
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
