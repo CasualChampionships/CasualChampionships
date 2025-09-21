@@ -44,6 +44,7 @@ import net.casual.arcade.utils.MathUtils.component3
 import net.casual.arcade.utils.MathUtils.isAbove
 import net.casual.arcade.utils.MathUtils.isBelow
 import net.casual.arcade.utils.PlayerUtils.boostHealth
+import net.casual.arcade.utils.PlayerUtils.broadcastToOps
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.dropItemStackIntoInventory
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
@@ -81,6 +82,7 @@ import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
 import net.casual.arcade.visuals.sidebar.SidebarComponents.Companion.addRow
 import net.casual.championships.common.event.ChunkGenerationMobSpawnEvent
+import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.event.TippedArrowTradeOfferEvent
 import net.casual.championships.common.event.portal.EntityPortalEntryPositionEvent
 import net.casual.championships.common.event.portal.PortalCreateValidPositionEvent
@@ -739,6 +741,14 @@ class UHCMinigame(
     @Listener(strategy = ThreadingTarget.UseCurrentThread)
     private fun onChunkGenerationMobSpawn(event: ChunkGenerationMobSpawnEvent) {
         event.probability *= MOB_SPAWN_PROBABILITY
+    }
+
+    @Listener
+    private fun onPlayerCheat(event: PlayerCheatEvent) {
+        val message = Component {
+            literal("Player ") + event.player.displayName!! + literal(" tried to cheated with ${event.type}")
+        }
+        this.chat.broadcastInfo(message, this.players.admins)
     }
 
     private fun isPositionValidForPortal(level: ServerLevel, position: BlockPos, boundary: LevelBoundary): Boolean {

@@ -53,6 +53,7 @@ allprojects {
         modImplementation(libs.arcade)
 
         modImplementation(libs.map.canvas)
+        modImplementation(libs.permissions)
     }
 
     java {

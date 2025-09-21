@@ -8,6 +8,7 @@ map-canvas      = "0.5.1+1.21.5"
 arcade          = "0.6.2-beta.42+1.21.8"
 casual-database = "0.3.1"
 voicechat-api   = "2.5.31"
+permissions     = "0.4.1"
 
 # Plugins
 fabric-loom = "1.11-SNAPSHOT"
@@ -22,6 +23,7 @@ arcade          = { module = "net.casualchampionships:arcade"              , ver
 arcade-datagen  = { module = "net.casualchampionships:arcade-datagen"      , version.ref = "arcade" }
 casual-database = { module = "net.casualchampionships:casual-database-core", version.ref = "casual-database" }
 voicechat-api   = { module = "de.maxhenkel.voicechat:voicechat-api"        , version.ref = "voicechat-api" }
+permissions     = { module = "me.lucko:fabric-permissions-api"             , version.ref = "permissions" }
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }

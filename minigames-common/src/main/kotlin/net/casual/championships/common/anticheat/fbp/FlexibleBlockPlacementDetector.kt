@@ -1,5 +1,6 @@
 package net.casual.championships.common.anticheat.fbp
 
+import me.lucko.fabric.api.permissions.v0.Permissions
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.level.LevelBlockChangedEvent
@@ -39,17 +40,12 @@ object FlexibleBlockPlacementDetector {
     private fun onPlayerBlockPlaced(event: PlayerBlockPlacedEvent) {
         if (this.detectFlexibleBlockPlacement(event.player, event.context)) {
             GlobalEventHandler.Server.broadcast(PlayerCheatEvent(event.player, AntiCheatType.FlexibleBlockPlacement))
-
-            // TODO: Move this
-            val message = Component.literal("Player ").append(event.player.displayName!!).append(" used fbp")
-            event.player.levelServer.playerList.players.broadcastToOps(message)
-
             event.cancel()
         }
     }
 
     private fun detectFlexibleBlockPlacement(player: ServerPlayer, context: BlockPlaceContext): Boolean {
-        if (player.hasPermissions(4)) {
+        if (Permissions.check(player, "casual.fbp", 4)) {
             return false
         }
 
