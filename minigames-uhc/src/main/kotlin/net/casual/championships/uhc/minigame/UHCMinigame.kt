@@ -302,7 +302,7 @@ class UHCMinigame(
         val boundary = level.levelBoundary ?: return
 
         val shrinkingSpeed = this.boundaryPhase.getSpeedInBlocksPerTick(level)
-        if (shrinkingSpeed > 0) {
+        if (shrinkingSpeed <= 0) {
             val box = boundary.getAABB()
             event.cancel(BlockPos.containing(
                 Mth.clamp(pos.x, box.minX, box.maxX),
