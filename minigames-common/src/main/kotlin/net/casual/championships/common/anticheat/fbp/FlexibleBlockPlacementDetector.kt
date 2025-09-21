@@ -4,8 +4,10 @@ import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.level.LevelBlockChangedEvent
 import net.casual.arcade.events.server.player.PlayerBlockPlacedEvent
+import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.PlayerUtils.broadcastToOps
 import net.casual.arcade.utils.PlayerUtils.levelServer
+import net.casual.arcade.utils.isOf
 import net.casual.championships.common.anticheat.AntiCheatType
 import net.casual.championships.common.anticheat.fbp.WorldBlockTrackerExtension.Companion.blockTracker
 import net.casual.championships.common.event.PlayerCheatEvent
@@ -15,6 +17,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.BlockTags
+import net.minecraft.world.item.Items
 import net.minecraft.world.item.PlaceOnWaterBlockItem
 import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.block.state.BlockState
@@ -50,15 +53,19 @@ object FlexibleBlockPlacementDetector {
             return false
         }
 
+        if (context.itemInHand.isOf(Items.SCAFFOLDING)) {
+            return false
+        }
+
         val pos = context.clickedPos
         val level = context.level as ServerLevel
 
         val state = level.getBlockState(pos)
 
-        var couldBePlacedOffset = isSolidForPlacement(context, state)
+        var couldBePlacedOffset = this.isSolidForPlacement(context, state)
         var couldBePlacedHere = !couldBePlacedOffset
         for (olderState in level.blockTracker.getTrackedStatesInLastNTicks(pos)) {
-            val isSolid = isSolidForPlacement(context, olderState)
+            val isSolid = this.isSolidForPlacement(context, olderState)
             couldBePlacedOffset = couldBePlacedOffset || isSolid
             couldBePlacedHere = couldBePlacedHere || !isSolid
 
@@ -89,11 +96,11 @@ object FlexibleBlockPlacementDetector {
         for (placedPos in possible) {
             for (direction in Direction.entries) {
                 val neighbor = level.getBlockState(placedPos.relative(direction))
-                if (isSolidForPlacement(context, neighbor)) {
+                if (this.isSolidForPlacement(context, neighbor)) {
                     return false
                 }
                 for (olderNeighbor in level.blockTracker.getTrackedStatesInLastNTicks(placedPos.relative(direction))) {
-                    if (isSolidForPlacement(context, olderNeighbor)) {
+                    if (this.isSolidForPlacement(context, olderNeighbor)) {
                         return false
                     }
                 }
@@ -103,7 +110,7 @@ object FlexibleBlockPlacementDetector {
     }
 
     private fun isSolidForPlacement(context: BlockPlaceContext, state: BlockState): Boolean {
-        if (state.canBeReplaced(context) && !state.`is`(BlockTags.SLABS)) {
+        if (state.canBeReplaced(context) && !state.isOf(BlockTags.SLABS)) {
             val fluidsSolid = context.itemInHand.item is PlaceOnWaterBlockItem
             return fluidsSolid && state.fluidState.isSource
         }
