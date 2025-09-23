@@ -141,10 +141,15 @@ class UHCAdvancementManager(
             player.grantAdvancement(UHCAdvancements.EARLY_EXIT)
         }
 
-        if (source.`is`(DamageTypes.OUTSIDE_BORDER)) {
-            player.grantAdvancement(UHCAdvancements.SKILL_ISSUE)
-        } else if (source.`is`(DamageTypes.FELL_OUT_OF_WORLD)) {
-            player.grantAdvancement(UHCAdvancements.WELL_THAT_WAS_A_BIT_SILLY)
+        when {
+            source.isOf(DamageTypes.OUTSIDE_BORDER) -> player.grantAdvancement(UHCAdvancements.SKILL_ISSUE)
+            source.isOf(DamageTypes.FELL_OUT_OF_WORLD) -> player.grantAdvancement(UHCAdvancements.WELL_THAT_WAS_A_BIT_SILLY)
+            source.isOf(DamageTypes.BAD_RESPAWN_POINT) -> {
+                val entity = source.entity
+                if (entity is ServerPlayer && entity.team == player.team) {
+                    player.grantAdvancement(UHCAdvancements.VELIZARD)
+                }
+            }
         }
 
         val killer = player.getKillCreditWith(source)
@@ -326,10 +331,14 @@ class UHCAdvancementManager(
 
     @Listener(flags = IS_PLAYING)
     private fun onPlayerDamage(event: PlayerDamageEvent) {
-        if (this.uhc.uptime < 1200 && event.source.`is`(DamageTypes.FALL) && event.amount > 0.0F) {
-            event.player.grantAdvancement(UHCAdvancements.BROKEN_ANKLES)
-        } else if (event.source.`is`(DamageTypes.DROWN)) {
-            event.player.grantAdvancement(UHCAdvancements.FORGOT_YOUR_DOOR)
+        val (player, source, amount) = event
+        when {
+            source.isOf(DamageTypes.DROWN) -> player.grantAdvancement(UHCAdvancements.FORGOT_YOUR_DOOR)
+            source.isOf(DamageTypes.FALL) -> {
+                if (this.uhc.uptime < 1200 && amount > 0.0F) {
+                    player.grantAdvancement(UHCAdvancements.BROKEN_ANKLES)
+                }
+            }
         }
     }
 

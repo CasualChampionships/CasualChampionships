@@ -319,6 +319,15 @@ object UHCAdvancements: AdvancementCollection() {
         announce()
     }
 
+    val VELIZARD = register {
+        parent(NO_ONE_ASKED)
+        id = casual("velizard")
+        display(Items.WHITE_BED)
+        setTitleAndDesc("uhc.advancement.velizard")
+        toast()
+        announce()
+    }
+
     val BROKEN_ANKLES = register {
         parent(EMBARRASSING)
         id = casual("broken_ankles")

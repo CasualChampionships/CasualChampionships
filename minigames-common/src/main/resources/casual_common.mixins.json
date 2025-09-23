@@ -10,6 +10,8 @@
     "event.TippedArrowForItemsAndEmeraldsMixin",
     "gui.ChestBlockMixin",
     "gui.ChestMenuMixin",
+    "minigame.BedBlockMixin",
+    "minigame.DamageSourceAccessor",
     "minigame.EntityMixin"
   ],
   "injectors": {
