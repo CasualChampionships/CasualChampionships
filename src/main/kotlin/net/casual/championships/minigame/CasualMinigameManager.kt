@@ -62,6 +62,7 @@ import net.minecraft.world.scores.Scoreboard
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.io.path.notExists
 import kotlin.jvm.optionals.getOrNull
 
@@ -302,14 +303,15 @@ class CasualMinigameManager(
         val participants = this.championships.sync.getParticipants()
         val whitelist = server.playerList.whiteList
         val previous = whitelist.userList.toSet()
+        val removed = ArrayList<String>()
         if (participants is SyncableParticipants.Strict) {
             for (entry in whitelist.entries.toList()) {
                 server.playerList.whiteList.remove(entry)
             }
+            removed.addAll(previous - participants.profiles.map(GameProfile::getName).toSet())
         }
 
         val added = HashSet<String>()
-        val removed = previous - participants.profiles.map(GameProfile::getName).toSet()
         for (profile in participants.profiles) {
             whitelist.add(UserWhiteListEntry(profile))
             if (!previous.contains(profile.name)) {
