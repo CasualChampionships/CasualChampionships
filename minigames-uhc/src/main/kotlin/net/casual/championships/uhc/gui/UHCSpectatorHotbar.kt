@@ -6,8 +6,10 @@ import eu.pb4.sgui.api.gui.HotbarGui
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.AdventureSpectator
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGameMode
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.NoClipSpectator
+import net.casual.arcade.utils.DynamicResolvableProfile
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.PlayerUtils.sendSound
+import net.casual.arcade.utils.StaticResolvableProfile
 import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
@@ -82,7 +84,7 @@ class UHCSpectatorHotbar(
     private fun setTeleportElement() {
         val players = ItemStack(CasualItems.FORWARD_FACING_PLAYER_HEAD)
             .named(Component.translatable("casual.spectator.teleport"))
-        players.set(DataComponents.PROFILE, ResolvableProfile(this.uhc.players.allProfiles.random()))
+        players.set(DataComponents.PROFILE, StaticResolvableProfile(this.uhc.players.allProfiles.random()))
         this.setSlot(8, players) { ->
             val gui = CasualGuiUtils.createTeamSelectionGui(this.uhc, this.player)
             this.player.sendSound(SoundEvents.UI_BUTTON_CLICK)

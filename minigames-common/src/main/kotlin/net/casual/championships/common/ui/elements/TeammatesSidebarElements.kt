@@ -1,11 +1,13 @@
 package net.casual.championships.common.ui.elements
 
-import net.casual.arcade.resources.font.heads.PlayerHeadComponents
+import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.utils.DynamicResolvableProfile
 import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.PlayerUtils.player
+import net.casual.arcade.utils.PlayerUtils.server
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.component.bold
 import net.casual.arcade.utils.component.italicize
@@ -41,7 +43,7 @@ class TeammatesSidebarElements(
         }
 
         for (username in teammates) {
-            components.addRow(this.createTeammateComponent(player.levelServer, username, team))
+            components.addRow(this.createTeammateComponent(player.server, username, team))
         }
     }
 
@@ -49,7 +51,7 @@ class TeammatesSidebarElements(
         val formatted = Component.empty()
             .append(this.buffer)
             .append(this.playerBuffer)
-            .append(PlayerHeadComponents.getHeadOrDefault(username))
+            .append(PixelGridHeadComponents.getHeadOrDefaultFor(DynamicResolvableProfile(username), server))
             .append(" ")
             .append(Component.literal(username).withMiniFont().color(team))
         val teammate = server.player(username)

@@ -23,7 +23,6 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.sendResourcePack
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.scheduler.coroutine.launch
 import net.casual.arcade.utils.ArcadeUtils
 import net.casual.arcade.utils.JsonUtils
 import net.casual.arcade.utils.PlayerUtils.getChatUsername
@@ -36,6 +35,7 @@ import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.green
 import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.component.red
+import net.casual.arcade.utils.coroutine.launch
 import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
@@ -56,6 +56,7 @@ import net.casual.championships.util.CasualTeamUtils.getOrCreateAdminTeam
 import net.casual.championships.util.CasualTeamUtils.getOrCreateSpectatorTeam
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.players.NameAndId
 import net.minecraft.server.players.UserWhiteListEntry
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Scoreboard
@@ -169,7 +170,7 @@ class CasualMinigameManager(
     // This should be called *after* minigames have been loaded
     // so the state can reload minigames if necessary
     internal fun load(server: MinecraftServer) {
-        server.playerList.setUsingWhiteList(true)
+        server.isUsingWhitelist = true
 
         this.reloadConfiguration()
         this.reloadState()
@@ -308,12 +309,12 @@ class CasualMinigameManager(
             for (entry in whitelist.entries.toList()) {
                 server.playerList.whiteList.remove(entry)
             }
-            removed.addAll(previous - participants.profiles.map(GameProfile::getName).toSet())
+            removed.addAll(previous - participants.profiles.map(GameProfile::name).toSet())
         }
 
         val added = HashSet<String>()
         for (profile in participants.profiles) {
-            whitelist.add(UserWhiteListEntry(profile))
+            whitelist.add(UserWhiteListEntry(NameAndId(profile)))
             if (!previous.contains(profile.name)) {
                 added.add(profile.name)
             }
@@ -335,7 +336,7 @@ class CasualMinigameManager(
     }
 
     private fun onPlayerRequestLogin(event: PlayerRequestLoginEvent) {
-        val profile = event.profile
+        val profile = event.identification
         if (event.isAccepted && !this.floodgates && !event.server.playerList.isOp(profile)) {
             event.deny(Component.literal("CasualChampionships isn't quite ready yet..."))
         }

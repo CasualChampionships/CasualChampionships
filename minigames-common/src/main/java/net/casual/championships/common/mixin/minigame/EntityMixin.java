@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Entity.class)
 public class EntityMixin {
     @ModifyExpressionValue(
-        method = "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z",
+        method = "startRiding(Lnet/minecraft/world/entity/Entity;ZZ)Z",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/entity/EntityType;canSerialize()Z"

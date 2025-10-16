@@ -15,7 +15,7 @@ object LobbyAdvancements: AdvancementCollection() {
         id = casual("lobby_root")
         display(Items.GOLDEN_APPLE)
         setTitleAndDesc("lobby.advancements.root")
-        background = ClientAsset(ResourceLocation.withDefaultNamespace("gui/advancements/backgrounds/adventure"))
+        background = ClientAsset.ResourceTexture(ResourceLocation.withDefaultNamespace("gui/advancements/backgrounds/adventure"))
     }
 
     val UH_OH = register {

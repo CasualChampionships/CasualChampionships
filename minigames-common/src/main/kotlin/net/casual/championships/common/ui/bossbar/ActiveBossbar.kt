@@ -39,7 +39,7 @@ class ActiveBossbar(
         return 1.0F
     }
 
-    override fun getColour(player: ServerPlayer): BossEvent.BossBarColor {
+    override fun getColor(player: ServerPlayer): BossEvent.BossBarColor {
         return BossEvent.BossBarColor.YELLOW
     }
 

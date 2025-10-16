@@ -7,7 +7,7 @@ import net.casual.arcade.commands.CommandTree
 import net.casual.arcade.commands.literal
 import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
-import net.casual.arcade.scheduler.coroutine.launch
+import net.casual.arcade.utils.coroutine.launch
 import net.casual.championships.CasualChampionships
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack

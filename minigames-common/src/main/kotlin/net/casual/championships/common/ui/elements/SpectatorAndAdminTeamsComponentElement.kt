@@ -2,7 +2,7 @@ package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.managers.MinigameTeamManager
-import net.casual.arcade.resources.font.heads.PlayerHeadComponents
+import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ComponentUtils
@@ -58,7 +58,7 @@ class SpectatorAndAdminTeamsComponentElement(
         val component = Component.empty()
         val iter = players.iterator()
         for (player in iter) {
-            component.append(PlayerHeadComponents.getHeadOrDefault(player))
+            component.append(PixelGridHeadComponents.getHeadOrDefaultFor(player))
             if (iter.hasNext()) {
                 component.append(SpacingFontResources.spaced(4))
             }

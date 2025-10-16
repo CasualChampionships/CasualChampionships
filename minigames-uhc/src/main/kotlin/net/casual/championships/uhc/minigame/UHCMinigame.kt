@@ -56,6 +56,7 @@ import net.casual.arcade.utils.PlayerUtils.resetHunger
 import net.casual.arcade.utils.PlayerUtils.revokeAllAdvancements
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.PlayerUtils.sendTitle
+import net.casual.arcade.utils.PlayerUtils.server
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
@@ -272,7 +273,11 @@ class UHCMinigame(
         this.advancements.addAll(UHCAdvancements)
         this.settings.enableChatCommand.set(true)
 
-        this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.overworld)
+        val y =  this.overworld.getHeight(Heightmap.Types.WORLD_SURFACE, 0, 0)
+        this.levels.spawn = MinigameLevelManager.SpawnLocation.global(
+            location = this.overworld.asLocation(Vec3(0.0, y.toDouble(), 0.0)),
+            overridesPlayerSpawnPoint = true
+        )
 
         this.ui.setSidebar(this.createSidebar())
     }
@@ -400,7 +405,7 @@ class UHCMinigame(
         val player = event.player
 
         player.lastDeathLocation.ifPresent { pos ->
-            val level = player.levelServer.getLevel(pos.dimension)
+            val level = player.server.getLevel(pos.dimension)
             if (level != null && this.levels.has(level)) {
                 val location = pos.pos.center.withRotation(player.rotationVector).with(level)
                 player.teleportTo(location)

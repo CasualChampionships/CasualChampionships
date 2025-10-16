@@ -17,7 +17,7 @@ class LobbyBossbar: TimerBossbar() {
         return CasualComponents.STARTING_IN_BACKGROUNDED.generate(time).withMiniFont()
     }
 
-    override fun getColour(player: ServerPlayer): BossEvent.BossBarColor {
+    override fun getColor(player: ServerPlayer): BossEvent.BossBarColor {
         return BossEvent.BossBarColor.YELLOW
     }
 

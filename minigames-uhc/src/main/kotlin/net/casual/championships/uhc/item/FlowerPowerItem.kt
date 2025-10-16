@@ -24,7 +24,7 @@ class FlowerPowerItem(properties: Properties): Item(properties), PolymerItem {
         player.addEffect(MobEffectInstance(
             MobEffects.STRENGTH, 5.Seconds.ticks, 0
         ))
-        stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(interactionHand))
+        stack.hurtAndBreak(1, player, interactionHand.asEquipmentSlot())
         return InteractionResult.SUCCESS_SERVER
     }
 }

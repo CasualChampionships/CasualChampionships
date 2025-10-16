@@ -56,7 +56,6 @@ import net.casual.championships.lobby.minigame.command.DuelCommand
 import net.casual.championships.lobby.minigame.command.LobbyCommand
 import net.casual.championships.lobby.minigame.command.MinesweeperCommand
 import net.casual.championships.lobby.minigame.modules.LobbyData
-import net.minecraft.core.BlockPos
 import net.minecraft.core.Vec3i
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
@@ -169,7 +168,7 @@ class LobbyMinigame(
     @Listener
     private fun onMinigameInitialize(event: MinigameInitializeEvent) {
         this.levels.add(this.level)
-        this.levels.spawn = SpawnLocation.global(this.level, BlockPos.containing(this.lobbyData.spawn.get().position))
+        this.levels.spawn = SpawnLocation.global(this.lobbyData.spawn.get().with(this.level))
 
         this.parkour.initialize()
 

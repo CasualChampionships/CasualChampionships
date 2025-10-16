@@ -1,6 +1,7 @@
 package net.casual.championships.common.items.minigame
 
 import net.casual.arcade.utils.ItemUtils.isOf
+import net.casual.arcade.utils.StaticResolvableProfile
 import net.casual.championships.common.items.CasualItems
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
@@ -21,7 +22,7 @@ class PlayerHeadItem(properties: Properties): HeadItem(properties) {
 
     override fun getName(stack: ItemStack): Component? {
         if (stack.isOf(CasualItems.PLAYER_HEAD)) {
-            val name = stack.get(DataComponents.PROFILE)?.name?.getOrNull()
+            val name = stack.get(DataComponents.PROFILE)?.name()?.getOrNull()
             if (name != null) {
                 return Component.translatable("${Items.PLAYER_HEAD.descriptionId}.named", name)
             }
@@ -32,7 +33,7 @@ class PlayerHeadItem(properties: Properties): HeadItem(properties) {
     companion object {
         fun create(player: ServerPlayer): ItemStack {
             val stack = ItemStack(CasualItems.PLAYER_HEAD)
-            stack.set(DataComponents.PROFILE, ResolvableProfile(player.gameProfile))
+            stack.set(DataComponents.PROFILE, StaticResolvableProfile(player.gameProfile))
             return stack
         }
     }

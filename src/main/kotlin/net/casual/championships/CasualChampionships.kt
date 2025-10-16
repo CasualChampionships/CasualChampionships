@@ -5,8 +5,8 @@ import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerStartEvent
-import net.casual.arcade.scheduler.coroutine.launch
 import net.casual.arcade.utils.ServerUtils.setMessageOfTheDay
+import net.casual.arcade.utils.coroutine.launch
 import net.casual.championships.commands.*
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.config.CasualConfig

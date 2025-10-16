@@ -17,7 +17,7 @@ class GlowingBossBar: TimerBossbar() {
         return MathUtils.centeredScale(super.getProgress(player), 0.75F)
     }
 
-    override fun getColour(player: ServerPlayer): BossEvent.BossBarColor {
+    override fun getColor(player: ServerPlayer): BossEvent.BossBarColor {
         return BossEvent.BossBarColor.GREEN
     }
 

@@ -110,7 +110,9 @@ class DuelMinigame(
             this.players.isPlaying(observee) && (this.players.isSpectating(observer) || this.duelSettings.glowing)
         }, false)
 
-        this.levels.spawn = MinigameLevelManager.SpawnLocation.global(this.level, this.duelArena.data.spawn)
+        this.levels.spawn = MinigameLevelManager.SpawnLocation.global(
+            this.level.asLocation(this.duelArena.data.spawn.bottomCenter)
+        )
 
         this.ui.addNametag(CasualGuiUtils.createPlayingHealthTag(
             VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
