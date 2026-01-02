@@ -7,7 +7,7 @@ import net.casual.championships.common.ui.minesweeper.MinesweeperItems
 import net.casual.championships.common.util.casual
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.core.ClientAsset
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.world.item.Items
 
 object LobbyAdvancements: AdvancementCollection() {
@@ -15,7 +15,7 @@ object LobbyAdvancements: AdvancementCollection() {
         id = casual("lobby_root")
         display(Items.GOLDEN_APPLE)
         setTitleAndDesc("lobby.advancements.root")
-        background = ClientAsset.ResourceTexture(ResourceLocation.withDefaultNamespace("gui/advancements/backgrounds/adventure"))
+        background = ClientAsset.ResourceTexture(Identifier.withDefaultNamespace("gui/advancements/backgrounds/adventure"))
     }
 
     val UH_OH = register {

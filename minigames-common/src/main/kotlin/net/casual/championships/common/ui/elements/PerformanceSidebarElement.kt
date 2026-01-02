@@ -2,9 +2,9 @@ package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.visuals.elements.UniversalElement
-import net.casual.arcade.visuals.elements.component.MSPTComponentElement
-import net.casual.arcade.visuals.elements.component.TPSComponentElement
 import net.casual.arcade.visuals.sidebar.SidebarComponent
+import net.casual.arcade.visuals.utils.elements.component.MSPTComponentElement
+import net.casual.arcade.visuals.utils.elements.component.TPSComponentElement
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 

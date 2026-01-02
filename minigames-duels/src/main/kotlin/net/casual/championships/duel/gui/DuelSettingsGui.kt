@@ -1,10 +1,10 @@
 package net.casual.championships.duel.gui
 
+import net.casual.arcade.guis.sgui.setSlot
 import net.casual.arcade.minigame.settings.display.MenuGameSetting
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.component.white
-import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.ui.CasualSimpleGui
 import net.casual.championships.common.util.CasualComponents

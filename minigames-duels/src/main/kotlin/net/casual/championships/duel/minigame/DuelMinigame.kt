@@ -30,8 +30,8 @@ import net.casual.arcade.utils.LootTableUtils.enchant
 import net.casual.arcade.utils.LootTableUtils.exactly
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
-import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.PlayerUtils.resetHealth
+import net.casual.arcade.utils.PlayerUtils.server
 import net.casual.arcade.utils.PlayerUtils.unboostHealth
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
@@ -39,7 +39,6 @@ import net.casual.arcade.utils.component.bold
 import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.suggestCommand
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
-import net.casual.arcade.utils.set
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.toKey
 import net.casual.championships.common.items.CasualItems
@@ -47,7 +46,6 @@ import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
-import net.casual.championships.common.util.CasualPredicates
 import net.casual.championships.common.util.CasualPredicates.OBSERVEE_NOT_MINIGAME_SPECTATOR
 import net.casual.championships.common.util.CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
 import net.casual.championships.common.util.RuleUtils
@@ -69,7 +67,6 @@ import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.context.DirectionalPlaceContext
-import net.minecraft.world.level.GameRules
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
@@ -114,7 +111,7 @@ class DuelMinigame(
             this.level.asLocation(this.duelArena.data.spawn.bottomCenter)
         )
 
-        this.ui.addNametag(CasualGuiUtils.createPlayingHealthTag(
+        this.visuals.addNametag(CasualGuiUtils.createPlayingHealthTag(
             VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
         ))
     }
@@ -212,7 +209,7 @@ class DuelMinigame(
         val player = event.player
 
         player.lastDeathLocation.ifPresent { location ->
-            val level = player.levelServer.getLevel(location.dimension)
+            val level = player.server.getLevel(location.dimension)
             if (level != null && this.levels.has(level) && player.isSpectator) {
                 player.teleportTo(level.asLocation(location.pos.center))
             }

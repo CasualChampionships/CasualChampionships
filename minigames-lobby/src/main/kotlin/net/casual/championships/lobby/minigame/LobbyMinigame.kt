@@ -1,5 +1,6 @@
 package net.casual.championships.lobby.minigame
 
+import kotlinx.coroutines.withContext
 import net.casual.arcade.dimensions.level.CustomLevel
 import net.casual.arcade.dimensions.level.LevelPersistence
 import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
@@ -23,11 +24,11 @@ import net.casual.arcade.minigame.managers.MinigameLevelManager.SpawnLocation
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
-import net.casual.arcade.minigame.utils.MinigameUtils.countdown
 import net.casual.arcade.minigame.utils.MinigameUtils.transferAdminAndSpectatorTeamsTo
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.scheduler.task.Completable
 import net.casual.arcade.scheduler.task.impl.PlayerTask
+import net.casual.arcade.scheduler.utils.asCoroutineDispatcher
 import net.casual.arcade.utils.*
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
@@ -42,6 +43,8 @@ import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.component.shadowless
 import net.casual.arcade.utils.component.wrap
+import net.casual.arcade.utils.coroutine.delay
+import net.casual.arcade.utils.coroutine.launch
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.visuals.tab.PlayerListDisplay
 import net.casual.championships.common.minigame.CasualSettings
@@ -60,13 +63,13 @@ import net.minecraft.core.Vec3i
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.level.GameRules
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
+import net.minecraft.world.level.gamerules.GameRules
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import java.util.*
@@ -90,7 +93,7 @@ class LobbyMinigame(
     val next by next
 
     override val settings: MinigameSettings = CasualSettings(this)
-    override val id: ResourceLocation = ID
+    override val id: Identifier = ID
 
     fun teleport(player: ServerPlayer) {
         val winners = this.tags.getUUIDsFor(CasualTags.WON)
@@ -113,8 +116,12 @@ class LobbyMinigame(
     }
 
     fun startCountdown() {
-        this.ui.countdown.countdown(this).then {
-            this.scheduler.schedulePhased(1.Seconds, this::moveToNextMinigame)
+        this.server.launch {
+            withContext(scheduler.asPhasedScheduler().asCoroutineDispatcher()) {
+                visuals.countdown.transition(players = players::all)
+                delay(1.Seconds)
+                moveToNextMinigame()
+            }
         }
     }
 
@@ -178,12 +185,12 @@ class LobbyMinigame(
 
         val display = PlayerListDisplay(LobbyPlayerListEntries(this))
         CasualGuiUtils.addCasualFooterAndHeader(this, display)
-        this.ui.setPlayerListDisplay(display)
+        this.visuals.setPlayerListDisplay(display)
 
         this.addEventListener(LobbyAdvancementManager(this))
         this.advancements.addAll(LobbyAdvancements)
 
-        this.ui.addBossbar(this.bossbar)
+        this.visuals.addBossbar(this.bossbar)
 
         this.registerProperties()
 
@@ -288,7 +295,7 @@ class LobbyMinigame(
 
     private fun createLevel(): CustomLevel {
         val data = this.lobbyData
-        val dimension = ResourceUtils.random().toKey(Registries.DIMENSION)
+        val dimension = IdentifierUtils.random().toKey(Registries.DIMENSION)
         this.extractLobbyWorld(dimension)
         val level = CustomLevelBuilder.build(this.server) {
             spoofedDimensionKey(casual("lobby"))
@@ -306,20 +313,20 @@ class LobbyMinigame(
             }
             gameRules {
                 resetToDefault()
-                set(GameRules.RULE_DOINSOMNIA, false)
-                set(GameRules.RULE_DOFIRETICK, false)
-                set(GameRules.RULE_DOMOBSPAWNING, false)
-                set(GameRules.RULE_FALL_DAMAGE, false)
-                set(GameRules.RULE_DROWNING_DAMAGE, false)
-                set(GameRules.RULE_DOENTITYDROPS, false)
-                set(GameRules.RULE_WEATHER_CYCLE, false)
-                set(GameRules.RULE_DO_TRADER_SPAWNING, false)
-                set(GameRules.RULE_DOMOBLOOT, false)
-                set(GameRules.RULE_DOBLOCKDROPS, false)
-                set(GameRules.RULE_COMMANDBLOCKOUTPUT, false)
-                set(GameRules.RULE_SNOW_ACCUMULATION_HEIGHT, 0)
-                set(GameRules.RULE_RANDOMTICKING, 0)
-                set(GameRules.RULE_LOCATOR_BAR, false)
+                set(GameRules.SPAWN_PHANTOMS, false)
+                set(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0)
+                set(GameRules.SPAWN_MOBS, false)
+                set(GameRules.FALL_DAMAGE, false)
+                set(GameRules.DROWNING_DAMAGE, false)
+                set(GameRules.ENTITY_DROPS, false)
+                set(GameRules.ADVANCE_WEATHER, false)
+                set(GameRules.SPAWN_WANDERING_TRADERS, false)
+                set(GameRules.MOB_DROPS, false)
+                set(GameRules.BLOCK_DROPS, false)
+                set(GameRules.COMMAND_BLOCK_OUTPUT, false)
+                set(GameRules.MAX_SNOW_ACCUMULATION_HEIGHT, 0)
+                set(GameRules.RANDOM_TICK_SPEED, 0)
+                set(GameRules.LOCATOR_BAR, false)
             }
             when {
                 data.timeOfDay.isEmpty -> tickTime(true)

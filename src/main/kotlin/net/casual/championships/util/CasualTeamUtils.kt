@@ -26,7 +26,7 @@ object CasualTeamUtils {
         if (admins == null) {
             admins = this.addPlayerTeam(ADMIN)
             admins.color = ChatFormatting.WHITE
-            admins.playerPrefix = Component.literal("§c[Admin] §r")
+            admins.setPlayerPrefix(Component.literal("§c[Admin] §r"))
             admins.collisionRule = Team.CollisionRule.NEVER
             admins.nameTagVisibility = Team.Visibility.NEVER
         }

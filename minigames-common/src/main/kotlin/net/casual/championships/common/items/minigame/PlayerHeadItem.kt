@@ -10,7 +10,6 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import net.minecraft.world.item.component.ResolvableProfile
 import kotlin.jvm.optionals.getOrNull
 
 class PlayerHeadItem(properties: Properties): HeadItem(properties) {
@@ -20,7 +19,9 @@ class PlayerHeadItem(properties: Properties): HeadItem(properties) {
         player.addEffect(MobEffectInstance(MobEffects.SATURATION, 5, 4))
     }
 
-    override fun getName(stack: ItemStack): Component? {
+
+
+    override fun getName(stack: ItemStack): Component {
         if (stack.isOf(CasualItems.PLAYER_HEAD)) {
             val name = stack.get(DataComponents.PROFILE)?.name()?.getOrNull()
             if (name != null) {

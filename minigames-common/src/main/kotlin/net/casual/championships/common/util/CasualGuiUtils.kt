@@ -2,6 +2,7 @@ package net.casual.championships.common.util
 
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
+import net.casual.arcade.guis.sgui.PlayerInventoryViewGui
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.events.MinigameAddPlayerEvent
 import net.casual.arcade.minigame.events.MinigamePauseEvent
@@ -22,15 +23,14 @@ import net.casual.arcade.utils.component.gold
 import net.casual.arcade.utils.component.isEmpty
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.impl.Sound
-import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.nametag.PlayerNametag
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
-import net.casual.arcade.visuals.screen.PlayerInventoryViewGui
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.tab.PlayerListDisplay
+import net.casual.arcade.visuals.utils.elements.ComponentElements
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualPlayerInventoryViewGui
@@ -86,13 +86,13 @@ object CasualGuiUtils {
     fun createPlayingNameTag(
         predicate: PlayerObserverPredicate = EntityObserverPredicate.visibleObservee().toPlayer()
     ): PlayerNametag {
-        return PlayerNametag({ it.displayName!! }, predicate)
+        return PlayerNametag.simple({ it.displayName!! }, predicate)
     }
 
     fun createPlayingHealthTag(
         predicate: PlayerObserverPredicate = CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
     ): PlayerNametag {
-        return PlayerNametag(
+        return PlayerNametag.simple(
             { Component.literal(String.format("%.1f ", it.health / 2)).append(CasualComponents.Hud.HARDCORE_HEART) },
             predicate
         )
@@ -170,14 +170,14 @@ object CasualGuiUtils {
 
     fun setMinigameUI(minigame: Minigame) {
         minigame.settings.broadcastChangesToAdmin()
-        minigame.ui.setPlayerListDisplay(this.createTeamMinigameTabDisplay(minigame))
-        minigame.ui.readier = ReadyChecker(
+        minigame.visuals.setPlayerListDisplay(this.createTeamMinigameTabDisplay(minigame))
+        minigame.visuals.readier = ReadyChecker(
             MinigamePlayerReadyHandler(minigame),
             CasualTeamReadyHandler(minigame)
         )
-        minigame.ui.countdown = CasualCountdown
+        minigame.visuals.countdown = CasualCountdown
 
-        minigame.ui.addNametag(this.createPlayingNameTag { observee, observer ->
+        minigame.visuals.addNametag(this.createPlayingNameTag { observee, observer ->
             !observee.isInvisible && !minigame.effects.isInvisibleFor(observee, observer)
         })
         minigame.events.register<MinigameAddPlayerEvent> {

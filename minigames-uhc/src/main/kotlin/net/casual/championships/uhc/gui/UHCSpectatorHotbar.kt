@@ -3,14 +3,13 @@ package net.casual.championships.uhc.gui
 import eu.pb4.sgui.api.ClickType
 import eu.pb4.sgui.api.elements.GuiElement
 import eu.pb4.sgui.api.gui.HotbarGui
+import net.casual.arcade.guis.sgui.setSlot
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.AdventureSpectator
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGameMode
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.NoClipSpectator
-import net.casual.arcade.utils.DynamicResolvableProfile
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.PlayerUtils.sendSound
 import net.casual.arcade.utils.StaticResolvableProfile
-import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.util.CasualGuiUtils
@@ -20,7 +19,6 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.Vec3
 import kotlin.random.Random
@@ -71,7 +69,7 @@ class UHCSpectatorHotbar(
     override fun onClickEntity(id: Int, type: EntityInteraction, sneaking: Boolean, pos: Vec3?): Boolean {
         val entity = this.player.level().getEntity(id)
         if (entity != null && type == EntityInteraction.ATTACK && this.player.extendedGameMode == NoClipSpectator) {
-            this.player.camera = entity
+            this.player.setCamera(entity)
             return false
         }
         return super.onClickEntity(id, type, sneaking, pos)

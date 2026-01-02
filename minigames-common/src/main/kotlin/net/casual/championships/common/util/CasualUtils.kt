@@ -1,14 +1,14 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.utils.ResourceLocation
+import net.casual.arcade.utils.Identifier
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
-fun casual(path: String): ResourceLocation {
-    return ResourceLocation(CasualUtils.MOD_ID, path)
+fun casual(path: String): Identifier {
+    return Identifier(CasualUtils.MOD_ID, path)
 }
 
 object CasualUtils {

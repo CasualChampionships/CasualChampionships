@@ -8,7 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
-import net.casual.arcade.resources.font.heads.PlayerHeadComponents
+import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
@@ -24,8 +24,8 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
 import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.BiomeTags
@@ -82,7 +82,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
                 Level.OVERWORLD -> "overworld" to OVERWORLD_ID
                 Level.NETHER -> "nether" to NETHER_ID
                 Level.END -> "end" to END_ID
-                else -> level.dimension().location().path to null
+                else -> level.dimension().identifier().path to null
             }
 
             val canvas = DrawableCanvas.create()
@@ -198,7 +198,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
 
         icon.move(scaledPlayerX, scaledPlayerZ, 0)
         // if (icon.text == null) {
-        val head = PlayerHeadComponents.getHeadOrDefault(player)
+        val head = PixelGridHeadComponents.getHeadOrDefaultFor(player)
         icon.text = Component.empty()
             .append(head)
             .append(SpacingFontResources.spaced(-10))
@@ -337,7 +337,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
 
     private data class CanvasData(
         val canvas: PlayerCanvas,
-        val model: ResourceLocation?,
+        val model: Identifier?,
         val dimensionIcon: CanvasIcon,
         val sizeIcon: CanvasIcon,
         val playerIcons: MutableMap<UUID, CanvasIcon>

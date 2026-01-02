@@ -1,6 +1,6 @@
 package net.casual.championships.lobby.gui
 
-import net.casual.arcade.resources.font.heads.PlayerHeadComponents
+import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
 import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TeamUtils.color
@@ -31,7 +31,7 @@ class LobbyPlayerListEntries(
             return super.createPlayerEntry(server, username, team, player)
         }
         val entry = Component {
-            empty() + DuelRequester.DUEL_PREFIX + spaced(2.0F) + PlayerHeadComponents.getHeadOrDefault(player) +
+            empty() + DuelRequester.DUEL_PREFIX + spaced(2.0F) + PixelGridHeadComponents.getHeadOrDefaultFor(player) +
                 spaced(2.0F) + literal(username).color(team).withMiniFont()
         }
         return PlayerListEntries.Entry.fromComponent(entry)

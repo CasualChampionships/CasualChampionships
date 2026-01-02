@@ -1,17 +1,17 @@
 [versions]
-minecraft       = "1.21.9"
-fabric-loader   = "0.17.2"
-parchment       = "1.21.8:2025.09.14"
-fabric-api      = "0.133.10+1.21.9"
-fabric-kotlin   = "1.13.5+kotlin.2.2.10"
+minecraft       = "1.21.11"
+fabric-loader   = "0.18.2"
+parchment       = "1.21.10:2025.10.12"
+fabric-api      = "0.139.4+1.21.11"
+fabric-kotlin   = "1.13.7+kotlin.2.2.21"
 map-canvas      = "0.6.0+1.21.9"
-arcade          = "0.7.1-beta.3+1.21.9"
+arcade          = "0.8.0-beta.10+1.21.11"
 casual-database = "0.3.1"
-voicechat-api   = "2.5.31"
-permissions     = "0.5.0"
+voicechat-api   = "2.6.0"
+permissions     = "0.6.1"
 
 # Plugins
-fabric-loom = "1.11-SNAPSHOT"
+fabric-loom = "1.14-SNAPSHOT"
 
 [libraries]
 minecraft       = { module = "com.mojang:minecraft"                        , version.ref = "minecraft" }

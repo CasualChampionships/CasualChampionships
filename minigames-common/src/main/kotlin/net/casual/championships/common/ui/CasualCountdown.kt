@@ -6,7 +6,7 @@ import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.impl.Sound
-import net.casual.arcade.visuals.countdown.TitledCountdown
+import net.casual.arcade.visuals.transition.TitledCountdown
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualSounds
 import net.minecraft.network.chat.Component
@@ -37,7 +37,7 @@ object CasualCountdown: TitledCountdown {
         return null
     }
 
-    override fun afterCountdown(players: Collection<ServerPlayer>) {
+    override fun afterTransition(players: Collection<ServerPlayer>) {
         val final = Sound(CasualSounds.COUNTDOWN_TICK_END)
         for (player in players) {
             player.setTitleAnimation()

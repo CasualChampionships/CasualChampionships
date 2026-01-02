@@ -36,7 +36,7 @@ import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.world.level.GameRules
+import net.minecraft.world.level.gamerules.GameRules
 import net.minecraft.world.phys.Vec3
 
 internal const val INITIALIZING_ID = "initializing"
@@ -76,19 +76,19 @@ enum class UHCPhase(
             // Fantasy does not save game rule data, we must always reset it.
             minigame.levels.setGameRules {
                 resetToDefault()
-                set(GameRules.RULE_LOCATOR_BAR, false)
-                set(GameRules.RULE_NATURAL_REGENERATION, false)
-                set(GameRules.RULE_DOINSOMNIA, false)
-                set(GameRules.RULE_DO_IMMEDIATE_RESPAWN, true)
+                set(GameRules.LOCATOR_BAR, false)
+                set(GameRules.NATURAL_HEALTH_REGENERATION, false)
+                set(GameRules.SPAWN_PHANTOMS, false)
+                set(GameRules.IMMEDIATE_RESPAWN, true)
             }
 
             minigame.teams.hideNameTags()
 
-            minigame.ui.removeAllNametags()
-            minigame.ui.addNametag(CasualGuiUtils.createPlayingNameTag(
+            minigame.visuals.removeAllNametags()
+            minigame.visuals.addNametag(CasualGuiUtils.createPlayingNameTag(
                 EntityObserverPredicate.visibleObservee().toPlayer().and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
             ))
-            minigame.ui.addNametag(CasualGuiUtils.createPlayingHealthTag(
+            minigame.visuals.addNametag(CasualGuiUtils.createPlayingHealthTag(
                 VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
             ))
         }

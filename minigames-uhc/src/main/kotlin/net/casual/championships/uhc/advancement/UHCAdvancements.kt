@@ -7,7 +7,7 @@ import net.casual.arcade.utils.advancement.AdvancementCollection
 import net.casual.championships.common.util.casual
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.core.ClientAsset
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
@@ -16,7 +16,7 @@ object UHCAdvancements: AdvancementCollection() {
         id = casual("uhc_root")
         display(Items.GOLDEN_APPLE)
         setTitleAndDesc("uhc.advancements.root")
-        background = ClientAsset.ResourceTexture(ResourceLocation.withDefaultNamespace("gui/advancements/backgrounds/adventure"))
+        background = ClientAsset.ResourceTexture(Identifier.withDefaultNamespace("gui/advancements/backgrounds/adventure"))
     }
 
     val FIRST_BLOOD = register {

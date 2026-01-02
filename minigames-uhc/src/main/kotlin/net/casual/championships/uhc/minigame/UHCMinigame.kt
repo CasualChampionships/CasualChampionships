@@ -49,7 +49,6 @@ import net.casual.arcade.utils.PlayerUtils.dropItemStackIntoInventory
 import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
 import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.PlayerUtils.grantAllRecipesSilently
-import net.casual.arcade.utils.PlayerUtils.levelServer
 import net.casual.arcade.utils.PlayerUtils.resetExperience
 import net.casual.arcade.utils.PlayerUtils.resetHealth
 import net.casual.arcade.utils.PlayerUtils.resetHunger
@@ -71,7 +70,6 @@ import net.casual.arcade.utils.math.location.Location.Companion.withRotation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.time.MinecraftTimeDuration
-import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.LevelSpecificElement
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
@@ -81,6 +79,7 @@ import net.casual.arcade.visuals.sidebar.DynamicSidebar
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
 import net.casual.arcade.visuals.sidebar.SidebarComponents.Companion.addRow
+import net.casual.arcade.visuals.utils.elements.ComponentElements
 import net.casual.championships.common.event.ChunkGenerationMobSpawnEvent
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.event.TippedArrowTradeOfferEvent
@@ -184,7 +183,7 @@ class UHCMinigame(
     init {
         this.tickrate.useGlobalManager = false
 
-        this.ui.addBossbar(ActiveBossbar(this))
+        this.visuals.addBossbar(ActiveBossbar(this))
         this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
 
@@ -279,7 +278,7 @@ class UHCMinigame(
             overridesPlayerSpawnPoint = true
         )
 
-        this.ui.setSidebar(this.createSidebar())
+        this.visuals.setSidebar(this.createSidebar())
     }
 
     @Listener

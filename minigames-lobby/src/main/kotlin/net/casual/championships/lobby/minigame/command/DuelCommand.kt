@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.*
 import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
-import net.casual.arcade.minigame.lobby.LobbyPhase
 import net.casual.arcade.minigame.ready.ReadyChecker
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.minigame.utils.MinigameUtils.isMinigameAdminOrHasPermission
@@ -25,11 +24,13 @@ import net.casual.championships.duel.minigame.DuelSettings
 import net.casual.championships.duel.utils.DuelRequester
 import net.casual.championships.lobby.advancement.LobbyAdvancements
 import net.casual.championships.lobby.minigame.LobbyMinigame
+import net.casual.championships.lobby.minigame.LobbyPhase
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.permissions.PermissionLevel
 import java.util.*
 
 class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
@@ -90,7 +91,7 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
         val requesting = duelers.filter { it != initiator }
 
         val requester = DuelRequester(initiator, duelers)
-        if (requesting.isEmpty() && !initiator.isMinigameAdminOrHasPermission(4)) {
+        if (requesting.isEmpty() && !initiator.isMinigameAdminOrHasPermission(PermissionLevel.OWNERS)) {
             requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").withMiniFont().red(), initiator)
             return
         }
@@ -133,7 +134,7 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
         }
         ready.removeIf { !this.lobby.players.has(it) }
 
-        if (ready.size <= 1 && !initiator.isMinigameAdminOrHasPermission(4)) {
+        if (ready.size <= 1 && !initiator.isMinigameAdminOrHasPermission(PermissionLevel.OWNERS)) {
             requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").withMiniFont().red(), initiator)
             return false
         }

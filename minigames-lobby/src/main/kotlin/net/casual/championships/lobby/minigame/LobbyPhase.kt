@@ -6,7 +6,7 @@ import net.minecraft.world.scores.Team
 enum class LobbyPhase(override val id: String): Phase<LobbyMinigame> {
     Waiting("waiting") {
         override fun initialize(minigame: LobbyMinigame) {
-            minigame.ui.addBossbar(minigame.bossbar)
+            minigame.visuals.addBossbar(minigame.bossbar)
             for (team in minigame.teams.getAllTeams()) {
                 team.collisionRule = Team.CollisionRule.NEVER
             }
@@ -15,7 +15,7 @@ enum class LobbyPhase(override val id: String): Phase<LobbyMinigame> {
     Readying("readying"),
     Countdown("countdown") {
         override fun start(minigame: LobbyMinigame, previous: Phase<LobbyMinigame>) {
-            minigame.ui.removeBossbar(minigame.bossbar)
+            minigame.visuals.removeBossbar(minigame.bossbar)
             for (team in minigame.teams.getAllTeams()) {
                 team.collisionRule = Team.CollisionRule.ALWAYS
             }

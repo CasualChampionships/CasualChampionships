@@ -3,7 +3,7 @@ package net.casual.championships.common.util
 import net.casual.arcade.utils.toKey
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.Registries
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.Items
@@ -12,7 +12,7 @@ import net.minecraft.world.item.Items
 
 class NamespacedRegistryRegister<T: Any>(
     private val registry: Registry<T>,
-    private val namespace: (String) -> ResourceLocation
+    private val namespace: (String) -> Identifier
 ) {
     fun register(path: String, element: T) {
         Registry.register(this.registry, this.namespace.invoke(path), element)
@@ -24,7 +24,7 @@ class NamespacedRegistryRegister<T: Any>(
 }
 
 class NamespacedItemRegistryRegister(
-    private val namespace: (String) -> ResourceLocation
+    private val namespace: (String) -> Identifier
 ) {
     fun register(path: String, provider: (Properties) -> Item): Item {
         val key = this.namespace.invoke(path).toKey(Registries.ITEM)

@@ -1,6 +1,9 @@
 package net.casual.championships.common.minigame
 
 import eu.pb4.sgui.api.gui.GuiInterface
+import net.casual.arcade.guis.sgui.SelectionGuiBuilder
+import net.casual.arcade.guis.sgui.SelectionGuiComponents
+import net.casual.arcade.guis.sgui.SelectionGuiStyle
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.settings.display.DisplayableSettingsDefaults
@@ -8,9 +11,6 @@ import net.casual.arcade.minigame.settings.display.MenuGameSetting
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.visuals.screen.SelectionGuiBuilder
-import net.casual.arcade.visuals.screen.SelectionGuiComponents
-import net.casual.arcade.visuals.screen.SelectionGuiStyle
 import net.casual.championships.common.items.CasualGuiItems.CROSS
 import net.casual.championships.common.items.CasualGuiItems.CROSS_SELECTED
 import net.casual.championships.common.items.CasualGuiItems.GREEN_LONG_LEFT

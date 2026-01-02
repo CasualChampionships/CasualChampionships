@@ -34,10 +34,10 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.ProblemReporter
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.animal.IronGolem
+import net.minecraft.world.entity.animal.golem.IronGolem
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.monster.warden.Warden
-import net.minecraft.world.entity.npc.Villager
+import net.minecraft.world.entity.npc.villager.Villager
 import net.minecraft.world.inventory.FurnaceMenu
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Items

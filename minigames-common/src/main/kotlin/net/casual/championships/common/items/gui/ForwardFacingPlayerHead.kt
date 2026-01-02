@@ -9,7 +9,7 @@ import net.minecraft.core.component.DataComponentType
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.codec.ByteBufCodecs
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
@@ -21,7 +21,7 @@ internal class ForwardFacingPlayerHead(properties: Properties): Item(properties)
         return Items.PLAYER_HEAD
     }
 
-    override fun getPolymerItemModel(stack: ItemStack, context: PacketContext): ResourceLocation {
+    override fun getPolymerItemModel(stack: ItemStack, context: PacketContext): Identifier {
         val small = stack.get(IS_SMALL_BRAIN) ?: false
         return if (small) SMALL_MODEL_ID else LARGE_MODEL_ID
     }

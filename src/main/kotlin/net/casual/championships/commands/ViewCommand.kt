@@ -11,11 +11,12 @@ import net.casual.championships.common.util.CasualGuiUtils
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
+import net.minecraft.server.permissions.PermissionLevel
 
 object ViewCommand: CommandTree {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("view") {
-            requires { Permissions.check(it, "casual.commands.view", 2) }
+            requires { Permissions.check(it, "casual.commands.view", PermissionLevel.GAMEMASTERS) }
             literal("inventory") {
                 argument("target", EntityArgument.player()) {
                     executes(::viewPlayerInventory)

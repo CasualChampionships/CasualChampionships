@@ -4,7 +4,7 @@ import net.casual.arcade.minigame.extensions.PlayerMovementRestrictionExtension.
 import net.casual.arcade.minigame.extensions.PlayerMovementRestrictionExtension.Companion.unrestrictMovement
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
-import net.casual.arcade.minigame.utils.MinigameUtils.countdown
+import net.casual.arcade.minigame.utils.MinigameUtils.launch
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.PlayerUtils.sendTitle
 import net.casual.arcade.utils.TeamUtils.color
@@ -18,7 +18,7 @@ import net.casual.championships.common.util.CasualStats
 import net.casual.championships.common.util.CasualUtils
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
-import net.minecraft.world.level.GameRules
+import net.minecraft.world.level.gamerules.GameRules
 
 internal const val INITIALIZING_ID = "initializing"
 internal const val COUNTDOWN_ID = "countdown"
@@ -32,16 +32,16 @@ enum class DuelPhase(
         override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
             minigame.levels.setGameRules {
                 resetToDefault()
-                set(GameRules.RULE_DO_IMMEDIATE_RESPAWN, true)
-                set(GameRules.RULE_COMMANDBLOCKOUTPUT, false)
-                set(GameRules.RULE_RANDOMTICKING, 0)
-                set(GameRules.RULE_LOCATOR_BAR, false)
+                set(GameRules.IMMEDIATE_RESPAWN, true)
+                set(GameRules.COMMAND_BLOCK_OUTPUT, false)
+                set(GameRules.RANDOM_TICK_SPEED, 0)
+                set(GameRules.LOCATOR_BAR, false)
                 if (!minigame.duelSettings.naturalRegen) {
-                    set(GameRules.RULE_NATURAL_REGENERATION, false)
+                    set(GameRules.NATURAL_HEALTH_REGENERATION, false)
                 }
             }
 
-            minigame.ui.addBossbar(ActiveBossbar(minigame))
+            minigame.visuals.addBossbar(ActiveBossbar(minigame))
 
             minigame.duelArena.data.teleporter.teleport(minigame.level, minigame.players.playing, minigame.duelSettings.teams)
 
@@ -58,7 +58,8 @@ enum class DuelPhase(
             for (player in minigame.players.playing) {
                 player.restrictMovement()
             }
-            minigame.ui.countdown.countdown(minigame).then {
+            minigame.launch {
+                minigame.visuals.countdown.transition(players = minigame.players::all)
                 minigame.setPhase(Dueling)
             }
         }

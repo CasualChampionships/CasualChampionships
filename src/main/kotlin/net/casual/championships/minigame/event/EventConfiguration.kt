@@ -1,8 +1,8 @@
 package net.casual.championships.minigame.event
 
 import com.mojang.serialization.Codec
+import com.mojang.serialization.codecs.RecordCodecBuilder
 import net.casual.arcade.minigame.serialization.MinigameFactory
-import net.casual.arcade.utils.serialization.codec.OrderedRecordCodecBuilder
 import net.casual.championships.uhc.minigame.UHCMinigameFactory
 
 data class EventConfiguration(
@@ -13,7 +13,7 @@ data class EventConfiguration(
     val lobby: String = "default"
 ) {
     companion object {
-        val CODEC: Codec<EventConfiguration> = OrderedRecordCodecBuilder.create { instance ->
+        val CODEC: Codec<EventConfiguration> = RecordCodecBuilder.create { instance ->
             instance.group(
                 Codec.STRING.fieldOf("name").forGetter(EventConfiguration::name),
                 MinigameFactory.CODEC.fieldOf("minigame").forGetter(EventConfiguration::minigame),

@@ -5,7 +5,7 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.championships.missilewars.items.MissileWarsItems
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -24,7 +24,7 @@ object MissileWarsMod: DedicatedServerModInitializer {
         MissileWarsItems.noop()
     }
 
-    fun id(path: String): ResourceLocation {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path)
+    fun id(path: String): Identifier {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path)
     }
 }

@@ -9,14 +9,14 @@ import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevels
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevelsBuilder
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
-import net.casual.arcade.utils.ResourceUtils
+import net.casual.arcade.utils.IdentifierUtils
 import net.casual.arcade.utils.serialization.codec.CodecProvider
 import net.casual.arcade.utils.setOf
 import net.casual.championships.uhc.utils.UHCDimensions
 import net.minecraft.core.UUIDUtil
 import net.minecraft.core.registries.Registries
+import net.minecraft.resources.Identifier
 import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.StringRepresentable
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.levelgen.WorldOptions
@@ -76,7 +76,7 @@ class UHCMinigameFactory(
             for (entry in dimensionsCopy.entries) {
                 val (dimension, data) = entry
                 val key = data.key.map { it.key }
-                    .orElseGet { randomDimensionKey(dimension.getDimensionKey().location().path) }
+                    .orElseGet { randomDimensionKey(dimension.getDimensionKey().identifier().path) }
                 val persistence = data.key.map { it.persist }.orElse(false)
 
                 // We update the copy so that our factory knows what random dimension key we used
@@ -109,7 +109,7 @@ class UHCMinigameFactory(
     }
 
     private fun randomDimensionKey(dimension: String): ResourceKey<Level> {
-        return ResourceKey.create(Registries.DIMENSION, ResourceUtils.random { "${dimension}_$it" })
+        return ResourceKey.create(Registries.DIMENSION, IdentifierUtils.random { "${dimension}_$it" })
     }
 
     private fun createLevelWithPersistence(
@@ -124,7 +124,7 @@ class UHCMinigameFactory(
     }
 
     companion object: CodecProvider<UHCMinigameFactory> {
-        override val ID: ResourceLocation
+        override val ID: Identifier
             get() = UHCMinigame.ID
 
         override val CODEC: MapCodec<out UHCMinigameFactory> = RecordCodecBuilder.mapCodec { instance ->

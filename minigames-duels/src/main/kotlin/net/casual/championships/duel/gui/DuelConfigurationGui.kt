@@ -1,15 +1,16 @@
 package net.casual.championships.duel.gui
 
 import eu.pb4.sgui.api.elements.GuiElement
+import net.casual.arcade.guis.sgui.setSlot
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.lore
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.utils.PlayerUtils.levelServer
+import net.casual.arcade.utils.PlayerUtils.hasPermission
+import net.casual.arcade.utils.PlayerUtils.server
 import net.casual.arcade.utils.component.gray
 import net.casual.arcade.utils.component.white
-import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.ui.CasualSimpleGui
@@ -17,6 +18,7 @@ import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.duel.minigame.DuelSettings
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.permissions.PermissionLevel
 import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.ItemStack
 import java.util.*
@@ -47,7 +49,7 @@ class DuelConfigurationGui(
         val confirm = CasualGuiItems.TICK
         confirm.named(CasualComponents.CONFIRM.withMiniFont())
         this.confirm = GuiElement(confirm) { _, _, _, _ ->
-            val playerList = this.player.levelServer.playerList
+            val playerList = this.player.server.playerList
             this.start.invoke(this.player, this.selectedPlayers.mapNotNull(playerList::getPlayer), this.settings)
             this.close()
         }
@@ -85,7 +87,7 @@ class DuelConfigurationGui(
     }
 
     private fun updateConfirm() {
-        if (this.selectedPlayers.isEmpty() && !this.player.hasPermissions(4)) {
+        if (this.selectedPlayers.isEmpty() && !this.player.hasPermission(PermissionLevel.OWNERS)) {
             this.setSlot(49, this.waiting)
             return
         }

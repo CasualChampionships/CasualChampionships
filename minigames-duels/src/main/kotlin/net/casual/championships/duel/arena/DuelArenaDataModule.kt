@@ -8,7 +8,7 @@ import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.file.ReadableArchive.Companion.parseJson
 import net.casual.championships.common.util.casual
 import net.minecraft.core.BlockPos
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
 
 data class DuelArenaDataModule(
@@ -27,7 +27,7 @@ data class DuelArenaDataModule(
             ).apply(instance, ::DuelArenaDataModule)
         }
 
-        override val id: ResourceLocation = casual("duel_arena_data")
+        override val id: Identifier = casual("duel_arena_data")
 
         override fun get(archive: ReadableArchive, server: MinecraftServer): DuelArenaDataModule {
             return archive.parseJson(DUEL_ARENA_DATA, CODEC).getOrThrow()

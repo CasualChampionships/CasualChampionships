@@ -10,7 +10,7 @@ import net.casual.arcade.utils.serialization.codec.ArcadeExtraCodecs
 import net.casual.championships.common.util.casual
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
@@ -61,7 +61,7 @@ class LobbyParkourData(
             ).apply(instance, ::LobbyParkourData)
         }
 
-        override val id: ResourceLocation = casual("lobby_parkour_data")
+        override val id: Identifier = casual("lobby_parkour_data")
 
         override fun get(archive: ReadableArchive, server: MinecraftServer): MinigameDataModule {
             return archive.parseJson(LOBBY_PARKOUR_DATA, CODEC).getOrThrow()

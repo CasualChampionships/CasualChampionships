@@ -9,7 +9,7 @@ import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.file.ReadableArchive.Companion.child
 import net.casual.arcade.utils.file.ReadableArchive.Companion.parseJson
 import net.casual.championships.common.util.casual
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.item.ItemStack
 import java.util.*
@@ -51,7 +51,7 @@ class DuelArenasDataModule(
     companion object: MinigameDataModule.Provider {
         private const val DUEL_ARENAS_DATA = "casual_duel_arenas_data.json"
 
-        override val id: ResourceLocation = casual("duel_arenas_data")
+        override val id: Identifier = casual("duel_arenas_data")
 
         override fun get(archive: ReadableArchive, server: MinecraftServer): DuelArenasDataModule {
             val unresolved = archive.parseJson(DUEL_ARENAS_DATA, UnresolvedArenas.CODEC.listOf()).getOrThrow()

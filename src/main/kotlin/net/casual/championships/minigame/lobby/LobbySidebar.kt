@@ -3,12 +3,12 @@ package net.casual.championships.minigame.lobby
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.component.*
-import net.casual.arcade.visuals.elements.ComponentElements
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.elements.UniversalElement
 import net.casual.arcade.visuals.sidebar.DynamicSidebar
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.sidebar.SidebarComponents
+import net.casual.arcade.visuals.utils.elements.ComponentElements
 import net.casual.championships.common.ui.elements.TeammatesSidebarElements
 import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.minecraft.network.chat.Component

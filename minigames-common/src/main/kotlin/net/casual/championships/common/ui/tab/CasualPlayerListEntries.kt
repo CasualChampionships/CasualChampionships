@@ -5,15 +5,12 @@ import com.google.common.cache.CacheLoader
 import kotlinx.coroutines.Deferred
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
-import net.casual.arcade.resources.font.heads.PlayerHeadComponents
 import net.casual.arcade.resources.font.heads.getHeadFor
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
-import net.casual.arcade.utils.DynamicResolvableProfile
 import net.casual.arcade.utils.ServerUtils
 import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.component.color
-import net.casual.arcade.utils.component.grayscale
 import net.casual.arcade.utils.component.italicize
 import net.casual.arcade.utils.coroutine.async
 import net.casual.arcade.utils.coroutine.getNow
@@ -25,7 +22,6 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.PlayerTeam
 import java.time.Duration
-import java.util.concurrent.CompletableFuture
 
 open class CasualPlayerListEntries(
     private val minigame: Minigame

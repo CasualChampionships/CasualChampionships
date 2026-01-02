@@ -9,12 +9,12 @@ import net.minecraft.commands.arguments.ComponentArgument
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.SlotArgument
 import net.minecraft.core.component.DataComponents
-import net.minecraft.world.entity.SlotAccess
+import net.minecraft.server.permissions.PermissionLevel
 
 object RenameCommand: CommandTree {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("rename") {
-            requiresPermission(2)
+            requiresPermission(PermissionLevel.GAMEMASTERS)
             literal("item") {
                 argument("player", EntityArgument.player()) {
                     argument("slot", SlotArgument.slot()) {
@@ -32,9 +32,7 @@ object RenameCommand: CommandTree {
         val slot = SlotArgument.getSlot(context, "slot")
         val name = ComponentArgument.getRawComponent(context, "name")
         val access = player.getSlot(slot)
-        if (access == SlotAccess.NULL) {
-            return context.source.fail("Tried to rename item in unknown slot")
-        }
+            ?: return context.source.fail("Tried to rename item in unknown slot")
         val stack = access.get()
         if (stack.isEmpty) {
             return context.source.fail("Cannot rename empty item")

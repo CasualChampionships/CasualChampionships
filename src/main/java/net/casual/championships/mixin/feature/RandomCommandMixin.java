@@ -3,6 +3,7 @@ package net.casual.championships.mixin.feature;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.server.commands.RandomCommand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,6 +19,6 @@ public class RandomCommandMixin {
 		)
 	)
 	private static LiteralArgumentBuilder<CommandSourceStack> onRegisterRandom(LiteralArgumentBuilder<CommandSourceStack> original) {
-		return original.requires(s -> s.hasPermission(2));
+		return original.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
 	}
 }

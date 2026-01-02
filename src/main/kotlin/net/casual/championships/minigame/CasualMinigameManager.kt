@@ -254,7 +254,7 @@ class CasualMinigameManager(
         for (team in teams) {
             val playerTeam = scoreboard.getOrCreateTeam(team.name)
             this.syncTeamPlayers(scoreboard, playerTeam, team)
-            playerTeam.playerPrefix = team.prefix
+            playerTeam.setPlayerPrefix(team.prefix)
             playerTeam.setHexColor(team.color)
             playerTeam.isAllowFriendlyFire = false
             playerTeam.collisionRule = Team.CollisionRule.ALWAYS
@@ -410,7 +410,7 @@ class CasualMinigameManager(
     private fun modifyDuelMinigame(minigame: DuelMinigame) {
         this.registerSyncMinigameStats(minigame)
         CasualGuiUtils.setMinigameUI(minigame)
-        minigame.ui.setPlayerListDisplay(CasualGuiUtils.createSimpleTabDisplay(minigame))
+        minigame.visuals.setPlayerListDisplay(CasualGuiUtils.createSimpleTabDisplay(minigame))
 
         minigame.resources.add(CasualResourcePackHost.createResourcesFromPacks {
             minigame.duelArena.data.packs
@@ -419,7 +419,7 @@ class CasualMinigameManager(
 
     private fun modifyLobbyMinigame(minigame: LobbyMinigame) {
         minigame.events.register<MinigameAddAdminEvent>(::outputAdminLogs)
-        minigame.ui.setSidebar(LobbySidebar.create(this.event.replace('_', ' '), minigame))
+        minigame.visuals.setSidebar(LobbySidebar.create(this.event.replace('_', ' '), minigame))
         CasualGuiUtils.setMinigameUI(minigame)
     }
 

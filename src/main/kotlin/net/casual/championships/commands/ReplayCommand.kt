@@ -11,11 +11,12 @@ import net.casual.championships.common.util.CasualUtils
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.permissions.PermissionLevel
 import java.nio.file.Path
 
 object ReplayCommand: BasicReplayCommand(CasualUtils.resolve("replays").resolve("custom")) {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
-        return super.create(buildContext).requiresPermission(2)
+        return super.create(buildContext).requiresPermission(PermissionLevel.GAMEMASTERS)
     }
 
     override fun createPlayerRecorder(player: ServerPlayer, path: Path, format: ReplayFormat): ReplayPlayerRecorder {
