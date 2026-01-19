@@ -62,6 +62,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.ItemTags
 import net.minecraft.util.context.ContextKeySet
+import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
@@ -71,6 +72,8 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
+import net.minecraft.world.level.storage.loot.functions.EnchantWithLevelsFunction.enchantWithLevels
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance
 import java.util.*
 import kotlin.random.Random
 
@@ -234,7 +237,7 @@ class DuelMinigame(
         player.boostHealth(this.duelSettings.health)
         player.resetHealth()
 
-        val stacks = getOrCreateLootTable(this.server.registryAccess()).getRandomItems(
+        val stacks = getOrCreateLootTable(this.server.registryAccess(), this.duelSettings.kit).getRandomItems(
             LootParams.Builder(player.level()).create(ContextKeySet.Builder().build()),
             this.lootSeed
         )
@@ -242,9 +245,15 @@ class DuelMinigame(
         player.clearPlayerInventory()
         for (stack in stacks) {
             val armor = stack.get(DataComponents.EQUIPPABLE)
-            if (armor != null) {
-                player.setItemSlot(armor.slot, stack)
-                continue
+            when {
+                armor != null -> {
+                    player.setItemSlot(armor.slot, stack)
+                    continue
+                }
+                player.offhandItem.isEmpty && stack.item == Items.WIND_CHARGE -> {
+                    player.setItemInHand(InteractionHand.OFF_HAND, stack)
+                    continue
+                }
             }
             player.inventory.add(stack)
         }
@@ -293,15 +302,17 @@ class DuelMinigame(
     }
 
     companion object {
-        private var table: LootTable? = null
+        private var kitToTable: EnumMap<DuelKit, LootTable> = EnumMap(DuelKit::class.java)
         val ID = casual("duel_minigame")
 
-        private fun getOrCreateLootTable(provider: HolderLookup.Provider): LootTable {
-            var table = table
-            if (table != null) {
-                return table
+        private fun getOrCreateLootTable(provider: HolderLookup.Provider, kit: DuelKit): LootTable {
+            return this.kitToTable.computeIfAbsent(kit) {
+                getMatchingTable(provider, kit)
             }
-            table = LootTableUtils.create {
+        }
+
+        private fun getMatchingTable(provider: HolderLookup.Provider, kit: DuelKit): LootTable = LootTableUtils.create {
+            if (kit == DuelKit.RandomGear) {
                 createPool {
                     createPool {
                         addItem(Items.IRON_SWORD) {
@@ -373,7 +384,7 @@ class DuelMinigame(
                         setWeight(3)
                     }
                     addItem(Items.COBBLESTONE) {
-                        count(between(32 ,64))
+                        count(between(32, 64))
                         setWeight(4)
                     }
                     addItem(Items.SAND) {
@@ -477,9 +488,38 @@ class DuelMinigame(
                         setWeight(2)
                     }
                 }
+            } else if (kit == DuelKit.MaceCharged) {
+                createPool {
+                    setRolls(exactly(1))
+                    addItem(Items.MACE) {
+                        count(exactly(1))
+                        apply(enchantWithLevels(provider, between(20, 30))
+                            .`when`(randomChance(2/3F))
+                        )
+                    }
+                }
+                createPool {
+                    setRolls(exactly(1))
+                    addItem(Items.NETHERITE_SPEAR) {
+                        count(exactly(1))
+                        apply(enchantWithLevels(provider, between(20, 30))
+                            .`when`(randomChance(2/3F))
+                        )
+                    }
+                }
+                createPool {
+                    setRolls(exactly(1))
+                    addItem(Items.WIND_CHARGE) {
+                        count(exactly(64))
+                    }
+                }
+                createPool {
+                    setRolls(exactly(1))
+                    addItem(Items.COBBLESTONE) {
+                        count(exactly(64))
+                    }
+                }
             }
-            Companion.table = table
-            return table
         }
     }
 }

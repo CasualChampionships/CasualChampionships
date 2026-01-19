@@ -43,6 +43,12 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
                     executes(::viewDueler)
                 }
             }
+            literal("accept") {
+                executes(::acceptDuel)
+            }
+            literal("reject") {
+                executes(::rejectDuel)
+            }
         }
     }
 
@@ -77,6 +83,22 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
         return context.source.success(Component.translatable("casual.duel.teleportingToDuel"))
     }
 
+    private fun acceptDuel(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+        if (!this.lobby.duels.acceptLatestDuel(player)) {
+            context.source.fail(Component.translatable("casual.duel.noPendingDuel"))
+        }
+        return Command.SINGLE_SUCCESS
+    }
+
+    private fun rejectDuel(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+        if (!this.lobby.duels.rejectLatestDuel(player)) {
+            context.source.fail(Component.translatable("casual.duel.noPendingDuel"))
+        }
+        return Command.SINGLE_SUCCESS
+    }
+
     private fun requestDuelWith(
         initiator: ServerPlayer,
         players: Collection<ServerPlayer>,
@@ -90,7 +112,7 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
 
         val requesting = duelers.filter { it != initiator }
 
-        val requester = DuelRequester(initiator, duelers)
+        val requester = DuelRequester(initiator, duelers, this.lobby.duels.readyCheckSaver)
         if (requesting.isEmpty() && !initiator.isMinigameAdminOrHasPermission(PermissionLevel.OWNERS)) {
             requester.broadcastTo(Component.translatable("casual.duel.notEnoughPlayers").withMiniFont().red(), initiator)
             return
