@@ -18,6 +18,10 @@ class DuelKitsDataModule(
         return this.kits.values
     }
 
+    fun names(): Set<String> {
+        return this.kits.keys
+    }
+
     class Kit(
         val name: String,
         val display: ItemStack,

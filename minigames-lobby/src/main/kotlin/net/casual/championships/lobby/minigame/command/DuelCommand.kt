@@ -1,6 +1,7 @@
 package net.casual.championships.lobby.minigame.command
 
 import com.mojang.brigadier.Command
+import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.*
@@ -44,6 +45,13 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
                     executes(::viewDueler)
                 }
             }
+            literal("everyone") {
+                executes { context -> duelEveryone(context, null) }
+                argument("kit", StringArgumentType.string()) {
+                    suggests { _ -> lobby.modules.get<DuelKitsDataModule>()?.names() ?: emptyList() }
+                    executes(::duelEveryone)
+                }
+            }
             literal("accept") {
                 executes(::acceptDuel)
             }
@@ -59,11 +67,7 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
             player.grantAdvancement(LobbyAdvancements.NOT_NOW)
             return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
         }
-        val arenas = this.lobby.modules.get<DuelArenasDataModule>()
-            ?: return context.source.fail("Lobby has no duel arenas available!")
-        val kits = this.lobby.modules.get<DuelKitsDataModule>()
-            ?: return context.source.fail("Lobby has no duel kits available!")
-        val settings = DuelSettings(arenas.all(), kits.all())
+        val (_, _, settings) = this.getDuelArenasKitsAndSettings(context) ?: return 0
         DuelConfigurationGui(player, settings, this.lobby.players::all, this::requestDuelWith).open()
         return Command.SINGLE_SUCCESS
     }
@@ -84,6 +88,19 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
         minigame.players.add(player, true, this.lobby.players.isAdmin(player))
         player.teleportTo(dueler.locationWithLevel)
         return context.source.success(Component.translatable("casual.duel.teleportingToDuel"))
+    }
+
+    private fun duelEveryone(
+        context: CommandContext<CommandSourceStack>,
+        kit: String? = StringArgumentType.getString(context, "kit")
+    ): Int {
+        val player = context.source.playerOrException
+        val (_, kits, settings) = this.getDuelArenasKitsAndSettings(context) ?: return 0
+        if (kit != null && kits.names().contains(kit)) {
+            settings.kit = kit
+        }
+        this.requestDuelWith(player, this.lobby.players.all, settings)
+        return Command.SINGLE_SUCCESS
     }
 
     private fun acceptDuel(context: CommandContext<CommandSourceStack>): Int {
@@ -188,5 +205,20 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
         }
 
         return true
+    }
+
+    private data class DuelArenasKitsAndSettings(
+        val arenas: DuelArenasDataModule,
+        val kits: DuelKitsDataModule,
+        val settings: DuelSettings
+    )
+
+    private fun getDuelArenasKitsAndSettings(context: CommandContext<CommandSourceStack>): DuelArenasKitsAndSettings? {
+        val arenas = this.lobby.modules.get<DuelArenasDataModule>()
+            ?: return run { context.source.fail("Lobby has no duel arenas available!"); null }
+        val kits = this.lobby.modules.get<DuelKitsDataModule>()
+            ?: return run { context.source.fail("Lobby has no duel kits available!"); null }
+        val settings = DuelSettings(arenas.all(), kits.all())
+        return DuelArenasKitsAndSettings(arenas, kits, settings)
     }
 }
