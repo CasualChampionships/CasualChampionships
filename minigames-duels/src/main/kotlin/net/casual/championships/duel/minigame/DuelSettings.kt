@@ -138,6 +138,6 @@ class DuelSettings(
     }
 
     fun getSelectedKit(): DuelKitsDataModule.Kit {
-        return kits.first { it.name == this.kit }
+        return this.kits.first { it.name == this.kit }
     }
 }
