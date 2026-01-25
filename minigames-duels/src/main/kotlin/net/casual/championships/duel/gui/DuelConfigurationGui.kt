@@ -50,12 +50,14 @@ class DuelConfigurationGui(
 
         val kits = Items.IRON_SWORD.defaultInstance
         kits.named(Component.literal("Kits").withMiniFont())
+            .hideTooltip(DataComponents.ATTRIBUTE_MODIFIERS)
         this.setSlot(48, kits) { ->
             DuelKitsGui(this.player, this.settings, this).open()
         }
 
         val allPlayers = ItemStack(CasualItems.GOLDEN_HEAD)
-        allPlayers.named(Component.literal("Duel with EVERYONE").withMiniFont()).hideTooltip(DataComponents.LORE)
+        allPlayers.named(Component.literal("Duel with EVERYONE").withMiniFont())
+            .hideTooltip(DataComponents.LORE)
         this.setSlot(50, allPlayers) { ->
             val players = this.getAvailablePlayers()
             val filtered = players.stream()
