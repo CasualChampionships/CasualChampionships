@@ -19,6 +19,7 @@ import net.casual.arcade.utils.teleportTo
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.duel.arena.DuelArenasDataModule
 import net.casual.championships.duel.gui.DuelConfigurationGui
+import net.casual.championships.duel.kit.DuelKitsDataModule
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.duel.minigame.DuelSettings
 import net.casual.championships.duel.utils.DuelRequester
@@ -60,7 +61,9 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
         }
         val arenas = this.lobby.modules.get<DuelArenasDataModule>()
             ?: return context.source.fail("Lobby has no duel arenas available!")
-        val settings = DuelSettings(arenas.all())
+        val kits = this.lobby.modules.get<DuelKitsDataModule>()
+            ?: return context.source.fail("Lobby has no duel kits available!")
+        val settings = DuelSettings(arenas.all(), kits.all())
         DuelConfigurationGui(player, settings, this.lobby.players::all, this::requestDuelWith).open()
         return Command.SINGLE_SUCCESS
     }

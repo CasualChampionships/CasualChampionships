@@ -20,14 +20,6 @@ import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.isOf
-import net.casual.arcade.utils.LootTableUtils
-import net.casual.arcade.utils.LootTableUtils.addItem
-import net.casual.arcade.utils.LootTableUtils.between
-import net.casual.arcade.utils.LootTableUtils.count
-import net.casual.arcade.utils.LootTableUtils.createPool
-import net.casual.arcade.utils.LootTableUtils.durability
-import net.casual.arcade.utils.LootTableUtils.enchant
-import net.casual.arcade.utils.LootTableUtils.exactly
 import net.casual.arcade.utils.PlayerUtils.boostHealth
 import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
 import net.casual.arcade.utils.PlayerUtils.resetHealth
@@ -41,7 +33,6 @@ import net.casual.arcade.utils.component.suggestCommand
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.toKey
-import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
 import net.casual.championships.common.util.CasualGuiUtils
@@ -53,7 +44,6 @@ import net.casual.championships.common.util.casual
 import net.casual.championships.duel.arena.DuelArenasDataModule
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.core.HolderLookup
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
@@ -71,9 +61,6 @@ import net.minecraft.world.item.context.DirectionalPlaceContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
-import net.minecraft.world.level.storage.loot.LootTable
-import net.minecraft.world.level.storage.loot.functions.EnchantWithLevelsFunction.enchantWithLevels
-import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition.randomChance
 import java.util.*
 import kotlin.random.Random
 
@@ -237,7 +224,7 @@ class DuelMinigame(
         player.boostHealth(this.duelSettings.health)
         player.resetHealth()
 
-        val stacks = getOrCreateLootTable(this.server.registryAccess(), this.duelSettings.kit).getRandomItems(
+        val stacks = this.duelSettings.getSelectedKit().lootTable.getRandomItems(
             LootParams.Builder(player.level()).create(ContextKeySet.Builder().build()),
             this.lootSeed
         )
@@ -302,224 +289,6 @@ class DuelMinigame(
     }
 
     companion object {
-        private var kitToTable: EnumMap<DuelKit, LootTable> = EnumMap(DuelKit::class.java)
         val ID = casual("duel_minigame")
-
-        private fun getOrCreateLootTable(provider: HolderLookup.Provider, kit: DuelKit): LootTable {
-            return this.kitToTable.computeIfAbsent(kit) {
-                getMatchingTable(provider, kit)
-            }
-        }
-
-        private fun getMatchingTable(provider: HolderLookup.Provider, kit: DuelKit): LootTable = LootTableUtils.create {
-            if (kit == DuelKit.RandomGear) {
-                createPool {
-                    createPool {
-                        addItem(Items.IRON_SWORD) {
-                            enchant(provider, exactly(10))
-                            durability(between(0.8, 0.99F))
-                            setWeight(4)
-                        }
-                        addItem(Items.DIAMOND_SWORD) {
-                            enchant(provider, exactly(10))
-                            durability(between(0.8, 0.99F))
-                            setWeight(2)
-                        }
-                    }
-                    createPool {
-                        addItem(Items.IRON_PICKAXE) {
-                            durability(between(0.8, 0.99F))
-                        }
-                    }
-                    addItem(Items.STONE_AXE) {
-                        durability(between(0.8, 0.99F))
-                        setWeight(4)
-                    }
-                    addItem(Items.IRON_AXE) {
-                        durability(between(0.8, 0.99F))
-                        setWeight(2)
-                    }
-                }
-                createPool {
-                    addItem(Items.STONE_SHOVEL) {
-                        durability(between(0.8, 0.99F))
-                        setWeight(4)
-                    }
-                    addItem(Items.IRON_SHOVEL) {
-                        durability(between(0.8, 0.99F))
-                        setWeight(2)
-                    }
-                }
-                createPool {
-                    addItem(Items.SHIELD) {
-                        durability(between(0.8, 0.99F))
-                    }
-                }
-                createPool {
-                    addItem(Items.CROSSBOW) {
-                        setWeight(2)
-                    }
-                    addItem(Items.BOW) {
-                        enchant(provider, exactly(10))
-                        setWeight(4)
-                    }
-                }
-                createPool {
-                    setRolls(exactly(3))
-                    addItem(Items.GOLDEN_APPLE) {
-                        count(between(1, 2))
-                        setWeight(4)
-                    }
-                    addItem(CasualItems.PLAYER_HEAD) {
-                        setWeight(2)
-                    }
-                    addItem(CasualItems.GOLDEN_HEAD) {
-                        setWeight(1)
-                    }
-                }
-                createPool {
-                    setRolls(exactly(4))
-                    addItem(Items.OAK_PLANKS) {
-                        count(between(32, 64))
-                        setWeight(3)
-                    }
-                    addItem(Items.COBBLESTONE) {
-                        count(between(32, 64))
-                        setWeight(4)
-                    }
-                    addItem(Items.SAND) {
-                        count(between(16, 32))
-                        setWeight(2)
-                    }
-                    addItem(Items.GRAVEL) {
-                        count(between(16, 32))
-                        setWeight(2)
-                    }
-                }
-                createPool {
-                    setRolls(exactly(5))
-                    addItem(Items.COOKED_CHICKEN) {
-                        count(between(3, 6))
-                        setWeight(2)
-                    }
-                    addItem(Items.COOKED_BEEF) {
-                        count(between(2, 4))
-                        setWeight(2)
-                    }
-                    addItem(Items.SWEET_BERRIES) {
-                        count(between(8, 12))
-                        setWeight(3)
-                    }
-                    addItem(Items.APPLE) {
-                        count(between(2, 4))
-                        setWeight(2)
-                    }
-                }
-                createPool {
-                    addItem(Items.IRON_HELMET) {
-                        durability(between(0.8, 0.99F))
-                        enchant(provider, between(8, 10))
-                        setWeight(4)
-                    }
-                    addItem(Items.DIAMOND_HELMET) {
-                        durability(between(0.8, 0.99F))
-                        enchant(provider, exactly(8))
-                        setWeight(1)
-                    }
-                }
-                createPool {
-                    addItem(Items.IRON_CHESTPLATE) {
-                        durability(between(0.8, 0.99F))
-                        enchant(provider, between(8, 10))
-                        setWeight(2)
-                    }
-                    addItem(Items.CHAINMAIL_CHESTPLATE) {
-                        durability(between(0.8, 0.99F))
-                        enchant(provider, between(10, 12))
-                        setWeight(1)
-                    }
-                }
-                createPool {
-                    addItem(Items.IRON_LEGGINGS) {
-                        durability(between(0.8, 0.99F))
-                        enchant(provider, between(8, 10))
-                    }
-                }
-                createPool {
-                    addItem(Items.IRON_BOOTS) {
-                        durability(between(0.8, 0.99F))
-                        enchant(provider, between(8, 10))
-                        setWeight(3)
-                    }
-                    addItem(Items.GOLDEN_BOOTS) {
-                        durability(between(0.9, 0.99F))
-                        enchant(provider, between(14, 18))
-                        setWeight(1)
-                    }
-                }
-                createPool {
-                    setRolls(exactly(4))
-                    addItem(Items.IRON_INGOT) {
-                        count(between(6, 8))
-                        setWeight(4)
-                    }
-                    addItem(Items.GOLD_INGOT) {
-                        count(between(8, 10))
-                        setWeight(4)
-                    }
-                    addItem(Items.DIAMOND) {
-                        count(between(1, 2))
-                        setWeight(1)
-                    }
-                }
-                createPool {
-                    addItem(Items.WATER_BUCKET) {
-
-                    }
-                }
-                createPool {
-                    setRolls(exactly(4))
-                    addItem(Items.ARROW) {
-                        count(between(8, 10))
-                        setWeight(5)
-                    }
-                    addItem(Items.SPECTRAL_ARROW) {
-                        count(between(6, 8))
-                        setWeight(2)
-                    }
-                }
-            } else if (kit == DuelKit.MaceCharged) {
-                createPool {
-                    setRolls(exactly(1))
-                    addItem(Items.MACE) {
-                        count(exactly(1))
-                        apply(enchantWithLevels(provider, between(20, 30))
-                            .`when`(randomChance(2/3F))
-                        )
-                    }
-                }
-                createPool {
-                    setRolls(exactly(1))
-                    addItem(Items.NETHERITE_SPEAR) {
-                        count(exactly(1))
-                        apply(enchantWithLevels(provider, between(20, 30))
-                            .`when`(randomChance(2/3F))
-                        )
-                    }
-                }
-                createPool {
-                    setRolls(exactly(1))
-                    addItem(Items.WIND_CHARGE) {
-                        count(exactly(64))
-                    }
-                }
-                createPool {
-                    setRolls(exactly(1))
-                    addItem(Items.COBBLESTONE) {
-                        count(exactly(64))
-                    }
-                }
-            }
-        }
     }
 }
