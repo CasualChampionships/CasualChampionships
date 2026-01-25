@@ -1,6 +1,9 @@
 package net.casual.championships.common.items.minigame
 
-import eu.pb4.polymer.core.api.utils.PolymerUtils
+import com.google.common.collect.ImmutableMultimap
+import com.mojang.authlib.properties.Property
+import com.mojang.authlib.properties.PropertyMap
+import net.casual.arcade.utils.StaticResolvableProfile
 import net.casual.arcade.utils.component.gold
 import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
@@ -12,7 +15,7 @@ import net.minecraft.world.item.component.ResolvableProfile
 
 class GoldenHeadItem(properties: Properties): HeadItem(properties) {
     override fun getResolvableProfile(stack: ItemStack): ResolvableProfile {
-        return PolymerUtils.createProfileComponent(GOLDEN, null)
+        return this.createProfileComponent(GOLDEN)
     }
 
     override fun addEffects(player: ServerPlayer) {
@@ -26,6 +29,12 @@ class GoldenHeadItem(properties: Properties): HeadItem(properties) {
 
     override fun getName(stack: ItemStack): Component {
         return CasualComponents.GOLDEN_HEAD.gold()
+    }
+
+    @Suppress("SameParameterValue")
+    private fun createProfileComponent(value: String): ResolvableProfile {
+        val properties = PropertyMap(ImmutableMultimap.of("textures", Property("textures", value, null)))
+        return StaticResolvableProfile(properties = properties)
     }
 
     private companion object {
