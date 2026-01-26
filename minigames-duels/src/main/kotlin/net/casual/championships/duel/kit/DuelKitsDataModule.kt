@@ -57,7 +57,7 @@ class DuelKitsDataModule(
             val kitNames = archive.parseJson(DUEL_KITS_DATA, KitsData.CODEC).getOrThrow().kitNames
             val kits = linkedMapOf<String, Kit>()
             for (kitName in kitNames) {
-                val kit = archive.parseJson("$kitName.json", Kit.CODEC).getOrThrow()
+                val kit = archive.parseJson("$kitName.json", Kit.CODEC, server).getOrThrow()
                 kits[kit.name] = kit
             }
             return DuelKitsDataModule(kits)
