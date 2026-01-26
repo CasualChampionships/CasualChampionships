@@ -49,6 +49,14 @@ enum class UHCPhase(
 ): Phase<UHCMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
+            minigame.levels.setGameRules {
+                resetToDefault()
+                set(GameRules.LOCATOR_BAR, false)
+                set(GameRules.NATURAL_HEALTH_REGENERATION, false)
+                set(GameRules.SPAWN_PHANTOMS, false)
+                set(GameRules.IMMEDIATE_RESPAWN, true)
+            }
+
             minigame.settings.canPvp.set(false)
             minigame.settings.tickFreezeOnPause.set(true)
             minigame.levels.all().forEach { it.dayTime = 0 }
@@ -73,15 +81,6 @@ enum class UHCPhase(
         }
 
         override fun initialize(minigame: UHCMinigame) {
-            // Fantasy does not save game rule data, we must always reset it.
-            minigame.levels.setGameRules {
-                resetToDefault()
-                set(GameRules.LOCATOR_BAR, false)
-                set(GameRules.NATURAL_HEALTH_REGENERATION, false)
-                set(GameRules.SPAWN_PHANTOMS, false)
-                set(GameRules.IMMEDIATE_RESPAWN, true)
-            }
-
             minigame.teams.hideNameTags()
 
             minigame.visuals.removeAllNametags()
