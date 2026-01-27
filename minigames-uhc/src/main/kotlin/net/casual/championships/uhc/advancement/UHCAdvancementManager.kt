@@ -316,7 +316,8 @@ class UHCAdvancementManager(
         }
 
         if (player.isInStructure(BuiltinStructures.STRONGHOLD)) {
-            if (this.uhc.phase <= UHCPhase.Grace) {
+            //TODO: have a better way to check for grace
+            if (!this.uhc.settings.canPvp.get() && this.uhc.settings.canTakeDamage.get()) {
                 player.grantAdvancement(UHCAdvancements.SPEEDRUN_ANY_PERCENT)
             }
             player.grantAdvancement(UHCAdvancements.THE_END_IS_NEAR)

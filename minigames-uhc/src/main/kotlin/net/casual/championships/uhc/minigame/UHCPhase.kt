@@ -2,7 +2,6 @@ package net.casual.championships.uhc.minigame
 
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
-import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
 import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.task.impl.PhaseChangeTask
@@ -16,8 +15,6 @@ import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.component.gold
-import net.casual.arcade.utils.component.red
-import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.resetToDefault
 import net.casual.arcade.utils.set
@@ -25,12 +22,12 @@ import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.championships.common.task.GracePeriodBossbarTask
+import net.casual.championships.common.task.GracePeriodTask
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualPredicates.OBSERVEE_NOT_MINIGAME_SPECTATOR
 import net.casual.championships.common.util.CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
-import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.CasualTags
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
@@ -40,13 +37,12 @@ import net.minecraft.world.level.gamerules.GameRules
 import net.minecraft.world.phys.Vec3
 
 internal const val INITIALIZING_ID = "initializing"
-internal const val GRACE_ID = "grace"
-internal const val BOUNDARY_MOVING_ID = "border_moving"
+internal const val GAMEPLAY_ID = "gameplay"
 internal const val GAME_OVER_ID = "game_over"
 
 enum class UHCPhase(
     override val id: String
-): Phase<UHCMinigame> {
+) : Phase<UHCMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.levels.setGameRules {
@@ -76,7 +72,7 @@ enum class UHCPhase(
             }
 
             GlobalTickedScheduler.later {
-                minigame.setPhase(Grace)
+                minigame.setPhase(Gameplay)
             }
         }
 
@@ -84,43 +80,36 @@ enum class UHCPhase(
             minigame.teams.hideNameTags()
 
             minigame.visuals.removeAllNametags()
-            minigame.visuals.addNametag(CasualGuiUtils.createPlayingNameTag(
-                EntityObserverPredicate.visibleObservee().toPlayer().and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
-            ))
-            minigame.visuals.addNametag(CasualGuiUtils.createPlayingHealthTag(
-                VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
-            ))
+            minigame.visuals.addNametag(
+                CasualGuiUtils.createPlayingNameTag(
+                    EntityObserverPredicate.visibleObservee().toPlayer().and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
+                )
+            )
+            minigame.visuals.addNametag(
+                CasualGuiUtils.createPlayingHealthTag(
+                    VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
+                )
+            )
         }
     },
-    Grace(GRACE_ID) {
+    Gameplay(GAMEPLAY_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.settings.isChatGlobal = false
             minigame.settings.mobsWithNoAIAreFlammable = true
-            val duration = minigame.settings.gracePeriod
-            val task = GracePeriodBossbarTask(minigame)
-                .withDuration(duration - 1.Ticks)
-                .then(PhaseChangeTask(minigame, BoundaryMoving))
-            minigame.scheduler.schedulePhasedCancellable(duration, task).runIfCancelled()
-            // Not starting boundaries, but just to set the time
-            minigame.onStartBoundary()
-
-            val minutes = duration.minutes
-            minigame.chat.broadcastGame(CasualComponents.BORDER_INITIAL_GRACE.generate(minutes).gold().withMiniFont())
-        }
-
-        override fun end(minigame: UHCMinigame, next: Phase<UHCMinigame>) {
-            if (this < next) {
-                minigame.chat.broadcastGame(
-                    CasualComponents.BORDER_GRACE_OVER.red().withMiniFont(),
-                    sound = Sound(CasualSounds.GAME_BORDER_MOVING)
-                )
-                minigame.settings.canPvp.set(true)
-            }
-        }
-    },
-    BoundaryMoving(BOUNDARY_MOVING_ID) {
-        override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             UHCBoundaryManager.start(minigame)
+
+            val gracePeriodTime = minigame.settings.gracePeriod
+
+            val graceBossbarTask = GracePeriodBossbarTask(minigame)
+                .withDuration(gracePeriodTime - 1.Ticks)
+            val graceTask = GracePeriodTask(minigame)
+
+            minigame.scheduler.schedulePhasedCancellable(gracePeriodTime, graceBossbarTask).runIfCancelled()
+            minigame.scheduler.schedulePhased(gracePeriodTime, graceTask)
+
+            minigame.chat.broadcastGame(
+                CasualComponents.BORDER_INITIAL_GRACE.generate(gracePeriodTime.minutes).gold().withMiniFont()
+            )
         }
     },
     GameOver(GAME_OVER_ID) {
