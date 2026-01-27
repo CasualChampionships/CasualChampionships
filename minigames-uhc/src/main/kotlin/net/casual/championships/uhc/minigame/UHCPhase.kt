@@ -103,15 +103,15 @@ enum class UHCPhase(
             minigame.settings.canPvp.set(false)
             UHCBoundaryManager.start(minigame)
 
-            val gracePeriodTime = minigame.settings.gracePeriod
+            val gracePeriodDuration = minigame.settings.gracePeriod
 
             val graceBossbarTask = GracePeriodBossbarTask(minigame)
-                .withDuration(gracePeriodTime - 1.Ticks)
+                .withDuration(gracePeriodDuration - 1.Ticks)
                 .then(PhaseChangeTask(minigame, Gameplay))
-            minigame.scheduler.schedulePhasedCancellable(gracePeriodTime, graceBossbarTask).runIfCancelled()
+            minigame.scheduler.schedulePhasedCancellable(gracePeriodDuration, graceBossbarTask).runIfCancelled()
 
             minigame.chat.broadcastGame(
-                CasualComponents.BORDER_INITIAL_GRACE.generate(gracePeriodTime.minutes).gold().withMiniFont()
+                CasualComponents.BORDER_INITIAL_GRACE.generate(gracePeriodDuration.minutes).gold().withMiniFont()
             )
         }
 
