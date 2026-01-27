@@ -2,8 +2,10 @@ package net.casual.championships.uhc.minigame
 
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
+import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
 import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
+import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
@@ -105,6 +107,7 @@ enum class UHCPhase(
 
             val graceBossbarTask = GracePeriodBossbarTask(minigame)
                 .withDuration(gracePeriodTime - 1.Ticks)
+                .then(PhaseChangeTask(minigame, Gameplay))
             minigame.scheduler.schedulePhasedCancellable(gracePeriodTime, graceBossbarTask).runIfCancelled()
 
             minigame.chat.broadcastGame(
