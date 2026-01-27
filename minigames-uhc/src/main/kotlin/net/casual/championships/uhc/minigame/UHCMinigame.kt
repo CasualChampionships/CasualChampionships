@@ -166,7 +166,7 @@ class UHCMinigame(
     override val id = ID
 
     private var lastBoundaryTime = 0.Ticks
-    var boundaryPhase: UHCBoundaryPhase = UHCBoundaryPhase.First
+    var boundaryPhase: UHCBoundaryPhase = UHCBoundaryPhase.Zeroth
 
     val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)

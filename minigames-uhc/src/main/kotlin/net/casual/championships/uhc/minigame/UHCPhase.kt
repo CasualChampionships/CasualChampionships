@@ -44,7 +44,7 @@ internal const val GAME_OVER_ID = "game_over"
 
 enum class UHCPhase(
     override val id: String
-): Phase<UHCMinigame> {
+) : Phase<UHCMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.levels.setGameRules {
