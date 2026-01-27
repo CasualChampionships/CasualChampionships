@@ -4,7 +4,6 @@ import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
-import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
@@ -15,6 +14,8 @@ import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.component.gold
+import net.casual.arcade.utils.component.red
+import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.resetToDefault
 import net.casual.arcade.utils.set
@@ -22,12 +23,12 @@ import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.championships.common.task.GracePeriodBossbarTask
-import net.casual.championships.common.task.GracePeriodTask
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualPredicates.OBSERVEE_NOT_MINIGAME_SPECTATOR
 import net.casual.championships.common.util.CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
+import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.CasualTags
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
@@ -37,6 +38,7 @@ import net.minecraft.world.level.gamerules.GameRules
 import net.minecraft.world.phys.Vec3
 
 internal const val INITIALIZING_ID = "initializing"
+internal const val GRACE_ID = "grace"
 internal const val GAMEPLAY_ID = "gameplay"
 internal const val GAME_OVER_ID = "game_over"
 
@@ -72,7 +74,7 @@ enum class UHCPhase(
             }
 
             GlobalTickedScheduler.later {
-                minigame.setPhase(Gameplay)
+                minigame.setPhase(Grace)
             }
         }
 
@@ -92,26 +94,33 @@ enum class UHCPhase(
             )
         }
     },
-    Gameplay(GAMEPLAY_ID) {
+    Grace(GRACE_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.settings.isChatGlobal = false
             minigame.settings.mobsWithNoAIAreFlammable = true
+            minigame.settings.canPvp.set(false)
             UHCBoundaryManager.start(minigame)
 
             val gracePeriodTime = minigame.settings.gracePeriod
 
             val graceBossbarTask = GracePeriodBossbarTask(minigame)
                 .withDuration(gracePeriodTime - 1.Ticks)
-            val graceTask = GracePeriodTask(minigame)
-
             minigame.scheduler.schedulePhasedCancellable(gracePeriodTime, graceBossbarTask).runIfCancelled()
-            minigame.scheduler.schedulePhased(gracePeriodTime, graceTask)
 
             minigame.chat.broadcastGame(
                 CasualComponents.BORDER_INITIAL_GRACE.generate(gracePeriodTime.minutes).gold().withMiniFont()
             )
         }
+
+        override fun end(minigame: UHCMinigame, next: Phase<UHCMinigame>) {
+            minigame.chat.broadcastGame(
+                CasualComponents.BORDER_GRACE_OVER.red().withMiniFont(),
+                sound = Sound(CasualSounds.GAME_BORDER_MOVING)
+            )
+            minigame.settings.canPvp.set(true)
+        }
     },
+    Gameplay(GAMEPLAY_ID),
     GameOver(GAME_OVER_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.settings.canPvp.set(false)
