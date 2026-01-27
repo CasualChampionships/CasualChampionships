@@ -44,7 +44,7 @@ internal const val GAME_OVER_ID = "game_over"
 
 enum class UHCPhase(
     override val id: String
-) : Phase<UHCMinigame> {
+): Phase<UHCMinigame> {
     Initializing(INITIALIZING_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.levels.setGameRules {
@@ -113,11 +113,13 @@ enum class UHCPhase(
         }
 
         override fun end(minigame: UHCMinigame, next: Phase<UHCMinigame>) {
-            minigame.chat.broadcastGame(
-                CasualComponents.BORDER_GRACE_OVER.red().withMiniFont(),
-                sound = Sound(CasualSounds.GAME_BORDER_MOVING)
-            )
-            minigame.settings.canPvp.set(true)
+            if (this < next) {
+                minigame.chat.broadcastGame(
+                    CasualComponents.BORDER_GRACE_OVER.red().withMiniFont(),
+                    sound = Sound(CasualSounds.GAME_BORDER_MOVING)
+                )
+                minigame.settings.canPvp.set(true)
+            }
         }
     },
     Gameplay(GAMEPLAY_ID),
