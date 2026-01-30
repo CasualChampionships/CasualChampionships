@@ -28,6 +28,7 @@ import net.casual.championships.common.items.CasualGuiItems.THREE_TIMES_SELECTED
 import net.casual.championships.common.items.CasualGuiItems.TWO_TIMES
 import net.casual.championships.common.items.CasualGuiItems.TWO_TIMES_SELECTED
 import net.casual.championships.common.minigame.CasualSettings
+import net.casual.championships.common.util.CasualGuiUtils.copyAndHideAttributeModifiers
 import net.casual.championships.duel.arena.DuelArenaSize
 import net.casual.championships.duel.arena.DuelArenaSize.*
 import net.casual.championships.duel.arena.DuelArenasDataModule
@@ -101,7 +102,7 @@ class DuelSettings(
         display = ARENA.named(Component.translatable("casual.gui.duel.settings.arena").withMiniFont())
         value = arenas.randomOrNull()?.name ?: ""
         for (arena in arenas) {
-            option(arena.name, arena.display, arena.name)
+            option(arena.name, arena.display.copyAndHideAttributeModifiers(), arena.name)
         }
     }
     var arena by this.register(this.displayableArena)
@@ -127,7 +128,7 @@ class DuelSettings(
         display = Items.IRON_SWORD.named(Component.translatable("casual.gui.duel.settings.kit").withMiniFont())
         value = kits.randomOrNull()?.name ?: ""
         for (kit in kits) {
-            option(kit.name, kit.display, kit.name)
+            option(kit.name, kit.display.copyAndHideAttributeModifiers(), kit.name)
         }
     }
     var kit by this.register(this.displayableKit)
