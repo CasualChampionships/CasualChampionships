@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import net.casual.arcade.commands.*
 import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.minigame.ready.ReadyChecker
@@ -63,10 +64,8 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
 
     private fun startDuel(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
-        if (this.lobby.phase >= LobbyPhase.Readying) {
-            player.grantAdvancement(LobbyAdvancements.NOT_NOW)
-            return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
-        }
+        this.enforceLobbyReadyingPhase(player)
+
         val (_, _, settings) = this.getDuelArenasKitsAndSettings(context) ?: return 0
         DuelConfigurationGui(player, settings, this.lobby.players::all, this::requestDuelWith).open()
         return Command.SINGLE_SUCCESS
@@ -95,6 +94,8 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
         kit: String? = StringArgumentType.getString(context, "kit")
     ): Int {
         val player = context.source.playerOrException
+        this.enforceLobbyReadyingPhase(player)
+
         val (_, kits, settings) = this.getDuelArenasKitsAndSettings(context) ?: return 0
         if (kit != null && kits.names().contains(kit)) {
             settings.kit = kit
@@ -220,5 +221,16 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
             ?: return run { context.source.fail("Lobby has no duel kits available!"); null }
         val settings = DuelSettings(arenas.all(), kits.all())
         return DuelArenasKitsAndSettings(arenas, kits, settings)
+    }
+
+    private fun enforceLobbyReadyingPhase(player: ServerPlayer) {
+        if (this.lobby.phase >= LobbyPhase.Readying) {
+            player.grantAdvancement(LobbyAdvancements.NOT_NOW)
+            throw CANNOT_DUEL_NOW.create()
+        }
+    }
+
+    companion object {
+        private val CANNOT_DUEL_NOW = SimpleCommandExceptionType(Component.translatable("casual.duel.cannotDuelNow"))
     }
 }
