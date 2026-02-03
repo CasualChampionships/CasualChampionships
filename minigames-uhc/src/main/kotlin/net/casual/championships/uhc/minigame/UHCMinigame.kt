@@ -127,6 +127,8 @@ import net.minecraft.network.protocol.game.ClientboundTickingStepPacket
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.level.Ticket
+import net.minecraft.server.level.TicketType
 import net.minecraft.tags.BlockTags
 import net.minecraft.util.Mth
 import net.minecraft.world.effect.MobEffectInstance
@@ -142,6 +144,7 @@ import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.item.crafting.SingleRecipeInput
 import net.minecraft.world.item.enchantment.Enchantments
+import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.levelgen.Heightmap
@@ -272,6 +275,8 @@ class UHCMinigame(
         this.advancements.addAll(UHCAdvancements)
         this.settings.enableChatCommand.set(true)
 
+        // Force load the chunk at 0, 0 so we can load the heightmap
+        this.overworld.getChunk(0, 0)
         val y =  this.overworld.getHeight(Heightmap.Types.WORLD_SURFACE, 0, 0)
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(
             location = this.overworld.asLocation(Vec3(0.0, y.toDouble(), 0.0)),
