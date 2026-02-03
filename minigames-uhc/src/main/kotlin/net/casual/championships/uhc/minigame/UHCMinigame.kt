@@ -275,8 +275,8 @@ class UHCMinigame(
         this.advancements.addAll(UHCAdvancements)
         this.settings.enableChatCommand.set(true)
 
-        this.overworld.chunkSource.addTicket(Ticket(TicketType.SPAWN_SEARCH, 1), ChunkPos(0,0))
-        this.overworld.tick { true }
+        // Force load the chunk at 0, 0 so we can load the heightmap
+        this.overworld.getChunk(0, 0)
         val y =  this.overworld.getHeight(Heightmap.Types.WORLD_SURFACE, 0, 0)
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(
             location = this.overworld.asLocation(Vec3(0.0, y.toDouble(), 0.0)),
