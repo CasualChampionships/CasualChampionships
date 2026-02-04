@@ -40,15 +40,9 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
 
     override fun teleportTeam(team: PlayerTeam, entities: Collection<Entity>, location: LocationWithLevel<ServerLevel>) {
         val level = location.level
-        val boundary = level.levelBoundary
         val origin = BlockPos.containing(location.position)
-        val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
-        for (position in positions) {
-            val adjusted = getTopNonCollidingPos(level, position)
-            if (adjusted == null || (boundary != null && !boundary.contains(adjusted.center))) {
-                continue
-            }
-            super.teleportTeam(team, entities, level.asLocation(adjusted.center, location.rotation))
+        tryFindPosition(origin, level)?.let {
+            super.teleportTeam(team, entities, level.asLocation(it.center, location.rotation))
             return
         }
 
@@ -79,6 +73,19 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
         return MapCodec.unit(this)
     }
 
+    fun tryFindPosition(origin: BlockPos, level: ServerLevel): BlockPos? {
+        val boundary = level.levelBoundary
+        val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
+        for (position in positions) {
+            val adjusted = getTopNonCollidingPos(level, position)
+            if (adjusted == null || (boundary != null && !boundary.contains(adjusted.center))) {
+                continue
+            }
+            return adjusted
+        }
+        return null
+    }
+
     private fun getTopNonCollidingPos(level: ServerLevel, initial: BlockPos): BlockPos? {
         val chunk = level.getChunk(initial)
         val y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, initial.x, initial.z)
@@ -88,9 +95,9 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
                 pos.move(Direction.DOWN)
             } while (!chunk.getBlockState(pos).isAir)
 
-            do {
+            while (chunk.getBlockState(pos.below()).isAir && pos.y > level.minY) {
                 pos.move(Direction.DOWN)
-            } while (chunk.getBlockState(pos).isAir && pos.y > level.minY)
+            }
         }
 
         val adjusted = SpawnPlacementTypes.ON_GROUND.adjustSpawnPosition(level, pos.immutable())
