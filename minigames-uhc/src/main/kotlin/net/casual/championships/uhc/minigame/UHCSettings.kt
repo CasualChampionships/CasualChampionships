@@ -278,4 +278,12 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         value = false
         defaults.options(this)
     })
+
+    var sharingIsCaring by this.register(bool {
+        name = "sharing_is_caring"
+        display = Items.DRAGON_BREATH.named("Sharing is Caring")
+            .lore(Component.literal("Health is shared between all players on a team"))
+        value = false
+        defaults.options(this)
+    })
 }

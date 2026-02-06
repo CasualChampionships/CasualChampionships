@@ -7,7 +7,6 @@ import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.level.LevelBlockChangedEvent
-import net.casual.arcade.events.server.level.LevelFluidTrySpreadEvent
 import net.casual.arcade.events.server.player.*
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.annotation.During
@@ -68,6 +67,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.context.DirectionalPlaceContext
 import net.minecraft.world.level.GameType
+import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
@@ -96,6 +96,11 @@ class DuelMinigame(
 
     override fun phases(): Collection<Phase<DuelMinigame>> {
         return DuelPhase.entries
+    }
+
+    // TODO:
+    fun canLiquidSpreadInto(pos: BlockPos, state: BlockState): Boolean {
+        return this.modifiableBlocks.contains(pos) || state.isAir
     }
 
     @Listener
@@ -162,13 +167,6 @@ class DuelMinigame(
     private fun onPlayerItemUse(event: PlayerItemUseEvent) {
         if (event.stack.isOf(ItemTags.BOATS)) {
             event.cancel(InteractionResult.PASS)
-        }
-    }
-
-    @Listener
-    private fun onFluidTrySpread(event: LevelFluidTrySpreadEvent) {
-        if (!this.modifiableBlocks.contains(event.spreadPos) && !event.spreadBlockState.isAir) {
-            event.canSpread = false
         }
     }
 

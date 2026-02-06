@@ -33,6 +33,7 @@ import net.casual.championships.common.util.CasualPredicates.VISIBLE_OBSERVER_AN
 import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.CasualTags
 import net.casual.championships.uhc.border.UHCBoundaryManager
+import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
@@ -69,6 +70,11 @@ enum class UHCPhase(
             }
             UHCSpreadTeleporter.teleport(level, minigame.players.playing, true)
 
+            for (team in minigame.teams.getPlayingTeams()) {
+                val extension = team.sharedHealthExtension
+                extension.enabled = minigame.settings.sharingIsCaring
+                extension.health = extension.maxHealth
+            }
             for (player in minigame.players.spectating) {
                 if (player.level() != level) {
                     player.teleportTo(level.asLocation(Vec3(0.0, 200.0, 0.0)))

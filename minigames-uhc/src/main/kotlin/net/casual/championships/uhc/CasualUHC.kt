@@ -6,6 +6,7 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
 import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
+import net.casual.championships.uhc.extensions.TeamSharedHealthExtension
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.UHCItems
 import net.casual.championships.uhc.minigame.UHCMinigameFactory
@@ -36,6 +37,8 @@ object CasualUHC: ModInitializer {
         UHCMapRenderer.load()
         UHCItems.load()
         UHCStats.load()
+
+        TeamSharedHealthExtension.registerEvents()
 
         UHCMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
     }

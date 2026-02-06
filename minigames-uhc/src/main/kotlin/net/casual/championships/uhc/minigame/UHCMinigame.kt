@@ -102,6 +102,7 @@ import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.border.UHCBoundaryPhase
+import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbar
 import net.casual.championships.uhc.item.TMCStarterPack
@@ -196,6 +197,17 @@ class UHCMinigame(
     fun resetPlayerHealth(player: ServerPlayer) {
         player.boostHealth(this.settings.health)
         player.resetHealth()
+
+        val team = player.team
+        if (team != null) {
+            val extension = team.sharedHealthExtension
+            if (this.settings.sharingIsCaring) {
+                extension.enabled = true
+                extension.maxHealth = (20 * (this.settings.health + 1.0)).toFloat()
+            } else {
+                extension.enabled = false
+            }
+        }
     }
 
     fun onStartBoundary() {
@@ -607,8 +619,10 @@ class UHCMinigame(
         this.effects.addFullbright(player)
 
         val team = player.team
-        team?.nameTagVisibility = Team.Visibility.NEVER
-        team?.collisionRule = Team.CollisionRule.ALWAYS
+        if (team != null) {
+            team.nameTagVisibility = Team.Visibility.NEVER
+            team.collisionRule = Team.CollisionRule.ALWAYS
+        }
 
         this.tags.add(player, CasualTags.HAS_PARTICIPATED)
         this.tags.add(player, CasualTags.HAS_TEAM_GLOW)
