@@ -158,11 +158,25 @@ class TeamSharedHealthExtension(
     }
 
     override fun serialize(output: ValueOutput) {
-        // TODO
+        output.putBoolean("enabled", this.enabled)
+        output.putInt("tick_timer", this.tickTimer)
+        output.putFloat("exhaustion_level", this.exhaustionLevel)
+        output.putFloat("absorption", this.absorption)
+        output.putFloat("max_health", this.maxHealth)
+        output.putFloat("health", this.health)
+        output.putInt("food_level", this.foodLevel)
+        output.putFloat("saturation_level", this.saturationLevel)
     }
 
     override fun deserialize(input: ValueInput) {
-        // TODO
+        this.enabled = input.getBooleanOr("enabled", this.enabled)
+        this.tickTimer = input.getIntOr("tick_timer", this.tickTimer)
+        this.exhaustionLevel = input.getFloatOr("exhaustion_level", this.exhaustionLevel)
+        this.absorption = input.getFloatOr("absorption", this.absorption)
+        this.maxHealth = input.getFloatOr("max_health", this.maxHealth)
+        this.health = input.getFloatOr("health", this.health)
+        this.foodLevel = input.getIntOr("food_level", this.foodLevel)
+        this.saturationLevel = input.getFloatOr("saturation_level", this.saturationLevel)
     }
 
     private fun isHurt(): Boolean {
