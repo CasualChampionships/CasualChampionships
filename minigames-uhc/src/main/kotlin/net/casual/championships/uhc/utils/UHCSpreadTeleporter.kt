@@ -38,17 +38,25 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
     private val netherSpawn by lazy { StructureUtils.read(structurePath.resolve("nether_spawn.nbt")) }
     private val endSpawn by lazy { StructureUtils.read(structurePath.resolve("end_spawn.nbt")) }
 
-    override fun teleportTeam(team: PlayerTeam, entities: Collection<Entity>, location: LocationWithLevel<ServerLevel>) {
-        val level = location.level
+    fun searchForValidPosition(origin: BlockPos, level: ServerLevel): BlockPos? {
         val boundary = level.levelBoundary
-        val origin = BlockPos.containing(location.position)
         val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
         for (position in positions) {
             val adjusted = getTopNonCollidingPos(level, position)
             if (adjusted == null || (boundary != null && !boundary.contains(adjusted.center))) {
                 continue
             }
-            super.teleportTeam(team, entities, level.asLocation(adjusted.center, location.rotation))
+            return adjusted
+        }
+        return null
+    }
+
+    override fun teleportTeam(team: PlayerTeam, entities: Collection<Entity>, location: LocationWithLevel<ServerLevel>) {
+        val level = location.level
+        val origin = BlockPos.containing(location.position)
+        val valid = searchForValidPosition(origin, level)
+        if (valid != null) {
+            super.teleportTeam(team, entities, level.asLocation(valid.center, location.rotation))
             return
         }
 
@@ -88,9 +96,9 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
                 pos.move(Direction.DOWN)
             } while (!chunk.getBlockState(pos).isAir)
 
-            do {
+            while (chunk.getBlockState(pos.below()).isAir && pos.y > level.minY) {
                 pos.move(Direction.DOWN)
-            } while (chunk.getBlockState(pos).isAir && pos.y > level.minY)
+            }
         }
 
         val adjusted = SpawnPlacementTypes.ON_GROUND.adjustSpawnPosition(level, pos.immutable())
