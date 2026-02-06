@@ -23,7 +23,6 @@ import net.casual.arcade.minigame.annotation.ListenerFlags.IS_PLAYING
 import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGameMode
-import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
@@ -67,7 +66,6 @@ import net.casual.arcade.utils.TimeUtils.formatMMSS
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.math.location.Location.Companion.withRotation
-import net.casual.arcade.utils.math.location.LocationWithLevel
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.time.MinecraftTimeDuration
@@ -114,12 +112,10 @@ import net.casual.championships.uhc.recipe.HeavyCoreRecipe
 import net.casual.championships.uhc.utils.UHCComponents
 import net.casual.championships.uhc.utils.UHCDimensions
 import net.casual.championships.uhc.utils.UHCMinigameRules
-import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.casual.championships.uhc.utils.UHCStats
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags
 import net.minecraft.ChatFormatting
 import net.minecraft.ChatFormatting.*
-import net.minecraft.commands.arguments.EntityAnchorArgument
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.Holder
@@ -275,7 +271,7 @@ class UHCMinigame(
         this.advancements.addAll(UHCAdvancements)
         this.settings.enableChatCommand.set(true)
 
-        this.levels.spawn = UHCSpawnLocation()
+        this.levels.spawn = UHCSpawnLocation(this)
 
         this.visuals.setSidebar(this.createSidebar())
     }
@@ -994,51 +990,6 @@ class UHCMinigame(
 
     private fun isFinalStage(level: ServerLevel): Boolean {
         return UHCBoundaryManager.getFinalPhase(this, level) <= this.boundaryPhase
-    }
-
-    private inner class UHCSpawnLocation: MinigameLevelManager.SpawnLocation {
-        override val overridesPlayerSpawnPoint: Boolean = true
-
-        override fun get(player: ServerPlayer): LocationWithLevel<ServerLevel> {
-            val location = this.getValidRespawnPos(player) ?:
-                    overworld.asLocation(overworld.levelBoundary?.getCenter() ?: Vec3.ZERO)
-            val level = location.level
-            val pos = location.position
-
-            return UHCSpreadTeleporter.tryFindPosition(BlockPos.containing(pos), level)?.let {
-                val centerPos = it.bottomCenter
-                level.levelBoundary?.let { boundary ->
-                    val rotation = player.createCommandSourceStack()
-                                         .withAnchor(EntityAnchorArgument.Anchor.EYES)
-                                         .withPosition(centerPos)
-                                         .facing(boundary.getCenter()).rotation
-                    level.asLocation(centerPos, rotation)
-                } ?: level.asLocation(centerPos)
-            } ?: run {
-                val blockPos = BlockPos.containing(pos)
-                // Force load the chunk so we can load the heightmap
-                level.getChunk(blockPos)
-                val y = level.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.x, blockPos.z)
-                level.asLocation(pos.with(Direction.Axis.Y, y.toDouble()))
-            }
-        }
-
-        private fun getValidRespawnPos(player: ServerPlayer): LocationWithLevel<ServerLevel>? {
-            val respawnData = player.respawnConfig?.respawnData ?: return null
-            val level = server.getLevel(respawnData.dimension()) ?: return null
-            if (!levels.has(level)) return null
-
-            val respawnPos = respawnData.pos().bottomCenter
-            val boundary = level.levelBoundary ?: return level.asLocation(respawnPos)
-            if (boundary.contains(respawnPos)) {
-                return level.asLocation(respawnPos)
-            }
-
-            val factor = 0.99 // nudge the player further inside the border
-            val inBorderPos = boundary.shape.getDirectionFrom(respawnPos)
-                .add(respawnPos).scale(factor)
-            return level.asLocation(inBorderPos)
-        }
     }
 
     private inner class BorderMovingInfo(private val buffer: Component): LevelSpecificElement<SidebarComponent> {

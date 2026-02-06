@@ -38,11 +38,25 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
     private val netherSpawn by lazy { StructureUtils.read(structurePath.resolve("nether_spawn.nbt")) }
     private val endSpawn by lazy { StructureUtils.read(structurePath.resolve("end_spawn.nbt")) }
 
+    fun searchForValidPosition(origin: BlockPos, level: ServerLevel): BlockPos? {
+        val boundary = level.levelBoundary
+        val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
+        for (position in positions) {
+            val adjusted = getTopNonCollidingPos(level, position)
+            if (adjusted == null || (boundary != null && !boundary.contains(adjusted.center))) {
+                continue
+            }
+            return adjusted
+        }
+        return null
+    }
+
     override fun teleportTeam(team: PlayerTeam, entities: Collection<Entity>, location: LocationWithLevel<ServerLevel>) {
         val level = location.level
         val origin = BlockPos.containing(location.position)
-        tryFindPosition(origin, level)?.let {
-            super.teleportTeam(team, entities, level.asLocation(it.center, location.rotation))
+        val valid = searchForValidPosition(origin, level)
+        if (valid != null) {
+            super.teleportTeam(team, entities, level.asLocation(valid.center, location.rotation))
             return
         }
 
@@ -71,19 +85,6 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
 
     override fun codec(): MapCodec<out EntityTeleporter> {
         return MapCodec.unit(this)
-    }
-
-    fun tryFindPosition(origin: BlockPos, level: ServerLevel): BlockPos? {
-        val boundary = level.levelBoundary
-        val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
-        for (position in positions) {
-            val adjusted = getTopNonCollidingPos(level, position)
-            if (adjusted == null || (boundary != null && !boundary.contains(adjusted.center))) {
-                continue
-            }
-            return adjusted
-        }
-        return null
     }
 
     private fun getTopNonCollidingPos(level: ServerLevel, initial: BlockPos): BlockPos? {
