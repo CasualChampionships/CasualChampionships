@@ -73,6 +73,9 @@ object CasualChampionships: DedicatedServerModInitializer {
         if (login.url.isEmpty()) {
             CasualUtils.logger.info("No sync service provided, defaulting to noop")
             this.sync = CasualNoopSyncService
+            server.launch {
+                minigames.createTeams()
+            }
             return
         }
 
