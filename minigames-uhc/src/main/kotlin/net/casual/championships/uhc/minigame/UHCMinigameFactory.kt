@@ -3,10 +3,12 @@ package net.casual.championships.uhc.minigame
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
+import net.casual.arcade.dimensions.level.CustomLevel
 import net.casual.arcade.dimensions.level.LevelPersistence
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevels
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevelsBuilder
+import net.casual.arcade.dimensions.utils.loadCustomLevel
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.utils.IdentifierUtils
@@ -71,34 +73,52 @@ class UHCMinigameFactory(
             dimensionsCopy.putIfAbsent(entry, DimensionWithSeed.DEFAULT)
         }
 
-        val seed = WorldOptions.randomSeed()
-        val levels = VanillaLikeLevelsBuilder.build(context.server) {
-            for (entry in dimensionsCopy.entries) {
-                val (dimension, data) = entry
-                val key = data.key.map { it.key }
-                    .orElseGet { randomDimensionKey(dimension.getDimensionKey().identifier().path) }
-                val persistence = data.key.map { it.persist }.orElse(false)
-
-                // We update the copy so that our factory knows what random dimension key we used
-                val updated = data.copy(
-                    key = Optional.of(DimensionWithSeed.DimensionWithPersistence(key, persistence))
-                )
-                dimensionsCopy[dimension] = updated
-
-                set(dimension) {
-                    dimensionKey(key)
-                    seed(data.seed.orElse(seed))
-                    defaultLevelProperties()
-                    persistence(LevelPersistence.Permanent)
+        val existingLevels = mutableMapOf<VanillaDimension, CustomLevel>()
+        for ((vanillaDimension, dimension) in this.dimensions) {
+            dimension.key.ifPresent { dp ->
+                val level = context.server.loadCustomLevel(dp.key)
+                if (level != null) {
+                    existingLevels[vanillaDimension] = level
                 }
             }
         }
 
-        val dimensions = UHCDimensions(
-            this.createLevelWithPersistence(levels, VanillaDimension.Overworld, dimensionsCopy),
-            this.createLevelWithPersistence(levels, VanillaDimension.Nether, dimensionsCopy),
-            this.createLevelWithPersistence(levels, VanillaDimension.End, dimensionsCopy),
-        )
+        val dimensions = if (existingLevels.size == this.dimensions.size) {
+            UHCDimensions(
+                UHCDimensions.LevelWithPersistence(existingLevels[VanillaDimension.Overworld]!!, true),
+                UHCDimensions.LevelWithPersistence(existingLevels[VanillaDimension.Nether]!!, true),
+                UHCDimensions.LevelWithPersistence(existingLevels[VanillaDimension.End]!!, true),
+            )
+        } else {
+            val seed = WorldOptions.randomSeed()
+            val levels = VanillaLikeLevelsBuilder.build(context.server) {
+                for (entry in dimensionsCopy.entries) {
+                    val (dimension, data) = entry
+                    val key = data.key.map { it.key }
+                        .orElseGet { randomDimensionKey(dimension.getDimensionKey().identifier().path) }
+                    val persistence = data.key.map { it.persist }.orElse(false)
+
+                    // We update the copy so that our factory knows what random dimension key we used
+                    val updated = data.copy(
+                        key = Optional.of(DimensionWithSeed.DimensionWithPersistence(key, persistence))
+                    )
+                    dimensionsCopy[dimension] = updated
+
+                    set(dimension) {
+                        dimensionKey(key)
+                        seed(data.seed.orElse(seed))
+                        defaultLevelProperties()
+                        persistence(LevelPersistence.Permanent)
+                    }
+                }
+            }
+
+            UHCDimensions(
+                this.createLevelWithPersistence(levels, VanillaDimension.Overworld, dimensionsCopy),
+                this.createLevelWithPersistence(levels, VanillaDimension.Nether, dimensionsCopy),
+                this.createLevelWithPersistence(levels, VanillaDimension.End, dimensionsCopy),
+            )
+        }
         return UHCMinigame(
             context.server,
             context.uuid,
