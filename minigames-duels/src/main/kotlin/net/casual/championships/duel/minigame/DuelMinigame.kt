@@ -40,6 +40,7 @@ import net.casual.arcade.utils.component.suggestCommand
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.toKey
+import net.casual.championships.common.event.LevelFluidTrySpreadEvent
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
@@ -96,11 +97,6 @@ class DuelMinigame(
 
     override fun phases(): Collection<Phase<DuelMinigame>> {
         return DuelPhase.entries
-    }
-
-    // TODO:
-    fun canLiquidSpreadInto(pos: BlockPos, state: BlockState): Boolean {
-        return this.modifiableBlocks.contains(pos) || state.isAir
     }
 
     @Listener
@@ -273,6 +269,13 @@ class DuelMinigame(
         val (player) = event
         if (player.isSpectator) {
             event.cancel()
+        }
+    }
+
+    @Listener
+    private fun onFluidTrySpread(event: LevelFluidTrySpreadEvent) {
+        if (!this.modifiableBlocks.contains(event.spreadPos) && !event.spreadBlockState.isAir) {
+            event.canSpread = false
         }
     }
 
