@@ -48,6 +48,7 @@ import net.casual.championships.minigame.event.EventState
 import net.casual.championships.minigame.lobby.LobbyMinigames
 import net.casual.championships.minigame.lobby.LobbySidebar
 import net.casual.championships.resources.CasualResourcePackHost
+import net.casual.championships.sync.CasualNoopSyncService
 import net.casual.championships.sync.data.SyncableParticipants
 import net.casual.championships.sync.data.SyncableTeam
 import net.casual.championships.sync.syncMinigame
@@ -243,8 +244,10 @@ class CasualMinigameManager(
     private suspend fun createTeams(server: MinecraftServer) {
         val teams = this.championships.sync.getTeams()
         val scoreboard = server.scoreboard
-        for (team in scoreboard.playerTeams.toList()) {
-            scoreboard.removePlayerTeam(team)
+        if (this.championships.sync !is CasualNoopSyncService) {
+            for (team in scoreboard.playerTeams.toList()) {
+                scoreboard.removePlayerTeam(team)
+            }
         }
 
         this.current.teams.setAdminTeam(scoreboard.getOrCreateAdminTeam())
