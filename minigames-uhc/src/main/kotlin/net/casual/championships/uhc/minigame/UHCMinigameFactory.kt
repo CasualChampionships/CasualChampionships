@@ -76,7 +76,7 @@ class UHCMinigameFactory(
         val existingLevels = mutableMapOf<VanillaDimension, CustomLevel>()
         for ((vanillaDimension, dimension) in this.dimensions) {
             dimension.key.ifPresent { dp ->
-                val level = context.server.loadCustomLevel(dp.key)
+                val level = CustomLevel.read(context.server, dp.key)
                 if (level != null) {
                     existingLevels[vanillaDimension] = level
                 }
