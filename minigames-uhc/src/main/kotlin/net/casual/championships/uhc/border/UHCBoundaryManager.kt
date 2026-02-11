@@ -26,8 +26,7 @@ object UHCBoundaryManager {
     }
 
     fun start(uhc: UHCMinigame) {
-        uhc.onStartBoundary()
-        this.move(uhc, UHCBoundaryPhase.Zeroth)
+        this.move(uhc, UHCBoundaryPhase.First)
     }
 
     fun calculateSizeAndCenter(

@@ -79,6 +79,15 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         option("twenty_minutes", Items.CAKE.named("20 Minutes"), 20.Minutes)
     })
 
+    var borderStartDelay by this.register(time {
+        name = "border_start_delay"
+        display = Items.STRUCTURE_VOID.named("Border Start Delay")
+        value = 10.Minutes
+        option("five_minutes", Items.CAKE.named("5 Minutes"), 5.Minutes)
+        option("ten_minutes", Items.CAKE.named("10 Minutes"), 10.Minutes)
+        option("twenty_minutes", Items.CAKE.named("20 Minutes"), 20.Minutes)
+    })
+
     var portalEscapeTime by this.register(time {
         name = "portal_escape_time"
         display = Items.OBSIDIAN.named("Portal Escape Time")

@@ -101,10 +101,12 @@ enum class UHCPhase(
             minigame.settings.isChatGlobal = false
             minigame.settings.mobsWithNoAIAreFlammable = true
             minigame.settings.canPvp.set(false)
-            UHCBoundaryManager.start(minigame)
+
+            minigame.onStartBoundary()
+            val borderDelayDuration = minigame.settings.borderStartDelay
+            minigame.scheduler.schedulePhasedCancellable(borderDelayDuration, MinigameTask(minigame, UHCBoundaryManager::start))
 
             val gracePeriodDuration = minigame.settings.gracePeriod
-
             val graceBossbarTask = GracePeriodBossbarTask(minigame)
                 .withDuration(gracePeriodDuration - 1.Ticks)
                 .then(PhaseChangeTask(minigame, Gameplay))

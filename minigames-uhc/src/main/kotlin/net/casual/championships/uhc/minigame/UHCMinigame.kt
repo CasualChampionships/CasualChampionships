@@ -166,7 +166,7 @@ class UHCMinigame(
     override val id = ID
 
     private var lastBoundaryTime = 0.Ticks
-    var boundaryPhase: UHCBoundaryPhase = UHCBoundaryPhase.Zeroth
+    var boundaryPhase: UHCBoundaryPhase = UHCBoundaryPhase.First
 
     val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)
@@ -1014,7 +1014,7 @@ class UHCMinigame(
             }
 
             val cooldown = when {
-                boundaryPhase == UHCBoundaryPhase.First -> settings.gracePeriod
+                boundaryPhase == UHCBoundaryPhase.First -> settings.borderStartDelay
                 else -> boundaryPhase.getCooldown(settings.borderTime)
             }
             val remainingTime = cooldown - (uptime.Ticks - lastBoundaryTime)

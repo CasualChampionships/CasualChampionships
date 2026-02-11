@@ -2,7 +2,6 @@ package net.casual.championships.uhc.border
 
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.utils.TimeUtils.Minutes
-import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
@@ -49,15 +48,6 @@ sealed class UHCBoundaryPhase(
     abstract fun getStartCenter(level: ServerLevel): Vec3
     abstract fun getEndCenter(level: ServerLevel): Vec3
     abstract fun getNextStage(): UHCBoundaryPhase
-
-
-    data object Zeroth: UHCBoundaryPhase(0, 1.Ticks, 10.Minutes) {
-    override fun getStartSize(level: ServerLevel) = Vec3(6128.0, 1024.0, 6128.0)
-    override fun getEndSize(level: ServerLevel) = Vec3(6128.0, 1024.0, 6128.0)
-    override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
-    override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
-    override fun getNextStage() = First
-    }
 
     data object First: UHCBoundaryPhase(0, 48.Minutes, 8.Minutes) {
         override fun getStartSize(level: ServerLevel) = Vec3(6128.0, 1024.0, 6128.0)
@@ -124,7 +114,7 @@ sealed class UHCBoundaryPhase(
     companion object {
         private val DEFAULT_CENTER = Vec3(0.0, 63.0, 0.0)
 
-        val entries by lazy { listOf(Zeroth, First, Second, Third, Fourth, Fifth, Sixth) }
+        val entries by lazy { listOf(First, Second, Third, Fourth, Fifth, Sixth) }
 
         val TOTAL_TIME by lazy {
             this.entries.fold(MinecraftTimeDuration.ZERO) { acc, stage ->
