@@ -26,7 +26,6 @@ object UHCBoundaryManager {
     }
 
     fun start(uhc: UHCMinigame) {
-        uhc.onStartBoundary()
         this.move(uhc, UHCBoundaryPhase.First)
     }
 
@@ -75,10 +74,10 @@ object UHCBoundaryManager {
             uhc.scheduler.schedulePhasedCancellable(duration, task).runIfCancelled()
         }
 
-        uhc.onPauseBoundary()
+        uhc.onPauseBoundaryTimer()
         val cooldown = current.getCooldown(uhc.settings.borderTime)
         uhc.scheduler.schedulePhased(cooldown, MinigameTask(uhc) { minigame ->
-            minigame.onResumeBoundary()
+            minigame.onResumeBoundaryTimer()
             this.move(minigame, minigame.boundaryPhase.getNextStage())
         })
     }
