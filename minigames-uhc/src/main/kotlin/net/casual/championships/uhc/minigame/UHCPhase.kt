@@ -102,7 +102,7 @@ enum class UHCPhase(
             minigame.settings.mobsWithNoAIAreFlammable = true
             minigame.settings.canPvp.set(false)
 
-            minigame.onStartBoundary()
+            minigame.onStartBoundaryTimer()
             val borderDelayDuration = minigame.settings.borderStartDelay
             minigame.scheduler.schedulePhasedCancellable(borderDelayDuration, MinigameTask(minigame, UHCBoundaryManager::start))
 
