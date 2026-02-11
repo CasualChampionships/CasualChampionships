@@ -23,6 +23,7 @@ import net.minecraft.util.StringRepresentable
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.levelgen.WorldOptions
 import java.util.*
+import kotlin.jvm.optionals.getOrNull
 
 data class DimensionWithSeed(
     val key: Optional<DimensionWithPersistence>,
@@ -75,8 +76,9 @@ class UHCMinigameFactory(
 
         val existingLevels = mutableMapOf<VanillaDimension, CustomLevel>()
         for ((vanillaDimension, dimension) in this.dimensions) {
-            dimension.key.ifPresent { dp ->
-                val level = CustomLevel.read(context.server, dp.key)
+            val persisted = dimension.key.getOrNull() ?: continue
+            if (!context.server.levelKeys().contains(persisted.key)) {
+                val level = CustomLevel.read(context.server, persisted.key)
                 if (level != null) {
                     existingLevels[vanillaDimension] = level
                 }
