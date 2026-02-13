@@ -367,7 +367,7 @@ class UHCMinigame(
 
         if (!this.players.isSpectating(player)) {
             this.updateBoundaryInfo(player)
-            this.updatePedalToTheMetal(player)
+            this.updateTeammateClosenessEffects(player)
         } else if (!player.isCreative) {
             val interval = 20.Minutes.ticks
             if (this.uptime % interval == interval - 1) {
@@ -891,20 +891,24 @@ class UHCMinigame(
         }
     }
 
-    private fun updatePedalToTheMetal(player: ServerPlayer) {
-        if (!this.settings.pedalToTheMetal) {
-            return
-        }
-
+    private fun updateTeammateClosenessEffects(player: ServerPlayer) {
         val teammates = player.team?.getOnlinePlayers()?.filter { it.isAlive } ?: return
-        for (teammate in teammates) {
-            if (teammate != player && teammate.closerThan(player, 50.0)) {
-                return
+        if (this.settings.pedalToTheMetal) {
+            val speedy = teammates.all { teammate -> teammate == player || !teammate.closerThan(player, 50.0) }
+            if (speedy) {
+                player.addEffect(MobEffectInstance(
+                    MobEffects.SPEED, 5.Seconds.ticks + 5, 0, false, false, false
+                ))
             }
         }
-        player.addEffect(MobEffectInstance(
-            MobEffects.SPEED, 5.Seconds.ticks + 5, 0, false, false, false
-        ))
+        if (this.settings.tightlyBonded) {
+            val bonded = teammates.all { teammate -> teammate.closerThan(player, 25.0) }
+            if (bonded) {
+                player.addEffect(MobEffectInstance(
+                    MobEffects.RESISTANCE, 5.Seconds.ticks + 5, 0, false, false, false
+                ))
+            }
+        }
     }
 
     private fun createSidebar(): DynamicSidebar {
