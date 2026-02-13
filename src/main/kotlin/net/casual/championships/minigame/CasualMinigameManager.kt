@@ -277,6 +277,7 @@ class CasualMinigameManager(
         }
 
         if (CasualResourcePackHost.loadTeamColors(updated)) {
+            this.reloadResourcePacks()
             this.reloadPlayerResources()
         }
     }

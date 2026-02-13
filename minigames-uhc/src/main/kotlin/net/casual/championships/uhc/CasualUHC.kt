@@ -6,6 +6,7 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
 import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
+import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.UHCItems
@@ -28,7 +29,7 @@ object CasualUHC: ModInitializer {
     val UHC_PACK = NamedResourcePackCreator.named("uhc") {
         addAssetSource(MOD_ID)
         addLangsFromData(MOD_ID)
-        addMissingItemModels(MOD_ID)
+        addMissingItemModels(CasualUtils.MOD_ID, container)
         addFont(UHCComponents.Bitmap)
         packDescription = Component.literal("Resources for CasualChampionships UHC minigame")
     }
