@@ -65,12 +65,20 @@ class TeamSharedHealthExtension(
             if (player != excluding) {
                 player.combatTracker.recordDamage(source, amount)
             }
+            player.health = this.health
         }
     }
 
-    fun heal(amount: Float) {
+    fun heal(
+        server: MinecraftServer,
+        amount: Float
+    ) {
         if (this.health > 0.0F) {
             this.health += amount
+
+            for (player in this.team.getOnlinePlayers(server)) {
+                player.health = this.health
+            }
         }
     }
 
@@ -115,14 +123,14 @@ class TeamSharedHealthExtension(
             this.tickTimer += 1
             if (this.tickTimer >= 10) {
                 val amount = min(this.saturationLevel, 6.0F)
-                this.heal(amount / 6.0F)
+                this.heal(server, amount / 6.0F)
                 this.addExhaustion(amount)
                 this.tickTimer = 0
             }
         } else if (naturalRegen && this.foodLevel >= 18 && this.isHurt()) {
             this.tickTimer += 1
             if (this.tickTimer >= 80) {
-                this.heal(1.0F)
+                this.heal(server, 1.0F)
                 this.addExhaustion(6.0F)
                 this.tickTimer = 0
             }
@@ -215,7 +223,7 @@ class TeamSharedHealthExtension(
                 event.addExtension(TeamSharedHealthExtension(event.team))
             }
             GlobalEventHandler.Server.register<ServerTickEvent>(::onServerTick)
-            GlobalEventHandler.Server.register<PlayerDamageEvent>(::onPlayerDamage)
+            GlobalEventHandler.Server.register<PlayerDamageEvent>(phase = PlayerDamageEvent.PHASE_POST, listener = ::onPlayerDamage)
         }
 
         private fun onServerTick(event: ServerTickEvent) {
