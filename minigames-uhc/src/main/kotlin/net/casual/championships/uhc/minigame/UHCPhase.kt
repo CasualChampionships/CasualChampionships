@@ -42,7 +42,7 @@ import net.minecraft.world.phys.Vec3
 
 internal const val INITIALIZING_ID = "initializing"
 internal const val GRACE_ID = "grace"
-internal const val BOUNDARY_MOVING_ID = "border_moving"
+internal const val GAMEPLAY_ID = "gameplay"
 internal const val GAME_OVER_ID = "game_over"
 
 enum class UHCPhase(
@@ -90,28 +90,37 @@ enum class UHCPhase(
             minigame.teams.hideNameTags()
 
             minigame.visuals.removeAllNametags()
-            minigame.visuals.addNametag(CasualGuiUtils.createPlayingNameTag(
-                EntityObserverPredicate.visibleObservee().toPlayer().and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
-            ))
-            minigame.visuals.addNametag(CasualGuiUtils.createPlayingHealthTag(
-                VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
-            ))
+            minigame.visuals.addNametag(
+                CasualGuiUtils.createPlayingNameTag(
+                    EntityObserverPredicate.visibleObservee().toPlayer().and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
+                )
+            )
+            minigame.visuals.addNametag(
+                CasualGuiUtils.createPlayingHealthTag(
+                    VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
+                )
+            )
         }
     },
     Grace(GRACE_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.settings.isChatGlobal = false
             minigame.settings.mobsWithNoAIAreFlammable = true
-            val duration = minigame.settings.gracePeriod
-            val task = GracePeriodBossbarTask(minigame)
-                .withDuration(duration - 1.Ticks)
-                .then(PhaseChangeTask(minigame, BoundaryMoving))
-            minigame.scheduler.schedulePhasedCancellable(duration, task).runIfCancelled()
-            // Not starting boundaries, but just to set the time
-            minigame.onStartBoundary()
+            minigame.settings.canPvp.set(false)
 
-            val minutes = duration.minutes
-            minigame.chat.broadcastGame(CasualComponents.BORDER_INITIAL_GRACE.generate(minutes).gold().withMiniFont())
+            minigame.onStartBoundaryTimer()
+            val borderDelayDuration = minigame.settings.borderStartDelay
+            minigame.scheduler.schedulePhasedCancellable(borderDelayDuration, MinigameTask(minigame, UHCBoundaryManager::start))
+
+            val gracePeriodDuration = minigame.settings.gracePeriod
+            val graceBossbarTask = GracePeriodBossbarTask(minigame)
+                .withDuration(gracePeriodDuration - 1.Ticks)
+                .then(PhaseChangeTask(minigame, Gameplay))
+            minigame.scheduler.schedulePhasedCancellable(gracePeriodDuration, graceBossbarTask).runIfCancelled()
+
+            minigame.chat.broadcastGame(
+                CasualComponents.BORDER_INITIAL_GRACE.generate(gracePeriodDuration.minutes).gold().withMiniFont()
+            )
         }
 
         override fun end(minigame: UHCMinigame, next: Phase<UHCMinigame>) {
@@ -124,11 +133,7 @@ enum class UHCPhase(
             }
         }
     },
-    BoundaryMoving(BOUNDARY_MOVING_ID) {
-        override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
-            UHCBoundaryManager.start(minigame)
-        }
-    },
+    Gameplay(GAMEPLAY_ID),
     GameOver(GAME_OVER_ID) {
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.settings.canPvp.set(false)

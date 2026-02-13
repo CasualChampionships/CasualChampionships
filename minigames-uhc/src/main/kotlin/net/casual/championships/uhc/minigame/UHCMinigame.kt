@@ -210,16 +210,16 @@ class UHCMinigame(
         }
     }
 
-    fun onStartBoundary() {
+    fun onStartBoundaryTimer() {
         this.lastBoundaryTime = this.uptime.Ticks
     }
 
-    fun onPauseBoundary() {
+    fun onPauseBoundaryTimer() {
         this.lastBoundaryTime = this.uptime.Ticks
         this.chat.broadcastGame(component = CasualComponents.BORDER_PAUSED.withMiniFont().red())
     }
 
-    fun onResumeBoundary() {
+    fun onResumeBoundaryTimer() {
         this.lastBoundaryTime = this.uptime.Ticks
         this.chat.broadcastGame(
             component = CasualComponents.BORDER_RESUMED.withMiniFont().red(),
@@ -1027,7 +1027,7 @@ class UHCMinigame(
             }
 
             val cooldown = when {
-                boundaryPhase == UHCBoundaryPhase.First -> settings.gracePeriod
+                boundaryPhase == UHCBoundaryPhase.First -> settings.borderStartDelay
                 else -> boundaryPhase.getCooldown(settings.borderTime)
             }
             val remainingTime = cooldown - (uptime.Ticks - lastBoundaryTime)
