@@ -110,7 +110,7 @@ enum class UHCPhase(
 
             minigame.onStartBoundaryTimer()
             val borderDelayDuration = minigame.settings.borderStartDelay
-            minigame.scheduler.schedulePhasedCancellable(borderDelayDuration, MinigameTask(minigame) { m ->
+            minigame.scheduler.schedule(borderDelayDuration, MinigameTask(minigame) { m ->
                 UHCBoundaryManager.start(m)
             })
 

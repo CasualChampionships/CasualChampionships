@@ -351,7 +351,14 @@ class CasualMinigameManager(
     }
 
     private fun onMinigameInitialize(event: MinigameInitializeEvent) {
-        when (val minigame = event.minigame) {
+        val minigame = event.minigame
+
+        minigame.resources.add(object: MinigameResources {
+            override fun getPacks(): Collection<PackInfo> {
+                return packs
+            }
+        })
+        when (minigame) {
             is UHCMinigame -> this.modifyUHCMinigame(minigame)
             is DuelMinigame -> this.modifyDuelMinigame(minigame)
         }
