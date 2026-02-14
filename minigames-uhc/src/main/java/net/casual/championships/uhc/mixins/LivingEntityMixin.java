@@ -64,9 +64,11 @@ public class LivingEntityMixin {
         }
         if ((Object) this instanceof ServerPlayer player) {
             TeamSharedHealthExtension extension = TeamSharedHealthExtension.getSharedHealthExtension(player);
-            for (ServerPlayer teammate : extension.teammates(PlayerUtils.getServer(player))) {
-                if (teammate != player && original.call(teammate, damageSource)) {
-                    return true;
+            if (extension != null) {
+                for (ServerPlayer teammate : extension.teammates(PlayerUtils.getServer(player))) {
+                    if (teammate != player && original.call(teammate, damageSource)) {
+                        return true;
+                    }
                 }
             }
         }
