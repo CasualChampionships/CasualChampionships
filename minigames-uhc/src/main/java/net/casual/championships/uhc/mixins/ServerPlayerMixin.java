@@ -18,7 +18,7 @@ public class ServerPlayerMixin {
         )
     )
     private boolean shouldTickNonSharedHunger(FoodData instance, ServerPlayer player) {
-        return TeamSharedHealthExtension.getSharedHealthExtension(player) != null;
+        return TeamSharedHealthExtension.getSharedHealthExtension(player) == null;
     }
 
     @ModifyExpressionValue(
