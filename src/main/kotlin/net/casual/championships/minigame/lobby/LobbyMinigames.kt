@@ -7,6 +7,7 @@ import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.casual.championships.minigame.duel.DuelArenas
+import net.casual.championships.minigame.duel.DuelKits
 import kotlin.reflect.KProperty0
 
 object LobbyMinigames {
@@ -25,6 +26,6 @@ object LobbyMinigames {
             CasualUtils.logger.error("Failed to read lobby $lobby", exception)
             MinigameDataModules.empty()
         }
-        return LobbyMinigame(server, context.uuid, next, DuelArenas.with(modules))
+        return LobbyMinigame(server, context.uuid, next, DuelKits.with(DuelArenas.with(modules)))
     }
 }

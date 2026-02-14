@@ -13,6 +13,7 @@ import net.casual.championships.config.CasualConfig
 import net.casual.championships.config.DatabaseLogin
 import net.casual.championships.minigame.CasualMinigameManager
 import net.casual.championships.minigame.duel.DuelArenas
+import net.casual.championships.minigame.duel.DuelKits
 import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.sync.CasualDatabaseSyncService
 import net.casual.championships.sync.CasualNoopSyncService
@@ -41,6 +42,7 @@ object CasualChampionships: DedicatedServerModInitializer {
 
         CasualResourcePackHost.registerEvents()
         DuelArenas.registerEvents()
+        DuelKits.registerEvents()
 
         this.minigames.registerEvents(GlobalEventHandler.Server)
         GlobalEventHandler.Server.register<ServerStartEvent>(priority = 10_000, listener = ::onServerStart)
@@ -51,6 +53,7 @@ object CasualChampionships: DedicatedServerModInitializer {
         this.config = CasualConfig.read()
 
         DuelArenas.reload(server)
+        DuelKits.reload(server)
         this.minigames.reload(server)
 
         this.reloadSyncService(server)

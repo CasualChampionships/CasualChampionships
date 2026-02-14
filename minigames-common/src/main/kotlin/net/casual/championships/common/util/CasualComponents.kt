@@ -153,6 +153,7 @@ object CasualComponents {
 
         val DUELS = bitmap(at("gui/duels_menu.png"), 13, 256)
         val DUEL_SETTINGS = bitmap(at("gui/duels_settings_menu.png"), 13, 256)
+        val DUEL_KITS = bitmap(at("gui/duels_kits_menu.png"), 13, 256)
 
         val MINESWEEPER_MENU = bitmap(at("gui/minesweeper_menu.png"), 19, 227)
 

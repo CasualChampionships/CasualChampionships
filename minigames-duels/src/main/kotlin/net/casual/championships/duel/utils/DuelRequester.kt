@@ -11,15 +11,20 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.Nameable
 
+typealias ReadyCheckSaver = (receiver: ServerPlayer, ready: () -> Unit, notReady: () -> Unit) -> Unit
+
 class DuelRequester(
     private val requester: ServerPlayer,
-    private val players: Collection<ServerPlayer>
+    private val players: Collection<ServerPlayer>,
+    private val readyCheckSaver: ReadyCheckSaver
 ): ReadyHandler<ServerPlayer> {
     override fun format(readier: ServerPlayer): Component {
         return (readier as Nameable).displayName
     }
 
     override fun broadcastReadyCheck(receiver: ServerPlayer, ready: () -> Unit, notReady: () -> Unit) {
+        this.readyCheckSaver(receiver, ready, notReady)
+
         val message = Component.empty()
             .append(Component.translatable("casual.duel.challenge", requester.displayName))
             .append(SpacingFontResources.spaced(4))

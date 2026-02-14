@@ -10,16 +10,23 @@ import net.casual.arcade.minigame.events.MinigameCloseEvent
 import net.casual.arcade.utils.PlayerUtils.username
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.duel.minigame.DuelSettings
+import net.casual.championships.duel.utils.ReadyCheckSaver
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.scores.PlayerTeam
 import java.util.*
 
+private data class DuelReadyCheck(val ready: () -> Unit, val notReady: () -> Unit)
+
 class LobbyDuels(
     private val lobby: LobbyMinigame
 ) {
+    val readyCheckSaver: ReadyCheckSaver = { receiver, ready, notReady ->
+        this.playerToCheck[receiver] = DuelReadyCheck(ready, notReady)
+    }
     private val duels = ArrayList<DuelMinigame>()
+    private val playerToCheck = WeakHashMap<ServerPlayer, DuelReadyCheck>()
 
     fun createDuel(settings: DuelSettings): DuelMinigame {
         val duel = DuelMinigame(this.lobby.server, UUID.randomUUID(), settings, settings.getSelectedArena())
@@ -48,6 +55,18 @@ class LobbyDuels(
 
     fun getDuelingPlayerUsernames(): List<String> {
         return this.duels.flatMap { duel -> duel.players.playing }.map { player -> player.username }
+    }
+
+    fun acceptLatestDuel(player: ServerPlayer): Boolean {
+        val check = this.playerToCheck.remove(player) ?: return false
+        check.ready()
+        return true
+    }
+
+    fun rejectLatestDuel(player: ServerPlayer): Boolean {
+        val check = this.playerToCheck.remove(player) ?: return false
+        check.notReady()
+        return true
     }
 
     private fun modifyDuel(duel: DuelMinigame) {
