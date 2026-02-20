@@ -758,7 +758,7 @@ class UHCMinigame(
     @Listener
     private fun onPlayerCheat(event: PlayerCheatEvent) {
         val message = Component {
-            literal("Player ") + event.player.displayName!! + literal(" tried to cheated with ${event.type}")
+            literal("Player ") + event.player.displayName!! + literal(" tried to cheat with ${event.type}")
         }
         this.chat.broadcastInfo(message, this.players.admins)
     }
