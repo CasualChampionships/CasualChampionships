@@ -55,7 +55,7 @@ enum class UHCPhase(
                 set(GameRules.LOCATOR_BAR, false)
                 set(GameRules.NATURAL_HEALTH_REGENERATION, false)
                 set(GameRules.SPAWN_PHANTOMS, false)
-                set(GameRules.IMMEDIATE_RESPAWN, true)
+                set(GameRules.IMMEDIATE_RESPAWN, true, minigame.server)
             }
 
             minigame.settings.canPvp.set(false)
@@ -73,7 +73,9 @@ enum class UHCPhase(
             for (team in minigame.teams.getPlayingTeams()) {
                 val extension = team.sharedHealthExtension
                 extension.enabled = minigame.settings.sharingIsCaring
-                extension.health = extension.maxHealth
+                if (minigame.settings.sharingIsCaring) {
+                    extension.set(minigame.server, extension.maxHealth)
+                }
             }
             for (player in minigame.players.spectating) {
                 if (player.level() != level) {

@@ -37,6 +37,7 @@ class TeamSharedHealthExtension(
 
     var maxHealth = 20.0F
     var health = 20.0F
+        private set
     var foodLevel = 20
         private set
     var saturationLevel = 5.0F
@@ -79,6 +80,13 @@ class TeamSharedHealthExtension(
             for (player in this.team.getOnlinePlayers(server)) {
                 player.health = this.health
             }
+        }
+    }
+
+    fun set(server: MinecraftServer, health: Float) {
+        this.health = health
+        for (player in this.team.getOnlinePlayers(server)) {
+            player.health = this.health
         }
     }
 

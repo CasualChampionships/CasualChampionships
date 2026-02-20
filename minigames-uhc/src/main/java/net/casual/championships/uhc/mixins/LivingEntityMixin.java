@@ -89,7 +89,7 @@ public class LivingEntityMixin {
         if ((Object) this instanceof ServerPlayer player) {
             TeamSharedHealthExtension extension = TeamSharedHealthExtension.getSharedHealthExtension(player);
             if (extension != null) {
-                extension.setHealth(health);
+                extension.set(PlayerUtils.getServer(player), health);
                 return;
             }
         }
