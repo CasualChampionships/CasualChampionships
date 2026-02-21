@@ -102,6 +102,7 @@ import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.border.UHCBoundaryPhase
+import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.getSharedHealthExtension
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbar
@@ -288,12 +289,15 @@ class UHCMinigame(
         this.visuals.setSidebar(this.createSidebar())
     }
 
-    @Listener
+    @Listener(priority = -2000)
     private fun onMinigameClose(event: MinigameCloseEvent) {
         for ((level, persist) in this.dimensions) {
             if (!persist) {
                 this.server.deleteCustomLevel(level)
             }
+        }
+        for (team in this.teams.getPlayingTeams()) {
+            team.sharedHealthExtension.enabled = false
         }
     }
 

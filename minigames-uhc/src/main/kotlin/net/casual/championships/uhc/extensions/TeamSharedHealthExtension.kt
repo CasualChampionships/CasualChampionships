@@ -11,6 +11,7 @@ import net.casual.arcade.utils.PlayerUtils.server
 import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.mixins.PlayerInvoker
+import net.minecraft.network.protocol.game.ClientboundDamageEventPacket
 import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
@@ -65,6 +66,7 @@ class TeamSharedHealthExtension(
         for (player in this.team.getOnlinePlayers(server)) {
             if (player != excluding) {
                 player.combatTracker.recordDamage(source, amount)
+                player.connection.send(ClientboundDamageEventPacket(player, source))
             }
             player.health = this.health
         }
@@ -163,8 +165,10 @@ class TeamSharedHealthExtension(
         if (this.health <= 0.0F) {
             val sources = server.overworld().damageSources()
             for (player in this.team.getOnlinePlayers(server)) {
+                player.health = this.health
                 player.die(sources.genericKill())
             }
+            this.enabled = false
             this.health = this.maxHealth
         }
     }
