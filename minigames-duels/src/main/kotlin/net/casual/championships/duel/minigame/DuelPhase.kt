@@ -32,7 +32,7 @@ enum class DuelPhase(
         override fun start(minigame: DuelMinigame, previous: Phase<DuelMinigame>) {
             minigame.levels.setGameRules {
                 resetToDefault()
-                set(GameRules.IMMEDIATE_RESPAWN, true)
+                set(GameRules.IMMEDIATE_RESPAWN, true, minigame.server)
                 set(GameRules.COMMAND_BLOCK_OUTPUT, false)
                 set(GameRules.RANDOM_TICK_SPEED, 0)
                 set(GameRules.LOCATOR_BAR, false)

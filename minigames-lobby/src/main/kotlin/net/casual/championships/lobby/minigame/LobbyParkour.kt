@@ -5,6 +5,7 @@ import eu.pb4.sgui.api.gui.HotbarGui
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerTickEvent
+import net.casual.arcade.guis.sgui.setSlot
 import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
@@ -15,7 +16,6 @@ import net.casual.arcade.utils.component.bold
 import net.casual.arcade.utils.component.red
 import net.casual.arcade.utils.math.location.Location
 import net.casual.arcade.utils.teleportTo
-import net.casual.arcade.visuals.screen.setSlot
 import net.casual.championships.lobby.advancement.LobbyAdvancements
 import net.casual.championships.lobby.minigame.modules.LobbyParkourData
 import net.minecraft.network.chat.Component

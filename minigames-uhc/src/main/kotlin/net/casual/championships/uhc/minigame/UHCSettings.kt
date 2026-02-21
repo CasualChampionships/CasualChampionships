@@ -239,6 +239,13 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         defaults.options(this)
     })
 
+    var tightlyBonded by this.register(bool {
+        name = "tightly_bonded"
+        display = Items.STRING.named("Tightly Bonded")
+        value = false
+        defaults.options(this)
+    })
+
     var nerfedPlayerDamage by this.register(float32 {
         name = "nerfed_player_damage"
         display = Items.WOODEN_SWORD.named("Nerfed player damage")
@@ -284,6 +291,14 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         name = "helping_hand"
         display = Items.LEAD.named("Helping Hand")
             .lore(Component.literal("Allows players to pick up other players"))
+        value = false
+        defaults.options(this)
+    })
+
+    var sharingIsCaring by this.register(bool {
+        name = "sharing_is_caring"
+        display = Items.DRAGON_BREATH.named("Sharing is Caring")
+            .lore(Component.literal("Health is shared between all players on a team"))
         value = false
         defaults.options(this)
     })

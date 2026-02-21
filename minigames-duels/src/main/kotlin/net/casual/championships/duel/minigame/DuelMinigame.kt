@@ -7,7 +7,6 @@ import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.level.LevelBlockChangedEvent
-import net.casual.arcade.events.server.level.LevelFluidTrySpreadEvent
 import net.casual.arcade.events.server.player.*
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.annotation.During
@@ -41,6 +40,7 @@ import net.casual.arcade.utils.component.suggestCommand
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.teleportTo
 import net.casual.arcade.utils.toKey
+import net.casual.championships.common.event.LevelFluidTrySpreadEvent
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
@@ -68,6 +68,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.context.DirectionalPlaceContext
 import net.minecraft.world.level.GameType
+import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
@@ -162,13 +163,6 @@ class DuelMinigame(
     private fun onPlayerItemUse(event: PlayerItemUseEvent) {
         if (event.stack.isOf(ItemTags.BOATS)) {
             event.cancel(InteractionResult.PASS)
-        }
-    }
-
-    @Listener
-    private fun onFluidTrySpread(event: LevelFluidTrySpreadEvent) {
-        if (!this.modifiableBlocks.contains(event.spreadPos) && !event.spreadBlockState.isAir) {
-            event.canSpread = false
         }
     }
 
@@ -275,6 +269,13 @@ class DuelMinigame(
         val (player) = event
         if (player.isSpectator) {
             event.cancel()
+        }
+    }
+
+    @Listener
+    private fun onFluidTrySpread(event: LevelFluidTrySpreadEvent) {
+        if (!this.modifiableBlocks.contains(event.spreadPos) && !event.spreadBlockState.isAir) {
+            event.canSpread = false
         }
     }
 

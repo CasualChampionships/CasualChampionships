@@ -27,6 +27,6 @@
     ]
   },
   "mixins": [
-
+    "casual-uhc.mixins.json"
   ]
 }

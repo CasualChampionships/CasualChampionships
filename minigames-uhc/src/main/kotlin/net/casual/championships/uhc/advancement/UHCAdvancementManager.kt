@@ -113,19 +113,24 @@ class UHCAdvancementManager(
 
     @Listener(flags = IS_PLAYING, priority = 2000, during = During(before = GAME_OVER_ID))
     private fun onPlayerJoin(event: PlayerJoinEvent) {
-        val relogs = this.uhc.stats.getOrCreateStat(event.player, ArcadeStats.RELOGS).value
+        val player = event.player
+        val relogs = this.uhc.stats.getOrCreateStat(player, ArcadeStats.RELOGS).value
         // Wait for player to load in
-        GlobalTickedScheduler.schedule(1.Seconds, PlayerTask(event.player) { player ->
+        GlobalTickedScheduler.schedule(1.Seconds, PlayerTask(player) { player ->
             player.grantAdvancement(UHCAdvancements.COMBAT_LOGGER)
             if (relogs == 10) {
                 player.grantAdvancement(UHCAdvancements.OK_WE_BELIEVE_YOU_NOW)
             }
         })
 
-        val team = event.player.team
+        val team = player.team
         if (team !== null && this.uhc.teams.isTeamEliminated(team)) {
-            this.uhc.teams.removeEliminatedTeam(team)
-            event.player.grantAdvancement(UHCAdvancements.TEAM_PLAYER)
+            if (this.uhc.settings.sharingIsCaring) {
+                player.die(player.damageSources().genericKill())
+            } else {
+                this.uhc.teams.removeEliminatedTeam(team)
+                player.grantAdvancement(UHCAdvancements.TEAM_PLAYER)
+            }
         }
     }
 

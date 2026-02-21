@@ -102,6 +102,8 @@ import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.border.UHCBoundaryPhase
+import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.getSharedHealthExtension
+import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbar
 import net.casual.championships.uhc.item.TMCStarterPack
@@ -196,6 +198,17 @@ class UHCMinigame(
     fun resetPlayerHealth(player: ServerPlayer) {
         player.boostHealth(this.settings.health)
         player.resetHealth()
+
+        val team = player.team
+        if (team != null) {
+            val extension = team.sharedHealthExtension
+            if (this.settings.sharingIsCaring) {
+                extension.enabled = true
+                extension.maxHealth = (20 * (this.settings.health + 1.0)).toFloat()
+            } else {
+                extension.enabled = false
+            }
+        }
     }
 
     fun onStartBoundaryTimer() {
@@ -276,12 +289,15 @@ class UHCMinigame(
         this.visuals.setSidebar(this.createSidebar())
     }
 
-    @Listener
+    @Listener(priority = -2000)
     private fun onMinigameClose(event: MinigameCloseEvent) {
         for ((level, persist) in this.dimensions) {
             if (!persist) {
                 this.server.deleteCustomLevel(level)
             }
+        }
+        for (team in this.teams.getPlayingTeams()) {
+            team.sharedHealthExtension.enabled = false
         }
     }
 
@@ -355,7 +371,7 @@ class UHCMinigame(
 
         if (!this.players.isSpectating(player)) {
             this.updateBoundaryInfo(player)
-            this.updatePedalToTheMetal(player)
+            this.updateTeammateClosenessEffects(player)
         } else if (!player.isCreative) {
             val interval = 20.Minutes.ticks
             if (this.uptime % interval == interval - 1) {
@@ -607,8 +623,10 @@ class UHCMinigame(
         this.effects.addFullbright(player)
 
         val team = player.team
-        team?.nameTagVisibility = Team.Visibility.NEVER
-        team?.collisionRule = Team.CollisionRule.ALWAYS
+        if (team != null) {
+            team.nameTagVisibility = Team.Visibility.NEVER
+            team.collisionRule = Team.CollisionRule.ALWAYS
+        }
 
         this.tags.add(player, CasualTags.HAS_PARTICIPATED)
         this.tags.add(player, CasualTags.HAS_TEAM_GLOW)
@@ -744,7 +762,7 @@ class UHCMinigame(
     @Listener
     private fun onPlayerCheat(event: PlayerCheatEvent) {
         val message = Component {
-            literal("Player ") + event.player.displayName!! + literal(" tried to cheated with ${event.type}")
+            literal("Player ") + event.player.displayName!! + literal(" tried to cheat with ${event.type}")
         }
         this.chat.broadcastInfo(message, this.players.admins)
     }
@@ -877,20 +895,24 @@ class UHCMinigame(
         }
     }
 
-    private fun updatePedalToTheMetal(player: ServerPlayer) {
-        if (!this.settings.pedalToTheMetal) {
-            return
-        }
-
+    private fun updateTeammateClosenessEffects(player: ServerPlayer) {
         val teammates = player.team?.getOnlinePlayers()?.filter { it.isAlive } ?: return
-        for (teammate in teammates) {
-            if (teammate != player && teammate.closerThan(player, 50.0)) {
-                return
+        if (this.settings.pedalToTheMetal) {
+            val speedy = teammates.all { teammate -> teammate == player || !teammate.closerThan(player, 50.0) }
+            if (speedy) {
+                player.addEffect(MobEffectInstance(
+                    MobEffects.SPEED, 5.Seconds.ticks + 5, 0, false, false, false
+                ))
             }
         }
-        player.addEffect(MobEffectInstance(
-            MobEffects.SPEED, 5.Seconds.ticks + 5, 0, false, false, false
-        ))
+        if (this.settings.tightlyBonded) {
+            val bonded = teammates.all { teammate -> teammate.closerThan(player, 25.0) }
+            if (bonded) {
+                player.addEffect(MobEffectInstance(
+                    MobEffects.RESISTANCE, 5.Seconds.ticks + 5, 0, false, false, false
+                ))
+            }
+        }
     }
 
     private fun createSidebar(): DynamicSidebar {
