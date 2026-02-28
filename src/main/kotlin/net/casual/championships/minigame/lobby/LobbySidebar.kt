@@ -1,8 +1,8 @@
 package net.casual.championships.minigame.lobby
 
 import net.casual.arcade.resources.utils.withMiniFont
-import net.casual.arcade.utils.TeamUtils.getOnlineCount
 import net.casual.arcade.utils.component.*
+import net.casual.arcade.utils.scoreboard.getOnlineCount
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.elements.UniversalElement
 import net.casual.arcade.visuals.sidebar.DynamicSidebar

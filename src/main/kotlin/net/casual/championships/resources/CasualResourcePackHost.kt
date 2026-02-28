@@ -12,7 +12,7 @@ import net.casual.arcade.resources.creator.NamedResourcePackCreator
 import net.casual.arcade.resources.pack.PackInfo
 import net.casual.arcade.resources.utils.ResourcePackUtils.addPack
 import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
-import net.casual.arcade.utils.TeamUtils.getHexColor
+import net.casual.arcade.utils.scoreboard.getHexColor
 import net.casual.championships.CasualChampionships
 import net.casual.championships.common.CasualCommon
 import net.casual.championships.common.util.CasualUtils

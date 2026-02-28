@@ -1,6 +1,5 @@
 package net.casual.championships.uhc.advancement
 
-import com.google.gson.JsonObject
 import net.casual.arcade.events.BuiltInEventPhases
 import net.casual.arcade.events.server.entity.EntityDeathEvent
 import net.casual.arcade.events.server.player.*
@@ -14,15 +13,14 @@ import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.ItemUtils.isOf
-import net.casual.arcade.utils.JsonUtils.array
-import net.casual.arcade.utils.JsonUtils.toJsonStringArray
-import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
-import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.arcade.utils.PlayerUtils.isSurvival
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
-import net.casual.arcade.utils.isInStructure
+import net.casual.arcade.utils.entity.isInStructure
 import net.casual.arcade.utils.isOf
+import net.casual.arcade.utils.level.isOf
+import net.casual.arcade.utils.player.getKillCreditWith
+import net.casual.arcade.utils.player.grantAdvancement
+import net.casual.arcade.utils.player.isSurvival
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.util.CasualStats
 import net.casual.championships.common.util.CasualTags
@@ -52,6 +50,8 @@ import net.minecraft.world.level.block.state.properties.ChestType
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures
 import net.minecraft.world.level.storage.TagValueInput
 import net.minecraft.world.level.storage.TagValueOutput
+import net.minecraft.world.level.storage.ValueInput
+import net.minecraft.world.level.storage.ValueOutput
 
 class UHCAdvancementManager(
     private val uhc: UHCMinigame
@@ -99,15 +99,14 @@ class UHCAdvancementManager(
         }
     }
 
-    fun serialize(): JsonObject {
-        val json = JsonObject()
-        json.add("claimed", this.claimed.toJsonStringArray { it.name })
-        return json
+    fun serialize(output: ValueOutput) {
+        val claimed = output.list("claimed", UHCRaceAdvancement.CODEC)
+        this.claimed.forEach(claimed::add)
     }
 
-    fun deserialize(json: JsonObject) {
-        for (claimed in json.array("claimed")) {
-            this.claimed.add(UHCRaceAdvancement.valueOf(claimed.asString))
+    fun deserialize(input: ValueInput) {
+        for (claimed in input.listOrEmpty("claimed", UHCRaceAdvancement.CODEC)) {
+            this.claimed.add(claimed)
         }
     }
 

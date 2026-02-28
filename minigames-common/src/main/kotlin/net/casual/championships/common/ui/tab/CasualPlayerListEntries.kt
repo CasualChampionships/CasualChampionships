@@ -8,12 +8,12 @@ import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
 import net.casual.arcade.resources.font.heads.getHeadFor
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
-import net.casual.arcade.utils.ServerUtils
-import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.italicize
 import net.casual.arcade.utils.coroutine.async
 import net.casual.arcade.utils.coroutine.getNow
+import net.casual.arcade.utils.scoreboard.color
+import net.casual.arcade.utils.server.ServerSingleton
 import net.casual.arcade.visuals.tab.PlayerListEntries
 import net.casual.arcade.visuals.tab.TeamListEntries
 import net.minecraft.network.chat.Component
@@ -63,7 +63,7 @@ open class CasualPlayerListEntries(
             .expireAfterAccess(Duration.ofSeconds(60))
             .build(object: CacheLoader<String, Deferred<Component>>() {
                 override fun load(key: String): Deferred<Component> {
-                    val server = ServerUtils.getServer()
+                    val server = ServerSingleton.get()
                     return server.async {
                         PixelGridHeadComponents.get(services = server.services()).getHeadFor(key)
                     }

@@ -56,7 +56,7 @@ object UHCBoundaryManager {
         val duration = current.getDuration(uhc.settings.borderTime)
         this.move(uhc, duration) { current.getEnd(it) }
         uhc.scheduler.schedulePhased(duration, MinigameTask(uhc) { minigame ->
-            this.complete(minigame, current)
+            this.complete(minigame, uhc.boundaryPhase) // current
         })
     }
 

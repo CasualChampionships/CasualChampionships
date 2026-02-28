@@ -7,11 +7,11 @@ import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.utils.PlayerUtils.server
 import net.casual.arcade.utils.component.white
 import net.casual.arcade.utils.component.yellow
+import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
-import net.casual.arcade.utils.teleportTo
+import net.casual.arcade.utils.player.server
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.ui.CasualSimpleGui

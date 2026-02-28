@@ -25,10 +25,6 @@ import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ArcadeUtils
 import net.casual.arcade.utils.JsonUtils
-import net.casual.arcade.utils.PlayerUtils.getChatUsername
-import net.casual.arcade.utils.PlayerUtils.username
-import net.casual.arcade.utils.TeamUtils.getOrCreateTeam
-import net.casual.arcade.utils.TeamUtils.setHexColor
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.component.Component
@@ -36,6 +32,10 @@ import net.casual.arcade.utils.component.green
 import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.component.red
 import net.casual.arcade.utils.coroutine.launch
+import net.casual.arcade.utils.player.getChatUsername
+import net.casual.arcade.utils.player.username
+import net.casual.arcade.utils.scoreboard.getOrCreateTeam
+import net.casual.arcade.utils.scoreboard.setHexColor
 import net.casual.championships.CasualChampionships
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
@@ -64,7 +64,6 @@ import net.minecraft.world.scores.Scoreboard
 import net.minecraft.world.scores.Team
 import java.nio.file.Path
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.io.path.notExists
 import kotlin.jvm.optionals.getOrNull
 
@@ -214,7 +213,7 @@ class CasualMinigameManager(
 
     private fun reloadMinigame(server: MinecraftServer) {
         this.minigame?.close()
-        val minigame = this.config.minigame.create(MinigameCreationContext(server))
+        val minigame = this.config.minigame.create(MinigameCreationContext.initial(server))
         minigame.tryInitialize()
         this.minigame = minigame
     }
@@ -234,7 +233,7 @@ class CasualMinigameManager(
     }
 
     private fun createLobby(server: MinecraftServer): LobbyMinigame {
-        val lobby = LobbyMinigames.create(this.config.lobby, this::minigame, MinigameCreationContext(server))
+        val lobby = LobbyMinigames.create(this.config.lobby, this::minigame, MinigameCreationContext.initial(server))
         lobby.resources.add(CasualResourcePackHost.createResourcesFromPacks { lobby.getAdditionalPacks() })
         this.modifyLobbyMinigame(lobby)
         lobby.start()

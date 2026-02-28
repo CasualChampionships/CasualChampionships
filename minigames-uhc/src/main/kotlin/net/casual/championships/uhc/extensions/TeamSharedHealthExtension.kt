@@ -7,8 +7,7 @@ import net.casual.arcade.events.server.player.PlayerDamageEvent
 import net.casual.arcade.extensions.SerializableExtension
 import net.casual.arcade.extensions.event.TeamExtensionEvent
 import net.casual.arcade.extensions.utils.getExtension
-import net.casual.arcade.utils.PlayerUtils.server
-import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
+import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.mixins.PlayerInvoker
 import net.minecraft.network.protocol.game.ClientboundDamageEventPacket
@@ -44,8 +43,8 @@ class TeamSharedHealthExtension(
     var saturationLevel = 5.0F
         private set
 
-    fun teammates(server: MinecraftServer): Collection<ServerPlayer> {
-        return this.team.getOnlinePlayers(server)
+    fun teammates(): Collection<ServerPlayer> {
+        return this.team.getOnlinePlayers()
     }
 
     fun eat(foodLevelModifier: Int, saturationLevelModifier: Float) {
@@ -57,13 +56,12 @@ class TeamSharedHealthExtension(
     }
 
     fun hurt(
-        server: MinecraftServer,
         source: DamageSource,
         amount: Float,
         excluding: ServerPlayer? = null
     ) {
         this.health -= amount
-        for (player in this.team.getOnlinePlayers(server)) {
+        for (player in this.team.getOnlinePlayers()) {
             if (player != excluding) {
                 player.combatTracker.recordDamage(source, amount)
                 player.connection.send(ClientboundDamageEventPacket(player, source))
@@ -72,29 +70,26 @@ class TeamSharedHealthExtension(
         }
     }
 
-    fun heal(
-        server: MinecraftServer,
-        amount: Float
-    ) {
+    fun heal(amount: Float) {
         if (this.health > 0.0F) {
             this.health += amount
 
-            for (player in this.team.getOnlinePlayers(server)) {
+            for (player in this.team.getOnlinePlayers()) {
                 player.health = this.health
             }
         }
     }
 
-    fun set(server: MinecraftServer, health: Float) {
+    fun set(health: Float) {
         this.health = health
-        for (player in this.team.getOnlinePlayers(server)) {
+        for (player in this.team.getOnlinePlayers()) {
             player.health = this.health
         }
     }
 
     fun setAbsorption(absorption: Float, setter: ServerPlayer) {
         this.absorption = absorption
-        for (teammate in this.teammates(setter.server)) {
+        for (teammate in this.teammates()) {
             if (teammate != setter) {
                 (teammate as PlayerInvoker).invokeInternalSetAbsorptionAmount(absorption)
             }
@@ -133,14 +128,14 @@ class TeamSharedHealthExtension(
             this.tickTimer += 1
             if (this.tickTimer >= 10) {
                 val amount = min(this.saturationLevel, 6.0F)
-                this.heal(server, amount / 6.0F)
+                this.heal(amount / 6.0F)
                 this.addExhaustion(amount)
                 this.tickTimer = 0
             }
         } else if (naturalRegen && this.foodLevel >= 18 && this.isHurt()) {
             this.tickTimer += 1
             if (this.tickTimer >= 80) {
-                this.heal(server, 1.0F)
+                this.heal(1.0F)
                 this.addExhaustion(6.0F)
                 this.tickTimer = 0
             }
@@ -149,7 +144,7 @@ class TeamSharedHealthExtension(
             if (this.tickTimer >= 80) {
                 if (this.health > 10.0F || difficulty == Difficulty.HARD || this.health > 1.0F && difficulty == Difficulty.NORMAL) {
                     val sources = server.overworld().damageSources()
-                    this.hurt(server, sources.starve(), 1.0F)
+                    this.hurt(sources.starve(), 1.0F)
                 }
 
                 this.tickTimer = 0
@@ -164,7 +159,7 @@ class TeamSharedHealthExtension(
     private fun tickDeath(server: MinecraftServer) {
         if (this.health <= 0.0F) {
             val sources = server.overworld().damageSources()
-            for (player in this.team.getOnlinePlayers(server)) {
+            for (player in this.team.getOnlinePlayers()) {
                 player.health = this.health
                 player.die(sources.genericKill())
             }
@@ -248,7 +243,7 @@ class TeamSharedHealthExtension(
         private fun onPlayerDamage(event: PlayerDamageEvent) {
             val (player, source, amount) = event
             val extension = player.getSharedHealthExtension() ?: return
-            extension.hurt(player.server, source, amount - extension.absorption, player)
+            extension.hurt(source, amount - extension.absorption, player)
         }
     }
 }

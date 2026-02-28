@@ -6,7 +6,7 @@ import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.level.LevelBlockChangedEvent
 import net.casual.arcade.events.server.player.PlayerBlockPlacedEvent
 import net.casual.arcade.utils.ItemUtils.isOf
-import net.casual.arcade.utils.isOf
+import net.casual.arcade.utils.level.isOf
 import net.casual.championships.common.anticheat.AntiCheatType
 import net.casual.championships.common.anticheat.fbp.WorldBlockTrackerExtension.Companion.blockTracker
 import net.casual.championships.common.event.PlayerCheatEvent
@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.permissions.PermissionLevel
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.PlaceOnWaterBlockItem
@@ -42,7 +43,7 @@ object FlexibleBlockPlacementDetector {
     }
 
     private fun detectFlexibleBlockPlacement(player: ServerPlayer, context: BlockPlaceContext): Boolean {
-        if (Permissions.check(player, "casual.fbp", 4)) {
+        if (Permissions.check(player, "casual.fbp", PermissionLevel.OWNERS)) {
             return false
         }
 

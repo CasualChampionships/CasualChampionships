@@ -1,5 +1,7 @@
 package net.casual.championships.uhc.border
 
+import com.mojang.serialization.Codec
+import com.mojang.serialization.DataResult
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.time.MinecraftTimeDuration
@@ -114,12 +116,22 @@ sealed class UHCBoundaryPhase(
     companion object {
         private val DEFAULT_CENTER = Vec3(0.0, 63.0, 0.0)
 
-        val entries by lazy { listOf(First, Second, Third, Fourth, Fifth, Sixth) }
-
+        val CODEC: Codec<UHCBoundaryPhase> = Codec.INT.comapFlatMap(::getPhaseFromIndex, ::getIndexFromPhase)
         val TOTAL_TIME by lazy {
             this.entries.fold(MinecraftTimeDuration.ZERO) { acc, stage ->
                 acc + stage.duration + stage.cooldown
             }
+        }
+
+        val entries by lazy { listOf(First, Second, Third, Fourth, Fifth, Sixth) }
+
+        private fun getPhaseFromIndex(index: Int): DataResult<UHCBoundaryPhase> {
+            val phase = this.entries.getOrNull(index) ?: return DataResult.error { "Phase index out of bounds!" }
+            return DataResult.success(phase)
+        }
+
+        private fun getIndexFromPhase(phase: UHCBoundaryPhase): Int {
+            return this.entries.indexOf(phase)
         }
     }
 }

@@ -6,12 +6,12 @@ import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.arcade.minigame.utils.MinigameUtils.launch
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.utils.PlayerUtils.sendTitle
-import net.casual.arcade.utils.TeamUtils.color
-import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
-import net.casual.arcade.utils.resetToDefault
-import net.casual.arcade.utils.set
+import net.casual.arcade.utils.level.resetToDefault
+import net.casual.arcade.utils.level.set
+import net.casual.arcade.utils.player.sendTitle
+import net.casual.arcade.utils.scoreboard.color
+import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.championships.common.ui.bossbar.ActiveBossbar
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualStats
@@ -33,9 +33,9 @@ enum class DuelPhase(
             minigame.levels.setGameRules {
                 resetToDefault()
                 set(GameRules.IMMEDIATE_RESPAWN, true, minigame.server)
+                set(GameRules.LOCATOR_BAR, false, minigame.server)
                 set(GameRules.COMMAND_BLOCK_OUTPUT, false)
                 set(GameRules.RANDOM_TICK_SPEED, 0)
-                set(GameRules.LOCATOR_BAR, false)
                 if (!minigame.duelSettings.naturalRegen) {
                     set(GameRules.NATURAL_HEALTH_REGENERATION, false)
                 }

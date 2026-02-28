@@ -1,10 +1,10 @@
 package net.casual.championships.util
 
 import net.casual.arcade.utils.component.*
-import net.casual.arcade.utils.convertCasing
 import net.casual.arcade.utils.string.SmallCapsTitleCase
 import net.casual.arcade.utils.string.TitleCase
-import net.casual.arcade.utils.toSmallCaps
+import net.casual.arcade.utils.string.convertCasing
+import net.casual.arcade.utils.string.toSmallCaps
 import net.minecraft.network.chat.Component
 
 object CasualComponentUtils {

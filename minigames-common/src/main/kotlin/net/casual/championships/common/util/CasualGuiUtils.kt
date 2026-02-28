@@ -7,14 +7,10 @@ import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.events.MinigameAddPlayerEvent
 import net.casual.arcade.minigame.events.MinigamePauseEvent
 import net.casual.arcade.minigame.managers.MinigameChatManager
-import net.casual.arcade.minigame.ready.MinigamePlayerReadyHandler
-import net.casual.arcade.minigame.ready.ReadyChecker
 import net.casual.arcade.minigame.utils.MinigameUtils.broadcastChangesToAdmin
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
-import net.casual.arcade.utils.PlayerUtils.sendSound
-import net.casual.arcade.utils.TeamUtils.getHexColor
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.chat.PlayerChatFormatter
 import net.casual.arcade.utils.chat.PlayerFormattedChat
@@ -23,18 +19,21 @@ import net.casual.arcade.utils.component.gold
 import net.casual.arcade.utils.component.isEmpty
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.player.sendSound
+import net.casual.arcade.utils.scoreboard.getHexColor
+import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
 import net.casual.arcade.visuals.nametag.PlayerNametag
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
+import net.casual.arcade.visuals.ready.chat.TeamChatReadyBroadcaster
 import net.casual.arcade.visuals.sidebar.SidebarComponent
 import net.casual.arcade.visuals.tab.PlayerListDisplay
 import net.casual.arcade.visuals.utils.elements.ComponentElements
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualPlayerInventoryViewGui
-import net.casual.championships.common.ui.CasualTeamReadyHandler
 import net.casual.championships.common.ui.elements.*
 import net.casual.championships.common.ui.game.TeamSelectorGui
 import net.casual.championships.common.ui.tab.CasualPlayerListEntries
@@ -48,6 +47,7 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.component.DyedItemColor
+import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 
 object CasualGuiUtils {
@@ -171,9 +171,8 @@ object CasualGuiUtils {
     fun setMinigameUI(minigame: Minigame) {
         minigame.settings.broadcastChangesToAdmin()
         minigame.visuals.setPlayerListDisplay(this.createTeamMinigameTabDisplay(minigame))
-        minigame.visuals.readier = ReadyChecker(
-            MinigamePlayerReadyHandler(minigame),
-            CasualTeamReadyHandler(minigame)
+        minigame.visuals.teamReadyBroadcaster = TeamChatReadyBroadcaster(
+            this.createReadyUnicast(minigame), this.createReadyMulticast(minigame)
         )
         minigame.visuals.countdown = CasualCountdown
 
@@ -206,5 +205,15 @@ object CasualGuiUtils {
                 Sound(CasualSounds.GAME_PAUSED)
             )
         }
+    }
+
+    private fun createReadyUnicast(minigame: Minigame): (PlayerTeam, Component) -> Unit {
+        return { team, message ->
+            minigame.chat.broadcastWithSound(message, players = team.getOnlinePlayers(), formatter = READY_ANNOUNCEMENT)
+        }
+    }
+
+    private fun createReadyMulticast(minigame: Minigame): (Component) -> Unit {
+        return { message -> minigame.chat.broadcast(message, formatter = READY_ANNOUNCEMENT) }
     }
 }

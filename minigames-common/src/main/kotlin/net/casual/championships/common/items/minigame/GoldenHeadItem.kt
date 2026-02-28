@@ -3,8 +3,8 @@ package net.casual.championships.common.items.minigame
 import com.google.common.collect.ImmutableMultimap
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
-import net.casual.arcade.utils.StaticResolvableProfile
 import net.casual.arcade.utils.component.gold
+import net.casual.arcade.utils.player.StaticResolvableProfile
 import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer

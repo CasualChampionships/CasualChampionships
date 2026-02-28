@@ -6,10 +6,10 @@ import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.TeamUtils.getOnlineCount
-import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus
+import net.casual.arcade.utils.scoreboard.getOnlineCount
+import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.arcade.visuals.elements.UniversalElement
 import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component

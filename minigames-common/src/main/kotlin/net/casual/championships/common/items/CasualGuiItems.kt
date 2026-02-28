@@ -1,7 +1,7 @@
 package net.casual.championships.common.items
 
 import net.casual.arcade.items.ItemStackFactory
-import net.casual.arcade.utils.impl.ConcatenatedList.Companion.concat
+import net.casual.arcade.utils.collection.concat
 import net.casual.championships.common.util.casual
 import net.minecraft.world.item.ItemStack
 

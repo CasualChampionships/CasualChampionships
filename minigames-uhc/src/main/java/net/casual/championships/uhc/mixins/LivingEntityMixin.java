@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.casual.arcade.utils.PlayerUtils;
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -27,7 +26,7 @@ public class LivingEntityMixin {
         if ((Object) this instanceof ServerPlayer player) {
             TeamSharedHealthExtension extension = TeamSharedHealthExtension.getSharedHealthExtension(player);
             if (extension != null) {
-                extension.heal(PlayerUtils.getServer(player), healAmount);
+                extension.heal(healAmount);
                 ci.cancel();
             }
         }
@@ -65,7 +64,7 @@ public class LivingEntityMixin {
         if ((Object) this instanceof ServerPlayer player) {
             TeamSharedHealthExtension extension = TeamSharedHealthExtension.getSharedHealthExtension(player);
             if (extension != null) {
-                for (ServerPlayer teammate : extension.teammates(PlayerUtils.getServer(player))) {
+                for (ServerPlayer teammate : extension.teammates()) {
                     if (teammate != player && original.call(teammate, damageSource)) {
                         return true;
                     }
@@ -89,7 +88,7 @@ public class LivingEntityMixin {
         if ((Object) this instanceof ServerPlayer player) {
             TeamSharedHealthExtension extension = TeamSharedHealthExtension.getSharedHealthExtension(player);
             if (extension != null) {
-                extension.set(PlayerUtils.getServer(player), health);
+                extension.set(health);
                 return;
             }
         }

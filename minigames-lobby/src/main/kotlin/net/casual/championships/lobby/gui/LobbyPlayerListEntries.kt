@@ -3,9 +3,9 @@ package net.casual.championships.lobby.gui
 import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
 import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.resources.utils.withMiniFont
-import net.casual.arcade.utils.TeamUtils.color
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus
+import net.casual.arcade.utils.scoreboard.color
 import net.casual.arcade.visuals.tab.PlayerListEntries
 import net.casual.championships.common.ui.tab.CasualPlayerListEntries
 import net.casual.championships.duel.utils.DuelRequester

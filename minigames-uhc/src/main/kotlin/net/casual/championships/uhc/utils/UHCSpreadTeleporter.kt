@@ -7,8 +7,8 @@ import net.casual.arcade.minigame.template.teleporter.EntityTeleporter
 import net.casual.arcade.minigame.template.teleporter.ShapedTeleporter
 import net.casual.arcade.utils.BlockPosUtils
 import net.casual.arcade.utils.StructureUtils
-import net.casual.arcade.utils.isOceanOrRiver
 import net.casual.arcade.utils.isOf
+import net.casual.arcade.utils.level.isOceanOrRiver
 import net.casual.arcade.utils.math.location.LocationWithLevel
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.visuals.shapes.ShapePoints.Companion.points

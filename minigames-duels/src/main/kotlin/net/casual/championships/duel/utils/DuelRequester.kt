@@ -1,76 +1,90 @@
 package net.casual.championships.duel.utils
 
-import net.casual.arcade.commands.function
-import net.casual.arcade.minigame.ready.ReadyHandler
-import net.casual.arcade.minigame.ready.ReadyState
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.component.red
+import net.casual.arcade.visuals.ready.chat.ChatReadyBroadcaster
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.Nameable
+import net.minecraft.server.network.ServerGamePacketListenerImpl
 
 class DuelRequester(
     private val requester: ServerPlayer,
-    private val players: Collection<ServerPlayer>
-): ReadyHandler<ServerPlayer> {
-    override fun format(readier: ServerPlayer): Component {
-        return (readier as Nameable).displayName
+    players: Iterable<ServerPlayer>
+): ChatReadyBroadcaster<ServerPlayer>(::unicast, multicast(players)) {
+    private val accepted = HashSet<ServerGamePacketListenerImpl>()
+
+    init {
+        this.accepted.add(this.requester.connection)
     }
 
-    override fun broadcastReadyCheck(receiver: ServerPlayer, ready: () -> Unit, notReady: () -> Unit) {
-        val message = Component.empty()
-            .append(Component.translatable("casual.duel.challenge", requester.displayName))
+    override fun getBroadcastComponent(
+        yes: Component,
+        no: Component
+    ): Component {
+        return Component.empty()
+            .append(Component.translatable("casual.duel.challenge", this.requester.displayName))
             .append(SpacingFontResources.spaced(4))
-            .append(
-                Component.literal("[")
-                    .append(Component.translatable("casual.duel.challenge.accept"))
-                    .append("]")
-                    .function { ready.invoke() }
-                    .lime()
-            )
+            .append(yes)
             .append(SpacingFontResources.spaced(4))
-            .append(
-                Component.literal("[")
-                    .append(Component.translatable("casual.duel.challenge.decline"))
-                    .append("]")
-                    .function { notReady.invoke() }
-                    .red()
-            ).withMiniFont()
-        this.broadcastTo(message, receiver)
+            .append(no)
+            .withMiniFont()
     }
 
-    override fun onReady(readier: ServerPlayer, previous: ReadyState): Boolean {
-        val message = Component.translatable("casual.duel.accepted", this.format(readier)).lime().withMiniFont()
-        this.broadcast(message)
-        return true
+    override fun getYesComponent(): MutableComponent {
+        return Component.literal("[")
+            .append(Component.translatable("casual.duel.challenge.accept"))
+            .append("]").lime()
     }
 
-    override fun onNotReady(readier: ServerPlayer, previous: ReadyState): Boolean {
-        if (previous != ReadyState.Ready) {
-            val message = Component.translatable("casual.duel.declined", this.format(readier)).red().withMiniFont()
-            this.broadcast(message)
-            return true
-        }
-        return false
+    override fun getNoComponent(): MutableComponent {
+        return Component.literal("[")
+            .append(Component.translatable("casual.duel.challenge.decline"))
+            .append("]")
+            .red()
     }
 
-    override fun onAllReady() {
+    override fun broadcastParticipantReady(participant: ServerPlayer) {
+        this.multicast.invoke(Component.translatable("casual.duel.accepted", participant.displayName).lime().withMiniFont())
+        this.accepted.add(participant.connection)
+    }
+
+    override fun broadcastParticipantNotReady(participant: ServerPlayer) {
+        this.multicast.invoke(Component.translatable("casual.duel.declined", participant.displayName).red().withMiniFont())
+        this.accepted.remove(participant.connection)
+    }
+
+    override fun broadcastSuccess() {
 
     }
 
-    private fun broadcast(message: Component) {
-        for (player in this.players) {
-            this.broadcastTo(message, player)
-        }
+    override fun broadcastFailure() {
+
     }
 
-    fun broadcastTo(message: Component, player: ServerPlayer) {
-        player.sendSystemMessage(Component.empty().append(DUEL_PREFIX).append(" ").append(message))
+    fun broadcastTo(player: ServerPlayer, message: Component) {
+        this.unicast.invoke(player, message)
+    }
+
+    fun getAccepted(): List<ServerPlayer> {
+        return this.accepted.map { connection -> connection.player }
     }
 
     companion object {
         val DUEL_PREFIX = Component.literal("[⚔]").lime()
+
+        private fun multicast(players: Iterable<ServerPlayer>): (Component) -> Unit {
+            return { message ->
+                for (player in players) {
+                    this.unicast(player, message)
+                }
+            }
+        }
+
+        private fun unicast(player: ServerPlayer, message: Component) {
+            player.sendSystemMessage(Component.empty().append(DUEL_PREFIX).append(" ").append(message))
+        }
     }
 }

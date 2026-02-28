@@ -8,12 +8,11 @@ import net.casual.arcade.dimensions.level.LevelPersistence
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevels
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevelsBuilder
-import net.casual.arcade.dimensions.utils.loadCustomLevel
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.utils.IdentifierUtils
 import net.casual.arcade.utils.serialization.codec.CodecProvider
-import net.casual.arcade.utils.setOf
+import net.casual.arcade.utils.serialization.codec.setOf
 import net.casual.championships.uhc.utils.UHCDimensions
 import net.minecraft.core.UUIDUtil
 import net.minecraft.core.registries.Registries
@@ -65,7 +64,7 @@ class UHCMinigameFactory(
     private val nerfedPlayers: Set<UUID>
 ): MinigameFactory {
     override fun codec(): MapCodec<out MinigameFactory> {
-        return CODEC
+        return codec
     }
 
     override fun create(context: MinigameCreationContext): UHCMinigame {
@@ -146,10 +145,10 @@ class UHCMinigameFactory(
     }
 
     companion object: CodecProvider<UHCMinigameFactory> {
-        override val ID: Identifier
+        override val id: Identifier
             get() = UHCMinigame.ID
 
-        override val CODEC: MapCodec<out UHCMinigameFactory> = RecordCodecBuilder.mapCodec { instance ->
+        override val codec: MapCodec<out UHCMinigameFactory> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
                 Codec.simpleMap(
                     VanillaDimension.CODEC,

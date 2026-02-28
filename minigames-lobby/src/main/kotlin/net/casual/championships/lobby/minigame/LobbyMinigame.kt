@@ -29,29 +29,26 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.scheduler.task.Completable
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.scheduler.utils.asCoroutineDispatcher
-import net.casual.arcade.utils.*
-import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
-import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.arcade.utils.PlayerUtils.resetExperience
-import net.casual.arcade.utils.PlayerUtils.resetHealth
-import net.casual.arcade.utils.PlayerUtils.resetHunger
-import net.casual.arcade.utils.PlayerUtils.sendSound
-import net.casual.arcade.utils.PlayerUtils.sendTitle
-import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
-import net.casual.arcade.utils.PlayerUtils.unboostHealth
+import net.casual.arcade.utils.IdentifierUtils
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.component.shadowless
 import net.casual.arcade.utils.component.wrap
 import net.casual.arcade.utils.coroutine.delay
 import net.casual.arcade.utils.coroutine.launch
+import net.casual.arcade.utils.entity.teleportTo
+import net.casual.arcade.utils.level.resetToDefault
+import net.casual.arcade.utils.level.set
+import net.casual.arcade.utils.player.*
 import net.casual.arcade.utils.time.MinecraftTimeDuration
+import net.casual.arcade.utils.toKey
 import net.casual.arcade.visuals.tab.PlayerListDisplay
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.minigame.rules.MinigameRulesProvider
 import net.casual.championships.common.ui.bossbar.LobbyBossbar
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
+import net.casual.championships.common.util.player.unboostHealth
 import net.casual.championships.lobby.advancement.LobbyAdvancementManager
 import net.casual.championships.lobby.advancement.LobbyAdvancements
 import net.casual.championships.lobby.gui.LobbyPlayerListEntries
@@ -62,8 +59,8 @@ import net.casual.championships.lobby.minigame.modules.LobbyData
 import net.minecraft.core.Vec3i
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.Identifier
+import net.minecraft.resources.ResourceKey
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -315,7 +312,6 @@ class LobbyMinigame(
                 resetToDefault()
                 set(GameRules.SPAWN_PHANTOMS, false)
                 set(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0)
-                set(GameRules.SPAWN_MOBS, false)
                 set(GameRules.FALL_DAMAGE, false)
                 set(GameRules.DROWNING_DAMAGE, false)
                 set(GameRules.ENTITY_DROPS, false)
@@ -326,7 +322,8 @@ class LobbyMinigame(
                 set(GameRules.COMMAND_BLOCK_OUTPUT, false)
                 set(GameRules.MAX_SNOW_ACCUMULATION_HEIGHT, 0)
                 set(GameRules.RANDOM_TICK_SPEED, 0)
-                set(GameRules.LOCATOR_BAR, false)
+                set(GameRules.SPAWN_MOBS, false, server)
+                set(GameRules.LOCATOR_BAR, false, server)
             }
             when {
                 data.timeOfDay.isEmpty -> tickTime(true)

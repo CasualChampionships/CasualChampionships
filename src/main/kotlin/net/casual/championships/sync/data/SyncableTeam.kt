@@ -1,6 +1,6 @@
 package net.casual.championships.sync.data
 
-import net.casual.arcade.utils.TeamUtils.getHexColor
+import net.casual.arcade.utils.scoreboard.getHexColor
 import net.minecraft.network.chat.Component
 import net.minecraft.world.scores.PlayerTeam
 

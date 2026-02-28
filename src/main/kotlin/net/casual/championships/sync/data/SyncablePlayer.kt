@@ -1,11 +1,11 @@
 package net.casual.championships.sync.data
 
-import com.mojang.authlib.GameProfile
 import net.casual.arcade.minigame.stats.StatTracker
 import net.minecraft.advancements.AdvancementHolder
+import net.minecraft.server.players.NameAndId
 
 data class SyncablePlayer(
-    val profile: GameProfile,
+    val profile: NameAndId,
     val team: SyncableTeam,
     val stats: StatTracker,
     val advancements: List<AdvancementHolder>

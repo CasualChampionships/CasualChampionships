@@ -7,10 +7,10 @@ import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.lore
 import net.casual.arcade.utils.ItemUtils.named
-import net.casual.arcade.utils.PlayerUtils.hasPermission
-import net.casual.arcade.utils.PlayerUtils.server
 import net.casual.arcade.utils.component.gray
 import net.casual.arcade.utils.component.white
+import net.casual.arcade.utils.player.hasPermission
+import net.casual.arcade.utils.player.server
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.ui.CasualSimpleGui

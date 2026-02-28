@@ -7,8 +7,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.*
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
+import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
-import net.casual.arcade.utils.teleportTo
 import net.casual.championships.common.util.CasualCommands
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.uhc.border.UHCBoundaryManager

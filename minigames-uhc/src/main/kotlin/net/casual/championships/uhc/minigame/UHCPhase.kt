@@ -9,19 +9,19 @@ import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.utils.PlayerUtils.sendSound
-import net.casual.arcade.utils.PlayerUtils.sendTitle
-import net.casual.arcade.utils.TeamUtils.color
-import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.component.gold
 import net.casual.arcade.utils.component.red
+import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.level.resetToDefault
+import net.casual.arcade.utils.level.set
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
-import net.casual.arcade.utils.resetToDefault
-import net.casual.arcade.utils.set
-import net.casual.arcade.utils.teleportTo
+import net.casual.arcade.utils.player.sendSound
+import net.casual.arcade.utils.player.sendTitle
+import net.casual.arcade.utils.scoreboard.color
+import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.arcade.visuals.predicate.EntityObserverPredicate
 import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
 import net.casual.championships.common.task.GracePeriodBossbarTask
@@ -52,10 +52,10 @@ enum class UHCPhase(
         override fun start(minigame: UHCMinigame, previous: Phase<UHCMinigame>) {
             minigame.levels.setGameRules {
                 resetToDefault()
-                set(GameRules.LOCATOR_BAR, false)
+                set(GameRules.IMMEDIATE_RESPAWN, true, minigame.server)
+                set(GameRules.LOCATOR_BAR, false, minigame.server)
                 set(GameRules.NATURAL_HEALTH_REGENERATION, false)
                 set(GameRules.SPAWN_PHANTOMS, false)
-                set(GameRules.IMMEDIATE_RESPAWN, true, minigame.server)
             }
 
             minigame.settings.canPvp.set(false)
@@ -74,7 +74,7 @@ enum class UHCPhase(
                 val extension = team.sharedHealthExtension
                 extension.enabled = minigame.settings.sharingIsCaring
                 if (minigame.settings.sharingIsCaring) {
-                    extension.set(minigame.server, extension.maxHealth)
+                    extension.set(extension.maxHealth)
                 }
             }
             for (player in minigame.players.spectating) {

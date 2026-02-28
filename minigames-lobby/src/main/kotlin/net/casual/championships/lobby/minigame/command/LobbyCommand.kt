@@ -9,10 +9,13 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import net.casual.arcade.commands.*
 import net.casual.arcade.commands.arguments.EnumArgument
 import net.casual.arcade.commands.hidden.HiddenCommandContext
+import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyPlayers
+import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyTeams
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.scheduler.task.Completable.Companion.thenOrNow
-import net.casual.arcade.utils.PlayerUtils.ops
 import net.casual.arcade.utils.component.*
+import net.casual.arcade.utils.coroutine.launch
+import net.casual.arcade.utils.player.ops
 import net.casual.arcade.utils.time.MinecraftTimeUnit
 import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.casual.championships.lobby.minigame.LobbyPhase
@@ -42,12 +45,6 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree {
                 }
                 literal("teams") {
                     executes(::broadcastTeamReadyCheck)
-                }
-                literal("awaiting") {
-                    executes(::queryAwaitingReadyCheck)
-                }
-                literal("complete") {
-                    executes(::completeReadyCheck)
                 }
                 literal("in") {
                     argument("time", IntegerArgumentType.integer(1)) {
@@ -94,30 +91,21 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree {
     private fun broadcastPlayerReadyCheck(context: CommandContext<CommandSourceStack>): Int {
         this.lobby.next ?: return context.source.fail("Cannot ready for next minigame, it has not been set!")
         this.lobby.setPhase(LobbyPhase.Readying)
-        this.lobby.ui.readier.arePlayersReady(this.lobby.players.playing).thenOrNow(this::onSuccessfullyReady)
+        context.source.server.launch {
+            lobby.checkReadyPlayers()
+            onSuccessfullyReady()
+        }
         return context.source.success("Successfully broadcasted ready check")
     }
 
     private fun broadcastTeamReadyCheck(context: CommandContext<CommandSourceStack>): Int {
         this.lobby.next ?: return context.source.fail("Cannot ready for next minigame, it has not been set!")
         this.lobby.setPhase(LobbyPhase.Readying)
-        this.lobby.ui.readier.areTeamsReady(this.lobby.teams.getPlayingTeams()).thenOrNow(this::onSuccessfullyReady)
+        context.source.server.launch {
+            lobby.checkReadyTeams()
+            onSuccessfullyReady()
+        }
         return context.source.success("Successfully broadcasted ready check")
-    }
-
-    private fun queryAwaitingReadyCheck(context: CommandContext<CommandSourceStack>): Int {
-        if (!this.lobby.ui.readier.isRunning()) {
-            return context.source.fail("Not currently awaiting any players or teams to be ready")
-        }
-        val awaiting = this.lobby.ui.readier.getUnreadyFormatted(context.source.server)
-        return context.source.success(Component.literal("Currently awaiting: ").append(awaiting.join()))
-    }
-
-    private fun completeReadyCheck(context: CommandContext<CommandSourceStack>): Int {
-        if (this.lobby.ui.readier.complete()) {
-            return context.source.success("Successfully completed ready check")
-        }
-        return context.source.fail("There was no ready check that needed to be completed")
     }
 
     private fun setTimeUntilReadyCheck(context: CommandContext<CommandSourceStack>): Int {

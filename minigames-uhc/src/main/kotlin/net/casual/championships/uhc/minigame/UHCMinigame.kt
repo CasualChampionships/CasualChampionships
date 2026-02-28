@@ -1,6 +1,5 @@
 package net.casual.championships.uhc.minigame
 
-import com.google.gson.JsonObject
 import eu.pb4.sgui.api.GuiHelpers
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
@@ -33,41 +32,31 @@ import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.resources.utils.withMiniShiftedDownFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.utils.*
+import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ItemUtils.isOf
-import net.casual.arcade.utils.JsonUtils.int
-import net.casual.arcade.utils.JsonUtils.obj
+import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.MathUtils.component1
 import net.casual.arcade.utils.MathUtils.component2
 import net.casual.arcade.utils.MathUtils.component3
 import net.casual.arcade.utils.MathUtils.isAbove
 import net.casual.arcade.utils.MathUtils.isBelow
-import net.casual.arcade.utils.PlayerUtils.boostHealth
-import net.casual.arcade.utils.PlayerUtils.clearPlayerInventory
-import net.casual.arcade.utils.PlayerUtils.dropItemStackIntoInventory
-import net.casual.arcade.utils.PlayerUtils.getKillCreditWith
-import net.casual.arcade.utils.PlayerUtils.grantAdvancement
-import net.casual.arcade.utils.PlayerUtils.grantAllRecipesSilently
-import net.casual.arcade.utils.PlayerUtils.resetExperience
-import net.casual.arcade.utils.PlayerUtils.resetHealth
-import net.casual.arcade.utils.PlayerUtils.resetHunger
-import net.casual.arcade.utils.PlayerUtils.revokeAllAdvancements
-import net.casual.arcade.utils.PlayerUtils.sendSound
-import net.casual.arcade.utils.PlayerUtils.sendTitle
-import net.casual.arcade.utils.PlayerUtils.server
-import net.casual.arcade.utils.PlayerUtils.unboostHealth
-import net.casual.arcade.utils.TeamUtils.color
-import net.casual.arcade.utils.TeamUtils.getOnlineCount
-import net.casual.arcade.utils.TeamUtils.getOnlinePlayers
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatMMSS
 import net.casual.arcade.utils.component.*
+import net.casual.arcade.utils.entity.setVelocityAndMark
+import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.isOf
+import net.casual.arcade.utils.level.isOf
 import net.casual.arcade.utils.math.location.Location.Companion.withRotation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
+import net.casual.arcade.utils.player.*
+import net.casual.arcade.utils.scoreboard.color
+import net.casual.arcade.utils.scoreboard.getOnlineCount
+import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.visuals.elements.LevelSpecificElement
 import net.casual.arcade.visuals.elements.PlayerSpecificElement
@@ -98,11 +87,12 @@ import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
+import net.casual.championships.common.util.player.boostHealth
+import net.casual.championships.common.util.player.unboostHealth
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.border.UHCBoundaryPhase
-import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.getSharedHealthExtension
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbar
@@ -146,6 +136,8 @@ import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.levelgen.Heightmap
+import net.minecraft.world.level.storage.ValueInput
+import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
@@ -251,22 +243,16 @@ class UHCMinigame(
         return this.factory
     }
 
-    override fun load(data: JsonObject) {
-        if (data.has("advancements")) {
-            this.uhcAdvancements.deserialize(data.obj("advancements"))
-        }
-        if (data.has("boundary_phase")) {
-            this.boundaryPhase = UHCBoundaryPhase.entries[data.int("boundary_phase")]
-        }
-        if (data.has("last_boundary_time")) {
-            this.lastBoundaryTime = data.int("last_boundary_time").Ticks
-        }
+    override fun load(input: ValueInput) {
+        this.uhcAdvancements.deserialize(input.childOrEmpty("advancements"))
+        this.boundaryPhase = input.read("boundary_phase", UHCBoundaryPhase.CODEC).orElse(this.boundaryPhase)
+        this.lastBoundaryTime = input.read("last_boundary_time", MinecraftTimeDuration.CODEC).orElse(this.lastBoundaryTime)
     }
 
-    override fun save(data: JsonObject) {
-        data.add("advancements", this.uhcAdvancements.serialize())
-        data.addProperty("boundary_phase", UHCBoundaryPhase.entries.indexOf(this.boundaryPhase))
-        data.addProperty("last_boundary_time", this.lastBoundaryTime.ticks)
+    override fun save(output: ValueOutput) {
+        this.uhcAdvancements.serialize(output.child("advancements"))
+        output.store("boundary_phase", UHCBoundaryPhase.CODEC, this.boundaryPhase)
+        output.store("last_boundary_time", MinecraftTimeDuration.CODEC, this.lastBoundaryTime)
     }
 
     @Listener
