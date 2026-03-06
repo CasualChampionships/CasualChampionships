@@ -1,6 +1,5 @@
 package net.casual.championships.uhc.minigame
 
-import eu.pb4.sgui.api.GuiHelpers
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
@@ -14,6 +13,8 @@ import net.casual.arcade.events.server.entity.EntityStartTrackingEvent
 import net.casual.arcade.events.server.level.LevelLootEvent
 import net.casual.arcade.events.server.player.*
 import net.casual.arcade.events.threading.ThreadingTarget
+import net.casual.arcade.guis.utils.removeCustomInventory
+import net.casual.arcade.guis.utils.setCustomInventory
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
@@ -95,7 +96,7 @@ import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.border.UHCBoundaryPhase
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
 import net.casual.championships.uhc.gui.UHCMapRenderer
-import net.casual.championships.uhc.gui.UHCSpectatorHotbar
+import net.casual.championships.uhc.gui.UHCSpectatorHotbarInventory
 import net.casual.championships.uhc.item.TMCStarterPack
 import net.casual.championships.uhc.minigame.UHCPhase.GameOver
 import net.casual.championships.uhc.minigame.UHCPhase.Initializing
@@ -363,11 +364,6 @@ class UHCMinigame(
             if (this.uptime % interval == interval - 1) {
                 this.chat.broadcastInfo(UHCMinigameRules.getFormattedSpectatorRules(), listOf(player))
             }
-
-            val gui = GuiHelpers.getCurrentGui(player)
-            if (gui == null && player.containerMenu == player.inventoryMenu) {
-                UHCSpectatorHotbar(event.player, this).open()
-            }
         }
 
         this.updateHUD(player)
@@ -583,11 +579,13 @@ class UHCMinigame(
     private fun onMinigameRemovePlayer(event: MinigameRemovePlayerEvent) {
         val player = event.player
         player.isInvisible = false
+        player.removeCustomInventory()
     }
 
     @Listener
     private fun onSetPlaying(event: MinigameSetPlayingEvent) {
         val player = event.player
+        player.removeCustomInventory()
         player.isInvisible = false
         player.closeContainer()
 
@@ -677,6 +675,8 @@ class UHCMinigame(
     private fun onLoadSpectating(event: MinigameLoadSpectatingEvent) {
         val player = event.player
         this.mapRenderer.startWatching(player)
+
+        player.setCustomInventory(UHCSpectatorHotbarInventory(player, this))
     }
 
     @Listener(flags = ListenerFlags.IS_SPECTATOR)

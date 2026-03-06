@@ -67,6 +67,9 @@ allprojects {
                 programArgs("--arcade-datagen")
                 runDir = "run-datagen"
             }
+            named("server") {
+                vmArgs("-Dmixin.debug.export=true")
+            }
         }
     }
 
