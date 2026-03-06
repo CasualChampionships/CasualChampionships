@@ -23,6 +23,7 @@ import net.casual.arcade.utils.player.grantAdvancement
 import net.casual.arcade.utils.player.isSurvival
 import net.casual.arcade.utils.player.revokeAdvancement
 import net.casual.championships.common.event.PlayerCheatEvent
+import net.casual.championships.common.event.PlayerLootVaultEvent
 import net.casual.championships.common.util.CasualStats
 import net.casual.championships.common.util.CasualTags
 import net.casual.championships.uhc.minigame.GAME_OVER_ID
@@ -203,7 +204,6 @@ class UHCAdvancementManager(
             event.player.grantAdvancement(UHCAdvancements.MAIN_STORAGE)
         }
 
-
         val blocksPlaced = this.uhc.stats.getOrCreateStat(event.player, CasualStats.BLOCKS_PLACED)
         blocksPlaced.increment()
         if (blocksPlaced.value >= 500) {
@@ -288,6 +288,13 @@ class UHCAdvancementManager(
     @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
     private fun onPlayerLoot(event: PlayerLootEvent) {
         if (event.items.any { it.isOf(Items.ENCHANTED_GOLDEN_APPLE) }) {
+            event.player.grantAdvancement(UHCAdvancements.DREAM_LUCK)
+        }
+    }
+
+    @Listener(flags = IS_PLAYING, during = During(before = GAME_OVER_ID))
+    private fun onPlayerLootVault(event: PlayerLootVaultEvent) {
+        if (event.item.isOf(Items.ENCHANTED_GOLDEN_APPLE)) {
             event.player.grantAdvancement(UHCAdvancements.DREAM_LUCK)
         }
     }

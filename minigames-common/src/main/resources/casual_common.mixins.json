@@ -13,6 +13,8 @@
     "event.NetherPortalBlockMixin",
     "event.PortalForcerMixin",
     "event.TippedArrowForItemsAndEmeraldsMixin",
+    "event.VaultServerDataInvoker",
+    "event.VaultStateMixin",
     "gui.ChestBlockMixin",
     "gui.ChestMenuMixin",
     "minigame.BedBlockMixin",
