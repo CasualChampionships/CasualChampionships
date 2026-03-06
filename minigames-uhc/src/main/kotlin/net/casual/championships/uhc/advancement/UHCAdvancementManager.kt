@@ -21,6 +21,7 @@ import net.casual.arcade.utils.level.isOf
 import net.casual.arcade.utils.player.getKillCreditWith
 import net.casual.arcade.utils.player.grantAdvancement
 import net.casual.arcade.utils.player.isSurvival
+import net.casual.arcade.utils.player.revokeAdvancement
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.util.CasualStats
 import net.casual.championships.common.util.CasualTags
@@ -222,6 +223,17 @@ class UHCAdvancementManager(
 
         if (state.block == Blocks.BEE_NEST) {
             player.grantAdvancement(UHCAdvancements.BEE_NES)
+        }
+
+        if (state.block == Blocks.DIORITE) {
+            val time = this.uhc.stats.getOrCreateStat(player, CasualStats.DIORITE_TIME)
+            if (time.value < 0 || time.value <= this.uhc.uptime) {
+                // We re-trigger the advancement
+                player.revokeAdvancement(UHCAdvancements.WHATS_THIS)
+                player.grantAdvancement(UHCAdvancements.WHATS_THIS)
+
+                time.modify { this.uhc.uptime + 10.Minutes.ticks }
+            }
         }
 
         if (state.block == Blocks.NETHER_WART && player.isInStructure(BuiltinStructures.FORTRESS)) {

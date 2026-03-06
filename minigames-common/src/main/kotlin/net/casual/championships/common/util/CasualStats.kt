@@ -9,6 +9,7 @@ object CasualStats {
     val WON = this.register("won", StatType.bool())
     val ALIVE_TIME = this.register("alive_time", StatType.int32())
     val CROUCH_TIME = this.register("crouch_time", StatType.int32())
+    val DIORITE_TIME = this.register("diorite_time", StatType.int32(-1))
     val JUMPS = this.register("jumps", StatType.int32())
     val BLOCKS_MINED = this.register("blocks_mined", StatType.int32())
     val BLOCKS_PLACED = this.register("blocks_placed",  StatType.int32())

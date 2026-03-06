@@ -84,6 +84,15 @@ object UHCAdvancements: AdvancementCollection() {
         announce()
     }
 
+    val WHATS_THIS = register {
+        parent(DEMOLITION_EXPERT)
+        id = casual("whats_this")
+        display(Items.DIORITE)
+        setTitleAndDesc("uhc.advancements.whatsThis")
+        toast()
+        announce()
+    }
+
     val HUMAN_QUARRY = register {
         parent(DEMOLITION_EXPERT)
         id = casual("human_quarry")
@@ -166,7 +175,7 @@ object UHCAdvancements: AdvancementCollection() {
         announce()
     }
 
-    val OK_WE_BELIEVE_YOU_NOW= register {
+    val OK_WE_BELIEVE_YOU_NOW = register {
         parent(COMBAT_LOGGER)
         id = casual("ok_we_believe_you_now")
         display(Items.WOODEN_HOE)
