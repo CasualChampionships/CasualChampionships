@@ -1,14 +1,16 @@
 package net.casual.championships.lobby.advancement
 
+import net.casual.arcade.events.server.player.PlayerAdvancementEvent
 import net.casual.arcade.events.server.player.PlayerTickEvent
 import net.casual.arcade.events.server.player.PlayerTryAttackEvent
 import net.casual.arcade.events.server.player.PlayerVoidDamageEvent
 import net.casual.arcade.minigame.annotation.Listener
+import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
-import net.casual.arcade.utils.PlayerUtils.grantAdvancement
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.arcade.utils.player.grantAdvancement
 import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.lobby.minigame.LobbyMinigame
@@ -84,6 +86,11 @@ class LobbyAdvancementManager(
             val message = CasualComponents.MINESWEEPER_RECORD.generate(player.scoreboardName, formatted)
             this.lobby.chat.broadcast(message)
         }
+    }
+
+    @Listener(flags = ListenerFlags.HAS_PLAYER)
+    private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
+        event.announce = event.announce && LobbyAdvancements.contains(event.advancement)
     }
 
     companion object {
