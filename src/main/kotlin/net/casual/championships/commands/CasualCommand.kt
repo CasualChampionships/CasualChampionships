@@ -12,7 +12,7 @@ import net.casual.championships.CasualChampionships
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 
-object CasualCommand: CommandTree {
+object CasualCommand: CommandTree<CommandSourceStack> {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("casual") {
             requiresAdminOrPermission()

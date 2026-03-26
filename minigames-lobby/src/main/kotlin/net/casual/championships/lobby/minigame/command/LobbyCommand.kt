@@ -23,7 +23,7 @@ import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.network.chat.Component
 
-class LobbyCommand(val lobby: LobbyMinigame): CommandTree {
+class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
     init {
         this.lobby.bossbar.then(this::onBossbarComplete)
     }

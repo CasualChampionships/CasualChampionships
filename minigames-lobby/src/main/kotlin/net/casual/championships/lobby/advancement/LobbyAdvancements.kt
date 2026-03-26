@@ -8,6 +8,7 @@ import net.casual.championships.common.util.casual
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.core.ClientAsset
 import net.minecraft.resources.Identifier
+import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.Items
 
 object LobbyAdvancements: AdvancementCollection() {
@@ -57,7 +58,7 @@ object LobbyAdvancements: AdvancementCollection() {
     val ADMIN_ABUSE = register {
         parent(OFFICIALLY_BORED)
         id = casual("admin_abuse")
-        display(ItemUtils.createPlayerHead("senseiwells"))
+        display(ItemStackTemplate.fromNonEmptyStack(ItemUtils.createPlayerHead("senseiwells")))
         setTitleAndDesc("lobby.advancements.adminAbuse")
         toast()
         announce()
@@ -66,7 +67,7 @@ object LobbyAdvancements: AdvancementCollection() {
     val GAMER = register {
         parent(ROOT)
         id = casual("gamer")
-        display(MinesweeperItems.FLAG_COUNTER)
+        display(ItemStackTemplate.fromNonEmptyStack(MinesweeperItems.FLAG_COUNTER))
         setTitleAndDesc("lobby.advancements.gamer")
         toast()
         announce()

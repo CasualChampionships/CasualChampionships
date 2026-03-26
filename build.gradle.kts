@@ -12,9 +12,9 @@ plugins {
 
 allprojects {
     group = "net.casual"
-    version = "2.2.1"
+    version = "2.3.0"
 
-    apply(plugin = "fabric-loom")
+    apply(plugin = "net.fabricmc.fabric-loom")
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
@@ -41,19 +41,14 @@ allprojects {
         val libs = rootProject.libs
 
         minecraft(libs.minecraft)
-        @Suppress("UnstableApiUsage")
-        mappings(loom.layered {
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-${libs.versions.parchment.get()}@zip")
-        })
-        modImplementation(libs.fabric.loader)
-        modImplementation(libs.fabric.api)
-        modImplementation(libs.fabric.kotlin)
+        implementation(libs.fabric.loader)
+        implementation(libs.fabric.api)
+        implementation(libs.fabric.kotlin)
 
-        modImplementation(libs.arcade)
+        implementation(libs.arcade)
 
-        modImplementation(libs.map.canvas)
-        modImplementation(libs.permissions)
+        implementation(libs.map.canvas)
+        implementation(libs.permissions)
     }
 
     java {
@@ -79,7 +74,7 @@ allprojects {
             filesMatching("fabric.mod.json") {
                 expand(mutableMapOf(
                     "version" to version,
-                    "minecraft_dependency" to libs.versions.minecraft.get().replaceAfterLast('.', "x"),
+                    "minecraft_dependency" to libs.versions.minecraft.get(),
                     "fabric_api_dependency" to libs.versions.fabric.api.get(),
                     "fabric_kotlin_dependency" to libs.versions.fabric.kotlin.get(),
                 ))
@@ -93,9 +88,9 @@ allprojects {
 }
 
 subprojects {
-    if (this.path != ":minigames-common") {
+    if (path != ":minigames-common") {
         dependencies {
-            api(project(path = ":minigames-common", configuration = "namedElements"))
+            api(project(":minigames-common"))
         }
     }
 }
@@ -103,22 +98,11 @@ subprojects {
 dependencies {
     include(libs.arcade)
     include(libs.map.canvas)
-    includeImplementation(libs.voicechat.api)
+
+    include(implementation(libs.voicechat.api.get())!!)
+    include(implementation(libs.casual.database.get())!!)
 
     for (subproject in project.subprojects) {
-        implementation(project(path = subproject.path, configuration = "namedElements"))
-        include(subproject)
+        include(implementation(subproject)!!)
     }
-
-    includeImplementation(libs.casual.database)
-}
-
-private fun DependencyHandler.includeModImplementation(dependencyNotation: Any) {
-    include(dependencyNotation)
-    modImplementation(dependencyNotation)
-}
-
-private fun DependencyHandler.includeImplementation(dependencyNotation: Any) {
-    include(dependencyNotation)
-    implementation(dependencyNotation)
 }

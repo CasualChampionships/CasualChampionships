@@ -61,7 +61,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
 
     fun getMaps(): List<ItemStack> {
         return this.canvases.values.map { data ->
-            val map = data.canvas.asStack().named(data.dimensionIcon.text!!)
+            val map = data.canvas.asStack().named(data.dimensionIcon.name!!)
             val model = data.model
             map.hideTooltip(DataComponents.MAP_ID)
             if (model != null) {
@@ -150,7 +150,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         }
 
         val roundedStartSize = startSize.roundToInt()
-        sizeIcon.text = Component.literal("$roundedStartSize x $roundedStartSize").withMiniFont().yellow()
+        sizeIcon.name = Component.literal("$roundedStartSize x $roundedStartSize").withMiniFont().yellow()
 
         for (players in level.players()) {
             if (this.isPlayerValidForIcon(players, level, center.x, center.z, startSize)) {
@@ -199,7 +199,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
         icon.move(scaledPlayerX, scaledPlayerZ, 0)
         // if (icon.text == null) {
         val head = PixelGridHeadComponents.getHeadOrDefaultFor(player)
-        icon.text = Component.empty()
+        icon.name = Component.empty()
             .append(head)
             .append(SpacingFontResources.spaced(-10))
             .append(UHCComponents.Bitmap.PLAYER_BACKGROUND.copy().color(player.team))

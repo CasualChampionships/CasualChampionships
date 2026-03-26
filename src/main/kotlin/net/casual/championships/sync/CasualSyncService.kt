@@ -25,9 +25,8 @@ suspend fun CasualSyncService.syncMinigame(minigame: Minigame): Boolean {
         val advancements = minigame.advancements.getFor(profile.id).mapNotNull(minigame.advancements::get)
         return SyncablePlayer(profile, SyncableTeam.from(team), tracker, advancements)
     })
-    val syncable = SyncableMinigame(
-        minigame.uuid, minigame.id, minigame.data.startTime, minigame.data.endTime, players
-    )
+    val timeTracker = minigame.timeTracker
+    val syncable = SyncableMinigame(minigame.uuid, minigame.id, timeTracker.getStart(), timeTracker.getEnd(), players)
     return syncer.invoke(syncable)
 }
 

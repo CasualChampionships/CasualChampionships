@@ -1,3 +1,3 @@
 dependencies {
-    modImplementation(libs.arcade.datagen)
+    implementation(libs.arcade.datagen)
 }

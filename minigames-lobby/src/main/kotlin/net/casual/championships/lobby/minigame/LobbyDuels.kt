@@ -7,7 +7,7 @@ import net.casual.arcade.commands.literal
 import net.casual.arcade.commands.success
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.minigame.events.MinigameCloseEvent
-import net.casual.arcade.utils.PlayerUtils.username
+import net.casual.arcade.utils.player.username
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.duel.minigame.DuelSettings
 import net.minecraft.commands.CommandBuildContext
@@ -61,7 +61,7 @@ class LobbyDuels(
     private class DuelCommand(
         private val duel: DuelMinigame,
         private val lobby: LobbyMinigame
-    ): CommandTree {
+    ): CommandTree<CommandSourceStack> {
         override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
             return CommandTree.buildLiteral("duel") {
                 literal("leave") {

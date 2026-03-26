@@ -35,7 +35,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.permissions.PermissionLevel
 
-class DuelCommand(private val lobby: LobbyMinigame): CommandTree {
+class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("duel") {
             executes(::startDuel)

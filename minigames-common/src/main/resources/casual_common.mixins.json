@@ -12,7 +12,7 @@
     "event.NaturalSpawnerMixin",
     "event.NetherPortalBlockMixin",
     "event.PortalForcerMixin",
-    "event.TippedArrowForItemsAndEmeraldsMixin",
+    "event.VillagerTradeMixin",
     "event.VaultServerDataInvoker",
     "event.VaultStateMixin",
     "gui.ChestBlockMixin",

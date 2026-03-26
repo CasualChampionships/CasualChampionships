@@ -2,7 +2,7 @@ package net.casual.championships.common.ui.minesweeper
 
 import eu.pb4.sgui.api.ClickType
 import eu.pb4.sgui.api.elements.GuiElement
-import eu.pb4.sgui.api.elements.GuiElementInterface
+import eu.pb4.sgui.api.elements.SimpleGuiElement
 import eu.pb4.sgui.api.gui.SimpleGui
 import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
@@ -16,13 +16,13 @@ import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
+import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import java.util.*
 import kotlin.math.floor
 import kotlin.time.Duration.Companion.nanoseconds
-import net.minecraft.world.inventory.ClickType as ClickAction
 
 class MinesweeperGui(
     player: ServerPlayer
@@ -40,14 +40,14 @@ class MinesweeperGui(
             this.setSlot(i, UNKNOWN_TILE)
         }
 
-        this.setSlot(81, GuiElement(EXIT_TILE) { _, _, _, gui -> gui.close() })
+        this.setSlot(81, SimpleGuiElement(EXIT_TILE) { _, _, _, gui -> gui.close() })
         this.setSlot(82, DESC_TILE_1)
         this.setSlot(83, DESC_TILE_2)
         this.setSlot(84, DESC_TILE_3)
         this.setSlot(85, DESC_TILE_4)
         this.setSlot(87, this.flagItem)
         this.setSlot(88, this.clockItem)
-        this.setSlot(89, GuiElement(PLAY_AGAIN_TILE) { _, _, _, gui -> MinesweeperGui(gui.player).open() })
+        this.setSlot(89, SimpleGuiElement(PLAY_AGAIN_TILE) { _, _, _, gui -> MinesweeperGui(gui.player).open() })
 
         this.title = Component.empty().append(SpacingFontResources.spaced(-8))
             .append(CasualComponents.Gui.MINESWEEPER_MENU.copy().white())
@@ -63,11 +63,11 @@ class MinesweeperGui(
     override fun onClick(
         slotId: Int,
         type: ClickType,
-        action: ClickAction,
-        element: GuiElementInterface?
+        action: ContainerInput,
+        element: GuiElement?
     ): Boolean {
         if (slotId >= 0 && slotId < this.grid.capacity) {
-            if (action != ClickAction.PICKUP || this.complete) {
+            if (action != ContainerInput.PICKUP || this.complete) {
                 return false
             }
             if (type.isLeft && !this.flags.contains(slotId)) {

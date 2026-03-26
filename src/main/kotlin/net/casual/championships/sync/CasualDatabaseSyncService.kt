@@ -137,7 +137,7 @@ class CasualDatabaseSyncService(
         return MinigameAdvancement.new {
             advancementId = id
             minigameType = type
-            displayItem = BuiltInRegistries.ITEM.getKey(display.icon.item).toString()
+            displayItem = BuiltInRegistries.ITEM.getKey(display.icon.item.value()).toString()
             title = display.title.string
         }
     }

@@ -1,7 +1,7 @@
 package net.casual.championships.duel.gui
 
 import eu.pb4.sgui.api.elements.GuiElement
-import net.casual.arcade.guis.sgui.setSlot
+import eu.pb4.sgui.api.elements.SimpleGuiElement
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
@@ -48,7 +48,7 @@ class DuelConfigurationGui(
 
         val confirm = CasualGuiItems.TICK
         confirm.named(CasualComponents.CONFIRM.withMiniFont())
-        this.confirm = GuiElement(confirm) { _, _, _, _ ->
+        this.confirm = SimpleGuiElement(confirm) { _, _, _, _ ->
             val playerList = this.player.server.playerList
             this.start.invoke(this.player, this.selectedPlayers.mapNotNull(playerList::getPlayer), this.settings)
             this.close()
@@ -56,7 +56,7 @@ class DuelConfigurationGui(
         val waiting = CasualGuiItems.GREY_TICK
         waiting.named(CasualComponents.CONFIRM.withMiniFont())
         waiting.lore(Component.literal("Select players to start!").gray().withMiniFont())
-        this.waiting = GuiElement(waiting, GuiElement.EMPTY_CALLBACK)
+        this.waiting = SimpleGuiElement(waiting, GuiElement.EMPTY_CALLBACK)
 
         this.updateConfirm()
 

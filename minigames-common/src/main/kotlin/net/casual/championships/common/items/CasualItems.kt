@@ -1,11 +1,11 @@
 package net.casual.championships.common.items
 
+import net.casual.arcade.utils.registries.NamespacedItemRegistryRegister
 import net.casual.championships.common.items.gui.DummyItem
 import net.casual.championships.common.items.gui.ForwardFacingPlayerHead
 import net.casual.championships.common.items.gui.TintableDummyItem
 import net.casual.championships.common.items.minigame.GoldenHeadItem
 import net.casual.championships.common.items.minigame.PlayerHeadItem
-import net.casual.championships.common.util.NamespacedItemRegistryRegister
 import net.casual.championships.common.util.casual
 
 object CasualItems {

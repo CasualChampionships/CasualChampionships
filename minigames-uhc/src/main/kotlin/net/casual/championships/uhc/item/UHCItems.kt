@@ -1,6 +1,6 @@
 package net.casual.championships.uhc.item
 
-import net.casual.championships.common.util.NamespacedItemRegistryRegister
+import net.casual.arcade.utils.registries.NamespacedItemRegistryRegister
 import net.casual.championships.common.util.casual
 import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.component.UseCooldown

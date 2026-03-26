@@ -1,11 +1,10 @@
 package net.casual.championships.lobby.minigame
 
-import eu.pb4.sgui.api.GuiHelpers
+import eu.pb4.sgui.api.SguiUtils
 import eu.pb4.sgui.api.gui.HotbarGui
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerTickEvent
-import net.casual.arcade.guis.sgui.setSlot
 import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
@@ -43,13 +42,13 @@ class LobbyParkour(
             if (!isParkouring) {
                 if (wasParkouring) {
                     this.parkourers.removeInt(player.uuid)
-                    val gui = GuiHelpers.getCurrentGui(player) as? ParkourHotbarGui
+                    val gui = SguiUtils.getCurrentGui(player) as? ParkourHotbarGui
                     gui?.close()
                 }
                 continue
             }
 
-            if (GuiHelpers.getCurrentGui(player) == null) {
+            if (SguiUtils.getCurrentGui(player) == null) {
                 ParkourHotbarGui(player, data.exit).open()
             }
 

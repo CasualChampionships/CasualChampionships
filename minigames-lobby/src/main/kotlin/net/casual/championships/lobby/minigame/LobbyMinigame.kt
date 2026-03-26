@@ -201,7 +201,6 @@ class LobbyMinigame(
         this.settings.canTakeDamage.set(false)
         this.settings.canAttackEntities.set(true)
         this.settings.canInteractAll = false
-        this.settings.daylightCycle = 0
 
         if (!this.modules.has<MinigameWorldData>()) {
             BoxedArea(Vec3i(0, -1, 0), 10, 3, this.level).place()
@@ -304,7 +303,7 @@ class LobbyMinigame(
             viewDistance(20)
             weather {
                 if (data.raining) {
-                    raining = true
+                    isRaining = true
                     rainTime = 999999
                 }
             }
@@ -325,10 +324,11 @@ class LobbyMinigame(
                 set(GameRules.SPAWN_MOBS, false, server)
                 set(GameRules.LOCATOR_BAR, false, server)
             }
-            when {
-                data.timeOfDay.isEmpty -> tickTime(true)
-                else -> timeOfDay(data.timeOfDay.get().toLong())
-            }
+            // TODO:
+            // when {
+            //     data.timeOfDay.isEmpty -> tickTime(true)
+            //     else -> timeOfDay(data.timeOfDay.get().toLong())
+            // }
         }
         return level
     }

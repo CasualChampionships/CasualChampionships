@@ -86,7 +86,7 @@ object CasualGuiUtils {
     fun createPlayingNameTag(
         predicate: PlayerObserverPredicate = EntityObserverPredicate.visibleObservee().toPlayer()
     ): PlayerNametag {
-        return PlayerNametag.simple({ it.displayName!! }, predicate)
+        return PlayerNametag.simple({ it.displayName }, predicate)
     }
 
     fun createPlayingHealthTag(
@@ -141,6 +141,7 @@ object CasualGuiUtils {
         }
 
         val spectatorAndAdmins = SpectatorAndAdminTeamsComponentElement(minigame).cached()
+        @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") 
         val footer = spectatorAndAdmins.merge<_, Component>(baseFooter) { a, b ->
             a.map { Component.empty().append(it).append("\n\n") }.orElse(Component.empty()).append(b)
         }

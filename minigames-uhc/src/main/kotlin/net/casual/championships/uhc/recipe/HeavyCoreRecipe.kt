@@ -3,7 +3,7 @@ package net.casual.championships.uhc.recipe
 import net.casual.arcade.utils.recipe.CraftingRecipeBuilder
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.util.casual
-import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.crafting.CraftingBookCategory
 
@@ -13,7 +13,7 @@ object HeavyCoreRecipe {
         category = CraftingBookCategory.MISC
         height = 3
         width = 3
-        result = ItemStack(Items.HEAVY_CORE)
+        result = ItemStackTemplate(Items.HEAVY_CORE)
         val x = Items.IRON_BLOCK
         val o = CasualItems.PLAYER_HEAD
         ingredients(

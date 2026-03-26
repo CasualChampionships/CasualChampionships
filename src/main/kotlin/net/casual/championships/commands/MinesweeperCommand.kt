@@ -9,7 +9,7 @@ import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 
-object MinesweeperCommand: CommandTree {
+object MinesweeperCommand: CommandTree<CommandSourceStack> {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return Commands.literal("minesweeper").executes(this::execute)
     }

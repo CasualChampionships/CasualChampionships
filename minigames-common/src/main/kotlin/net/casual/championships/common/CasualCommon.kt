@@ -1,6 +1,6 @@
 package net.casual.championships.common
 
-import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils
+import eu.pb4.polymer.core.api.item.PolymerCreativeModeTabUtils
 import net.casual.arcade.dimensions.utils.DimensionRegistries
 import net.casual.arcade.resources.ArcadeResourcePacks
 import net.casual.arcade.resources.creator.NamedResourcePackCreator
@@ -75,7 +75,7 @@ object CasualCommon: ModInitializer {
     }
 
     private fun registerItemGroups() {
-        PolymerItemGroupUtils.registerPolymerItemGroup(
+        PolymerCreativeModeTabUtils.registerPolymerCreativeModeTab(
             casual("menu"),
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 7)
                 .title(Component.literal("Display Items"))
@@ -86,7 +86,7 @@ object CasualCommon: ModInitializer {
                 }
                 .build()
         )
-        PolymerItemGroupUtils.registerPolymerItemGroup(
+        PolymerCreativeModeTabUtils.registerPolymerCreativeModeTab(
             casual("heads"),
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 7)
                 .title(Component.literal("Head Items"))

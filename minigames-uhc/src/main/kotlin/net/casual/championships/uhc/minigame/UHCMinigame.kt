@@ -70,14 +70,16 @@ import net.casual.arcade.visuals.sidebar.SidebarComponents
 import net.casual.arcade.visuals.sidebar.SidebarComponents.Companion.addRow
 import net.casual.arcade.visuals.utils.elements.ComponentElements
 import net.casual.championships.common.event.ChunkGenerationMobSpawnEvent
+import net.casual.championships.common.event.CreateTradeOfferEvent
 import net.casual.championships.common.event.PlayerCheatEvent
-import net.casual.championships.common.event.TippedArrowTradeOfferEvent
 import net.casual.championships.common.event.portal.EntityPortalEntryPositionEvent
 import net.casual.championships.common.event.portal.PortalCreateValidPositionEvent
 import net.casual.championships.common.event.portal.PortalFindValidPositionEvent
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
+import net.casual.championships.common.minigame.CasualTimeTracker
+import net.casual.championships.common.minigame.TimeTrackedMinigame
 import net.casual.championships.common.minigame.rules.MinigameRulesProvider
 import net.casual.championships.common.ui.bossbar.ActiveBossbar
 import net.casual.championships.common.ui.elements.MinigamePhaseSidebarElement
@@ -130,10 +132,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potion
+import net.minecraft.world.item.alchemy.PotionContents
 import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.item.crafting.SingleRecipeInput
 import net.minecraft.world.item.enchantment.Enchantments
+import net.minecraft.world.item.enchantment.ItemEnchantments
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.levelgen.Heightmap
@@ -156,7 +160,7 @@ class UHCMinigame(
     nerfedPlayers: Set<UUID>,
     private val dimensions: UHCDimensions,
     private val factory: UHCMinigameFactory? = null
-): Minigame(server, uuid), MinigameRulesProvider by UHCMinigameRules {
+): Minigame(server, uuid), MinigameRulesProvider by UHCMinigameRules, TimeTrackedMinigame {
     override val id = ID
 
     private var lastBoundaryTime = 0.Ticks
@@ -166,6 +170,7 @@ class UHCMinigame(
     val uhcAdvancements = UHCAdvancementManager(this)
 
     override val settings = UHCSettings(this)
+    override val timeTracker = CasualTimeTracker()
 
     val overworld: ServerLevel
         get() = this.dimensions.overworld.level
@@ -244,6 +249,7 @@ class UHCMinigame(
         return this.factory
     }
 
+    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     override fun load(input: ValueInput) {
         this.uhcAdvancements.deserialize(input.childOrEmpty("advancements"))
         this.boundaryPhase = input.read("boundary_phase", UHCBoundaryPhase.CODEC).orElse(this.boundaryPhase)
@@ -406,8 +412,12 @@ class UHCMinigame(
     }
 
     @Listener
-    private fun onTippedArrowTradeOffer(event: TippedArrowTradeOfferEvent) {
-        event.potion = this.replacePotion(event.potion)
+    private fun onCreateTradeOfferEvent(event: CreateTradeOfferEvent) {
+        val offer = event.offer
+        val potion = offer.get(DataComponents.POTION_CONTENTS)?.potion()?.getOrNull()
+        if (potion != null) {
+            offer.set(DataComponents.POTION_CONTENTS, PotionContents(this.replacePotion(potion)))
+        }
     }
 
     @Listener
@@ -486,14 +496,18 @@ class UHCMinigame(
         if (entity is ServerPlayer) {
             if (event.state.isOf(ConventionalBlockTags.ORES)) {
                 val tool = event.params.getOptionalParameter(LootContextParams.TOOL) ?: return
-                val silkTouch = tool.enchantments.keySet().any { it.isOf(Enchantments.SILK_TOUCH) }
+                val enchantments = tool.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)
+                val silkTouch = enchantments.keySet().any { it.isOf(Enchantments.SILK_TOUCH) }
                 if (silkTouch) {
                     return
                 }
                 event.drops = event.drops.map { item ->
                     val input = SingleRecipeInput(item)
-                    val recipe = this.server.recipeManager.getRecipeFor(RecipeType.SMELTING, input, event.level)
-                    recipe.getOrNull()?.value?.assemble(input, event.level.registryAccess()) ?: item
+                    val recipe = this.server.recipeManager.getRecipeFor(
+                        RecipeType.SMELTING, input, event.level
+                    ).getOrNull() ?: return@map item
+                    val output = recipe.value.assemble(input)
+                    output.copyWithCount(item.count)
                 }
             }
         }
@@ -748,7 +762,7 @@ class UHCMinigame(
     @Listener
     private fun onPlayerCheat(event: PlayerCheatEvent) {
         val message = Component {
-            literal("Player ") + event.player.displayName!! + literal(" tried to cheat with ${event.type}")
+            literal("Player ") + event.player.displayName + literal(" tried to cheat with ${event.type}")
         }
         this.chat.broadcastInfo(message, this.players.admins)
     }

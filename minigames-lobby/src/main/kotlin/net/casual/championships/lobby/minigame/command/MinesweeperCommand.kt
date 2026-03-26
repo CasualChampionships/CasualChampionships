@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.CommandTree
 import net.casual.arcade.commands.fail
-import net.casual.arcade.utils.PlayerUtils.grantAdvancement
+import net.casual.arcade.utils.player.grantAdvancement
 import net.casual.championships.common.ui.minesweeper.MinesweeperGui
 import net.casual.championships.lobby.advancement.LobbyAdvancements
 import net.casual.championships.lobby.minigame.LobbyMinigame
@@ -14,7 +14,7 @@ import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.network.chat.Component
 
-class MinesweeperCommand(private val lobby: LobbyMinigame): CommandTree {
+class MinesweeperCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("minesweeper") {
             executes(::openMinesweeper)

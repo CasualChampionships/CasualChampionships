@@ -13,7 +13,7 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.server.permissions.PermissionLevel
 
-object ViewCommand: CommandTree {
+object ViewCommand: CommandTree<CommandSourceStack> {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("view") {
             requires { Permissions.check(it, "casual.commands.view", PermissionLevel.GAMEMASTERS) }

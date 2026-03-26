@@ -8,6 +8,7 @@ import net.casual.championships.common.util.casual
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.core.ClientAsset
 import net.minecraft.resources.Identifier
+import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 
@@ -31,7 +32,7 @@ object UHCAdvancements: AdvancementCollection() {
     val OKAY_EZTAK = register {
         parent(FIRST_BLOOD)
         id = casual("okay_eztak")
-        display(ItemUtils.createPlayerHead("eztak_red"))
+        display(ItemStackTemplate.fromNonEmptyStack(ItemUtils.createPlayerHead("eztak_red")))
         setTitleAndDesc("uhc.advancements.okayEztak")
         toast()
         announce()
@@ -259,7 +260,7 @@ object UHCAdvancements: AdvancementCollection() {
     val WORLD_RECORD_PACE = register {
         parent(ROOT)
         id = casual("world_record_pace")
-        display = Items.SPLASH_POTION.defaultInstance.potion(Potions.SWIFTNESS)
+        display = ItemStackTemplate.fromNonEmptyStack(Items.SPLASH_POTION.defaultInstance.potion(Potions.SWIFTNESS))
         setTitleAndDesc("uhc.advancements.worldRecordPace")
         toast()
         announce()
@@ -268,7 +269,7 @@ object UHCAdvancements: AdvancementCollection() {
     val SPEEDRUN_ANY_PERCENT = register {
         parent(WORLD_RECORD_PACE)
         id = casual("speedrun_any_percent")
-        display = Items.END_PORTAL_FRAME.defaultInstance
+        display(Items.END_PORTAL_FRAME)
         setTitleAndDesc("uhc.advancements.speedrunAnyPercent")
         toast()
         announce()
@@ -286,7 +287,7 @@ object UHCAdvancements: AdvancementCollection() {
     val DO_THE_IMPOSSIBLE = register {
         parent(BRAVE_CHOICE)
         id = casual("do_the_impossible")
-        display = Items.DRAGON_HEAD.defaultInstance
+        display(Items.DRAGON_HEAD)
         setTitleAndDesc("uhc.advancements.doTheImpossible")
         toast()
         announce()
@@ -349,7 +350,7 @@ object UHCAdvancements: AdvancementCollection() {
     val ON_THE_EDGE = register {
         parent(BROKEN_ANKLES)
         id = casual("on_the_edge")
-        display = Items.SPLASH_POTION.defaultInstance.potion(Potions.STRONG_HARMING)
+        display = ItemStackTemplate.fromNonEmptyStack(Items.SPLASH_POTION.defaultInstance.potion(Potions.STRONG_HARMING))
         setTitleAndDesc("uhc.advancements.onTheEdge")
         toast()
         announce()
@@ -358,7 +359,7 @@ object UHCAdvancements: AdvancementCollection() {
     val DOES_YOUR_PINKIE_HURT_YET = register {
         parent(ON_THE_EDGE)
         id = casual("does_your_pinkie_hurt_yet")
-        display = Items.POTION.defaultInstance.potion(Potions.INVISIBILITY)
+        display = ItemStackTemplate.fromNonEmptyStack(Items.POTION.defaultInstance.potion(Potions.INVISIBILITY))
         setTitleAndDesc("uhc.advancements.doesYourPinkieHurtYet")
         toast()
         announce()
@@ -376,7 +377,7 @@ object UHCAdvancements: AdvancementCollection() {
     val HOWD_THAT_HAPPEN = register {
         parent(BUSTED)
         id = casual("howd_that_happen")
-        display = Items.POTION.defaultInstance.potion(Potions.HEALING)
+        display = ItemStackTemplate.fromNonEmptyStack(Items.POTION.defaultInstance.potion(Potions.HEALING))
         setTitleAndDesc("uhc.advancements.howdThatHappen")
         toast()
         announce()

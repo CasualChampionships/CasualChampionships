@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec
 import eu.pb4.polymer.core.api.item.PolymerItem
 import eu.pb4.polymer.core.api.other.PolymerComponent
 import net.casual.championships.common.util.casual
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext
+import net.minecraft.core.HolderLookup
 import net.minecraft.core.Registry
 import net.minecraft.core.component.DataComponentType
 import net.minecraft.core.component.DataComponents
@@ -14,14 +16,13 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.TooltipFlag
-import xyz.nucleoid.packettweaker.PacketContext
 
 internal class ForwardFacingPlayerHead(properties: Properties): Item(properties), PolymerItem {
     override fun getPolymerItem(stack: ItemStack, context: PacketContext): Item {
         return Items.PLAYER_HEAD
     }
 
-    override fun getPolymerItemModel(stack: ItemStack, context: PacketContext): Identifier {
+    override fun getPolymerItemModel(stack: ItemStack, context: PacketContext, lookup: HolderLookup.Provider): Identifier {
         val small = stack.get(IS_SMALL_BRAIN) ?: false
         return if (small) SMALL_MODEL_ID else LARGE_MODEL_ID
     }
@@ -29,9 +30,10 @@ internal class ForwardFacingPlayerHead(properties: Properties): Item(properties)
     override fun getPolymerItemStack(
         stack: ItemStack,
         flag: TooltipFlag,
-        context: PacketContext
+        context: PacketContext,
+        lookup: HolderLookup.Provider
     ): ItemStack {
-        val copy = super.getPolymerItemStack(stack, flag, context)
+        val copy = super.getPolymerItemStack(stack, flag, context, lookup)
         copy.set(DataComponents.PROFILE, stack.get(DataComponents.PROFILE))
         return copy
     }

@@ -12,6 +12,7 @@ import net.casual.championships.common.util.casual
 import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.ItemStackTemplate
 import java.util.*
 
 class DuelArenasDataModule(
@@ -34,14 +35,14 @@ class DuelArenasDataModule(
 
     private class UnresolvedArenas(
         val name: String,
-        val display: ItemStack,
+        val display: ItemStackTemplate,
         val arenas: Map<DuelArenaSize, String>
     ) {
         companion object {
             val CODEC: Codec<UnresolvedArenas> = RecordCodecBuilder.create { instance ->
                 instance.group(
                     Codec.STRING.fieldOf("name").forGetter(UnresolvedArenas::name),
-                    ItemStack.SINGLE_ITEM_CODEC.fieldOf("display").forGetter(UnresolvedArenas::display),
+                    ItemStackTemplate.CODEC.fieldOf("display").forGetter(UnresolvedArenas::display),
                     Codec.simpleMap(DuelArenaSize.CODEC, Codec.STRING, DuelArenaSize.KEYS).forGetter(UnresolvedArenas::arenas)
                 ).apply(instance, DuelArenasDataModule::UnresolvedArenas)
             }
@@ -65,7 +66,7 @@ class DuelArenasDataModule(
                         MinigameWorldData.get(child, server)
                     )
                 }
-                resolved[instance.name] = ResolvedArenas(instance.name, instance.display, arenas)
+                resolved[instance.name] = ResolvedArenas(instance.name, instance.display.create(), arenas)
             }
             return DuelArenasDataModule(resolved)
         }

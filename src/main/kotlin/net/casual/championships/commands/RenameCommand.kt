@@ -11,7 +11,7 @@ import net.minecraft.commands.arguments.SlotArgument
 import net.minecraft.core.component.DataComponents
 import net.minecraft.server.permissions.PermissionLevel
 
-object RenameCommand: CommandTree {
+object RenameCommand: CommandTree<CommandSourceStack> {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("rename") {
             requiresPermission(PermissionLevel.GAMEMASTERS)

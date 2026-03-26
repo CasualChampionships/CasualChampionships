@@ -1,3 +1,3 @@
 dependencies {
-    implementation(project(":minigames-duels", configuration = "namedElements"))
+    implementation(project(":minigames-duels"))
 }

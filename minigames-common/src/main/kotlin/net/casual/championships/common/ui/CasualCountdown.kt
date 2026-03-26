@@ -1,11 +1,11 @@
 package net.casual.championships.common.ui
 
 import net.casual.arcade.resources.utils.withMiniFont
-import net.casual.arcade.utils.PlayerUtils.sendSound
-import net.casual.arcade.utils.PlayerUtils.sendTitle
-import net.casual.arcade.utils.PlayerUtils.setTitleAnimation
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.player.sendSound
+import net.casual.arcade.utils.player.sendTitle
+import net.casual.arcade.utils.player.setTitleAnimation
 import net.casual.arcade.visuals.transition.TitledCountdown
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualSounds

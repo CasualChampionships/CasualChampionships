@@ -60,7 +60,8 @@ enum class UHCPhase(
 
             minigame.settings.canPvp.set(false)
             minigame.settings.tickFreezeOnPause.set(true)
-            minigame.levels.all().forEach { it.dayTime = 0 }
+            // TODO:
+            // minigame.levels.all().forEach { it.dayTime = 0 }
             UHCBoundaryManager.reset(minigame)
 
             val (level, _) = when (minigame.settings.startingDimension) {

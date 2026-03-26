@@ -15,6 +15,7 @@ import net.casual.arcade.minigame.events.MinigameAddAdminEvent
 import net.casual.arcade.minigame.events.MinigameCloseEvent
 import net.casual.arcade.minigame.events.MinigameCompleteEvent
 import net.casual.arcade.minigame.events.MinigameInitializeEvent
+import net.casual.arcade.minigame.events.MinigameStartEvent
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.minigame.utils.MinigameResources.Companion.sendTo
@@ -37,6 +38,7 @@ import net.casual.arcade.utils.player.username
 import net.casual.arcade.utils.scoreboard.getOrCreateTeam
 import net.casual.arcade.utils.scoreboard.setHexColor
 import net.casual.championships.CasualChampionships
+import net.casual.championships.common.minigame.TimeTrackedMinigame
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualTags
@@ -357,6 +359,13 @@ class CasualMinigameManager(
                 return packs
             }
         })
+        
+        if (minigame is TimeTrackedMinigame) {
+            minigame.events.register<MinigameStartEvent> { minigame.timeTracker.markStart() }
+            minigame.events.register<MinigameCompleteEvent> { minigame.timeTracker.markEnd() }
+            minigame.events.register<MinigameCloseEvent> { minigame.timeTracker.markEnd() }
+        }
+
         when (minigame) {
             is UHCMinigame -> this.modifyUHCMinigame(minigame)
             is DuelMinigame -> this.modifyDuelMinigame(minigame)

@@ -42,6 +42,8 @@ import net.casual.championships.common.event.LevelFluidTrySpreadEvent
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
+import net.casual.championships.common.minigame.CasualTimeTracker
+import net.casual.championships.common.minigame.TimeTrackedMinigame
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualPredicates.OBSERVEE_NOT_MINIGAME_SPECTATOR
@@ -79,7 +81,7 @@ class DuelMinigame(
     uuid: UUID,
     val duelSettings: DuelSettings,
     val duelArena: DuelArenasDataModule.DuelArena
-): Minigame(server, uuid) {
+): Minigame(server, uuid), TimeTrackedMinigame {
     override val id = ID
 
     private val lootSeed = Random.nextLong()
@@ -89,6 +91,7 @@ class DuelMinigame(
     val level: ServerLevel = this.createLevel()
 
     override val settings = MinigameSettings(this)
+    override val timeTracker = CasualTimeTracker()
 
     init {
         this.tickrate.useGlobalManager = false

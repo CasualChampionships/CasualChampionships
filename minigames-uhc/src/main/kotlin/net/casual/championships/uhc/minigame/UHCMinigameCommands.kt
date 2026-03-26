@@ -20,7 +20,7 @@ import net.minecraft.network.chat.Component
 
 class UHCMinigameCommands(
     private val uhc: UHCMinigame
-): CommandTree {
+): CommandTree<CommandSourceStack> {
     override fun register(dispatcher: CommandDispatcher<CommandSourceStack>, buildContext: CommandBuildContext) {
         super.register(dispatcher, buildContext)
         dispatcher.register(CommandTree.buildLiteral("s") {

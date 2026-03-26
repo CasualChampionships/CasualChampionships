@@ -2,7 +2,9 @@ package net.casual.championships.common.items.minigame
 
 import eu.pb4.polymer.core.api.item.VanillaModeledPolymerItem
 import net.casual.championships.common.util.CasualComponents
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext
 import net.minecraft.ChatFormatting
+import net.minecraft.core.HolderLookup
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -15,7 +17,6 @@ import net.minecraft.world.item.component.TooltipDisplay
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Blocks
-import xyz.nucleoid.packettweaker.PacketContext
 import java.util.function.Consumer
 
 abstract class HeadItem(properties: Properties): BlockItem(Blocks.PLAYER_HEAD, properties), VanillaModeledPolymerItem {
@@ -68,12 +69,15 @@ abstract class HeadItem(properties: Properties): BlockItem(Blocks.PLAYER_HEAD, p
         return Items.PLAYER_HEAD
     }
 
+
+
     override fun getPolymerItemStack(
         stack: ItemStack,
         tooltip: TooltipFlag,
-        context: PacketContext
+        context: PacketContext,
+        lookup: HolderLookup.Provider
     ): ItemStack {
-        val out = super.getPolymerItemStack(stack, tooltip, context)
+        val out = super.getPolymerItemStack(stack, tooltip, context, lookup)
         val profile = this.getResolvableProfile(stack)
         if (profile != null) {
             out.set(DataComponents.PROFILE, profile)

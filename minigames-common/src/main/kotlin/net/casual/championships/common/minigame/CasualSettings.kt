@@ -1,6 +1,6 @@
 package net.casual.championships.common.minigame
 
-import eu.pb4.sgui.api.gui.GuiInterface
+import eu.pb4.sgui.api.gui.GuiLike
 import net.casual.arcade.guis.sgui.SelectionGuiBuilder
 import net.casual.arcade.guis.sgui.SelectionGuiComponents
 import net.casual.arcade.guis.sgui.SelectionGuiStyle
@@ -44,7 +44,7 @@ open class CasualSettings(
                 .style(SelectionGuiStyle.centered(5, 3))
         }
 
-        override fun createOptionsGuiBuilder(parent: GuiInterface, setting: MenuGameSetting<*>): SelectionGuiBuilder {
+        override fun createOptionsGuiBuilder(parent: GuiLike, setting: MenuGameSetting<*>): SelectionGuiBuilder {
             return SelectionGuiBuilder(parent, named(setting.display.hoverName))
                 .style(SelectionGuiStyle.centered(setting.optionCount))
         }
