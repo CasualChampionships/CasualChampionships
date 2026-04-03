@@ -12,7 +12,7 @@ plugins {
 
 allprojects {
     group = "net.casual"
-    version = "2.4.0"
+    version = "2.4.1"
 
     apply(plugin = "net.fabricmc.fabric-loom")
     apply(plugin = "org.jetbrains.kotlin.jvm")
