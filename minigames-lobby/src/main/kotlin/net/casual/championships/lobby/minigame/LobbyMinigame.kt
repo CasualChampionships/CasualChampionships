@@ -224,7 +224,7 @@ class LobbyMinigame(
     private fun onMinigameAddPlayer(event: MinigameAddPlayerEvent) {
         val (_, player) = event
         if (this.tags.add(player, WELCOMED)) {
-            player.setTitleAnimation(stay = 5.Seconds)
+            player.setTitleAnimation(stay = 10.Seconds)
             player.sendTitle(CasualComponents.Text.WELCOME_TO_CASUAL_CHAMPIONSHIPS.wrap().shadowless())
         }
 
@@ -324,11 +324,10 @@ class LobbyMinigame(
                 set(GameRules.SPAWN_MOBS, false, server)
                 set(GameRules.LOCATOR_BAR, false, server)
             }
-            // TODO:
-            // when {
-            //     data.timeOfDay.isEmpty -> tickTime(true)
-            //     else -> timeOfDay(data.timeOfDay.get().toLong())
-            // }
+            when {
+                data.timeOfDay.isEmpty -> clockState(paused = false)
+                else -> clockState(totalTicks = data.timeOfDay.get().toLong(), paused = true)
+            }
         }
         return level
     }

@@ -1,5 +1,6 @@
 package net.casual.championships.uhc.minigame
 
+import net.casual.arcade.dimensions.level.extensions.LevelClockExtension.Companion.clockExtension
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
@@ -37,6 +38,9 @@ import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Compani
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
+import net.minecraft.world.clock.ClockState
+import net.minecraft.world.effect.MobEffectInstance
+import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.level.gamerules.GameRules
 import net.minecraft.world.phys.Vec3
 
@@ -60,8 +64,7 @@ enum class UHCPhase(
 
             minigame.settings.canPvp.set(false)
             minigame.settings.tickFreezeOnPause.set(true)
-            // TODO:
-            // minigame.levels.all().forEach { it.dayTime = 0 }
+            minigame.overworld.clockExtension.set(ClockState(0, 0.0F, 1.0F, false))
             UHCBoundaryManager.reset(minigame)
 
             val (level, _) = when (minigame.settings.startingDimension) {
@@ -111,7 +114,7 @@ enum class UHCPhase(
             minigame.settings.mobsWithNoAIAreFlammable = true
             minigame.settings.canPvp.set(false)
 
-            minigame.onStartBoundaryTimer()
+            minigame.resetBoundaryTimer()
             val borderDelayDuration = minigame.settings.borderStartDelay
             minigame.scheduler.schedule(borderDelayDuration, MinigameTask(minigame) { m ->
                 UHCBoundaryManager.start(m)
@@ -126,6 +129,11 @@ enum class UHCPhase(
             minigame.chat.broadcastGame(
                 CasualComponents.BORDER_INITIAL_GRACE.generate(gracePeriodDuration.minutes).gold().withMiniFont()
             )
+
+            val resistanceDuration = gracePeriodDuration.ticks / 2
+            for (player in minigame.players.playing) {
+                player.addEffect(MobEffectInstance(MobEffects.RESISTANCE, resistanceDuration, 0, false, false, true))
+            }
         }
 
         override fun end(minigame: UHCMinigame, next: Phase<UHCMinigame>) {

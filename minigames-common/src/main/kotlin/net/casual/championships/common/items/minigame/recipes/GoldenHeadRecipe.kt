@@ -1,9 +1,9 @@
 package net.casual.championships.common.items.minigame.recipes
 
+import net.casual.arcade.utils.ItemUtils.template
 import net.casual.arcade.utils.recipe.CraftingRecipeBuilder
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.util.casual
-import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.crafting.CraftingBookCategory
 
@@ -13,7 +13,7 @@ object GoldenHeadRecipe {
         category = CraftingBookCategory.MISC
         height = 3
         width = 3
-        result = ItemStackTemplate(CasualItems.GOLDEN_HEAD)
+        result = CasualItems.GOLDEN_HEAD.template()
         val x = Items.GOLD_INGOT
         val o = CasualItems.PLAYER_HEAD
         ingredients(

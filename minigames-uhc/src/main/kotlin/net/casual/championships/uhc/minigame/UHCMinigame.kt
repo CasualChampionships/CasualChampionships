@@ -33,6 +33,7 @@ import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.resources.utils.withMiniShiftedDownFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
+import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.MathUtils
@@ -209,17 +210,22 @@ class UHCMinigame(
         }
     }
 
-    fun onStartBoundaryTimer() {
+    fun resetBoundaryTimer() {
         this.lastBoundaryTime = this.uptime.Ticks
     }
 
+    fun onStartBoundaryTimer() {
+        this.resetBoundaryTimer()
+        this.chat.broadcastGame(component = CasualComponents.BORDER_STARTED.withMiniFont().red())
+    }
+
     fun onPauseBoundaryTimer() {
-        this.lastBoundaryTime = this.uptime.Ticks
+        this.resetBoundaryTimer()
         this.chat.broadcastGame(component = CasualComponents.BORDER_PAUSED.withMiniFont().red())
     }
 
     fun onResumeBoundaryTimer() {
-        this.lastBoundaryTime = this.uptime.Ticks
+        this.resetBoundaryTimer()
         this.chat.broadcastGame(
             component = CasualComponents.BORDER_RESUMED.withMiniFont().red(),
             sound = Sound(CasualSounds.GAME_BORDER_MOVING)
@@ -629,16 +635,11 @@ class UHCMinigame(
         this.tags.add(player, CasualTags.HAS_PARTICIPATED)
         this.tags.add(player, CasualTags.HAS_TEAM_GLOW)
 
-        player.addEffect(
-            MobEffectInstance(MobEffects.RESISTANCE, 2000, 255, true, false)
-        )
         player.setGameMode(GameType.SURVIVAL)
-        player.afterPacksLoad {
-            player.removeEffect(MobEffects.RESISTANCE)
-            player.addEffect(
-                MobEffectInstance(MobEffects.RESISTANCE, 200, 255, true, false)
-            )
-        }
+        player.isInvulnerable = true
+        val task = PlayerTask(player) { it.isInvulnerable = false }
+        GlobalTickedScheduler.schedule(10.Seconds, task)
+        player.afterPacksLoad(task::run)
 
         if (team != null) {
             this.teams.removeEliminatedTeam(team)

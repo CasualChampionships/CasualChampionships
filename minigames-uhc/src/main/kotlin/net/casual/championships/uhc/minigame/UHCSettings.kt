@@ -71,12 +71,13 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
     var gracePeriod by this.register(time {
         name = "grace_period"
         display = Items.SHIELD.named("Grace Period")
-        value = 10.Minutes
+        value = 30.Minutes
         option("one_minute", Items.CAKE.named("1 Minute"), 1.Minutes)
         option("two_minutes", Items.CAKE.named("2 Minutes"), 2.Minutes)
         option("five_minutes", Items.CAKE.named("5 Minutes"), 5.Minutes)
         option("ten_minutes", Items.CAKE.named("10 Minutes"), 10.Minutes)
         option("twenty_minutes", Items.CAKE.named("20 Minutes"), 20.Minutes)
+        option("thirty_minutes", Items.CAKE.named("30 Minutes"), 30.Minutes)
     })
 
     var borderStartDelay by this.register(time {

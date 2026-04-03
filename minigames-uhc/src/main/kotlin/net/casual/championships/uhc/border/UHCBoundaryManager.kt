@@ -26,6 +26,7 @@ object UHCBoundaryManager {
     }
 
     fun start(uhc: UHCMinigame) {
+        uhc.onStartBoundaryTimer()
         this.move(uhc, UHCBoundaryPhase.First)
     }
 
@@ -55,7 +56,7 @@ object UHCBoundaryManager {
         this.move(uhc, MinecraftTimeDuration.ZERO) { current.getStart(it) }
         val duration = current.getDuration(uhc.settings.borderTime)
         this.move(uhc, duration) { current.getEnd(it) }
-        uhc.scheduler.schedulePhased(duration, MinigameTask(uhc) { minigame ->
+        uhc.scheduler.schedule(duration, MinigameTask(uhc) { minigame ->
             this.complete(minigame, uhc.boundaryPhase) // current
         })
     }
@@ -66,17 +67,19 @@ object UHCBoundaryManager {
             return
         }
 
+        CasualUHC.logger.info("Completed boundary moving phase ${current::class.java.simpleName}!")
+
         if (current == UHCBoundaryPhase.Fifth) {
             val duration = current.getCooldown(uhc.settings.borderTime)
             val task = GlowingBossbarTask(uhc)
                 .withDuration(duration)
                 .then(MinigameTask(uhc, UHCMinigame::weAreInTheEndgameNow))
-            uhc.scheduler.schedulePhasedCancellable(duration, task).runIfCancelled()
+            uhc.scheduler.schedule(duration, task)
         }
 
         uhc.onPauseBoundaryTimer()
         val cooldown = current.getCooldown(uhc.settings.borderTime)
-        uhc.scheduler.schedulePhased(cooldown, MinigameTask(uhc) { minigame ->
+        uhc.scheduler.schedule(cooldown, MinigameTask(uhc) { minigame ->
             minigame.onResumeBoundaryTimer()
             this.move(minigame, minigame.boundaryPhase.getNextStage())
         })

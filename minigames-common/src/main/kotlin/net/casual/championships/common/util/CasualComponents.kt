@@ -9,6 +9,8 @@ import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.translatable
 import net.casual.arcade.utils.ComponentUtils.translatableWithArgs
 import net.casual.arcade.utils.component.crimson
+import net.casual.arcade.utils.component.join
+import net.casual.arcade.utils.component.joinToComponent
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.component.shadowless
 import net.casual.arcade.utils.component.white
@@ -84,6 +86,7 @@ object CasualComponents {
     val BORDER_INITIAL_GRACE = translatableWithArgs("casual.game.grace.first")
     val BORDER_GENERIC_GRACE = translatableWithArgs("casual.game.grace.generic")
     val BORDER_GRACE_OVER by translatable("casual.game.grace.over")
+    val BORDER_STARTED by translatable("casual.game.borderStarted")
     val BORDER_RESUMED by translatable("casual.game.borderResumed")
     val BORDER_PAUSED by translatable("casual.game.borderPaused")
     val HAS_BEEN_ELIMINATED = translatableWithArgs("casual.game.eliminated")
@@ -184,10 +187,13 @@ object CasualComponents {
         val CASUAL = bitmap(at("text/casual.png"), 8, 9)
         val CHAMPIONSHIPS = bitmap(at("text/championships.png"), 8, 9)
 
-        val SERVER_HOSTED_BY = bitmap(at("text/server_hosted_by.png"), 8, 9)
-        val KIWITECH = bitmap(at("text/kiwitech.png"), 8, 9)
+        val SERVER_HOSTED_BY: Component = (1..5).map { i ->
+            bitmap(at("text/host/$i"), 8, 8)
+        }.join(SpacingFontResources.composed(-1F))
 
-        val WELCOME_TO_CASUAL_CHAMPIONSHIPS = bitmap(at("text/welcome_to_casual_championships.png"), 6, 16)
+        val WELCOME_TO_CASUAL_CHAMPIONSHIPS: Component = (1..4).map { i ->
+            bitmap(at("text/welcome/$i"), 8, 16)
+        }.join(SpacingFontResources.composed(-0.8F))
     }
 
     object Border: IndexedFontResources(casual("border_font")) {

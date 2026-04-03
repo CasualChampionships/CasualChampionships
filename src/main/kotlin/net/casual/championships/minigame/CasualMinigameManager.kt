@@ -386,9 +386,10 @@ class CasualMinigameManager(
         event.format { it.copy(username = event.player.getChatUsername(false)) }
     }
 
-    @Suppress("unused_parameter")
     private fun onServerSave(event: ServerSaveEvent) {
-        this.writeEventState()
+        if (event.reason != ServerSaveEvent.Reason.Initial) {
+            this.writeEventState()
+        }
     }
 
     private fun onServerTick(event: ServerTickEvent) {

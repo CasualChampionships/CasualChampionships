@@ -12,7 +12,7 @@ plugins {
 
 allprojects {
     group = "net.casual"
-    version = "2.3.0"
+    version = "2.4.0"
 
     apply(plugin = "net.fabricmc.fabric-loom")
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -74,7 +74,7 @@ allprojects {
             filesMatching("fabric.mod.json") {
                 expand(mutableMapOf(
                     "version" to version,
-                    "minecraft_dependency" to libs.versions.minecraft.get(),
+                    "minecraft_dependency" to "~${libs.versions.minecraft.get()}",
                     "fabric_api_dependency" to libs.versions.fabric.api.get(),
                     "fabric_kotlin_dependency" to libs.versions.fabric.kotlin.get(),
                 ))

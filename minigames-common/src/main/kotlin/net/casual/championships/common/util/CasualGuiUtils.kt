@@ -8,7 +8,6 @@ import net.casual.arcade.minigame.events.MinigameAddPlayerEvent
 import net.casual.arcade.minigame.events.MinigamePauseEvent
 import net.casual.arcade.minigame.managers.MinigameChatManager
 import net.casual.arcade.minigame.utils.MinigameUtils.broadcastChangesToAdmin
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.chat.ChatFormatter
@@ -40,8 +39,6 @@ import net.casual.championships.common.ui.tab.CasualPlayerListEntries
 import net.casual.championships.common.ui.tab.SimpleCasualPlayerListEntries
 import net.casual.championships.common.util.CasualComponents.Text.CASUAL
 import net.casual.championships.common.util.CasualComponents.Text.CHAMPIONSHIPS
-import net.casual.championships.common.util.CasualComponents.Text.KIWITECH
-import net.casual.championships.common.util.CasualComponents.Text.SERVER_HOSTED_BY
 import net.minecraft.ChatFormatting.*
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
@@ -120,9 +117,7 @@ object CasualGuiUtils {
 
     fun addCasualFooterAndHeader(minigame: Minigame, display: PlayerListDisplay) {
         val hostedByKiwiTech = Component.empty()
-            .append(SERVER_HOSTED_BY)
-            .append(SpacingFontResources.spaced(4))
-            .append(KIWITECH)
+            .append(CasualComponents.Text.SERVER_HOSTED_BY)
 
         val baseFooter = PlayerSpecificElement { player ->
             val ping = player.connection.latency()
