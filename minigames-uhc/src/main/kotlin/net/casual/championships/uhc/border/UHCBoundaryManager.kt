@@ -10,8 +10,8 @@ import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
 import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.utils.MathUtils
+import net.casual.arcade.utils.registries.toIdString
 import net.casual.arcade.utils.time.MinecraftTimeDuration
-import net.casual.arcade.utils.toIdString
 import net.casual.championships.common.task.GlowingBossbarTask
 import net.casual.championships.uhc.CasualUHC
 import net.casual.championships.uhc.minigame.UHCMinigame

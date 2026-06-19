@@ -4,6 +4,7 @@ import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.recipe.CraftingRecipeBuilder
 import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.item.UHCItems
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags
 import net.minecraft.core.RegistryAccess
 import net.minecraft.tags.ItemTags
 import net.minecraft.world.item.ItemStackTemplate
@@ -23,7 +24,7 @@ object FlowerPowerRecipe {
                 height = 3
                 width = 3
                 result = ItemStackTemplate.fromNonEmptyStack(UHCItems.FLOWER_POWER.named("Flower Power"))
-                val x = ItemTags.SMALL_FLOWERS
+                val x = ConventionalItemTags.SMALL_FLOWERS
                 val o = Items.DIAMOND_BLOCK
                 ingredients(x, x, x, x)
                 ingredients(o)

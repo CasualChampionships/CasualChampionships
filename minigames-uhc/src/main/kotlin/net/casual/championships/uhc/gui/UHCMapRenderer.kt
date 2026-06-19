@@ -14,7 +14,7 @@ import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.component.yellow
-import net.casual.arcade.utils.isOf
+import net.casual.arcade.utils.registries.isOf
 import net.casual.arcade.utils.scoreboard.color
 import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.border.UHCBoundaryManager

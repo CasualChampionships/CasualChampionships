@@ -79,7 +79,7 @@ object UHCAdvancements: AdvancementCollection() {
     val PRINTER_ISNT_ALLOWED = register {
         parent(DEMOLITION_EXPERT)
         id = casual("printer_isnt_allowed")
-        display(Items.RED_GLAZED_TERRACOTTA)
+        display(Items.GLAZED_TERRACOTTA.red)
         setTitleAndDesc("uhc.advancements.printerIsntAllowed")
         toast()
         announce()
@@ -314,7 +314,7 @@ object UHCAdvancements: AdvancementCollection() {
     val CONCRETE_SMELTER = register {
         parent(EMBARRASSING)
         id = casual("concrete_smelter")
-        display(Items.PINK_CONCRETE_POWDER)
+        display(Items.CONCRETE_POWDER.pink)
         setTitleAndDesc("uhc.advancements.concreteSmelter")
         toast()
         announce()
@@ -323,7 +323,7 @@ object UHCAdvancements: AdvancementCollection() {
     val NO_ONE_ASKED = register {
         parent(EMBARRASSING)
         id = casual("no_one_asked")
-        display(Items.BLUE_BED)
+        display(Items.BED.blue)
         setTitleAndDesc("uhc.advancements.noOneAsked")
         toast()
         announce()
@@ -332,7 +332,7 @@ object UHCAdvancements: AdvancementCollection() {
     val VELIZARD = register {
         parent(NO_ONE_ASKED)
         id = casual("velizard")
-        display(Items.WHITE_BED)
+        display(Items.BED.white)
         setTitleAndDesc("uhc.advancement.velizard")
         toast()
         announce()
@@ -413,7 +413,7 @@ object UHCAdvancements: AdvancementCollection() {
     val TEAM_PLAYER = register {
         parent(SOLOIST)
         id = casual("team_player")
-        display(Items.LIME_BANNER)
+        display(Items.BANNER.lime)
         setTitleAndDesc("uhc.advancements.teamPlayer")
         toast()
         announce()
@@ -440,7 +440,7 @@ object UHCAdvancements: AdvancementCollection() {
     val BASICALLY = register {
         parent(LDAP)
         id = casual("basically")
-        display(Items.WHITE_WOOL)
+        display(Items.WOOL.white)
         setTitleAndDesc("uhc.advancements.basically")
         toast()
         announce()

@@ -18,7 +18,6 @@ import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.resources.utils.withMiniFont
-import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.LootTableUtils
 import net.casual.arcade.utils.LootTableUtils.addItem
 import net.casual.arcade.utils.LootTableUtils.between
@@ -37,7 +36,8 @@ import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocat
 import net.casual.arcade.utils.player.clearPlayerInventory
 import net.casual.arcade.utils.player.resetHealth
 import net.casual.arcade.utils.player.server
-import net.casual.arcade.utils.toKey
+import net.casual.arcade.utils.registries.isOf
+import net.casual.arcade.utils.registries.toKey
 import net.casual.championships.common.event.LevelFluidTrySpreadEvent
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
@@ -73,6 +73,7 @@ import net.minecraft.world.level.GameType
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.LootTable
+import net.minecraft.world.phys.Vec3
 import java.util.*
 import kotlin.random.Random
 
@@ -111,7 +112,7 @@ class DuelMinigame(
         }, false)
 
         this.levels.spawn = MinigameLevelManager.SpawnLocation.global(
-            this.level.asLocation(this.duelArena.data.spawn.bottomCenter)
+            this.level.asLocation(Vec3.atBottomCenterOf(this.duelArena.data.spawn))
         )
 
         this.visuals.addNametag(CasualGuiUtils.createPlayingHealthTag(
@@ -207,7 +208,7 @@ class DuelMinigame(
         player.lastDeathLocation.ifPresent { location ->
             val level = player.server.getLevel(location.dimension)
             if (level != null && this.levels.has(level) && player.isSpectator) {
-                player.teleportTo(level.asLocation(location.pos.center))
+                player.teleportTo(level.asLocation(Vec3.atCenterOf(location.pos)))
             }
         }
     }

@@ -19,13 +19,15 @@ import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.uhc.CasualUHC
 import net.minecraft.ChatFormatting
 import net.minecraft.world.scores.PlayerTeam
+import net.minecraft.world.scores.TeamColor
+import java.util.Optional
 import kotlin.io.path.listDirectoryEntries
 
 object CasualResourcePackHost {
     private val packs = CasualUtils.resolve("packs")
     private val generated = this.packs.resolve("generated")
 
-    private val colors = Object2IntOpenHashMap<ChatFormatting>()
+    private val colors = Object2IntOpenHashMap<TeamColor>()
 
     private val host = GlobalPackHost
     private val common = HashMap<String, HostedPackRef>()
@@ -62,7 +64,7 @@ object CasualResourcePackHost {
 
     fun loadTeamColors(teams: Collection<PlayerTeam>): Boolean {
         var index = 0
-        val colors = HashBiMap.create<ChatFormatting, Int>()
+        val colors = HashBiMap.create<TeamColor, Int>()
         for (team in teams) {
             val color = team.getHexColor()?.coerceIn(-1, 0xFFFFFF) ?: continue
             var original = colors.inverse()[color]
@@ -71,10 +73,10 @@ object CasualResourcePackHost {
                     CasualUtils.logger.error("Tried to load more team colors than were available!!")
                     continue
                 }
-                original = ChatFormatting.entries[index++]
+                original = TeamColor.entries[index++]
             }
             colors[original] = color
-            team.color = original
+            team.color = Optional.of(original)
         }
 
         if (this.colors != colors) {

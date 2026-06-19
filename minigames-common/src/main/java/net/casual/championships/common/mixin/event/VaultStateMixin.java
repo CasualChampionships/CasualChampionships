@@ -27,17 +27,16 @@ public class VaultStateMixin {
         )
     )
     private boolean broadcastLootVaultEvent(
-        VaultState instance,
-        ServerLevel level,
+        ServerLevel serverLevel,
         BlockPos pos,
-        ItemStack stack,
-        float ejectionProgress,
-        @Local(argsOnly = true) VaultServerData data
+        ItemStack itemToEject,
+        float ejectionSoundProgress,
+        @Local(argsOnly = true) VaultServerData serverData
     ) {
-        Set<UUID> rewarded = ((VaultServerDataInvoker) data).invokeGetRewardedPlayers();
+        Set<UUID> rewarded = ((VaultServerDataInvoker) serverData).invokeGetRewardedPlayers();
         UUID recent = CollectionsKt.lastOrNull(rewarded);
-        if (recent != null && level.getPlayerByUUID(recent) instanceof ServerPlayer player) {
-            PlayerLootVaultEvent event = new PlayerLootVaultEvent(player, stack);
+        if (recent != null && serverLevel.getPlayerByUUID(recent) instanceof ServerPlayer player) {
+            PlayerLootVaultEvent event = new PlayerLootVaultEvent(player, itemToEject);
             GlobalEventHandler.Server.broadcast(event);
         }
         return true;

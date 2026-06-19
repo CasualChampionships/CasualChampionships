@@ -12,16 +12,14 @@ import net.casual.arcade.minigame.stats.ArcadeStats
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.task.impl.PlayerTask
-import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.entity.isInStructure
-import net.casual.arcade.utils.isOf
-import net.casual.arcade.utils.level.isOf
 import net.casual.arcade.utils.player.getKillCreditWith
 import net.casual.arcade.utils.player.grantAdvancement
 import net.casual.arcade.utils.player.isSurvival
 import net.casual.arcade.utils.player.revokeAdvancement
+import net.casual.arcade.utils.registries.isOf
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.event.PlayerLootVaultEvent
 import net.casual.championships.common.util.CasualStats
@@ -34,6 +32,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.ProblemReporter
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.animal.golem.IronGolem
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.monster.warden.Warden
@@ -252,8 +251,8 @@ class UHCAdvancementManager(
             val isBlazeSpawner = spawnerNbt.getCompound(BaseSpawner.SPAWN_DATA_TAG)
                 .flatMap { it.getCompound(SpawnData.ENTITY_TAG) }
                 .flatMap { EntityType.by(TagValueInput.create(ProblemReporter.DISCARDING, player.registryAccess(), it)) }
-                .map { it == EntityType.BLAZE }
-                .orElse(false)
+                .map { it == EntityTypes.BLAZE }
+                .orElse(false)!!
 
             if (isBlazeSpawner) {
                 player.grantAdvancement(UHCAdvancements.SPAWNER_SABOTEUR)

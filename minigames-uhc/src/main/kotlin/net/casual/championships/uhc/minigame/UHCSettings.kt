@@ -43,10 +43,10 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         value = 1.0
         option("one_third", Items.SCAFFOLDING.named("0.33x Size"), 1.0 / 3.0)
         option("half", Items.ANVIL.named("0.5x Size"), 0.5)
-        option("two_thirds", Items.GREEN_STAINED_GLASS_PANE.named("0.66x Size"), 2.0 / 3.0)
-        option("normal", Items.LIME_STAINED_GLASS_PANE.named("1x Size"), 1.0)
-        option("three_halves", Items.RED_STAINED_GLASS_PANE.named("1.5x Size"), 1.5)
-        option("double", Items.RED_STAINED_GLASS_PANE.named("2x Size"), 2.0)
+        option("two_thirds", Items.STAINED_GLASS_PANE.green.named("0.66x Size"), 2.0 / 3.0)
+        option("normal", Items.STAINED_GLASS_PANE.lime.named("1x Size"), 1.0)
+        option("three_halves", Items.STAINED_GLASS_PANE.red.named("1.5x Size"), 1.5)
+        option("double", Items.STAINED_GLASS_PANE.red.named("2x Size"), 2.0)
     })
 
     var borderTime by this.register(time {
@@ -55,10 +55,10 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         value = UHCBoundaryPhase.TOTAL_TIME
         option("ten_minutes", Items.CAKE.named("10 Minutes"), 10.Minutes)
         option("thirty_minutes", Items.SCULK_SENSOR.named("30 Minutes"), 30.Minutes)
-        option("two_hours", Items.GREEN_STAINED_GLASS_PANE.named("2 Hours"), 120.Minutes)
-        option("total_time", Items.GREEN_STAINED_GLASS_PANE.named("Total Time"), UHCBoundaryPhase.TOTAL_TIME)
-        option("two_and_half_hours", Items.YELLOW_STAINED_GLASS_PANE.named("2.5 Hours"), 150.Minutes)
-        option("three_hours", Items.RED_STAINED_GLASS_PANE.named("3 Hours"), 180.Minutes)
+        option("two_hours", Items.STAINED_GLASS_PANE.green.named("2 Hours"), 120.Minutes)
+        option("total_time", Items.STAINED_GLASS_PANE.green.named("Total Time"), UHCBoundaryPhase.TOTAL_TIME)
+        option("two_and_half_hours", Items.STAINED_GLASS_PANE.yellow.named("2.5 Hours"), 150.Minutes)
+        option("three_hours", Items.STAINED_GLASS_PANE.red.named("3 Hours"), 180.Minutes)
     })
 
     var startingDimension by this.register(enumeration<VanillaDimension> {
@@ -117,9 +117,9 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         display = Items.POTION.named("Health").potion(Potions.HEALING)
             .hideTooltip(DataComponents.ATTRIBUTE_MODIFIERS)
         value = 1.0
-        option("triple", Items.GREEN_STAINED_GLASS_PANE.named("Triple"), 2.0)
-        option("double", Items.YELLOW_STAINED_GLASS_PANE.named("Double"), 1.0)
-        option("normal", Items.RED_STAINED_GLASS_PANE.named("Normal"), 0.0)
+        option("triple", Items.STAINED_GLASS_PANE.green.named("Triple"), 2.0)
+        option("double", Items.STAINED_GLASS_PANE.yellow.named("Double"), 1.0)
+        option("normal", Items.STAINED_GLASS_PANE.red.named("Normal"), 0.0)
     })
 
     var endGameGlow by this.register(bool {
@@ -251,14 +251,14 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         name = "nerfed_player_damage"
         display = Items.WOODEN_SWORD.named("Nerfed player damage")
         value = 0.3F
-        option("minus_10_percent", Items.GREEN_STAINED_GLASS_PANE.named("Minus 10%"), 0.1F)
-        option("minus_30_percent", Items.YELLOW_STAINED_GLASS_PANE.named("Minus 30%"), 0.3F)
-        option("minus_50_percent", Items.RED_STAINED_GLASS_PANE.named("Minus 50%"), 0.5F)
+        option("minus_10_percent", Items.STAINED_GLASS_PANE.green.named("Minus 10%"), 0.1F)
+        option("minus_30_percent", Items.STAINED_GLASS_PANE.yellow.named("Minus 30%"), 0.3F)
+        option("minus_50_percent", Items.STAINED_GLASS_PANE.red.named("Minus 50%"), 0.5F)
     })
 
     var tmcStarterPack by this.register(bool {
         name = "tmc_starter_pack"
-        display = Items.RED_SHULKER_BOX.named("TMC Starter Pack")
+        display = Items.DYED_SHULKER_BOX.red.named("TMC Starter Pack")
             .lore(Component.literal("Gives players a shulker box with redstone goodies"))
         value = false
         defaults.options(this)

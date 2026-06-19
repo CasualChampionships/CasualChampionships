@@ -1,7 +1,7 @@
 package net.casual.championships.uhc.gui
 
-import net.casual.arcade.guis.core.SlotInteractAction
 import net.casual.arcade.guis.inventory.VirtualInventory
+import net.casual.arcade.guis.utils.SlotInteractAction
 import net.casual.arcade.guis.utils.isUse
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.AdventureSpectator
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGameMode

@@ -48,7 +48,6 @@ allprojects {
         implementation(libs.arcade)
 
         implementation(libs.map.canvas)
-        implementation(libs.permissions)
     }
 
     java {
@@ -59,11 +58,11 @@ allprojects {
         runs {
             create("datagenClient") {
                 client()
-                programArgs("--arcade-datagen")
-                runDir = "run-datagen"
+                programArguments.add("--arcade-datagen")
+                runDirectory.set(file("run-datagen"))
             }
             named("server") {
-                vmArgs("-Dmixin.debug.export=true")
+                jvmArguments.add("-Dmixin.debug.export=true")
             }
         }
     }

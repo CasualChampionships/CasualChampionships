@@ -27,7 +27,7 @@ class UHCSpawnLocation(
 
         val valid = UHCSpreadTeleporter.searchForValidPosition(BlockPos.containing(pos), level)
         if (valid != null) {
-            val centerPos = valid.bottomCenter
+            val centerPos = Vec3.atBottomCenterOf(valid)
             val boundary = level.levelBoundary
             val rotation = if (boundary != null) player.eyePosition.rotationAnglesTowards(boundary.getCenter()) else Vec2.ZERO
             return level.asLocation(centerPos, rotation)
@@ -47,7 +47,7 @@ class UHCSpawnLocation(
             return null
         }
 
-        val respawnPos = respawnData.pos().bottomCenter
+        val respawnPos = Vec3.atBottomCenterOf(respawnData.pos())
         val boundary = level.levelBoundary ?: return level.asLocation(respawnPos)
         if (boundary.contains(respawnPos)) {
             return level.asLocation(respawnPos)

@@ -40,8 +40,8 @@ import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.level.resetToDefault
 import net.casual.arcade.utils.level.set
 import net.casual.arcade.utils.player.*
+import net.casual.arcade.utils.registries.toKey
 import net.casual.arcade.utils.time.MinecraftTimeDuration
-import net.casual.arcade.utils.toKey
 import net.casual.arcade.visuals.tab.PlayerListDisplay
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.minigame.rules.MinigameRulesProvider

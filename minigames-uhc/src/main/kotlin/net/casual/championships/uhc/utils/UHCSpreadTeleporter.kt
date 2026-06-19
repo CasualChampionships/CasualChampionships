@@ -7,10 +7,10 @@ import net.casual.arcade.minigame.template.teleporter.EntityTeleporter
 import net.casual.arcade.minigame.template.teleporter.ShapedTeleporter
 import net.casual.arcade.utils.BlockPosUtils
 import net.casual.arcade.utils.StructureUtils
-import net.casual.arcade.utils.isOf
 import net.casual.arcade.utils.level.isOceanOrRiver
 import net.casual.arcade.utils.math.location.LocationWithLevel
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
+import net.casual.arcade.utils.registries.isOf
 import net.casual.arcade.visuals.shapes.ShapePoints.Companion.points
 import net.casual.arcade.visuals.shapes.impl.LevelSurfaceShape
 import net.casual.arcade.visuals.shapes.impl.RegularPolygonShape
@@ -22,6 +22,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.tags.BiomeTags
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.SpawnPlacementTypes
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
@@ -43,7 +44,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
         val positions = BlockPosUtils.dispersed(origin, 20, 100, 8, Direction.Axis.Y)
         for (position in positions) {
             val adjusted = getTopNonCollidingPos(level, position)
-            if (adjusted == null || (boundary != null && !boundary.contains(adjusted.center))) {
+            if (adjusted == null || (boundary != null && !boundary.contains(Vec3.atCenterOf(adjusted)))) {
                 continue
             }
             return adjusted
@@ -56,7 +57,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
         val origin = BlockPos.containing(location.position)
         val valid = searchForValidPosition(origin, level)
         if (valid != null) {
-            super.teleportTeam(team, entities, level.asLocation(valid.center, location.rotation))
+            super.teleportTeam(team, entities, level.asLocation(Vec3.atCenterOf(valid), location.rotation))
             return
         }
 
@@ -71,7 +72,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
 
         spawn.placeInWorld(level, corner, corner, settings, level.random, Block.UPDATE_CLIENTS)
 
-        super.teleportTeam(team, entities, level.asLocation(origin.center, location.rotation))
+        super.teleportTeam(team, entities, level.asLocation(Vec3.atCenterOf(origin), location.rotation))
     }
 
     override fun createShape(level: ServerLevel, points: Int): Iterator<Vec3> {
@@ -102,7 +103,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
         }
 
         val adjusted = SpawnPlacementTypes.ON_GROUND.adjustSpawnPosition(level, pos.immutable())
-        if (SpawnPlacementTypes.ON_GROUND.isSpawnPositionOk(level, adjusted, EntityType.PLAYER)) {
+        if (SpawnPlacementTypes.ON_GROUND.isSpawnPositionOk(level, adjusted, EntityTypes.PLAYER)) {
             return adjusted
         }
         return null
@@ -132,7 +133,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
                 // We have no other option...
                 return point
             }
-            return pair.first.center
+            return Vec3.atCenterOf(pair.first)
         }
     }
 }

@@ -8,7 +8,7 @@ import net.minecraft.world.item.component.ItemContainerContents
 
 object TMCStarterPack {
     fun create(): ItemStack {
-        val shulker = ItemStack(Items.RED_SHULKER_BOX)
+        val shulker = ItemStack(Items.DYED_SHULKER_BOX.red)
         shulker.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(this.contents()))
         shulker.named("TMC Starter Pack", italicized = true)
         return shulker
@@ -21,8 +21,8 @@ object TMCStarterPack {
             ItemStack(Items.REDSTONE_TORCH, 64),
             ItemStack(Items.DISPENSER, 64),
             ItemStack(Items.TARGET, 64),
-            ItemStack(Items.WHITE_CONCRETE, 64),
-            ItemStack(Items.WHITE_GLAZED_TERRACOTTA, 64),
+            ItemStack(Items.CONCRETE.white, 64),
+            ItemStack(Items.GLAZED_TERRACOTTA.white, 64),
             ItemStack(Items.IRON_TRAPDOOR, 64),
             ItemStack(Items.TRIPWIRE_HOOK, 64),
             ItemStack(Items.STICKY_PISTON, 64),
@@ -38,7 +38,7 @@ object TMCStarterPack {
             ItemStack(Items.HONEY_BLOCK, 64),
             ItemStack(Items.REPEATER, 64),
             ItemStack(Items.TRAPPED_CHEST, 64),
-            ItemStack(Items.WAXED_COPPER_BULB, 64),
+            ItemStack(Items.COPPER_BULB.waxed.unaffected, 64),
             ItemStack(Items.DETECTOR_RAIL, 64),
             ItemStack(Items.POWERED_RAIL, 64),
             ItemStack(Items.LEVER, 64),

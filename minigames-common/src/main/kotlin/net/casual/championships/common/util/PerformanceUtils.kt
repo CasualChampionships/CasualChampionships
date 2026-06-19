@@ -5,7 +5,7 @@ import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.entity.EntityStartTrackingEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.championships.common.util.level.ReducedMobSpawningRules
-import net.minecraft.world.entity.EntityType.*
+import net.minecraft.world.entity.EntityTypes.*
 import net.minecraft.world.entity.Mob
 
 object PerformanceUtils {

@@ -35,7 +35,6 @@ import net.casual.arcade.resources.utils.withMiniShiftedDownFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.ComponentUtils
-import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.MathUtils.component1
 import net.casual.arcade.utils.MathUtils.component2
@@ -50,12 +49,11 @@ import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.entity.setVelocityAndMark
 import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.impl.Sound
-import net.casual.arcade.utils.isOf
-import net.casual.arcade.utils.level.isOf
 import net.casual.arcade.utils.math.location.Location.Companion.withRotation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.player.*
+import net.casual.arcade.utils.registries.isOf
 import net.casual.arcade.utils.scoreboard.color
 import net.casual.arcade.utils.scoreboard.getOnlineCount
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
@@ -411,7 +409,7 @@ class UHCMinigame(
         player.lastDeathLocation.ifPresent { pos ->
             val level = player.server.getLevel(pos.dimension)
             if (level != null && this.levels.has(level)) {
-                val location = pos.pos.center.withRotation(player.rotationVector).with(level)
+                val location = Vec3.atCenterOf(pos.pos).withRotation(player.rotationVector).with(level)
                 player.teleportTo(location)
             }
         }
@@ -486,7 +484,7 @@ class UHCMinigame(
     private fun onBlockMined(event: PlayerBlockMinedEvent) {
         val (player, _, state, _) = event
         if (this.settings.bloodDiamonds) {
-            if (state.isOf(BlockTags.DIAMOND_ORES)) {
+            if (state.isOf(ConventionalBlockTags.DIAMOND_ORES)) {
                 player.hurtServer(player.level(), player.damageSources().magic(), 1.0F)
             }
         }

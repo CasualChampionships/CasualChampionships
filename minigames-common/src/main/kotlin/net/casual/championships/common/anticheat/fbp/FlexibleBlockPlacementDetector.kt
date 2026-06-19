@@ -1,15 +1,14 @@
 package net.casual.championships.common.anticheat.fbp
 
-import me.lucko.fabric.api.permissions.v0.Permissions
 import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.level.LevelBlockChangedEvent
 import net.casual.arcade.events.server.player.PlayerBlockPlacedEvent
-import net.casual.arcade.utils.ItemUtils.isOf
-import net.casual.arcade.utils.level.isOf
+import net.casual.arcade.utils.registries.isOf
 import net.casual.championships.common.anticheat.AntiCheatType
 import net.casual.championships.common.anticheat.fbp.WorldBlockTrackerExtension.Companion.blockTracker
 import net.casual.championships.common.event.PlayerCheatEvent
+import net.casual.championships.common.util.casual
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
@@ -19,6 +18,7 @@ import net.minecraft.tags.BlockTags
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.PlaceOnWaterBlockItem
 import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.shapes.CollisionContext
 
@@ -43,7 +43,7 @@ object FlexibleBlockPlacementDetector {
     }
 
     private fun detectFlexibleBlockPlacement(player: ServerPlayer, context: BlockPlaceContext): Boolean {
-        if (Permissions.check(player, "casual.fbp", PermissionLevel.OWNERS)) {
+        if (player.checkPermission(casual("fbp"), PermissionLevel.OWNERS)) {
             return false
         }
 
