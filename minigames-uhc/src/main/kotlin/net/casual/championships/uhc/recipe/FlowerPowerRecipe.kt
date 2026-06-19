@@ -6,7 +6,6 @@ import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.item.UHCItems
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags
 import net.minecraft.core.RegistryAccess
-import net.minecraft.tags.ItemTags
 import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.crafting.CraftingBookCategory

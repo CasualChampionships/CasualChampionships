@@ -3,6 +3,7 @@ package net.casual.championships.common.mixin.gui;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -12,7 +13,8 @@ public class ChestMenuMixin {
 		method = "threeRows(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;)Lnet/minecraft/world/inventory/ChestMenu;",
 		at = @At(
 			value = "FIELD",
-			target = "Lnet/minecraft/world/inventory/MenuType;GENERIC_9x3:Lnet/minecraft/world/inventory/MenuType;"
+			target = "Lnet/minecraft/world/inventory/MenuType;GENERIC_9x3:Lnet/minecraft/world/inventory/MenuType;",
+			opcode = Opcodes.GETSTATIC
 		)
 	)
 	private static MenuType<?> get9x3MenuType(MenuType<ChestMenu> original) {

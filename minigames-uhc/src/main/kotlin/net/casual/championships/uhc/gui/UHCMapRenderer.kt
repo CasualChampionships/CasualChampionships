@@ -244,18 +244,18 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
                 var height = chunk.getHeight(Heightmap.Types.WORLD_SURFACE,pos.x and 15, pos.z and 15)
                 var state: BlockState
                 do {
-                    pos.setY(--height)
+                    pos.y = --height
                     state = chunk.getBlockState(pos)
                 } while (state.getMapColor(level, pos) == MapColor.NONE && height > level.minY)
 
                 canvas.set(x, y, state.getMapColor(level, pos), MapColor.Brightness.NORMAL)
                 dy += step
-                pos.setZ(from.z + Mth.floor(dy))
+                pos.z = from.z + Mth.floor(dy)
             }
             dx += step
             dy = 0.0
-            pos.setX(from.x + Mth.floor(dx))
-            pos.setZ(from.z)
+            pos.x = from.x + Mth.floor(dx)
+            pos.z = from.z
         }
         return canvas
     }

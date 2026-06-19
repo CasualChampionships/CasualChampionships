@@ -1,10 +1,11 @@
 package net.casual.championships.lobby.minigame
 
-import eu.pb4.sgui.api.SguiUtils
-import eu.pb4.sgui.api.gui.HotbarGui
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerTickEvent
+import net.casual.arcade.guis.inventory.VirtualInventory
+import net.casual.arcade.guis.utils.removeCustomInventory
+import net.casual.arcade.guis.utils.setCustomInventory
 import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
@@ -42,14 +43,12 @@ class LobbyParkour(
             if (!isParkouring) {
                 if (wasParkouring) {
                     this.parkourers.removeInt(player.uuid)
-                    val gui = SguiUtils.getCurrentGui(player) as? ParkourHotbarGui
-                    gui?.close()
+                    player.removeCustomInventory()
                 }
                 continue
             }
-
-            if (SguiUtils.getCurrentGui(player) == null) {
-                ParkourHotbarGui(player, data.exit).open()
+            if (!wasParkouring) {
+                player.setCustomInventory(ParkourHotbarInventory(player, data.exit))
             }
 
             val currentCheckpointIndex = this.parkourers.getInt(player.uuid)
@@ -81,14 +80,15 @@ class LobbyParkour(
         return observer.closerThan(observee, 5.0)
     }
 
-    private class ParkourHotbarGui(
+    private class ParkourHotbarInventory(
         player: ServerPlayer,
         private val exit: Location
-    ): HotbarGui(player) {
-        override fun onOpen() {
+    ): VirtualInventory(player) {
+        init {
             val barrier = Items.BARRIER.named(Component.translatable("lobby.parkour.exit").bold().red()).hideTooltip()
             this.setSlot(8, barrier) { _ ->
                 this.player.teleportTo(this.exit)
+                true
             }
         }
     }

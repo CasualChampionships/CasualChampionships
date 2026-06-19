@@ -17,7 +17,6 @@ import net.casual.championships.CasualChampionships
 import net.casual.championships.common.CasualCommon
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.uhc.CasualUHC
-import net.minecraft.ChatFormatting
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.TeamColor
 import java.util.Optional

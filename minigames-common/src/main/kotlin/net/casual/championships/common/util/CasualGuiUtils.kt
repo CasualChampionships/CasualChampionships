@@ -2,7 +2,7 @@ package net.casual.championships.common.util
 
 import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
-import net.casual.arcade.guis.sgui.PlayerInventoryViewGui
+import net.casual.arcade.guis.presets.PlayerInventoryViewGui
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.events.MinigameAddPlayerEvent
 import net.casual.arcade.minigame.events.MinigamePauseEvent
@@ -136,7 +136,7 @@ object CasualGuiUtils {
         }
 
         val spectatorAndAdmins = SpectatorAndAdminTeamsComponentElement(minigame).cached()
-        @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") 
+        @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
         val footer = spectatorAndAdmins.merge<_, Component>(baseFooter) { a, b ->
             a.map { Component.empty().append(it).append("\n\n") }.orElse(Component.empty()).append(b)
         }

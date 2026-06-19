@@ -1,23 +1,21 @@
 package net.casual.championships.common.ui.minesweeper
 
-import eu.pb4.sgui.api.ClickType
-import eu.pb4.sgui.api.elements.GuiElement
-import eu.pb4.sgui.api.elements.SimpleGuiElement
-import eu.pb4.sgui.api.gui.SimpleGui
 import it.unimi.dsi.fastutil.ints.IntArraySet
 import it.unimi.dsi.fastutil.ints.IntSet
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
+import net.casual.arcade.guis.core.container.ContainerGui
+import net.casual.arcade.guis.utils.ContainerType
+import net.casual.arcade.guis.utils.SlotClickAction
+import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.utils.component.Component
+import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.component.white
 import net.casual.championships.common.event.MinesweeperWonEvent
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.util.CasualComponents
-import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
-import net.minecraft.world.inventory.ContainerInput
-import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import java.util.*
@@ -26,7 +24,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 
 class MinesweeperGui(
     player: ServerPlayer
-): SimpleGui(MenuType.GENERIC_9x6, player, true) {
+): ContainerGui(player, ContainerType.Generic9x6, true) {
     private val guessed = IntArraySet()
     private val flags = IntArraySet()
     private val grid = Grid(9, 9)
@@ -35,49 +33,46 @@ class MinesweeperGui(
     private var complete = false
 
     init {
+        this.setTitle(Component {
+            empty() + spaced(-8.0F) + CasualComponents.Gui.MINESWEEPER_MENU.copy().white()
+        })
+
         this.flagItem.count = Grid.MINE_COUNT
         for (i in 0..80) {
             this.setSlot(i, UNKNOWN_TILE)
         }
 
-        this.setSlot(81, SimpleGuiElement(EXIT_TILE) { _, _, _, gui -> gui.close() })
+        this.setSlot(81, EXIT_TILE) { this.close() }
         this.setSlot(82, DESC_TILE_1)
         this.setSlot(83, DESC_TILE_2)
         this.setSlot(84, DESC_TILE_3)
         this.setSlot(85, DESC_TILE_4)
         this.setSlot(87, this.flagItem)
         this.setSlot(88, this.clockItem)
-        this.setSlot(89, SimpleGuiElement(PLAY_AGAIN_TILE) { _, _, _, gui -> MinesweeperGui(gui.player).open() })
-
-        this.title = Component.empty().append(SpacingFontResources.spaced(-8))
-            .append(CasualComponents.Gui.MINESWEEPER_MENU.copy().white())
+        this.setSlot(89, PLAY_AGAIN_TILE) { MinesweeperGui(this.player).open() }
     }
 
-    override fun onTick() {
+    override fun tick() {
+        super.tick()
+
         if (this.grid.startTime != 0L && !this.complete) {
             val seconds = floor((System.nanoTime() - this.grid.startTime) / 1000000000.0).toInt()
             this.clockItem.count = Mth.clamp(seconds, 1, 127)
         }
     }
 
-    override fun onClick(
-        slotId: Int,
-        type: ClickType,
-        action: ContainerInput,
-        element: GuiElement?
-    ): Boolean {
-        if (slotId >= 0 && slotId < this.grid.capacity) {
-            if (action != ContainerInput.PICKUP || this.complete) {
-                return false
+    override fun click(slot: Int, action: SlotClickAction) {
+        if (slot >= 0 && slot < this.grid.capacity) {
+            if (this.complete) {
+                return
             }
-            if (type.isLeft && !this.flags.contains(slotId)) {
-                leftClickTile(slotId, player)
+            if (action.isLeft && !this.flags.contains(slot)) {
+                this.leftClickTile(slot, player)
             }
-            if (type.isRight) {
-                rightClickTile(slotId)
+            if (action.isRight) {
+                this.rightClickTile(slot)
             }
         }
-        return false
     }
 
     private fun leftClickTile(index: Int, player: ServerPlayer) {
@@ -180,7 +175,7 @@ class MinesweeperGui(
                 if (index != first && !isMine(index)) {
                     setMine(index)
                     // Super jank way of checking but it works :P
-                    if (countMines(first) > 0) {
+                    if (this.countMines(first) > 0) {
                         this.tiles[index] = 0
                         continue
                     }
@@ -188,18 +183,20 @@ class MinesweeperGui(
                 }
             }
             for (i in 0 until this.capacity) {
-                this.tiles[i] = countMines(i)
+                this.tiles[i] = this.countMines(i)
             }
         }
 
         private fun countMines(index: Int): Int {
             // If it's a mine we ignore; we don't count the mines.
-            if (isMine(index)) {
+            if (this.isMine(index)) {
                 return -1
             }
             var mines = 0
-            for (surrounding in this.getSurroundingIndices(index).iterator()) {
-                if (isMine(surrounding)) {
+            val iterator = this.getSurroundingIndices(index).iterator()
+            while (iterator.hasNext()) {
+                val surrounding = iterator.nextInt()
+                if (this.isMine(surrounding)) {
                     mines++
                 }
             }
@@ -246,7 +243,7 @@ class MinesweeperGui(
         }
 
         private fun setMine(index: Int) {
-            tiles[index] = -1
+            this.tiles[index] = -1
         }
 
         companion object {

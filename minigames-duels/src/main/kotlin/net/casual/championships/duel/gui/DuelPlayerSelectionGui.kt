@@ -1,39 +1,40 @@
 package net.casual.championships.duel.gui
 
-import net.casual.arcade.guis.sgui.setSlot
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
+import net.casual.arcade.guis.utils.ContainerType
+import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
+import net.casual.arcade.utils.component.Component
+import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.component.white
 import net.casual.arcade.utils.component.yellow
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
-import net.casual.championships.common.ui.CasualSimpleGui
+import net.casual.championships.common.ui.CasualContainerGui
 import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.inventory.MenuType
 
 class DuelPlayerSelectionGui(
     player: ServerPlayer,
     private val configuration: DuelConfigurationGui
-): CasualSimpleGui(MenuType.GENERIC_9x6, player, true) {
+): CasualContainerGui(ContainerType.Generic9x6, player, true) {
     private var page = 0
 
     init {
+        this.setTitle(Component {
+            empty() + spaced(-8.0F) + CasualComponents.Gui.PLAYER_SELECTOR.copy().white()
+        })
+
         this.setParent(this.configuration)
 
-        this.setSlot(58, CasualGuiItems.RED_BACK.hideTooltip()) { ->
+        this.setSlot(58, CasualGuiItems.RED_BACK.hideTooltip()) {
             this.openParentOrClose()
         }
 
         this.loadPlayers()
-
-        this.title = Component.empty()
-            .append(SpacingFontResources.spaced(-8))
-            .append(CasualComponents.Gui.PLAYER_SELECTOR.copy().white())
     }
 
     private fun loadPlayers() {
@@ -63,7 +64,7 @@ class DuelPlayerSelectionGui(
                 this.setSlot(slot - 9, CasualGuiItems.GREEN_HIGHLIGHT.hideTooltip())
             }
             val name = Component.literal(player.scoreboardName).yellow().withMiniFont()
-            this.setSlot(slot, head.named(name)) { _, _, _, _ ->
+            this.setSlot(slot, head.named(name)) {
                 if (this.configuration.toggleSelection(player.uuid)) {
                     this.setSlot(slot - 9, CasualGuiItems.GREEN_HIGHLIGHT.hideTooltip())
                 } else {
@@ -78,7 +79,7 @@ class DuelPlayerSelectionGui(
         }
 
         if (this.page != 0) {
-            this.setSlot(57, CasualGuiItems.RED_LEFT.hideTooltip()) { ->
+            this.setSlot(57, CasualGuiItems.RED_LEFT.hideTooltip()) {
                 this.page -= 1
                 this.loadPlayers()
             }
@@ -86,7 +87,7 @@ class DuelPlayerSelectionGui(
             this.setSlot(57, CasualGuiItems.GREY_RED_LEFT.hideTooltip())
         }
         if ((this.page + 1) * 12 < players.size - 1) {
-            this.setSlot(59, CasualGuiItems.RED_RIGHT.hideTooltip()) { ->
+            this.setSlot(59, CasualGuiItems.RED_RIGHT.hideTooltip()) {
                 this.page += 1
                 this.loadPlayers()
             }

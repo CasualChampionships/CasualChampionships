@@ -10,7 +10,6 @@ import net.casual.arcade.utils.ComponentUtils.translatable
 import net.casual.arcade.utils.ComponentUtils.translatableWithArgs
 import net.casual.arcade.utils.component.crimson
 import net.casual.arcade.utils.component.join
-import net.casual.arcade.utils.component.joinToComponent
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.component.shadowless
 import net.casual.arcade.utils.component.white

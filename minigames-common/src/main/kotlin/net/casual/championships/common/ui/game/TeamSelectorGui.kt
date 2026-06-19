@@ -1,33 +1,33 @@
 package net.casual.championships.common.ui.game
 
-import net.casual.arcade.guis.sgui.setSlot
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
+import net.casual.arcade.guis.utils.ContainerType
+import net.casual.arcade.resources.utils.spaced
 import net.casual.arcade.utils.ItemUtils.hideTooltip
+import net.casual.arcade.utils.component.Component
+import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.component.white
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.championships.common.items.CasualGuiItems
-import net.casual.championships.common.ui.CasualSimpleGui
+import net.casual.championships.common.ui.CasualContainerGui
 import net.casual.championships.common.util.CasualComponents
-import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.scores.PlayerTeam
 
 class TeamSelectorGui(
     player: ServerPlayer,
     selections: List<Selection>
-): CasualSimpleGui(MenuType.GENERIC_9x6, player, true) {
+): CasualContainerGui(ContainerType.Generic9x6, player, true) {
     init {
-        this.title = Component.empty()
-            .append(SpacingFontResources.spaced(-8))
-            .append(CasualComponents.Gui.TEAM_SELECTOR.copy().white())
+        this.setTitle(Component {
+            empty() + spaced(-8.0F) + CasualComponents.Gui.TEAM_SELECTOR.copy().white()
+        })
 
         var row = 1
         var column = 1
         for (selection in selections.take(12)) {
             val slot = row * 9 + column
-            this.setSlot(slot, selection.display) { ->
+            this.setSlot(slot, selection.display) {
                 val profiles = selection.team.getOnlinePlayers().map(ServerPlayer::getGameProfile)
                 val gui = PlayerSelectorGui(this.player, profiles)
                 gui.setParent(this)
@@ -40,7 +40,7 @@ class TeamSelectorGui(
             }
         }
 
-        this.setSlot(58, CasualGuiItems.RED_BACK.hideTooltip()) { ->
+        this.setSlot(58, CasualGuiItems.RED_BACK.hideTooltip()) {
             this.close()
         }
     }
