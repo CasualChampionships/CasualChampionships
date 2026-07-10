@@ -1,6 +1,6 @@
 package net.casual.championships.uhc.advancement
 
-import net.casual.arcade.events.BuiltInEventPhases
+import net.casual.arcade.events.phase.BuiltInEventPhases
 import net.casual.arcade.events.server.entity.EntityDeathEvent
 import net.casual.arcade.events.server.player.*
 import net.casual.arcade.minigame.annotation.During

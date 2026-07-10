@@ -4,7 +4,7 @@ import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.dimensions.utils.deleteCustomLevel
-import net.casual.arcade.events.BuiltInEventPhases
+import net.casual.arcade.events.phase.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.block.BlockDropLootEvent
 import net.casual.arcade.events.server.block.BrewingStandBrewEvent

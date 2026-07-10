@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile
 import com.mojang.serialization.DataResult
 import net.casual.arcade.events.ListenerRegistry
 import net.casual.arcade.events.ListenerRegistry.Companion.register
+import net.casual.arcade.events.common.ServerSideEvent
 import net.casual.arcade.events.server.ServerSaveEvent
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.player.PlayerChatEvent
@@ -159,7 +160,7 @@ class CasualMinigameManager(
         this.createTeams(this.current.server)
     }
 
-    internal fun registerEvents(registry: ListenerRegistry) {
+    internal fun registerEvents(registry: ListenerRegistry<ServerSideEvent>) {
         registry.register<PlayerRequestLoginEvent>(::onPlayerRequestLogin)
         registry.register<MinigameInitializeEvent>(::onMinigameInitialize)
         registry.register<PlayerJoinEvent>(phase = PlayerJoinEvent.PHASE_INITIALIZED, listener = ::onPlayerJoinEarly)

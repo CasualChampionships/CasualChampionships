@@ -11,4 +11,4 @@ data class EntityPortalEntryPositionEvent(
     override val level: ServerLevel,
     val entity: Entity,
     val pos: Vec3
-): CancellableEvent.Typed<BlockPos>(), LevelEvent
+): CancellableEvent.WithResult<BlockPos>(), LevelEvent
