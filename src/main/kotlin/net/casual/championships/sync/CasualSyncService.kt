@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTime::class)
-
 package net.casual.championships.sync
 
 import net.casual.arcade.minigame.Minigame
@@ -9,7 +7,6 @@ import net.casual.championships.sync.data.SyncableParticipants
 import net.casual.championships.sync.data.SyncablePlayer
 import net.casual.championships.sync.data.SyncableTeam
 import net.casual.championships.uhc.minigame.UHCMinigame
-import kotlin.time.ExperimentalTime
 
 suspend fun CasualSyncService.syncMinigame(minigame: Minigame): Boolean {
     val syncer = when (minigame) {

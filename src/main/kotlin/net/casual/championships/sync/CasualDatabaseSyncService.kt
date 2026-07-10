@@ -21,10 +21,10 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.dao.IntEntityClass
 import java.util.*
 import kotlin.jvm.optionals.getOrNull
-import kotlin.time.ExperimentalTime
 import net.casual.database.Minigame as DatabaseMinigame
 
 class CasualDatabaseSyncService(
@@ -173,7 +173,6 @@ class CasualDatabaseSyncService(
         }
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun getOrCreateMinigame(minigame: SyncableMinigame): DatabaseMinigame {
         val databaseMinigame = DatabaseMinigame.findById(minigame.uuid)
         if (databaseMinigame != null) {
