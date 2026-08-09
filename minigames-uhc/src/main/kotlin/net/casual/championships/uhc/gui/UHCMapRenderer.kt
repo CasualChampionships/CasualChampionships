@@ -273,12 +273,12 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
             for (y in 0..< 128) {
                 canvas.set(x, y, this.biomeToCanvasColor(level.getBiome(pos), pos))
                 dy += step
-                pos.setZ(from.z + Mth.floor(dy))
+                pos.z = from.z + Mth.floor(dy)
             }
             dx += step
             dy = 0.0
-            pos.setX(from.x + Mth.floor(dx))
-            pos.setZ(from.z)
+            pos.x = from.x + Mth.floor(dx)
+            pos.z = from.z
         }
         return canvas
     }

@@ -49,9 +49,9 @@ import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.entity.setVelocityAndMark
 import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.impl.Sound
-import net.casual.arcade.utils.math.location.Location.Companion.withRotation
-import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
-import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
+import net.casual.arcade.utils.math.location.asLocation
+import net.casual.arcade.utils.math.location.locationWithLevel
+import net.casual.arcade.utils.math.location.with
 import net.casual.arcade.utils.player.*
 import net.casual.arcade.utils.registries.isOf
 import net.casual.arcade.utils.scoreboard.color
@@ -405,7 +405,7 @@ class UHCMinigame(
         player.lastDeathLocation.ifPresent { pos ->
             val level = player.server.getLevel(pos.dimension)
             if (level != null && this.levels.has(level)) {
-                val location = Vec3.atCenterOf(pos.pos).withRotation(player.rotationVector).with(level)
+                val location = Vec3.atCenterOf(pos.pos).with(player.rotationVector).with(level)
                 player.teleportTo(location)
             }
         }
@@ -963,6 +963,7 @@ class UHCMinigame(
 
         val mode = this.chat.getChatModeFor(player)
         player.connection.send(ClientboundSetActionBarTextPacket(
+            @Suppress("DEPRECATION")
             Component.empty().apply {
                 append(SpacingFontResources.spaced(26))
                 append(SpacingFontResources.spaced(shift * 6))

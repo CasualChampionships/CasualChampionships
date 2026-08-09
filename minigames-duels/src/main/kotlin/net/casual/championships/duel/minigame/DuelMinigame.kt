@@ -32,7 +32,7 @@ import net.casual.arcade.utils.component.bold
 import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.suggestCommand
 import net.casual.arcade.utils.entity.teleportTo
-import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
+import net.casual.arcade.utils.math.location.asLocation
 import net.casual.arcade.utils.player.clearPlayerInventory
 import net.casual.arcade.utils.player.resetHealth
 import net.casual.arcade.utils.player.server
@@ -168,7 +168,7 @@ class DuelMinigame(
     @Listener
     private fun onPlayerTryHarm(event: PlayerTryHarmEvent) {
          if (!this.duelSettings.teams) {
-             event.canHarmOtherBoolean = true
+             event.canHarmOtherPlayer = true
          }
     }
 

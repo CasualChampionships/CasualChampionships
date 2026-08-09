@@ -32,7 +32,7 @@ abstract class BossbarCountdownRoutine<M: Minigame>(
 
     protected companion object {
         fun <R: BossbarCountdownRoutine<*>> codec(factory: (MinecraftTimeDuration) -> R): MapCodec<R> {
-            return MinecraftTimeDuration.Companion.CODEC.fieldOf("duration").xmap(factory, BossbarCountdownRoutine<*>::duration)
+            return MinecraftTimeDuration.CODEC.fieldOf("duration").xmap(factory, BossbarCountdownRoutine<*>::duration)
         }
     }
 }

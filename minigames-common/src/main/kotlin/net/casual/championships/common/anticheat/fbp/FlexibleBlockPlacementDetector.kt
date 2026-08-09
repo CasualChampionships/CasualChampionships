@@ -1,9 +1,9 @@
 package net.casual.championships.common.anticheat.fbp
 
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.level.LevelBlockChangedEvent
 import net.casual.arcade.events.server.player.PlayerBlockPlacedEvent
+import net.casual.arcade.events.utils.register
 import net.casual.arcade.utils.registries.isOf
 import net.casual.championships.common.anticheat.AntiCheatType
 import net.casual.championships.common.anticheat.fbp.WorldBlockTrackerExtension.Companion.blockTracker

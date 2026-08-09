@@ -9,7 +9,7 @@ import net.casual.arcade.utils.BlockPosUtils
 import net.casual.arcade.utils.StructureUtils
 import net.casual.arcade.utils.level.isOceanOrRiver
 import net.casual.arcade.utils.math.location.LocationWithLevel
-import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
+import net.casual.arcade.utils.math.location.asLocation
 import net.casual.arcade.utils.registries.isOf
 import net.casual.arcade.utils.shapes.ShapePoints.Companion.points
 import net.casual.arcade.utils.shapes.impl.LevelSurfaceShape
@@ -75,7 +75,7 @@ object UHCSpreadTeleporter: ShapedTeleporter() {
     }
 
     override fun createShape(level: ServerLevel, points: Int): Iterator<Vec3> {
-        val border = level.levelBoundary ?: throw IllegalStateException("No level boundary!")
+        val border = checkNotNull(level.levelBoundary) { "No level boundary" }
         val center = Vec3(border.getCenter().x, level.seaLevel + 1.0, border.getCenter().z)
         val polygon = RegularPolygonShape.createHorizontal(center, border.getSize().x * 0.45, points)
         return LevelSurfaceShape(level) { steps ->

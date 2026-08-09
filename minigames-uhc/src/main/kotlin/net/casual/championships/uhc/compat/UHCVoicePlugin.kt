@@ -8,10 +8,10 @@ import de.maxhenkel.voicechat.api.events.EventRegistration
 import de.maxhenkel.voicechat.api.events.PlayerConnectedEvent
 import net.casual.arcade.commands.*
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.player.PlayerEvent
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
 import net.casual.arcade.events.server.player.PlayerTeamLeaveEvent
+import net.casual.arcade.events.utils.register
 import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.championships.uhc.CasualUHC

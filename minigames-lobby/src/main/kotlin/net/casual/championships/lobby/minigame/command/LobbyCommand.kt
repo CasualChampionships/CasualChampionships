@@ -6,14 +6,19 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
-import net.casual.arcade.commands.*
+import net.casual.arcade.commands.CommandTree
+import net.casual.arcade.commands.argument
 import net.casual.arcade.commands.arguments.EnumArgument
-import net.casual.arcade.commands.hidden.HiddenCommandContext
+import net.casual.arcade.commands.fail
+import net.casual.arcade.commands.literal
+import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyPlayers
 import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyTeams
 import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
 import net.casual.arcade.utils.component.Component
+import net.casual.arcade.utils.component.event.ClickEventCallback
+import net.casual.arcade.utils.component.function
 import net.casual.arcade.utils.component.green
 import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.coroutine.launch
@@ -23,7 +28,9 @@ import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.casual.championships.lobby.minigame.LobbyPhase
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
+import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
 
 class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
@@ -116,25 +123,25 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
 
     private fun onSuccessfullyReady() {
         val component = Component {
-            literal("[Click To Run Rules]").green().singleUseFunction(::playRulesThenCountdown) + nl +
-                literal("[Click to Skip Rules]").green().singleUseFunction(::skipRulesThenCountdown)
+            literal("[Click To Run Rules]").green().function { playRulesThenCountdown() } + nl +
+                literal("[Click to Skip Rules]").green().function { skipRulesThenCountdown() }
         }
         val admins = ObjectOpenHashSet(this.lobby.players.admins)
         admins.addAll(this.lobby.players.ops())
         this.lobby.chat.broadcastTo(component, admins)
     }
 
-    @Suppress("unused_parameter")
-    private fun playRulesThenCountdown(context: HiddenCommandContext) {
+    private fun playRulesThenCountdown(): ClickEventCallback.Result {
         this.lobby.launchPhased {
             lobby.playRulesForNextMinigame()
             lobby.setPhase(LobbyPhase.Countdown)
         }
+        return ClickEventCallback.Result.Consume
     }
 
-    @Suppress("unused_parameter")
-    private fun skipRulesThenCountdown(context: HiddenCommandContext) {
+    private fun skipRulesThenCountdown(): ClickEventCallback.Result {
         this.lobby.setPhase(LobbyPhase.Countdown)
+        return ClickEventCallback.Result.Consume
     }
 
     companion object {

@@ -5,7 +5,7 @@ import com.mojang.brigadier.context.CommandContext
 import net.casual.arcade.commands.CommandTree
 import net.casual.arcade.commands.literal
 import net.casual.arcade.commands.success
-import net.casual.arcade.events.ListenerRegistry.Companion.register
+import net.casual.arcade.events.utils.register
 import net.casual.arcade.minigame.events.MinigameCloseEvent
 import net.casual.arcade.utils.player.username
 import net.casual.championships.duel.minigame.DuelMinigame

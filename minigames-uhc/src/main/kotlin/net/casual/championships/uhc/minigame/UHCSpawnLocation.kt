@@ -4,7 +4,7 @@ import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.utils.MathUtils.rotationAnglesTowards
 import net.casual.arcade.utils.math.location.LocationWithLevel
-import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
+import net.casual.arcade.utils.math.location.asLocation
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction

@@ -1,7 +1,7 @@
 package net.casual.championships.common.items.minigame
 
-import net.casual.arcade.utils.ItemUtils.isOf
 import net.casual.arcade.utils.player.StaticResolvableProfile
+import net.casual.arcade.utils.registries.isOf
 import net.casual.championships.common.items.CasualItems
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component

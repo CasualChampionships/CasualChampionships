@@ -3,9 +3,10 @@ package net.casual.championships.common.util
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
-import net.casual.arcade.commands.function
 import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.Minigame
+import net.casual.arcade.utils.component.event.ClickEventCallback
+import net.casual.arcade.utils.component.function
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.minecraft.commands.CommandSourceStack
@@ -64,8 +65,9 @@ object CasualCommands {
         }
 
         val position = player.position()
-        val location = Component.literal("[%.0f, %.0f, %.0f]".format(position.x, position.y, position.z)).lime().function {
-            it.player.lookAt(EntityAnchorArgument.Anchor.EYES, position)
+        val location = Component.literal("[%.0f, %.0f, %.0f]".format(position.x, position.y, position.z)).lime().function { player ->
+            player.lookAt(EntityAnchorArgument.Anchor.EYES, position)
+            ClickEventCallback.Result.Success
         }
         minigame.chat.broadcastAsPlayerTo(
             player,

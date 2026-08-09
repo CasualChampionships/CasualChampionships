@@ -4,18 +4,25 @@ import com.mojang.brigadier.Command
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import kotlinx.coroutines.async
-import net.casual.arcade.commands.*
+import net.casual.arcade.commands.CommandTree
+import net.casual.arcade.commands.argument
+import net.casual.arcade.commands.fail
+import net.casual.arcade.commands.literal
+import net.casual.arcade.commands.success
+import net.casual.arcade.commands.suggests
 import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.minigame.utils.MinigameUtils.isMinigameAdminOrHasPermission
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.component.command
+import net.casual.arcade.utils.component.event.ClickEventCallback
+import net.casual.arcade.utils.component.function
 import net.casual.arcade.utils.component.green
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.component.red
 import net.casual.arcade.utils.coroutine.launch
 import net.casual.arcade.utils.entity.teleportTo
-import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
+import net.casual.arcade.utils.math.location.locationWithLevel
 import net.casual.arcade.utils.player.grantAdvancement
 import net.casual.arcade.utils.player.server
 import net.casual.arcade.virtual.visuals.ready.ReadyChecker
@@ -108,6 +115,7 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceSt
                 awaiting.cancel()
                 val unready = requester.getAccepted()
                 started = startDuelWith(started, initiator, duelers, unready, requester, settings, true)
+                ClickEventCallback.Result.Success
             }
             requester.broadcastTo(initiator, startAnyways)
         }

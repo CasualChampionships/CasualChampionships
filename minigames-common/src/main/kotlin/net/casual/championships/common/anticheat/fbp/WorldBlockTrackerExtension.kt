@@ -2,8 +2,8 @@ package net.casual.championships.common.anticheat.fbp
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.level.LevelTickEvent
+import net.casual.arcade.events.utils.register
 import net.casual.arcade.extensions.Extension
 import net.casual.arcade.extensions.event.LevelExtensionEvent
 import net.casual.arcade.extensions.utils.getExtension

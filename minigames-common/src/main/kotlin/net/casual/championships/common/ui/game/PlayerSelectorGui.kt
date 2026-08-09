@@ -12,7 +12,7 @@ import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.component.white
 import net.casual.arcade.utils.component.yellow
 import net.casual.arcade.utils.entity.teleportTo
-import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
+import net.casual.arcade.utils.math.location.locationWithLevel
 import net.casual.arcade.utils.player.server
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems

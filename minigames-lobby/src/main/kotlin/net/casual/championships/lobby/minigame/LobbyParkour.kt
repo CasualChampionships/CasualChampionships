@@ -1,8 +1,8 @@
 package net.casual.championships.lobby.minigame
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerTickEvent
+import net.casual.arcade.events.utils.register
 import net.casual.arcade.guis.inventory.VirtualInventory
 import net.casual.arcade.guis.utils.removeCustomInventory
 import net.casual.arcade.guis.utils.setCustomInventory

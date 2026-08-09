@@ -16,9 +16,7 @@ object LobbyStats {
 
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun <T: Any> register(name: String, type: StatType<T>): Holder.Reference<StatType<T>> {
         return Registry.registerForHolder(MinigameRegistries.STAT_TYPES, casual(name), type)
-            as Holder.Reference<StatType<T>>
     }
 }

@@ -2,9 +2,9 @@ package net.casual.championships
 
 import net.casual.arcade.commands.register
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerStartEvent
+import net.casual.arcade.events.utils.register
 import net.casual.arcade.utils.coroutine.launch
 import net.casual.arcade.utils.server.setMessageOfTheDay
 import net.casual.championships.commands.*

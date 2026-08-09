@@ -3,13 +3,13 @@ package net.casual.championships.minigame
 import com.mojang.authlib.GameProfile
 import com.mojang.serialization.DataResult
 import net.casual.arcade.events.ListenerRegistry
-import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.common.ServerSideEvent
 import net.casual.arcade.events.server.ServerSaveEvent
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.player.PlayerChatEvent
 import net.casual.arcade.events.server.player.PlayerJoinEvent
 import net.casual.arcade.events.server.player.PlayerRequestLoginEvent
+import net.casual.arcade.events.utils.register
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.Minigames
 import net.casual.arcade.minigame.events.*
