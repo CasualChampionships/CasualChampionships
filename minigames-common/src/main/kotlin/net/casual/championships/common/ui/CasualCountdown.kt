@@ -6,7 +6,7 @@ import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.player.sendSound
 import net.casual.arcade.utils.player.sendTitle
 import net.casual.arcade.utils.player.setTitleAnimation
-import net.casual.arcade.visuals.transition.TitledCountdown
+import net.casual.arcade.virtual.visuals.transition.TitledCountdown
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualSounds
 import net.minecraft.network.chat.Component

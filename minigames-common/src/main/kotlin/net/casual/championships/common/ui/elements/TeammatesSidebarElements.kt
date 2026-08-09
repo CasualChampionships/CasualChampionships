@@ -11,8 +11,8 @@ import net.casual.arcade.utils.player.isSurvival
 import net.casual.arcade.utils.player.server
 import net.casual.arcade.utils.scoreboard.color
 import net.casual.arcade.utils.server.player
-import net.casual.arcade.visuals.sidebar.SidebarComponent
-import net.casual.arcade.visuals.sidebar.SidebarComponents
+import net.casual.arcade.virtual.visuals.sidebar.SidebarComponent
+import net.casual.arcade.virtual.visuals.sidebar.SidebarComponents
 import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
@@ -26,7 +26,7 @@ class TeammatesSidebarElements(
 ) {
     fun addTeammates(
         player: ServerPlayer,
-        components: SidebarComponents<SidebarComponent>
+        components: SidebarComponents
     ) {
         val teammates = linkedSetOf(player.scoreboardName)
         val team = player.team

@@ -1,16 +1,16 @@
 package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.boundary.LevelBoundary
-import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
+import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.MathUtils.contains
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus
-import net.casual.arcade.visuals.elements.LevelSpecificElement
-import net.casual.arcade.visuals.elements.PlayerSpecificElement
-import net.casual.arcade.visuals.sidebar.SidebarComponent
+import net.casual.arcade.virtual.visuals.elements.LevelSpecificElement
+import net.casual.arcade.virtual.visuals.elements.PlayerSpecificElement
+import net.casual.arcade.virtual.visuals.sidebar.SidebarComponent
 import net.casual.championships.common.util.CasualComponents
 import net.minecraft.ChatFormatting
 import net.minecraft.ChatFormatting.*
@@ -19,7 +19,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.phys.Vec3
-import java.util.EnumSet
+import java.util.*
 
 class BorderStatusElement(private val buffer: Component): LevelSpecificElement<SidebarComponent> {
     override fun get(level: ServerLevel): SidebarComponent {
@@ -84,21 +84,4 @@ class BorderSizeElement(private val buffer: Component): LevelSpecificElement<Sid
         val score = Component.literal(((level.levelBoundary?.getSize()?.x ?: 0.0) / 2.0).toInt().toString()).append(this.buffer)
         return SidebarComponent.withCustomScore(display, score.withMiniFont())
     }
-}
-
-private fun LevelBoundary.getSidebarBoundaryDistance(
-    player: ServerPlayer,
-    axes: EnumSet<Direction.Axis>,
-    buffer: Component,
-    name: Component
-): SidebarComponent {
-    val vectorToBorder = this.getDirectionFrom(player.position(), axes)
-    val multiplier = if (this.contains(player.position())) 1 else -1
-    val distanceToBorder = multiplier * vectorToBorder.length().toInt()
-
-    val percent = distanceToBorder / (this.getSize().x / 2.0)
-    val colour = if (percent > 0.4) DARK_GREEN else if (percent > 0.2) YELLOW else if (percent > 0.1) RED else DARK_RED
-    val display = Component.empty().append(buffer).append(" ").append(name).withMiniFont()
-    val score = Component.literal(distanceToBorder.toString()).append(buffer).withStyle(colour)
-    return SidebarComponent.withCustomScore(display, score.withMiniFont())
 }

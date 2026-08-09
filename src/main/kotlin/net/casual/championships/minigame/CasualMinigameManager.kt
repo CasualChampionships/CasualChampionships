@@ -12,11 +12,7 @@ import net.casual.arcade.events.server.player.PlayerJoinEvent
 import net.casual.arcade.events.server.player.PlayerRequestLoginEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.Minigames
-import net.casual.arcade.minigame.events.MinigameAddAdminEvent
-import net.casual.arcade.minigame.events.MinigameCloseEvent
-import net.casual.arcade.minigame.events.MinigameCompleteEvent
-import net.casual.arcade.minigame.events.MinigameInitializeEvent
-import net.casual.arcade.minigame.events.MinigameStartEvent
+import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.minigame.utils.MinigameResources.Companion.sendTo
@@ -123,7 +119,7 @@ class CasualMinigameManager(
 
             // We need to do this later, because the first minigame
             // may not have fully closed yet...
-            GlobalTickedScheduler.later {
+            GlobalTickedScheduler.Server.later {
                 this.reloadMinigame(this.lobby.server)
             }
         }

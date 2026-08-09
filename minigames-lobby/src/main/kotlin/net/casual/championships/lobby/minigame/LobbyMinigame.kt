@@ -1,6 +1,5 @@
 package net.casual.championships.lobby.minigame
 
-import kotlinx.coroutines.withContext
 import net.casual.arcade.dimensions.level.CustomLevel
 import net.casual.arcade.dimensions.level.LevelPersistence
 import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
@@ -24,25 +23,23 @@ import net.casual.arcade.minigame.managers.MinigameLevelManager.SpawnLocation
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
+import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
 import net.casual.arcade.minigame.utils.MinigameUtils.transferAdminAndSpectatorTeamsTo
 import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
-import net.casual.arcade.scheduler.task.Completable
 import net.casual.arcade.scheduler.task.impl.PlayerTask
-import net.casual.arcade.scheduler.utils.asCoroutineDispatcher
 import net.casual.arcade.utils.IdentifierUtils
 import net.casual.arcade.utils.TimeUtils.Seconds
+import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.chat.ChatFormatter
-import net.casual.arcade.utils.component.shadowless
-import net.casual.arcade.utils.component.wrap
+import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.coroutine.delay
-import net.casual.arcade.utils.coroutine.launch
 import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.level.resetToDefault
 import net.casual.arcade.utils.level.set
 import net.casual.arcade.utils.player.*
 import net.casual.arcade.utils.registries.toKey
-import net.casual.arcade.utils.time.MinecraftTimeDuration
-import net.casual.arcade.visuals.tab.PlayerListDisplay
+import net.casual.arcade.virtual.visuals.tab.DynamicVirtualPlayerList
+import net.casual.arcade.virtual.visuals.utils.elements.timer.TimerElement
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.minigame.rules.MinigameRulesProvider
 import net.casual.championships.common.ui.bossbar.LobbyBossbar
@@ -86,7 +83,8 @@ class LobbyMinigame(
     val duels = LobbyDuels(this)
 
     val level: ServerLevel = this.createLevel()
-    val bossbar = LobbyBossbar()
+    val timer = TimerElement()
+    val bossbar = LobbyBossbar.create(this.server, this.timer)
     val next by next
 
     override val settings: MinigameSettings = CasualSettings(this)
@@ -113,12 +111,10 @@ class LobbyMinigame(
     }
 
     fun startCountdown() {
-        this.server.launch {
-            withContext(scheduler.asPhasedScheduler().asCoroutineDispatcher()) {
-                visuals.countdown.transition(players = players::all)
-                delay(1.Seconds)
-                moveToNextMinigame()
-            }
+        this.launchPhased {
+            visuals.countdown.transition(players = players::all)
+            delay(1.Seconds)
+            moveToNextMinigame()
         }
     }
 
@@ -136,33 +132,26 @@ class LobbyMinigame(
         this.setPhase(LobbyPhase.Waiting)
     }
 
-    fun playRulesForNextMinigame(): Completable {
+    suspend fun playRulesForNextMinigame() {
         val next = this.next
         if (next !is MinigameRulesProvider) {
-            return Completable.complete()
+            return
         }
 
-        val completable = Completable.Impl()
-        this.settings.isChatMuted.set(true)
-        val rules = next.getRules()
-        var delay = MinecraftTimeDuration.ZERO
-        for (rule in rules) {
-            for (entry in rule.entries) {
-                val formatter = ChatFormatter.createAnnouncement(rule.title)
-                this.scheduler.schedulePhased(delay) {
+        try {
+            this.settings.isChatMuted.set(true)
+            val rules = next.getRules()
+            for (rule in rules) {
+                for (entry in rule.entries) {
+                    delay(entry.duration)
+                    val formatter = ChatFormatter.createAnnouncement(rule.title)
                     val message = entry.lines.fold(Component.empty()) { a, b -> a.append("\n\n").append(b) }
                     this.chat.broadcastWithSound(message, formatter = formatter)
                 }
-                delay += entry.duration
             }
-        }
-        this.scheduler.schedulePhased(delay) {
-            completable.complete()
-        }
-        this.scheduler.schedulePhasedCancellable(delay) {
+        } finally {
             this.settings.isChatMuted.set(false)
-        }.runIfCancelled()
-        return completable
+        }
     }
 
     override fun phases(): Collection<Phase<out Minigame>> {
@@ -180,7 +169,7 @@ class LobbyMinigame(
         this.commands.register(LobbyCommand(this))
         this.commands.register(MinesweeperCommand(this))
 
-        val display = PlayerListDisplay(LobbyPlayerListEntries(this))
+        val display = DynamicVirtualPlayerList(this.server, LobbyPlayerListEntries(this))
         CasualGuiUtils.addCasualFooterAndHeader(this, display)
         this.visuals.setPlayerListDisplay(display)
 
@@ -262,8 +251,18 @@ class LobbyMinigame(
 
     @Listener
     private fun onServerTick(event: ServerTickEvent) {
-        if (this.bossbar.getRemainingDuration() == 25.Seconds) {
+        if (this.timer.getRemainingDuration() == 25.Seconds) {
             this.players.forEach { player -> player.sendSound(CasualSounds.WAITING) }
+        }
+
+        if (this.timer.getRemainingDuration() == 1.Ticks) {
+            val component = Component {
+                translatable("minigame.lobby.ready.finishedWaiting") + nl +
+                    literal("[Click to ready teams]").lime().command("/lobby ready teams") + nl +
+                    literal("[Click to ready players]").lime().command("/lobby ready players")
+            }
+
+            this.chat.broadcastTo(component, this.players.admins)
         }
     }
 

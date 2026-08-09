@@ -11,9 +11,11 @@ import net.casual.arcade.commands.arguments.EnumArgument
 import net.casual.arcade.commands.hidden.HiddenCommandContext
 import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyPlayers
 import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyTeams
+import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
-import net.casual.arcade.scheduler.task.Completable.Companion.thenOrNow
-import net.casual.arcade.utils.component.*
+import net.casual.arcade.utils.component.Component
+import net.casual.arcade.utils.component.green
+import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.coroutine.launch
 import net.casual.arcade.utils.player.ops
 import net.casual.arcade.utils.time.MinecraftTimeUnit
@@ -24,10 +26,6 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.network.chat.Component
 
 class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
-    init {
-        this.lobby.bossbar.then(this::onBossbarComplete)
-    }
-
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("lobby") {
             requiresAdminOrPermission()
@@ -112,7 +110,7 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
         val time = IntegerArgumentType.getInteger(context, "time")
         val unit = EnumArgument.getEnumeration(context, "unit", MinecraftTimeUnit::class.java)
         val duration = unit.duration(time)
-        this.lobby.bossbar.setDuration(duration)
+        this.lobby.timer.setTotalDuration(duration)
         return context.source.success("Countdown will begin in $time ${unit.name}")
     }
 
@@ -126,20 +124,11 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
         this.lobby.chat.broadcastTo(component, admins)
     }
 
-    private fun onBossbarComplete() {
-        val component = Component {
-            translatable("minigame.lobby.ready.finishedWaiting") + nl +
-                literal("[Click to ready teams]").lime().command("/lobby ready teams") + nl +
-                literal("[Click to ready players]").lime().command("/lobby ready players")
-        }
-
-        this.lobby.chat.broadcastTo(component, this.lobby.players.admins)
-    }
-
     @Suppress("unused_parameter")
     private fun playRulesThenCountdown(context: HiddenCommandContext) {
-        this.lobby.playRulesForNextMinigame().thenOrNow {
-            this.lobby.setPhase(LobbyPhase.Countdown)
+        this.lobby.launchPhased {
+            lobby.playRulesForNextMinigame()
+            lobby.setPhase(LobbyPhase.Countdown)
         }
     }
 

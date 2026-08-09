@@ -2,26 +2,24 @@ package net.casual.championships.common.ui.bossbar
 
 import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.TimeUtils.formatMMSS
-import net.casual.arcade.visuals.bossbar.TimerBossbar
+import net.casual.arcade.virtual.visuals.bossbar.DynamicVirtualBossbar
+import net.casual.arcade.virtual.visuals.elements.UniversalElement
+import net.casual.arcade.virtual.visuals.utils.elements.timer.TimerElement
 import net.casual.championships.common.util.CasualComponents
-import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.MinecraftServer
 import net.minecraft.world.BossEvent
 
-class GraceBossbar: TimerBossbar() {
-    override fun getTitle(player: ServerPlayer): Component {
-        return CasualComponents.GRACE_BACKGROUNDED.generate(this.getRemainingDuration().formatMMSS())
-    }
-
-    override fun getProgress(player: ServerPlayer): Float {
-        return MathUtils.centeredScale(super.getProgress(player), 0.75F)
-    }
-
-    override fun getColor(player: ServerPlayer): BossEvent.BossBarColor {
-        return BossEvent.BossBarColor.GREEN
-    }
-
-    override fun getOverlay(player: ServerPlayer): BossEvent.BossBarOverlay {
-        return BossEvent.BossBarOverlay.PROGRESS
+object GraceBossbar {
+    fun create(
+        server: MinecraftServer,
+        timer: TimerElement,
+    ): DynamicVirtualBossbar {
+        val bossbar = DynamicVirtualBossbar(server)
+        bossbar.addTickable(timer)
+        bossbar.setTitle(timer.remaining { time -> CasualComponents.GRACE_BACKGROUNDED.generate(time.formatMMSS()) })
+        bossbar.setProgress(UniversalElement { MathUtils.centeredScale(timer.getProgress(), 0.75F) })
+        bossbar.color.set(BossEvent.BossBarColor.GREEN)
+        bossbar.overlay.set(BossEvent.BossBarOverlay.PROGRESS)
+        return bossbar
     }
 }

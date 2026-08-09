@@ -3,8 +3,8 @@ package net.casual.championships.common.ui.elements
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.component.green
-import net.casual.arcade.visuals.elements.UniversalElement
-import net.casual.arcade.visuals.sidebar.SidebarComponent
+import net.casual.arcade.virtual.visuals.elements.UniversalElement
+import net.casual.arcade.virtual.visuals.sidebar.SidebarComponent
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 

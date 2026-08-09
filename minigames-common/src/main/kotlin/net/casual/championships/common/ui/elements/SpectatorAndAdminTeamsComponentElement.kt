@@ -10,7 +10,7 @@ import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.scoreboard.getOnlineCount
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
-import net.casual.arcade.visuals.elements.UniversalElement
+import net.casual.arcade.virtual.visuals.elements.UniversalElement
 import net.casual.championships.common.util.CasualComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer

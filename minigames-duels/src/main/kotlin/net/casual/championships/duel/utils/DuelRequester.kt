@@ -4,7 +4,7 @@ import net.casual.arcade.resources.font.spacing.SpacingFontResources
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.component.red
-import net.casual.arcade.visuals.ready.chat.ChatReadyBroadcaster
+import net.casual.arcade.virtual.visuals.ready.chat.ChatReadyBroadcaster
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerPlayer

@@ -3,20 +3,19 @@ package net.casual.championships.minigame.lobby
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.scoreboard.getOnlineCount
-import net.casual.arcade.visuals.elements.PlayerSpecificElement
-import net.casual.arcade.visuals.elements.UniversalElement
-import net.casual.arcade.visuals.sidebar.DynamicSidebar
-import net.casual.arcade.visuals.sidebar.SidebarComponent
-import net.casual.arcade.visuals.sidebar.SidebarComponents
-import net.casual.arcade.visuals.utils.elements.ComponentElements
+import net.casual.arcade.virtual.visuals.elements.PlayerSpecificElement
+import net.casual.arcade.virtual.visuals.elements.UniversalElement
+import net.casual.arcade.virtual.visuals.sidebar.DynamicVirtualSidebar
+import net.casual.arcade.virtual.visuals.sidebar.SidebarComponent
+import net.casual.arcade.virtual.visuals.sidebar.SidebarComponents
 import net.casual.championships.common.ui.elements.TeammatesSidebarElements
 import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.minecraft.network.chat.Component
 
 object LobbySidebar {
-    fun create(name: String, lobby: LobbyMinigame): DynamicSidebar {
-        val title = Component.literal("Casual Championships").withMiniFont().bold().gold()
-        val sidebar = DynamicSidebar(ComponentElements.of(title))
+    fun create(name: String, lobby: LobbyMinigame): DynamicVirtualSidebar {
+        val sidebar = DynamicVirtualSidebar(lobby.server)
+        sidebar.title.set(Component.literal("Casual Championships").withMiniFont().bold().gold())
         val event = SidebarComponent.withCustomScore(
             Component.literal(" Event:").withMiniFont().red().bold(),
             Component.literal("$name ").withMiniFont().gold()

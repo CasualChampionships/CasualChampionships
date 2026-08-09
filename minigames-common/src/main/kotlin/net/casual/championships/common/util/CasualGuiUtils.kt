@@ -1,13 +1,16 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
+import net.casual.arcade.events.utils.register
 import net.casual.arcade.guis.presets.PlayerInventoryViewGui
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.events.MinigameAddPlayerEvent
 import net.casual.arcade.minigame.events.MinigamePauseEvent
 import net.casual.arcade.minigame.managers.MinigameChatManager
 import net.casual.arcade.minigame.utils.MinigameUtils.broadcastChangesToAdmin
+import net.casual.arcade.nametags.Nametag
+import net.casual.arcade.observer.Observer
+import net.casual.arcade.observer.utils.asPlayerOrNull
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.chat.ChatFormatter
@@ -21,15 +24,10 @@ import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.player.sendSound
 import net.casual.arcade.utils.scoreboard.getHexColor
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
-import net.casual.arcade.visuals.elements.PlayerSpecificElement
-import net.casual.arcade.visuals.nametag.PlayerNametag
-import net.casual.arcade.visuals.predicate.EntityObserverPredicate
-import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
-import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
-import net.casual.arcade.visuals.ready.chat.TeamChatReadyBroadcaster
-import net.casual.arcade.visuals.sidebar.SidebarComponent
-import net.casual.arcade.visuals.tab.PlayerListDisplay
-import net.casual.arcade.visuals.utils.elements.ComponentElements
+import net.casual.arcade.virtual.visuals.elements.PlayerSpecificElement
+import net.casual.arcade.virtual.visuals.ready.chat.TeamChatReadyBroadcaster
+import net.casual.arcade.virtual.visuals.sidebar.SidebarComponent
+import net.casual.arcade.virtual.visuals.tab.DynamicVirtualPlayerList
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.ui.CasualCountdown
 import net.casual.championships.common.ui.CasualPlayerInventoryViewGui
@@ -43,6 +41,7 @@ import net.minecraft.ChatFormatting.*
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.item.component.DyedItemColor
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
@@ -80,19 +79,42 @@ object CasualGuiUtils {
         }
     }
 
-    fun createPlayingNameTag(
-        predicate: PlayerObserverPredicate = EntityObserverPredicate.visibleObservee().toPlayer()
-    ): PlayerNametag {
-        return PlayerNametag.simple({ it.displayName }, predicate)
+    fun createNametag(minigame: Minigame): Nametag {
+        return object: Nametag {
+            override fun getComponent(observee: Entity): Component {
+                return observee.displayName
+            }
+
+            override fun isObservable(observee: Entity, observer: Observer): Boolean {
+                check(observee is ServerPlayer)
+                if (observee.isInvisible) {
+                    return false
+                }
+                val player = observer.asPlayerOrNull() ?: return true
+                return !minigame.effects.isInvisibleFor(observee, player)
+            }
+        }
     }
 
-    fun createPlayingHealthTag(
-        predicate: PlayerObserverPredicate = CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
-    ): PlayerNametag {
-        return PlayerNametag.simple(
-            { Component.literal(String.format("%.1f ", it.health / 2)).append(CasualComponents.Hud.HARDCORE_HEART) },
-            predicate
-        )
+    fun createPlayingHealthTag(minigame: Minigame): Nametag {
+        return object: Nametag {
+            override fun getComponent(observee: Entity): Component {
+                check(observee is ServerPlayer)
+                return Component.literal(String.format("%.1f ", observee.health / 2)).append(CasualComponents.Hud.HARDCORE_HEART)
+            }
+
+            override fun isObservable(observee: Entity, observer: Observer): Boolean {
+                check(observee is ServerPlayer)
+                if (observee.isInvisible) {
+                    return false
+                }
+                if (minigame.players.isSpectating(observee)) {
+                    return false
+                }
+                val player = observer.asPlayerOrNull() ?: return true
+                return player.isSpectator || (observee.team != null && observee.team == player.team)
+            }
+        }
     }
 
     fun getBorderSidebarElements(buffer: Component): Array<PlayerSpecificElement<SidebarComponent>> {
@@ -103,19 +125,19 @@ object CasualGuiUtils {
         )
     }
 
-    fun createTeamMinigameTabDisplay(minigame: Minigame): PlayerListDisplay {
-        val display = PlayerListDisplay(CasualPlayerListEntries(minigame))
+    fun createTeamMinigameTabDisplay(minigame: Minigame): DynamicVirtualPlayerList {
+        val display = DynamicVirtualPlayerList(minigame.server, CasualPlayerListEntries(minigame))
         addCasualFooterAndHeader(minigame, display)
         return display
     }
 
-    fun createSimpleTabDisplay(minigame: Minigame): PlayerListDisplay {
-        val display = PlayerListDisplay(SimpleCasualPlayerListEntries(minigame))
+    fun createSimpleTabDisplay(minigame: Minigame): DynamicVirtualPlayerList {
+        val display = DynamicVirtualPlayerList(minigame.server, SimpleCasualPlayerListEntries(minigame))
         addCasualFooterAndHeader(minigame, display)
         return display
     }
 
-    fun addCasualFooterAndHeader(minigame: Minigame, display: PlayerListDisplay) {
+    fun addCasualFooterAndHeader(minigame: Minigame, list: DynamicVirtualPlayerList) {
         val hostedByKiwiTech = Component.empty()
             .append(CasualComponents.Text.SERVER_HOSTED_BY)
 
@@ -140,10 +162,8 @@ object CasualGuiUtils {
         val footer = spectatorAndAdmins.merge<_, Component>(baseFooter) { a, b ->
             a.map { Component.empty().append(it).append("\n\n") }.orElse(Component.empty()).append(b)
         }
-        display.setDisplay(
-            ComponentElements.of(Component.literal("\n").append(CASUAL).append(" ").append(CHAMPIONSHIPS).append("\n")),
-            footer
-        )
+        list.header.set(Component.literal("\n").append(CASUAL).append(" ").append(CHAMPIONSHIPS).append("\n"))
+        list.setHeader(footer)
     }
 
     fun createTeamSelectionGui(minigame: Minigame, player: ServerPlayer): TeamSelectorGui {
@@ -172,9 +192,7 @@ object CasualGuiUtils {
         )
         minigame.visuals.countdown = CasualCountdown
 
-        minigame.visuals.addNametag(this.createPlayingNameTag { observee, observer ->
-            !observee.isInvisible && !minigame.effects.isInvisibleFor(observee, observer)
-        })
+        minigame.visuals.addNametag(this.createNametag(minigame))
         minigame.events.register<MinigameAddPlayerEvent> {
             it.player.team?.nameTagVisibility = Team.Visibility.NEVER
         }

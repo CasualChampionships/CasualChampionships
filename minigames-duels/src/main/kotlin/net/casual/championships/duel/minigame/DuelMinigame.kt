@@ -46,8 +46,6 @@ import net.casual.championships.common.minigame.CasualTimeTracker
 import net.casual.championships.common.minigame.TimeTrackedMinigame
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
-import net.casual.championships.common.util.CasualPredicates.OBSERVEE_NOT_MINIGAME_SPECTATOR
-import net.casual.championships.common.util.CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
 import net.casual.championships.common.util.RuleUtils
 import net.casual.championships.common.util.casual
 import net.casual.championships.common.util.player.boostHealth
@@ -115,9 +113,7 @@ class DuelMinigame(
             this.level.asLocation(Vec3.atBottomCenterOf(this.duelArena.data.spawn))
         )
 
-        this.visuals.addNametag(CasualGuiUtils.createPlayingHealthTag(
-            VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
-        ))
+        this.visuals.addNametag(CasualGuiUtils.createPlayingHealthTag(this))
     }
 
     @Listener

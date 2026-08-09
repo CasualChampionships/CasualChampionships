@@ -9,12 +9,9 @@ import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
 import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
 import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
 import net.casual.arcade.resources.utils.ResourcePackUtils.addSounds
-import net.casual.arcade.scheduler.task.utils.TaskRegistries
 import net.casual.championships.common.anticheat.CasualAntiCheat
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
-import net.casual.championships.common.task.GlowingBossbarTask
-import net.casual.championships.common.task.GracePeriodBossbarTask
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.level.ReducedMobSpawningRules
 import net.fabricmc.api.ModInitializer
@@ -62,10 +59,6 @@ object CasualCommon: ModInitializer {
 
         this.registerSpawningRules()
         this.registerItemGroups()
-
-        // FIXME MOVE
-        Registry.register(TaskRegistries.TASK_FACTORY, GracePeriodBossbarTask.id, GracePeriodBossbarTask)
-        Registry.register(TaskRegistries.TASK_FACTORY, GlowingBossbarTask.id, GlowingBossbarTask)
     }
 
     private fun registerSpawningRules() {

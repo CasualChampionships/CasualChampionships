@@ -1,6 +1,6 @@
 package net.casual.championships.uhc.minigame
 
-import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
+import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.utils.MathUtils.rotationAnglesTowards
 import net.casual.arcade.utils.math.location.LocationWithLevel

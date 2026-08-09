@@ -116,7 +116,7 @@ class UHCAdvancementManager(
         val player = event.player
         val relogs = this.uhc.stats.getOrCreateStat(player, ArcadeStats.RELOGS).value
         // Wait for player to load in
-        GlobalTickedScheduler.schedule(1.Seconds, PlayerTask(player) { player ->
+        GlobalTickedScheduler.Server.schedule(1.Seconds, PlayerTask(player) { player ->
             player.grantAdvancement(UHCAdvancements.COMBAT_LOGGER)
             if (relogs == 10) {
                 player.grantAdvancement(UHCAdvancements.OK_WE_BELIEVE_YOU_NOW)

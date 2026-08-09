@@ -2,19 +2,19 @@ package net.casual.championships.uhc.border
 
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.LevelBoundary.SizeAndCenter
-import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.renderer.AxisAlignedDisplayBoundaryRenderer
 import net.casual.arcade.boundary.renderer.options.AxisAlignedModelRenderOptions
 import net.casual.arcade.boundary.shape.AxisAlignedBoundaryShape
-import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
-import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
+import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.utils.MathUtils
+import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.registries.toIdString
 import net.casual.arcade.utils.time.MinecraftTimeDuration
-import net.casual.championships.common.task.GlowingBossbarTask
 import net.casual.championships.uhc.CasualUHC
 import net.casual.championships.uhc.minigame.UHCMinigame
+import net.casual.championships.uhc.routine.BoundaryResumeRoutine
+import net.casual.championships.uhc.routine.GlowingCountdownRoutine
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.phys.Vec3
 
@@ -51,7 +51,7 @@ object UHCBoundaryManager {
         }
     }
 
-    private fun move(uhc: UHCMinigame, current: UHCBoundaryPhase) {
+    internal fun move(uhc: UHCMinigame, current: UHCBoundaryPhase) {
         uhc.boundaryPhase = current
         this.move(uhc, MinecraftTimeDuration.ZERO) { current.getStart(it) }
         val duration = current.getDuration(uhc.settings.borderTime)
@@ -69,20 +69,13 @@ object UHCBoundaryManager {
 
         CasualUHC.logger.info("Completed boundary moving phase ${current::class.java.simpleName}!")
 
+        val cooldown = current.getCooldown(uhc.settings.borderTime)
         if (current == UHCBoundaryPhase.Fifth) {
-            val duration = current.getCooldown(uhc.settings.borderTime)
-            val task = GlowingBossbarTask(uhc)
-                .withDuration(duration)
-                .then(MinigameTask(uhc, UHCMinigame::weAreInTheEndgameNow))
-            uhc.scheduler.schedule(duration, task)
+            uhc.scheduler.schedule(0.Ticks, GlowingCountdownRoutine(cooldown))
         }
 
         uhc.onPauseBoundaryTimer()
-        val cooldown = current.getCooldown(uhc.settings.borderTime)
-        uhc.scheduler.schedule(cooldown, MinigameTask(uhc) { minigame ->
-            minigame.onResumeBoundaryTimer()
-            this.move(minigame, minigame.boundaryPhase.getNextStage())
-        })
+        uhc.scheduler.schedule(cooldown, BoundaryResumeRoutine(current))
     }
 
     private fun move(uhc: UHCMinigame, duration: MinecraftTimeDuration, getter: (ServerLevel) -> SizeAndCenter) {
@@ -106,8 +99,8 @@ object UHCBoundaryManager {
         val phase = UHCBoundaryPhase.First
         val start = this.calculateSizeAndCenter(uhc, level, phase.getStart(level))
         val shape = AxisAlignedBoundaryShape(start.aabb())
-        val renderer = AxisAlignedDisplayBoundaryRenderer(shape, AxisAlignedModelRenderOptions.CUBOID_SHADER)
-        return LevelBoundary(shape, renderer)
+        val renderer = AxisAlignedDisplayBoundaryRenderer.Factory(AxisAlignedModelRenderOptions.CUBOID_SHADER)
+        return LevelBoundary(level, shape, renderer)
     }
 
     private fun clampBoundarySize(uhc: UHCMinigame, level: ServerLevel, size: Vec3): Vec3 {

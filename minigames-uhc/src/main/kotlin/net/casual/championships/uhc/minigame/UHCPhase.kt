@@ -1,40 +1,36 @@
 package net.casual.championships.uhc.minigame
 
+import kotlinx.coroutines.launch
 import net.casual.arcade.dimensions.level.extensions.LevelClockExtension.Companion.clockExtension
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
 import net.casual.arcade.minigame.phase.Phase
-import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.then
-import net.casual.arcade.minigame.task.impl.BossbarTask.Companion.withDuration
 import net.casual.arcade.minigame.task.impl.MinigameTask
-import net.casual.arcade.minigame.task.impl.PhaseChangeTask
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
+import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.component.gold
 import net.casual.arcade.utils.component.red
+import net.casual.arcade.utils.coroutine.delay
 import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.level.resetToDefault
 import net.casual.arcade.utils.level.set
-import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
+import net.casual.arcade.utils.math.location.asLocation
 import net.casual.arcade.utils.player.sendSound
 import net.casual.arcade.utils.player.sendTitle
 import net.casual.arcade.utils.scoreboard.color
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
-import net.casual.arcade.visuals.predicate.EntityObserverPredicate
-import net.casual.arcade.visuals.predicate.PlayerObserverPredicate.Companion.toPlayer
-import net.casual.championships.common.task.GracePeriodBossbarTask
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
-import net.casual.championships.common.util.CasualPredicates.OBSERVEE_NOT_MINIGAME_SPECTATOR
-import net.casual.championships.common.util.CasualPredicates.VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES
 import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.CasualTags
 import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
+import net.casual.championships.uhc.routine.GraceCountdownRoutine
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
@@ -87,7 +83,7 @@ enum class UHCPhase(
                 }
             }
 
-            GlobalTickedScheduler.later {
+            GlobalTickedScheduler.Server.later {
                 minigame.setPhase(Grace)
             }
         }
@@ -96,16 +92,8 @@ enum class UHCPhase(
             minigame.teams.hideNameTags()
 
             minigame.visuals.removeAllNametags()
-            minigame.visuals.addNametag(
-                CasualGuiUtils.createPlayingNameTag(
-                    EntityObserverPredicate.visibleObservee().toPlayer().and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
-                )
-            )
-            minigame.visuals.addNametag(
-                CasualGuiUtils.createPlayingHealthTag(
-                    VISIBLE_OBSERVER_AND_SPEC_OR_TEAMMATES.and(OBSERVEE_NOT_MINIGAME_SPECTATOR)
-                )
-            )
+            minigame.visuals.addNametag(CasualGuiUtils.createNametag(minigame))
+            minigame.visuals.addNametag(CasualGuiUtils.createPlayingHealthTag(minigame))
         }
     },
     Grace(GRACE_ID) {
@@ -121,10 +109,7 @@ enum class UHCPhase(
             })
 
             val gracePeriodDuration = minigame.settings.gracePeriod
-            val graceBossbarTask = GracePeriodBossbarTask(minigame)
-                .withDuration(gracePeriodDuration - 1.Ticks)
-                .then(PhaseChangeTask(minigame, Gameplay))
-            minigame.scheduler.schedulePhasedCancellable(gracePeriodDuration, graceBossbarTask).runIfCancelled()
+            minigame.scheduler.schedulePhased(0.Ticks, GraceCountdownRoutine(gracePeriodDuration))
 
             minigame.chat.broadcastGame(
                 CasualComponents.BORDER_INITIAL_GRACE.generate(gracePeriodDuration.minutes).gold().withMiniFont()
@@ -172,21 +157,24 @@ enum class UHCPhase(
             }
 
             // TODO: Better winning screen
-            val winTask = MinigameTask(minigame) {
-                for (player in it.players) {
-                    player.sendSound(SoundEvents.FIREWORK_ROCKET_BLAST, volume = 0.5F)
-                    player.sendSound(SoundEvents.FIREWORK_ROCKET_LAUNCH, volume = 0.5F)
-                    player.sendSound(SoundEvents.FIREWORK_ROCKET_BLAST_FAR, volume = 0.5F)
-                }
-                it.scheduler.schedulePhased(6.Ticks) {
-                    for (player in it.players) {
-                        player.sendSound(SoundEvents.FIREWORK_ROCKET_SHOOT, volume = 0.5F)
+            minigame.launchPhased {
+                repeat(25) {
+                    for (player in minigame.players) {
+                        player.sendSound(SoundEvents.FIREWORK_ROCKET_BLAST, volume = 0.5F)
                         player.sendSound(SoundEvents.FIREWORK_ROCKET_LAUNCH, volume = 0.5F)
-                        player.sendSound(SoundEvents.FIREWORK_ROCKET_LARGE_BLAST_FAR, volume = 0.5F)
+                        player.sendSound(SoundEvents.FIREWORK_ROCKET_BLAST_FAR, volume = 0.5F)
                     }
+                    launch {
+                        delay(6.Ticks)
+                        for (player in minigame.players) {
+                            player.sendSound(SoundEvents.FIREWORK_ROCKET_SHOOT, volume = 0.5F)
+                            player.sendSound(SoundEvents.FIREWORK_ROCKET_LAUNCH, volume = 0.5F)
+                            player.sendSound(SoundEvents.FIREWORK_ROCKET_LARGE_BLAST_FAR, volume = 0.5F)
+                        }
+                    }
+                    delay(4.Ticks)
                 }
             }
-            minigame.scheduler.schedulePhasedInLoop(0.Ticks, 4.Ticks, 100.Ticks, winTask)
 
             minigame.scheduler.schedulePhased(20.Seconds, MinigameTask(minigame) {
                 minigame.complete()

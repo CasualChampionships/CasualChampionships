@@ -41,14 +41,14 @@ enum class DuelPhase(
                 }
             }
 
-            minigame.visuals.addBossbar(ActiveBossbar(minigame))
+            minigame.visuals.addBossbar(ActiveBossbar.create(minigame))
 
             minigame.duelArena.data.teleporter.teleport(minigame.level, minigame.players.playing, minigame.duelSettings.teams)
 
             minigame.settings.canInteractAll = false
             minigame.settings.canAttackEntities.set(false)
 
-            GlobalTickedScheduler.later {
+            GlobalTickedScheduler.Server.later {
                 minigame.setPhase(Countdown)
             }
         }

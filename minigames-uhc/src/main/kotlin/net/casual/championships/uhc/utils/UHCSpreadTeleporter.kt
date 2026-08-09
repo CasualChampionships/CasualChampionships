@@ -1,7 +1,7 @@
 package net.casual.championships.uhc.utils
 
 import com.mojang.serialization.MapCodec
-import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
+import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter
 import net.casual.arcade.minigame.template.teleporter.ShapedTeleporter
@@ -11,9 +11,9 @@ import net.casual.arcade.utils.level.isOceanOrRiver
 import net.casual.arcade.utils.math.location.LocationWithLevel
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.asLocation
 import net.casual.arcade.utils.registries.isOf
-import net.casual.arcade.visuals.shapes.ShapePoints.Companion.points
-import net.casual.arcade.visuals.shapes.impl.LevelSurfaceShape
-import net.casual.arcade.visuals.shapes.impl.RegularPolygonShape
+import net.casual.arcade.utils.shapes.ShapePoints.Companion.points
+import net.casual.arcade.utils.shapes.impl.LevelSurfaceShape
+import net.casual.arcade.utils.shapes.impl.RegularPolygonShape
 import net.casual.championships.uhc.CasualUHC
 import net.minecraft.core.BlockPos
 import net.minecraft.core.BlockPos.MutableBlockPos

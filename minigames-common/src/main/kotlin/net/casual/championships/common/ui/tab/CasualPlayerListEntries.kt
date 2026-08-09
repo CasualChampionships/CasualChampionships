@@ -14,8 +14,8 @@ import net.casual.arcade.utils.coroutine.async
 import net.casual.arcade.utils.coroutine.getNow
 import net.casual.arcade.utils.scoreboard.color
 import net.casual.arcade.utils.server.ServerSingleton
-import net.casual.arcade.visuals.tab.PlayerListEntries
-import net.casual.arcade.visuals.tab.TeamListEntries
+import net.casual.arcade.virtual.visuals.tab.PlayerListEntries
+import net.casual.arcade.virtual.visuals.tab.TeamListEntries
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.MinecraftServer

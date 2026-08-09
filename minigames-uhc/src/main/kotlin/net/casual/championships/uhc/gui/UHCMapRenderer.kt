@@ -5,8 +5,8 @@ import it.unimi.dsi.fastutil.doubles.Double2ObjectFunction
 import it.unimi.dsi.fastutil.doubles.Double2ObjectLinkedOpenHashMap
 import it.unimi.dsi.fastutil.doubles.Double2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
-import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
+import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
 import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
 import net.casual.arcade.resources.font.spacing.SpacingFontResources

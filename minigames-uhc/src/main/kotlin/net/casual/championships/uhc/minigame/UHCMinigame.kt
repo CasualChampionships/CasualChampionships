@@ -1,8 +1,8 @@
 package net.casual.championships.uhc.minigame
 
 import net.casual.arcade.boundary.LevelBoundary
-import net.casual.arcade.boundary.extension.LevelBoundaryExtension.Companion.levelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
+import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.dimensions.utils.deleteCustomLevel
 import net.casual.arcade.events.phase.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
@@ -57,17 +57,14 @@ import net.casual.arcade.utils.registries.isOf
 import net.casual.arcade.utils.scoreboard.color
 import net.casual.arcade.utils.scoreboard.getOnlineCount
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
+import net.casual.arcade.utils.shapes.ShapePoints.Companion.drawAsParticlesFor
+import net.casual.arcade.utils.shapes.impl.ArrowShape
 import net.casual.arcade.utils.time.MinecraftTimeDuration
-import net.casual.arcade.visuals.elements.LevelSpecificElement
-import net.casual.arcade.visuals.elements.PlayerSpecificElement
-import net.casual.arcade.visuals.predicate.PlayerObserverPredicate
-import net.casual.arcade.visuals.shapes.ShapePoints.Companion.drawAsParticlesFor
-import net.casual.arcade.visuals.shapes.impl.ArrowShape
-import net.casual.arcade.visuals.sidebar.DynamicSidebar
-import net.casual.arcade.visuals.sidebar.SidebarComponent
-import net.casual.arcade.visuals.sidebar.SidebarComponents
-import net.casual.arcade.visuals.sidebar.SidebarComponents.Companion.addRow
-import net.casual.arcade.visuals.utils.elements.ComponentElements
+import net.casual.arcade.virtual.visuals.elements.LevelSpecificElement
+import net.casual.arcade.virtual.visuals.predicate.PlayerObserverPredicate
+import net.casual.arcade.virtual.visuals.sidebar.DynamicVirtualSidebar
+import net.casual.arcade.virtual.visuals.sidebar.SidebarComponent
+import net.casual.arcade.virtual.visuals.sidebar.SidebarComponents
 import net.casual.championships.common.event.ChunkGenerationMobSpawnEvent
 import net.casual.championships.common.event.CreateTradeOfferEvent
 import net.casual.championships.common.event.PlayerCheatEvent
@@ -180,7 +177,7 @@ class UHCMinigame(
     init {
         this.tickrate.useGlobalManager = false
 
-        this.visuals.addBossbar(ActiveBossbar(this))
+        this.visuals.addBossbar(ActiveBossbar.create(this))
         this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
 
@@ -394,7 +391,7 @@ class UHCMinigame(
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         val (player, source) = event
 
-        GlobalTickedScheduler.schedule(1.Seconds) {
+        GlobalTickedScheduler.Server.schedule(1.Seconds) {
             ReplayPlayerRecorders.get(player).forEach { it.stop() }
         }
 
@@ -570,7 +567,7 @@ class UHCMinigame(
             event.spectating = true
         }
 
-        GlobalTickedScheduler.schedule(1.Seconds) {
+        GlobalTickedScheduler.Server.schedule(1.Seconds) {
             // This is kinda a hack fix, but we need it, so the client renders the world border
             player.connection.send(ClientboundTickingStepPacket(1))
             // Needed for updating the player's health
@@ -635,7 +632,7 @@ class UHCMinigame(
         player.setGameMode(GameType.SURVIVAL)
         player.isInvulnerable = true
         val task = PlayerTask(player) { it.isInvulnerable = false }
-        GlobalTickedScheduler.schedule(10.Seconds, task)
+        GlobalTickedScheduler.Server.schedule(10.Seconds, task)
         player.afterPacksLoad(task::run)
 
         if (team != null) {
@@ -913,8 +910,10 @@ class UHCMinigame(
         }
     }
 
-    private fun createSidebar(): DynamicSidebar {
-        val sidebar = DynamicSidebar(ComponentElements.of(UHCComponents.Bitmap.TITLE))
+    private fun createSidebar(): DynamicVirtualSidebar {
+        val sidebar = DynamicVirtualSidebar(this.server)
+        sidebar.title.set(UHCComponents.Bitmap.TITLE)
+
         val buffer = SpacingFontResources.spaced(4)
         val border = CasualGuiUtils.getBorderSidebarElements(buffer)
         val pause = BorderMovingInfo(buffer).cached()
@@ -922,7 +921,14 @@ class UHCMinigame(
         val performance = PerformanceSidebarElement(SpacingFontResources.spaced(2)).cached()
         val phase = MinigamePhaseSidebarElement(this, SpacingFontResources.spaced(2)).cached()
         val mobcaps = MobcapSidebarElement.cached()
-        sidebar.setRows(PlayerSpecificElement.composed(*border, performance, phase, mobcaps, pause) { player ->
+
+        border.forEach(sidebar::addTickable)
+        sidebar.addTickable(pause)
+        sidebar.addTickable(performance)
+        sidebar.addTickable(phase)
+        sidebar.addTickable(mobcaps)
+
+        sidebar.setRows { player ->
             val components = SidebarComponents.empty()
 
             val team = player.team
@@ -946,7 +952,7 @@ class UHCMinigame(
             border.forEach { components.addRow(it.get(player)) }
             components.addRow(pause.get(player))
             components.addRow(SidebarComponent.EMPTY)
-        })
+        }
         return sidebar
     }
 

@@ -1,10 +1,10 @@
 package net.casual.championships.lobby.minigame
 
+import net.casual.arcade.minigame.utils.MinigameUtils.launch
 import net.casual.arcade.scheduler.task.impl.PlayerTask
-import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.arcade.utils.time.MinecraftTimeDuration
-import net.casual.arcade.visuals.entity.firework.VirtualFirework
+import net.casual.arcade.utils.coroutine.delay
+import net.casual.arcade.virtual.visuals.entity.firework.VirtualFirework
 import net.casual.championships.lobby.minigame.modules.LobbyData
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.component.FireworkExplosion.Shape
@@ -15,9 +15,13 @@ class LobbyFireworks(
     private val data: LobbyData
 ) {
     fun spawnFireworkDisplayFor(player: ServerPlayer) {
-        this.lobby.scheduler.scheduleInLoop(
-            MinecraftTimeDuration.ZERO, 10.Ticks, 10.Seconds, PlayerTask(player, this::spawnFireworkDisplayBurstFor)
-        )
+        val task = PlayerTask(player, this::spawnFireworkDisplayBurstFor)
+        this.lobby.launch {
+            repeat(20) {
+                task.run()
+                delay(10.Ticks)
+            }
+        }
     }
 
     private fun spawnFireworkDisplayBurstFor(player: ServerPlayer) {

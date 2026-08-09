@@ -4,8 +4,8 @@ import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.resources.utils.withMiniFont
 import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.italicize
-import net.casual.arcade.visuals.tab.PlayerListEntries
-import net.casual.arcade.visuals.tab.VanillaPlayerListEntries
+import net.casual.arcade.virtual.visuals.tab.PlayerListEntries
+import net.casual.arcade.virtual.visuals.tab.VanillaPlayerListEntries
 import net.minecraft.network.chat.Component
 
 class SimpleCasualPlayerListEntries(

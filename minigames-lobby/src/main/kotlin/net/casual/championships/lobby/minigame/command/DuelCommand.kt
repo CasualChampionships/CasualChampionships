@@ -18,7 +18,7 @@ import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.math.location.LocationWithLevel.Companion.locationWithLevel
 import net.casual.arcade.utils.player.grantAdvancement
 import net.casual.arcade.utils.player.server
-import net.casual.arcade.visuals.ready.ReadyChecker
+import net.casual.arcade.virtual.visuals.ready.ReadyChecker
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.duel.arena.DuelArenasDataModule
 import net.casual.championships.duel.gui.DuelConfigurationGui
