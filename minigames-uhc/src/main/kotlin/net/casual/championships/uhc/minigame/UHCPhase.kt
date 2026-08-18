@@ -28,7 +28,6 @@ import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.CasualTags
-import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
 import net.casual.championships.uhc.routine.GraceCountdownRoutine
 import net.casual.championships.uhc.utils.UHCSpreadTeleporter
@@ -61,7 +60,7 @@ enum class UHCPhase(
             minigame.settings.canPvp.set(false)
             minigame.settings.tickFreezeOnPause.set(true)
             minigame.overworld.clockExtension.set(ClockState(0, 0.0F, 1.0F, false))
-            UHCBoundaryManager.reset(minigame)
+            minigame.boundary.reset()
 
             val (level, _) = when (minigame.settings.startingDimension) {
                 VanillaDimension.Overworld -> minigame.overworld to null
@@ -102,11 +101,7 @@ enum class UHCPhase(
             minigame.settings.mobsWithNoAIAreFlammable = true
             minigame.settings.canPvp.set(false)
 
-            minigame.resetBoundaryTimer()
-            val borderDelayDuration = minigame.settings.borderStartDelay
-            minigame.scheduler.schedule(borderDelayDuration, MinigameTask(minigame) { m ->
-                UHCBoundaryManager.start(m)
-            })
+            minigame.boundary.startAfter(minigame.settings.borderStartDelay)
 
             val gracePeriodDuration = minigame.settings.gracePeriod
             minigame.scheduler.schedulePhased(0.Ticks, GraceCountdownRoutine(gracePeriodDuration))

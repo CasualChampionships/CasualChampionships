@@ -1,7 +1,6 @@
 package net.casual.championships.uhc.minigame
 
 import net.casual.arcade.boundary.LevelBoundary
-import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.dimensions.utils.deleteCustomLevel
 import net.casual.arcade.events.phase.BuiltInEventPhases
@@ -36,15 +35,11 @@ import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.MathUtils
-import net.casual.arcade.utils.MathUtils.component1
-import net.casual.arcade.utils.MathUtils.component2
-import net.casual.arcade.utils.MathUtils.component3
 import net.casual.arcade.utils.MathUtils.isAbove
 import net.casual.arcade.utils.MathUtils.isBelow
 import net.casual.arcade.utils.TimeUtils.Minutes
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
-import net.casual.arcade.utils.TimeUtils.formatMMSS
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.entity.setVelocityAndMark
 import net.casual.arcade.utils.entity.teleportTo
@@ -59,8 +54,6 @@ import net.casual.arcade.utils.scoreboard.getOnlineCount
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.arcade.utils.shapes.ShapePoints.Companion.drawAsParticlesFor
 import net.casual.arcade.utils.shapes.impl.ArrowShape
-import net.casual.arcade.utils.time.MinecraftTimeDuration
-import net.casual.arcade.virtual.visuals.elements.LevelSpecificElement
 import net.casual.arcade.virtual.visuals.predicate.PlayerObserverPredicate
 import net.casual.arcade.virtual.visuals.sidebar.DynamicVirtualSidebar
 import net.casual.arcade.virtual.visuals.sidebar.SidebarComponent
@@ -68,9 +61,6 @@ import net.casual.arcade.virtual.visuals.sidebar.SidebarComponents
 import net.casual.championships.common.event.ChunkGenerationMobSpawnEvent
 import net.casual.championships.common.event.CreateTradeOfferEvent
 import net.casual.championships.common.event.PlayerCheatEvent
-import net.casual.championships.common.event.portal.EntityPortalEntryPositionEvent
-import net.casual.championships.common.event.portal.PortalCreateValidPositionEvent
-import net.casual.championships.common.event.portal.PortalFindValidPositionEvent
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
@@ -78,20 +68,19 @@ import net.casual.championships.common.minigame.CasualTimeTracker
 import net.casual.championships.common.minigame.TimeTrackedMinigame
 import net.casual.championships.common.minigame.rules.MinigameRulesProvider
 import net.casual.championships.common.ui.bossbar.ActiveBossbar
-import net.casual.championships.common.ui.elements.MinigamePhaseSidebarElement
-import net.casual.championships.common.ui.elements.MobcapSidebarElement
-import net.casual.championships.common.ui.elements.PerformanceSidebarElement
+import net.casual.championships.uhc.ui.elements.BoundaryMovingElement
+import net.casual.championships.uhc.ui.elements.MinigamePhaseSidebarElement
+import net.casual.championships.uhc.ui.elements.MobcapSidebarElement
+import net.casual.championships.uhc.ui.elements.PerformanceSidebarElement
 import net.casual.championships.common.ui.elements.TeammatesSidebarElements
 import net.casual.championships.common.util.*
-import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
 import net.casual.championships.common.util.player.boostHealth
 import net.casual.championships.common.util.player.unboostHealth
 import net.casual.championships.uhc.advancement.UHCAdvancementManager
 import net.casual.championships.uhc.advancement.UHCAdvancements
-import net.casual.championships.uhc.border.UHCBoundaryManager
-import net.casual.championships.uhc.border.UHCBoundaryPhase
+import net.casual.championships.uhc.boundary.UHCBoundary
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.gui.UHCSpectatorHotbarInventory
@@ -105,7 +94,6 @@ import net.casual.championships.uhc.utils.UHCDimensions
 import net.casual.championships.uhc.utils.UHCMinigameRules
 import net.casual.championships.uhc.utils.UHCStats
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags
-import net.minecraft.ChatFormatting
 import net.minecraft.ChatFormatting.*
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -117,7 +105,6 @@ import net.minecraft.network.protocol.game.ClientboundTickingStepPacket
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.util.Mth
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
@@ -158,9 +145,7 @@ class UHCMinigame(
 ): Minigame(server, uuid), MinigameRulesProvider by UHCMinigameRules, TimeTrackedMinigame {
     override val id = ID
 
-    private var lastBoundaryTime = 0.Ticks
-    var boundaryPhase: UHCBoundaryPhase = UHCBoundaryPhase.First
-
+    val boundary = UHCBoundary(this)
     val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)
 
@@ -204,28 +189,6 @@ class UHCMinigame(
         }
     }
 
-    fun resetBoundaryTimer() {
-        this.lastBoundaryTime = this.uptime.Ticks
-    }
-
-    fun onStartBoundaryTimer() {
-        this.resetBoundaryTimer()
-        this.chat.broadcastGame(component = CasualComponents.BORDER_STARTED.withMiniFont().red())
-    }
-
-    fun onPauseBoundaryTimer() {
-        this.resetBoundaryTimer()
-        this.chat.broadcastGame(component = CasualComponents.BORDER_PAUSED.withMiniFont().red())
-    }
-
-    fun onResumeBoundaryTimer() {
-        this.resetBoundaryTimer()
-        this.chat.broadcastGame(
-            component = CasualComponents.BORDER_RESUMED.withMiniFont().red(),
-            sound = Sound(CasualSounds.GAME_BORDER_MOVING)
-        )
-    }
-
     fun weAreInTheEndgameNow() {
         for (player in this.players) {
             player.sendSound(CasualSounds.GAME_GRACE_END)
@@ -252,14 +215,12 @@ class UHCMinigame(
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     override fun load(input: ValueInput) {
         this.uhcAdvancements.deserialize(input.childOrEmpty("advancements"))
-        this.boundaryPhase = input.read("boundary_phase", UHCBoundaryPhase.CODEC).orElse(this.boundaryPhase)
-        this.lastBoundaryTime = input.read("last_boundary_time", MinecraftTimeDuration.CODEC).orElse(this.lastBoundaryTime)
+        this.boundary.deserialize(input.childOrEmpty("boundary"))
     }
 
     override fun save(output: ValueOutput) {
         this.uhcAdvancements.serialize(output.child("advancements"))
-        output.store("boundary_phase", UHCBoundaryPhase.CODEC, this.boundaryPhase)
-        output.store("last_boundary_time", MinecraftTimeDuration.CODEC, this.lastBoundaryTime)
+        this.boundary.serialize(output.child("boundary"))
     }
 
     @Listener
@@ -267,6 +228,7 @@ class UHCMinigame(
         this.commands.register(UHCMinigameCommands(this))
 
         this.addEventListener(this.uhcAdvancements)
+        this.addEventListener(this.boundary)
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
         if (this.settings.heavyHeads) {
             this.recipes.add(HeavyCoreRecipe.INSTANCE)
@@ -302,53 +264,6 @@ class UHCMinigame(
                 event.cancel()
             }
         }
-    }
-
-    @Listener
-    private fun onEntityPortalEntryPosition(event: EntityPortalEntryPositionEvent) {
-        val (level, _, pos) = event
-
-        val boundary = level.levelBoundary ?: return
-
-        val shrinkingSpeed = this.boundaryPhase.getSpeedInBlocksPerTick(level)
-        if (shrinkingSpeed <= 0) {
-            val box = boundary.getAABB()
-            event.cancel(BlockPos.containing(
-                Mth.clamp(pos.x, box.minX, box.maxX),
-                Mth.clamp(pos.y, box.minY, box.maxY),
-                Mth.clamp(pos.z, box.minZ, box.maxZ)
-            ))
-            return
-        }
-
-        val margin = shrinkingSpeed * this.settings.portalEscapeTime.ticks
-        if (margin >= boundary.getSize().x * 0.5) {
-            val (x, y, z) = boundary.getCenter()
-            // The border would reach size 0 within 30 seconds
-            event.cancel(BlockPos.containing(x, y, z))
-            return
-        }
-
-        val box = boundary.getAABB()
-        event.cancel(BlockPos.containing(
-            Mth.clamp(pos.x, box.minX + margin, box.maxX - margin),
-            Mth.clamp(pos.y, box.minY + margin, box.maxY - margin),
-            Mth.clamp(pos.z, box.minZ + margin, box.maxZ - margin)
-        ))
-    }
-
-    @Listener
-    private fun onPortalCreateValidPosition(event: PortalCreateValidPositionEvent) {
-        val (level, position) = event
-        val boundary = level.levelBoundary ?: return
-        event.and { this.isPositionValidForPortal(level, position, boundary) }
-    }
-
-    @Listener
-    private fun onPortalFindValidPosition(event: PortalFindValidPositionEvent) {
-        val (level, position) = event
-        val boundary = level.levelBoundary ?: return
-        event.and { this.isPositionValidForPortal(level, position, boundary) }
     }
 
     @Listener
@@ -762,27 +677,6 @@ class UHCMinigame(
         this.chat.broadcastInfo(message, this.players.admins)
     }
 
-    private fun isPositionValidForPortal(level: ServerLevel, position: BlockPos, boundary: LevelBoundary): Boolean {
-        val shrinkingSpeed = this.boundaryPhase.getSpeedInBlocksPerTick(level)
-        if (shrinkingSpeed <= 0) {
-            // The border is static or expanding
-            return boundary.contains(position) == BoundaryShape.Containment.Full
-        }
-
-        val margin = shrinkingSpeed * this.settings.portalEscapeTime.ticks
-        val size = boundary.getSize()
-        val xMargin = margin.coerceAtMost(size.x * 0.5 - 1)
-        val yMargin = margin.coerceAtMost(size.y * 0.5 - 1)
-        val zMargin = margin.coerceAtMost(size.z * 0.5 - 1)
-        val box = boundary.getAABB()
-        return position.x >= box.minX + xMargin
-            && position.x + 1 <= box.maxX - xMargin
-            && position.y >= box.minY + yMargin
-            && position.y + 1 <= box.maxY - yMargin
-            && position.z >= box.minZ + zMargin
-            && position.z + 1 <= box.maxZ - zMargin
-    }
-
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {
         if (killer is ServerPlayer) {
             this.onKilled(killer, player)
@@ -916,7 +810,7 @@ class UHCMinigame(
 
         val buffer = SpacingFontResources.spaced(4)
         val border = CasualGuiUtils.getBorderSidebarElements(buffer)
-        val pause = BorderMovingInfo(buffer).cached()
+        val pause = BoundaryMovingElement(this.boundary, buffer).cached()
         val teammates = TeammatesSidebarElements(Component.empty(), buffer, true)
         val performance = PerformanceSidebarElement(SpacingFontResources.spaced(2)).cached()
         val phase = MinigamePhaseSidebarElement(this, SpacingFontResources.spaced(2)).cached()
@@ -1012,49 +906,6 @@ class UHCMinigame(
             Potions.STRONG_STRENGTH.value() -> Potions.STRENGTH
             Potions.STRONG_TURTLE_MASTER.value() -> Potions.TURTLE_MASTER
             else -> potion
-        }
-    }
-
-    private fun isFinalStage(level: ServerLevel): Boolean {
-        return UHCBoundaryManager.getFinalPhase(this, level) <= this.boundaryPhase
-    }
-
-    private inner class BorderMovingInfo(private val buffer: Component): LevelSpecificElement<SidebarComponent> {
-        override fun get(level: ServerLevel): SidebarComponent {
-            val boundary = level.levelBoundary ?: return SidebarComponent.EMPTY
-            if (boundary.shape.getStatus().isMoving()) {
-                val remainingTime = boundaryPhase.getDuration(settings.borderTime) - (uptime.Ticks - lastBoundaryTime)
-                return SidebarComponent.withCustomScore(
-                    this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderPausingIn").withMiniFont()),
-                    Component.literal(remainingTime.formatMMSS()).withStyle(colorTime(remainingTime)).withMiniFont().append(this.buffer)
-                )
-            }
-            if (isFinalStage(level)) {
-                return SidebarComponent.withNoScore(
-                    this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderFinished").withMiniFont())
-                )
-            }
-
-            val cooldown = when {
-                boundaryPhase == UHCBoundaryPhase.First -> settings.borderStartDelay
-                else -> boundaryPhase.getCooldown(settings.borderTime)
-            }
-            val remainingTime = cooldown - (uptime.Ticks - lastBoundaryTime)
-            return SidebarComponent.withCustomScore(
-                this.buffer.wrap().append(this.buffer).append(Component.translatable("casual.game.borderMovingIn").withMiniFont()),
-                Component.literal(remainingTime.formatMMSS()).withStyle(colorTime(remainingTime)).append(buffer).withMiniFont()
-            )
-        }
-
-        private fun colorTime(time: MinecraftTimeDuration): ChatFormatting {
-            return when {
-                time > 30.Minutes -> DARK_GREEN
-                time > 15.Minutes -> GREEN
-                time > 8.Minutes -> YELLOW
-                time > 3.Minutes -> GOLD
-                time > 1.Minutes -> RED
-                else -> DARK_RED
-            }
         }
     }
 

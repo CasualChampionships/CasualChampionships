@@ -1,4 +1,4 @@
-package net.casual.championships.common.util
+package net.casual.championships.util
 
 import net.casual.arcade.dimensions.utils.setCustomMobSpawningRules
 import net.casual.arcade.events.server.entity.EntityStartTrackingEvent

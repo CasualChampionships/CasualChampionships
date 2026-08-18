@@ -1,4 +1,4 @@
-package net.casual.championships.common.ui.bossbar
+package net.casual.championships.lobby.ui.bossbar
 
 import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.TimeUtils.formatHHMMSS

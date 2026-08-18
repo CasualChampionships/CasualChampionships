@@ -1,4 +1,4 @@
-package net.casual.championships.common.ui.bossbar
+package net.casual.championships.uhc.ui.bossbar
 
 import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.TimeUtils.formatMMSS
@@ -9,14 +9,14 @@ import net.casual.championships.common.util.CasualComponents
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.BossEvent
 
-object GraceBossbar {
+object GlowingBossBar {
     fun create(
         server: MinecraftServer,
         timer: TimerElement,
     ): DynamicVirtualBossbar {
         val bossbar = DynamicVirtualBossbar(server)
         bossbar.addTickable(timer)
-        bossbar.setTitle(timer.remaining { time -> CasualComponents.GRACE_BACKGROUNDED.generate(time.formatMMSS()) })
+        bossbar.setTitle(timer.remaining { time -> CasualComponents.GLOWING_BACKGROUNDED.generate(time.formatMMSS()) })
         bossbar.setProgress(UniversalElement { MathUtils.centeredScale(timer.getProgress(), 0.75F) })
         bossbar.color.set(BossEvent.BossBarColor.GREEN)
         bossbar.overlay.set(BossEvent.BossBarOverlay.PROGRESS)

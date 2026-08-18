@@ -16,7 +16,7 @@ import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.minigame.CasualSettings
-import net.casual.championships.uhc.border.UHCBoundaryPhase
+import net.casual.championships.uhc.boundary.UHCBoundaryPhase
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
 import net.minecraft.core.component.DataComponents

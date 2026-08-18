@@ -18,7 +18,6 @@ import net.casual.arcade.utils.component.yellow
 import net.casual.arcade.utils.registries.isOf
 import net.casual.arcade.utils.scoreboard.color
 import net.casual.championships.common.util.casual
-import net.casual.championships.uhc.border.UHCBoundaryManager
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.utils.UHCComponents
 import net.minecraft.core.BlockPos
@@ -99,9 +98,9 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
 
         // Let's just assume that our center is stationary because that makes things easier.
         // Let's also assume that our boundary is square because that also makes things easier
-        val phase = this.uhc.boundaryPhase
-        var startSize = UHCBoundaryManager.calculateSizeAndCenter(this.uhc, level, phase.getStart(level)).size.x
-        val endSize = UHCBoundaryManager.calculateSizeAndCenter(this.uhc, level, phase.getEnd(level)).size.x
+        val phase = this.uhc.boundary.phase
+        var startSize = this.uhc.boundary.getSizeAndCenter(level, phase.getStart(level)).size.x
+        val endSize = this.uhc.boundary.getSizeAndCenter(level, phase.getEnd(level)).size.x
 
         val boundary = level.levelBoundary ?: return
         if (boundary.getSize().x == endSize) {

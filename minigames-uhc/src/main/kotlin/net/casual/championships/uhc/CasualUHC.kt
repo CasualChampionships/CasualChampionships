@@ -9,7 +9,7 @@ import net.casual.championships.uhc.extensions.TeamSharedHealthExtension
 import net.casual.championships.uhc.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.UHCItems
 import net.casual.championships.uhc.minigame.UHCMinigameFactory
-import net.casual.championships.uhc.routine.BoundaryResumeRoutine
+import net.casual.championships.uhc.boundary.UHCBoundaryRoutine
 import net.casual.championships.uhc.routine.GlowingCountdownRoutine
 import net.casual.championships.uhc.routine.GraceCountdownRoutine
 import net.casual.championships.uhc.utils.UHCComponents
@@ -44,7 +44,7 @@ object CasualUHC: ModInitializer {
 
         UHCMinigameFactory.register(MinigameRegistries.MINIGAME_FACTORY)
 
-        BoundaryResumeRoutine.register(TaskRegistries.ROUTINE)
+        UHCBoundaryRoutine.register(TaskRegistries.ROUTINE)
         GlowingCountdownRoutine.register(TaskRegistries.ROUTINE)
         GraceCountdownRoutine.register(TaskRegistries.ROUTINE)
     }

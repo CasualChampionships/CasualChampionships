@@ -1,4 +1,4 @@
-package net.casual.championships.common.ui.elements
+package net.casual.championships.uhc.ui.elements
 
 import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.virtual.visuals.elements.UniversalElement

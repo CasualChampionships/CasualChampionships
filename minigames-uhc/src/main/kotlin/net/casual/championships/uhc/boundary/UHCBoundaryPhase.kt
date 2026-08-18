@@ -1,4 +1,4 @@
-package net.casual.championships.uhc.border
+package net.casual.championships.uhc.boundary
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.DataResult
@@ -12,6 +12,7 @@ import net.minecraft.world.phys.Vec3
 import kotlin.math.abs
 
 sealed class UHCBoundaryPhase(
+    val name: String,
     private val ordinal: Int,
     private val duration: MinecraftTimeDuration,
     private val cooldown: MinecraftTimeDuration
@@ -49,49 +50,49 @@ sealed class UHCBoundaryPhase(
     abstract fun getEndSize(level: ServerLevel): Vec3
     abstract fun getStartCenter(level: ServerLevel): Vec3
     abstract fun getEndCenter(level: ServerLevel): Vec3
-    abstract fun getNextStage(): UHCBoundaryPhase
+    abstract fun next(): UHCBoundaryPhase?
 
-    data object First: UHCBoundaryPhase(0, 48.Minutes, 8.Minutes) {
+    data object First: UHCBoundaryPhase("first", 0, 48.Minutes, 8.Minutes) {
         override fun getStartSize(level: ServerLevel) = Vec3(6128.0, 1024.0, 6128.0)
         override fun getEndSize(level: ServerLevel) = Vec3(3064.0, 1024.0, 3064.0)
         override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
         override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
-        override fun getNextStage() = Second
+        override fun next() = Second
     }
 
-    data object Second: UHCBoundaryPhase(1, 26.Minutes, 5.Minutes) {
+    data object Second: UHCBoundaryPhase("second", 1, 26.Minutes, 5.Minutes) {
         override fun getStartSize(level: ServerLevel) = First.getEndSize(level)
         override fun getEndSize(level: ServerLevel) = Vec3(1532.0, 1024.0, 1532.0)
         override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
         override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
-        override fun getNextStage() = Third
+        override fun next() = Third
     }
 
-    data object Third: UHCBoundaryPhase(2, 18.Minutes, 2.Minutes) {
+    data object Third: UHCBoundaryPhase("third", 2, 18.Minutes, 2.Minutes) {
         override fun getStartSize(level: ServerLevel) = Second.getEndSize(level)
         override fun getEndSize(level: ServerLevel) = Vec3(510.0, 1024.0, 510.0)
         override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
         override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
-        override fun getNextStage() = Fourth
+        override fun next() = Fourth
     }
 
-    data object Fourth: UHCBoundaryPhase(3, 6.Minutes, 1.Minutes) {
+    data object Fourth: UHCBoundaryPhase("fourth", 3, 6.Minutes, 1.Minutes) {
         override fun getStartSize(level: ServerLevel) = Third.getEndSize(level)
         override fun getEndSize(level: ServerLevel) = Vec3(102.0, 1024.0, 102.0)
         override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
         override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
-        override fun getNextStage() = Fifth
+        override fun next() = Fifth
     }
 
-    data object Fifth: UHCBoundaryPhase(4, 2.Minutes, 2.Minutes) {
+    data object Fifth: UHCBoundaryPhase("fifth", 4, 2.Minutes, 2.Minutes) {
         override fun getStartSize(level: ServerLevel) = Fourth.getEndSize(level)
         override fun getEndSize(level: ServerLevel) = Vec3(20.0, 1024.0, 20.0)
         override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
         override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
-        override fun getNextStage() = Sixth
+        override fun next() = Sixth
     }
 
-    data object Sixth: UHCBoundaryPhase(5, 6.Minutes, 0.Minutes) {
+    data object Sixth: UHCBoundaryPhase("sixth", 5, 6.Minutes, 0.Minutes) {
         override fun getStartSize(level: ServerLevel): Vec3 {
             val height = level.height * 2.0
             return Fifth.getEndSize(level).with(Direction.Axis.Y, height)
@@ -110,7 +111,7 @@ sealed class UHCBoundaryPhase(
             return this.getStartCenter(level)
         }
 
-        override fun getNextStage() = Sixth
+        override fun next(): UHCBoundaryPhase? = null
     }
 
     companion object {

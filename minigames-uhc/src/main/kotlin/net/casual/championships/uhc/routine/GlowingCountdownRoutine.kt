@@ -9,8 +9,8 @@ import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.virtual.visuals.bossbar.VirtualBossbar
 import net.casual.arcade.virtual.visuals.utils.elements.timer.TimerElement
 import net.casual.championships.common.routine.BossbarCountdownRoutine
-import net.casual.championships.common.ui.bossbar.GlowingBossBar
 import net.casual.championships.common.util.casual
+import net.casual.championships.uhc.ui.bossbar.GlowingBossBar
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.minecraft.resources.Identifier
 

@@ -39,7 +39,7 @@ import net.casual.championships.common.minigame.TimeTrackedMinigame
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualTags
-import net.casual.championships.common.util.PerformanceUtils
+import net.casual.championships.util.PerformanceUtils
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.casual.championships.minigame.event.EventConfiguration

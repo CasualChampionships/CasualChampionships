@@ -42,7 +42,7 @@ import net.casual.arcade.virtual.visuals.tab.DynamicVirtualPlayerList
 import net.casual.arcade.virtual.visuals.utils.elements.timer.TimerElement
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.minigame.rules.MinigameRulesProvider
-import net.casual.championships.common.ui.bossbar.LobbyBossbar
+import net.casual.championships.lobby.ui.bossbar.LobbyBossbar
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
 import net.casual.championships.common.util.player.unboostHealth
