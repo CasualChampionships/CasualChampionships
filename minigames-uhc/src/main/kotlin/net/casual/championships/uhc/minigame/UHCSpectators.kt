@@ -21,7 +21,7 @@ import net.casual.arcade.utils.math.location.asLocation
 import net.casual.arcade.utils.math.location.locationWithLevel
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualTags
-import net.casual.championships.uhc.gui.UHCSpectatorHotbarInventory
+import net.casual.championships.uhc.ui.gui.UHCSpectatorHotbarInventory
 import net.casual.championships.uhc.utils.UHCMinigameRules
 import net.casual.championships.uhc.utils.UHCStats
 import net.minecraft.server.level.ServerPlayer

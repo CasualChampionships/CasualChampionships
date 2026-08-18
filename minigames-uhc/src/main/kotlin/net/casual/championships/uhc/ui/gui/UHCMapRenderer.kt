@@ -1,4 +1,4 @@
-package net.casual.championships.uhc.gui
+package net.casual.championships.uhc.ui.gui
 
 import eu.pb4.mapcanvas.api.core.*
 import it.unimi.dsi.fastutil.doubles.Double2ObjectFunction

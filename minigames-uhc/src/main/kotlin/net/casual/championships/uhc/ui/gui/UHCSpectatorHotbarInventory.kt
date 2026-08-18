@@ -1,4 +1,4 @@
-package net.casual.championships.uhc.gui
+package net.casual.championships.uhc.ui.gui
 
 import net.casual.arcade.guis.inventory.VirtualInventory
 import net.casual.arcade.guis.utils.SlotInteractAction

@@ -28,7 +28,7 @@ import net.casual.arcade.utils.player.server
 import net.casual.arcade.virtual.visuals.ready.ReadyChecker
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.duel.arena.DuelArenasDataModule
-import net.casual.championships.duel.gui.DuelConfigurationGui
+import net.casual.championships.duel.ui.gui.DuelConfigurationGui
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.duel.minigame.DuelSettings
 import net.casual.championships.duel.utils.DuelRequester

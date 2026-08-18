@@ -6,7 +6,7 @@ import net.casual.arcade.scheduler.utils.TaskRegistries
 import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension
-import net.casual.championships.uhc.gui.UHCMapRenderer
+import net.casual.championships.uhc.ui.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.UHCItems
 import net.casual.championships.uhc.minigame.UHCMinigameFactory
 import net.casual.championships.uhc.boundary.UHCBoundaryRoutine

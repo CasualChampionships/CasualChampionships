@@ -1,4 +1,4 @@
-package net.casual.championships.duel.gui
+package net.casual.championships.duel.ui.gui
 
 import net.casual.arcade.guis.utils.ContainerType
 import net.casual.arcade.pack.utils.spaced

@@ -48,7 +48,7 @@ import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
 import net.casual.championships.common.util.player.unboostHealth
 import net.casual.championships.lobby.advancement.LobbyAdvancementManager
 import net.casual.championships.lobby.advancement.LobbyAdvancements
-import net.casual.championships.lobby.gui.LobbyPlayerListEntries
+import net.casual.championships.lobby.ui.tab.LobbyPlayerListEntries
 import net.casual.championships.lobby.minigame.command.DuelCommand
 import net.casual.championships.lobby.minigame.command.LobbyCommand
 import net.casual.championships.lobby.minigame.command.MinesweeperCommand
