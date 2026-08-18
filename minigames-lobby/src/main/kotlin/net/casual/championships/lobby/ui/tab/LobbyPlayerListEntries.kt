@@ -1,4 +1,4 @@
-package net.casual.championships.lobby.gui
+package net.casual.championships.lobby.ui.tab
 
 import net.casual.arcade.pack.font.heads.PixelGridHeadComponents
 import net.casual.arcade.pack.utils.spaced

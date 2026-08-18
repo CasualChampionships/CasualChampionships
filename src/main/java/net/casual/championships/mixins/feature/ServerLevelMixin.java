@@ -1,4 +1,4 @@
-package net.casual.championships.mixin.feature;
+package net.casual.championships.mixins.feature;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;

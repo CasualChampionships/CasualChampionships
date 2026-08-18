@@ -1,4 +1,4 @@
-package net.casual.championships.common.mixin.event;
+package net.casual.championships.common.mixins.event;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import net.casual.arcade.events.GlobalEventHandler;

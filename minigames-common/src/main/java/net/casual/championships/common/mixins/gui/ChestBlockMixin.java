@@ -1,4 +1,4 @@
-package net.casual.championships.common.mixin.gui;
+package net.casual.championships.common.mixins.gui;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.casual.championships.common.util.CasualComponents;

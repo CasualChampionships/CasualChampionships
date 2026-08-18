@@ -2,7 +2,7 @@
  * Copyright (c) 2024 senseiwells
  * Licensed under the MIT License. See LICENSE file in the project root for details.
  */
-package net.casual.championships.common.mixin.event;
+package net.casual.championships.common.mixins.event;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.casual.arcade.events.GlobalEventHandler;

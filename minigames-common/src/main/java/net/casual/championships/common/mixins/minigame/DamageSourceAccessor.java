@@ -1,4 +1,4 @@
-package net.casual.championships.common.mixin.minigame;
+package net.casual.championships.common.mixins.minigame;
 
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;

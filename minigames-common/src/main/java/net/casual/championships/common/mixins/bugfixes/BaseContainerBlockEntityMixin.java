@@ -1,4 +1,4 @@
-package net.casual.championships.common.mixin.bugfixes;
+package net.casual.championships.common.mixins.bugfixes;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;

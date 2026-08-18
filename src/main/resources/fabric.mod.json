@@ -22,7 +22,7 @@
     ]
   },
   "mixins": [
-    "casual.mixins.json"
+    "casual-championships.mixins.json"
   ],
   "depends": {
     "minecraft": "${minecraft_dependency}",

@@ -1,4 +1,4 @@
-package net.casual.championships.common.mixin.event;
+package net.casual.championships.common.mixins.event;
 
 import net.minecraft.world.level.block.entity.vault.VaultServerData;
 import org.spongepowered.asm.mixin.Mixin;

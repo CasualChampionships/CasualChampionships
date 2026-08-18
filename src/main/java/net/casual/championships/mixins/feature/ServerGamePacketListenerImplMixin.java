@@ -1,4 +1,4 @@
-package net.casual.championships.mixin.feature;
+package net.casual.championships.mixins.feature;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;

@@ -1,4 +1,4 @@
-package net.casual.championships.common.mixin.minigame;
+package net.casual.championships.common.mixins.minigame;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
