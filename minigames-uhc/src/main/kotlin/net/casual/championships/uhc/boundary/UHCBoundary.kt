@@ -7,17 +7,25 @@ import net.casual.arcade.boundary.renderer.options.AxisAlignedModelRenderOptions
 import net.casual.arcade.boundary.shape.AxisAlignedBoundaryShape
 import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.boundary.utils.levelBoundary
+import net.casual.arcade.events.server.player.PlayerTickEvent
+import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.MathUtils
+import net.casual.arcade.utils.MathUtils.isAbove
+import net.casual.arcade.utils.MathUtils.isBelow
 import net.casual.arcade.utils.MathUtils.component1
 import net.casual.arcade.utils.MathUtils.component2
 import net.casual.arcade.utils.MathUtils.component3
 import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.component.red
 import net.casual.arcade.utils.impl.Sound
+import net.casual.arcade.utils.player.sendTitle
 import net.casual.arcade.utils.registries.toIdString
+import net.casual.arcade.utils.shapes.ShapePoints.Companion.drawAsParticlesFor
+import net.casual.arcade.utils.shapes.impl.ArrowShape
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.championships.common.event.portal.EntityPortalEntryPositionEvent
 import net.casual.championships.common.event.portal.PortalCreateValidPositionEvent
@@ -26,13 +34,21 @@ import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.uhc.CasualUHC
+import net.casual.championships.uhc.minigame.GAME_OVER_ID
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.routine.GlowingCountdownRoutine
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.Mth
 import net.minecraft.world.level.storage.ValueInput
+import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.storage.ValueOutput
+import net.minecraft.world.phys.HitResult
+import kotlin.math.atan2
 
 class UHCBoundary(
     private val uhc: UHCMinigame
@@ -135,6 +151,63 @@ class UHCBoundary(
 
     internal fun onCompleted() {
         CasualUHC.logger.info("Completed boundary moving!")
+    }
+
+    @Listener(during = During(before = GAME_OVER_ID))
+    private fun onPlayerTick(event: PlayerTickEvent) {
+        val (player) = event
+        if (this.uhc.players.isSpectating(player)) {
+            return
+        }
+
+        val level = player.level()
+        val boundary = level.levelBoundary ?: return
+
+        val position = player.position()
+        if (boundary.contains(position)) {
+            return
+        }
+
+        val box = boundary.getAABB()
+        when {
+            box.isAbove(position) -> this.showReturnDirection(player, CasualComponents.direction(Direction.DOWN))
+            box.isBelow(position) -> this.showReturnDirection(player, CasualComponents.direction(Direction.UP))
+            else -> this.showReturnPath(player, level, boundary)
+        }
+    }
+
+    private fun showReturnDirection(player: ServerPlayer, direction: MutableComponent) {
+        if (this.uhc.uptime % 200 == 0) {
+            player.sendTitle(
+                Component.empty(),
+                CasualComponents.INSIDE_BORDER.generate(direction.lime()).withMiniFont()
+            )
+        }
+    }
+
+    private fun showReturnPath(player: ServerPlayer, level: ServerLevel, boundary: LevelBoundary) {
+        val vector = boundary.getDirectionFrom(player.eyePosition)
+
+        val start = player.eyePosition.add(0.0, 4.0, 0.0)
+        val end = start.add(vector.normalize())
+
+        for (i in 1..2) {
+            val top = start.lerp(end, 1.5 * i)
+            val bottom = top.subtract(0.0, 10.0, 0.0)
+            val hit = level.clip(ClipContext(top, bottom, ClipContext.Block.VISUAL, ClipContext.Fluid.SOURCE_ONLY, player))
+
+            if (hit.type != HitResult.Type.MISS) {
+                val position = hit.blockPos
+                val rotation = atan2(vector.x, vector.z)
+
+                val arrow = ArrowShape.createHorizontalCentred(
+                    position.x, hit.location.y + 0.1, position.z, 1.0, rotation
+                )
+                arrow.drawAsParticlesFor(player, pointsPerUnit = 10.0)
+            }
+        }
+
+        this.showReturnDirection(player, CasualComponents.direction(MathUtils.getDirection8(vector)))
     }
 
     @Listener
