@@ -1,6 +1,7 @@
 package net.casual.championships.uhc.minigame
 
-import net.casual.arcade.dimensions.utils.deleteCustomLevel
+import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
+import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevels
 import net.casual.arcade.events.phase.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.player.*
@@ -47,13 +48,12 @@ import net.casual.championships.uhc.boundary.UHCBoundary
 import net.casual.championships.uhc.minigame.modifier.UHCModifiers
 import net.casual.championships.uhc.ui.UHCHud
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
-import net.casual.championships.uhc.gui.UHCMapRenderer
+import net.casual.championships.uhc.ui.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.TMCStarterPack
 import net.casual.championships.uhc.minigame.UHCPhase.GameOver
 import net.casual.championships.uhc.minigame.UHCPhase.Initializing
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
-import net.casual.championships.uhc.utils.UHCDimensions
 import net.casual.championships.uhc.utils.UHCMinigameRules
 import net.casual.championships.uhc.utils.UHCStats
 import net.minecraft.core.BlockPos
@@ -80,7 +80,7 @@ class UHCMinigame(
     server: MinecraftServer,
     uuid: UUID,
     nerfedPlayers: Set<UUID>,
-    private val dimensions: UHCDimensions,
+    private val dimensions: VanillaLikeLevels,
     private val factory: UHCMinigameFactory? = null
 ): Minigame(server, uuid), MinigameRulesProvider by UHCMinigameRules, TimeTrackedMinigame {
     override val id = ID
@@ -97,11 +97,11 @@ class UHCMinigame(
     override val timeTracker = CasualTimeTracker()
 
     val overworld: ServerLevel
-        get() = this.dimensions.overworld.level
+        get() = this.dimensions.getOrThrow(VanillaDimension.Overworld)
     val nether: ServerLevel
-        get() = this.dimensions.nether.level
+        get() = this.dimensions.getOrThrow(VanillaDimension.Nether)
     val end: ServerLevel
-        get() = this.dimensions.end.level
+        get() = this.dimensions.getOrThrow(VanillaDimension.End)
 
     init {
         this.tickrate.useGlobalManager = false
@@ -110,7 +110,7 @@ class UHCMinigame(
         this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
 
-        this.levels.addAll(this.dimensions.map { it.level })
+        this.levels.addAll(this.dimensions.all())
 
         for (player in nerfedPlayers) {
             this.tags.add(player, UHCModifiers.NERFED)
@@ -193,11 +193,6 @@ class UHCMinigame(
 
     @Listener(priority = -2000)
     private fun onMinigameClose(event: MinigameCloseEvent) {
-        for ((level, persist) in this.dimensions) {
-            if (!persist) {
-                this.server.deleteCustomLevel(level)
-            }
-        }
         for (team in this.teams.getPlayingTeams()) {
             team.sharedHealthExtension.enabled = false
         }
