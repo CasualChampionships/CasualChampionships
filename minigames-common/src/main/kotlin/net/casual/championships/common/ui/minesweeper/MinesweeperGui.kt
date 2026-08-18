@@ -6,7 +6,7 @@ import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.guis.core.container.ContainerGui
 import net.casual.arcade.guis.utils.ContainerType
 import net.casual.arcade.guis.utils.SlotClickAction
-import net.casual.arcade.resources.utils.spaced
+import net.casual.arcade.pack.utils.spaced
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus

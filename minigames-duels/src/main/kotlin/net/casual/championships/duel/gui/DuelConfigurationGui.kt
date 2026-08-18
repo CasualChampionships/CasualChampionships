@@ -1,8 +1,8 @@
 package net.casual.championships.duel.gui
 
 import net.casual.arcade.guis.utils.ContainerType
-import net.casual.arcade.resources.utils.spaced
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.spaced
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.lore
 import net.casual.arcade.utils.ItemUtils.named
@@ -39,7 +39,8 @@ class DuelConfigurationGui(
         val settings = CasualGuiItems.GEAR
         settings.named(Component.literal("Settings").withMiniFont())
         this.setSlot(47, settings) {
-            DuelSettingsGui(this.player, this.settings, this).open()
+            this.settings.open(this.player)
+            // DuelSettingsGui(this.player, this.settings, this).open()
         }
 
         val players = ItemStack(CasualItems.FORWARD_FACING_PLAYER_HEAD)

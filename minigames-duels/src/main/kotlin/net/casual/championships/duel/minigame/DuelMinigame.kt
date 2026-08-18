@@ -17,7 +17,7 @@ import net.casual.arcade.minigame.extensions.PlayerMovementRestrictionExtension.
 import net.casual.arcade.minigame.managers.MinigameLevelManager
 import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.settings.MinigameSettings
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.LootTableUtils
 import net.casual.arcade.utils.LootTableUtils.addItem
 import net.casual.arcade.utils.LootTableUtils.between

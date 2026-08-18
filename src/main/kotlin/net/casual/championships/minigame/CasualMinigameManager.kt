@@ -16,10 +16,10 @@ import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.minigame.utils.MinigameResources.Companion.sendTo
-import net.casual.arcade.resources.pack.PackInfo
-import net.casual.arcade.resources.utils.ResourcePackUtils.sendResourcePack
-import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.PackInfo
+import net.casual.arcade.pack.utils.ResourcePackUtils.sendResourcePack
+import net.casual.arcade.pack.utils.ResourcePackUtils.toPackInfo
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ArcadeUtils
 import net.casual.arcade.utils.JsonUtils

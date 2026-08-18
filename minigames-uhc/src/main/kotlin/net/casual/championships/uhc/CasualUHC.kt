@@ -1,10 +1,7 @@
 package net.casual.championships.uhc
 
 import net.casual.arcade.minigame.utils.MinigameRegistries
-import net.casual.arcade.resources.creator.NamedResourcePackCreator
-import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
-import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
-import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
+import net.casual.arcade.pack.generation.PackDefinition
 import net.casual.arcade.scheduler.utils.TaskRegistries
 import net.casual.arcade.utils.serialization.codec.CodecProvider.Companion.register
 import net.casual.championships.common.util.CasualUtils
@@ -30,12 +27,12 @@ object CasualUHC: ModInitializer {
 
     internal val logger: Logger = LoggerFactory.getLogger("CasualUHC")
 
-    val UHC_PACK = NamedResourcePackCreator.named("uhc") {
-        addAssetSource(MOD_ID)
-        addLangsFromData(MOD_ID)
-        addMissingItemModels(CasualUtils.MOD_ID, container)
+    val UHC_PACK = PackDefinition("uhc") {
+        description = Component.literal("Resources for CasualChampionships UHC minigame")
+        include(MOD_ID)
+        addLangs(MOD_ID)
+        generateMissingItemModels(CasualUtils.MOD_ID, container)
         addFont(UHCComponents.Bitmap)
-        packDescription = Component.literal("Resources for CasualChampionships UHC minigame")
     }
 
     override fun onInitialize() {

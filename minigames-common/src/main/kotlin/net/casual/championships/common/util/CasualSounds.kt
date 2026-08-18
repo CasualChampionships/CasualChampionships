@@ -1,6 +1,6 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.resources.sound.SoundResources
+import net.casual.arcade.pack.sound.SoundResources
 
 object CasualSounds: SoundResources(CasualUtils.MOD_ID) {
     val COUNTDOWN_TICK_NORMAL = sound(at("countdown.tick.normal"), 0.7F)

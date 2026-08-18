@@ -2,8 +2,8 @@ package net.casual.championships.common.ui.bossbar
 
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.stats.ArcadeStats
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.font.spacing.SpacingFontResources
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.TimeUtils.formatHHMMSS
 import net.casual.arcade.utils.component.shadowless

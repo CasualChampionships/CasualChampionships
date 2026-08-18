@@ -2,16 +2,15 @@ package net.casual.championships.resources
 
 import com.google.common.collect.HashBiMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
-import net.casual.arcade.host.GlobalPackHost
-import net.casual.arcade.host.PackHost.HostedPackRef
-import net.casual.arcade.host.pack.PathPack
-import net.casual.arcade.host.pack.hosted.HostedPack
 import net.casual.arcade.minigame.utils.MinigameResources
-import net.casual.arcade.resources.ArcadeResourcePacks
-import net.casual.arcade.resources.creator.NamedResourcePackCreator
-import net.casual.arcade.resources.pack.PackInfo
-import net.casual.arcade.resources.utils.ResourcePackUtils.addPack
-import net.casual.arcade.resources.utils.ResourcePackUtils.toPackInfo
+import net.casual.arcade.pack.PackInfo
+import net.casual.arcade.pack.generation.BuiltInResourcePacks
+import net.casual.arcade.pack.generation.PackDefinition
+import net.casual.arcade.pack.host.GlobalPackHost
+import net.casual.arcade.pack.host.HostedPack
+import net.casual.arcade.pack.host.PackHost.HostedPackRef
+import net.casual.arcade.pack.host.PathPack
+import net.casual.arcade.pack.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.scoreboard.getHexColor
 import net.casual.championships.CasualChampionships
 import net.casual.championships.common.CasualCommon
@@ -19,7 +18,7 @@ import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.uhc.CasualUHC
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.TeamColor
-import java.util.Optional
+import java.util.*
 import kotlin.io.path.listDirectoryEntries
 
 object CasualResourcePackHost {
@@ -32,7 +31,7 @@ object CasualResourcePackHost {
     private val common = HashMap<String, HostedPackRef>()
 
     val uhc: HostedPack by this.host(CasualUHC.UHC_PACK)
-    val boundary: HostedPack by this.host(ArcadeResourcePacks.BOUNDARY_SHADER_PACK)
+    val boundary: HostedPack by this.host(BuiltInResourcePacks.BOUNDARY_SHADER_PACK)
 
     init {
         for (pack in this.packs.listDirectoryEntries("*.zip")) {
@@ -81,7 +80,7 @@ object CasualResourcePackHost {
         if (this.colors != colors) {
             this.colors.clear()
             this.colors.putAll(colors)
-            this.hostCommon(ArcadeResourcePacks.createCustomGlowColorPack {
+            this.hostCommon(BuiltInResourcePacks.createCustomGlowColorPack {
                 for ((formatting, color) in colors) {
                     if (color != -1) {
                         set(formatting, color)
@@ -99,12 +98,13 @@ object CasualResourcePackHost {
 
     }
 
-    private fun hostCommon(creator: NamedResourcePackCreator) {
-        this.common[creator.zippedName()] = this.host(creator)
+    private fun hostCommon(definition: PackDefinition) {
+        this.common[definition.name] = this.host(definition)
     }
 
-    private fun host(creator: NamedResourcePackCreator): HostedPackRef {
-        val ref = this.host.addPack(this.generated, creator)
+    private fun host(creator: PackDefinition): HostedPackRef {
+        val built = creator.buildTo(this.generated)
+        val ref = this.host.add(PathPack(built))
         ref.future.thenApply(this::cachePackForReplay)
         return ref
     }

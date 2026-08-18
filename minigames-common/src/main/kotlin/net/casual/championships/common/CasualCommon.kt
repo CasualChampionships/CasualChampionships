@@ -2,13 +2,8 @@ package net.casual.championships.common
 
 import eu.pb4.polymer.core.api.item.PolymerCreativeModeTabUtils
 import net.casual.arcade.dimensions.utils.DimensionRegistries
-import net.casual.arcade.resources.ArcadeResourcePacks
-import net.casual.arcade.resources.creator.NamedResourcePackCreator
-import net.casual.arcade.resources.utils.ResourcePackUtils.addAssetsFrom
-import net.casual.arcade.resources.utils.ResourcePackUtils.addFont
-import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
-import net.casual.arcade.resources.utils.ResourcePackUtils.addMissingItemModels
-import net.casual.arcade.resources.utils.ResourcePackUtils.addSounds
+import net.casual.arcade.pack.generation.BuiltInResourcePacks
+import net.casual.arcade.pack.generation.PackDefinition
 import net.casual.championships.common.anticheat.CasualAntiCheat
 import net.casual.championships.common.items.CasualGuiItems
 import net.casual.championships.common.items.CasualItems
@@ -25,28 +20,28 @@ object CasualCommon: ModInitializer {
 
     private val container = FabricLoader.getInstance().getModContainer(MOD_ID).get()
 
-    private val COMMON_PACK = NamedResourcePackCreator.named("common") {
-        addAssetsFrom(container)
-        addLangsFromData(MOD_ID, container)
+    private val COMMON_PACK = PackDefinition("common") {
+        description = Component.literal("Common resources used in CasualChampionships")
+        include(container)
+        addLangs(MOD_ID, container)
         addFont(CasualComponents.Hud)
         addFont(CasualComponents.Gui)
         addFont(CasualComponents.Text)
         addFont(CasualComponents.Border)
         addSounds(CasualSounds)
-        addMissingItemModels(CasualUtils.MOD_ID, container)
-        packDescription = Component.literal("Common resources used in CasualChampionships")
+        generateMissingItemModels(CasualUtils.MOD_ID, container)
     }
 
     val COMMON_PACKS = listOf(
-        ArcadeResourcePacks.PADDING_FONT_PACK,
-        ArcadeResourcePacks.PIXEL_FONT_PACK,
-        ArcadeResourcePacks.HIDE_PLAYER_LIST_HEADS_PACK,
-        ArcadeResourcePacks.MINI_MINECRAFT_FONT_PACK,
-        ArcadeResourcePacks.SPACING_FONT_PACK,
-        ArcadeResourcePacks.HIDE_PLAYER_LIST_PING_PACK,
-        ArcadeResourcePacks.ACTION_BAR_FONT_PACK,
-        ArcadeResourcePacks.MINI_ACTION_BAR_FONT_PACK,
-        ArcadeResourcePacks.ARCADE_LANG_PACK,
+        BuiltInResourcePacks.PADDING_FONT_PACK,
+        BuiltInResourcePacks.PIXEL_FONT_PACK,
+        BuiltInResourcePacks.HIDE_PLAYER_LIST_HEADS_PACK,
+        BuiltInResourcePacks.MINI_MINECRAFT_FONT_PACK,
+        BuiltInResourcePacks.SPACING_FONT_PACK,
+        BuiltInResourcePacks.HIDE_PLAYER_LIST_PING_PACK,
+        BuiltInResourcePacks.ACTION_BAR_FONT_PACK,
+        BuiltInResourcePacks.MINI_ACTION_BAR_FONT_PACK,
+        BuiltInResourcePacks.ARCADE_LANG_PACK,
         COMMON_PACK
     )
 

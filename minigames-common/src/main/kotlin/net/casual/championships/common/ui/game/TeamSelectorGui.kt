@@ -1,7 +1,7 @@
 package net.casual.championships.common.ui.game
 
 import net.casual.arcade.guis.utils.ContainerType
-import net.casual.arcade.resources.utils.spaced
+import net.casual.arcade.pack.utils.spaced
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus

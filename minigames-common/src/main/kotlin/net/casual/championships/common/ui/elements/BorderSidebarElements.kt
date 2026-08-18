@@ -3,8 +3,8 @@ package net.casual.championships.common.ui.elements
 import net.casual.arcade.boundary.LevelBoundary
 import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.boundary.utils.levelBoundary
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.font.spacing.SpacingFontResources
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.MathUtils.contains
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus

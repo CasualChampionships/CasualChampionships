@@ -1,8 +1,8 @@
 package net.casual.championships.lobby.gui
 
-import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
-import net.casual.arcade.resources.utils.spaced
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.font.heads.PixelGridHeadComponents
+import net.casual.arcade.pack.utils.spaced
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus
 import net.casual.arcade.utils.scoreboard.color

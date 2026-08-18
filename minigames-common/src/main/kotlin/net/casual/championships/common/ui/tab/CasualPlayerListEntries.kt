@@ -4,10 +4,10 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import kotlinx.coroutines.Deferred
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
-import net.casual.arcade.resources.font.heads.getHeadFor
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.font.heads.PixelGridHeadComponents
+import net.casual.arcade.pack.font.heads.getHeadFor
+import net.casual.arcade.pack.font.spacing.SpacingFontResources
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.italicize
 import net.casual.arcade.utils.coroutine.async

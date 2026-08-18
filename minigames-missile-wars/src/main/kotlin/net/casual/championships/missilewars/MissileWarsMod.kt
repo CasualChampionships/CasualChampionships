@@ -1,7 +1,6 @@
 package net.casual.championships.missilewars
 
-import net.casual.arcade.resources.creator.NamedResourcePackCreator
-import net.casual.arcade.resources.utils.ResourcePackUtils.addLangsFromData
+import net.casual.arcade.pack.generation.PackDefinition
 import net.casual.championships.missilewars.items.MissileWarsItems
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.minecraft.network.chat.Component
@@ -14,10 +13,10 @@ object MissileWarsMod: DedicatedServerModInitializer {
 
     val logger: Logger = LoggerFactory.getLogger("CasualMissileWars")
 
-    val MISSILE_WARS_PACK = NamedResourcePackCreator.named("missile_wars") {
-        addAssetSource(MOD_ID)
-        addLangsFromData(MOD_ID)
-        packDescription = Component.literal("Resources for CasualChampionships Missile Wars minigame")
+    val MISSILE_WARS_PACK = PackDefinition("missile_wars") {
+        description = Component.literal("Resources for CasualChampionships Missile Wars minigame")
+        include(MOD_ID)
+        addLangs(MOD_ID)
     }
 
     override fun onInitializeServer() {

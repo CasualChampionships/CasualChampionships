@@ -11,7 +11,7 @@ import net.casual.arcade.minigame.utils.MinigameUtils.broadcastChangesToAdmin
 import net.casual.arcade.nametags.Nametag
 import net.casual.arcade.observer.Observer
 import net.casual.arcade.observer.utils.asPlayerOrNull
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.chat.PlayerChatFormatter
@@ -163,7 +163,7 @@ object CasualGuiUtils {
             a.map { Component.empty().append(it).append("\n\n") }.orElse(Component.empty()).append(b)
         }
         list.header.set(Component.literal("\n").append(CASUAL).append(" ").append(CHAMPIONSHIPS).append("\n"))
-        list.setHeader(footer)
+        list.setFooter(footer)
     }
 
     fun createTeamSelectionGui(minigame: Minigame, player: ServerPlayer): TeamSelectorGui {
@@ -180,8 +180,8 @@ object CasualGuiUtils {
         return TeamSelectorGui(player, selections)
     }
 
-    fun createPlayerInventoryViewGui(observee: ServerPlayer, observer: ServerPlayer): PlayerInventoryViewGui {
-        return CasualPlayerInventoryViewGui(observee, observer)
+    fun createPlayerInventoryViewGui(observer: ServerPlayer, observee: ServerPlayer): PlayerInventoryViewGui {
+        return CasualPlayerInventoryViewGui(observer, observee)
     }
 
     fun setMinigameUI(minigame: Minigame) {

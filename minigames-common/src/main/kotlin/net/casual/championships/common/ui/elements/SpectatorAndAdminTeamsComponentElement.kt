@@ -2,9 +2,9 @@ package net.casual.championships.common.ui.elements
 
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.managers.MinigameTeamManager
-import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.font.heads.PixelGridHeadComponents
+import net.casual.arcade.pack.font.spacing.SpacingFontResources
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus

@@ -1,8 +1,8 @@
 package net.casual.championships.duel.gui
 
 import net.casual.arcade.guis.utils.ContainerType
-import net.casual.arcade.resources.utils.spaced
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.spaced
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named

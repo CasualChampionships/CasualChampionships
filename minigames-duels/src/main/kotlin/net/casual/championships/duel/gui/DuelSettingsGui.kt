@@ -1,9 +1,8 @@
 package net.casual.championships.duel.gui
 
-import eu.pb4.sgui.api.ClickType
 import net.casual.arcade.guis.utils.ContainerType
 import net.casual.arcade.minigame.settings.display.MenuGameSetting
-import net.casual.arcade.resources.utils.spaced
+import net.casual.arcade.pack.utils.spaced
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.plus
@@ -13,8 +12,8 @@ import net.casual.championships.common.ui.CasualContainerGui
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.duel.minigame.DuelSettings
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.inventory.ContainerInput
 
+@Deprecated("Use the default DisplayableSettings gui")
 class DuelSettingsGui(
     player: ServerPlayer,
     private val settings: DuelSettings,
@@ -44,18 +43,18 @@ class DuelSettingsGui(
     private fun createHorizontalSetting(slot: Int, setting: MenuGameSetting<*>) {
         this.setSlot(slot, setting.display)
         for ((i, option) in setting.options.withIndex()) {
-            this.setSlot(slot + i + 1, option.itemStack) {
-                option.guiCallback.click(0, ClickType.MOUSE_RIGHT, ContainerInput.PICKUP, null)
-            }
+            // this.setSlot(slot + i + 1, option.itemStack) {
+            //     option.guiCallback.click(0, ClickType.MOUSE_RIGHT, ContainerInput.PICKUP, null)
+            // }
         }
     }
 
     private fun createVerticalSetting(slot: Int, setting: MenuGameSetting<*>) {
         this.setSlot(slot, setting.display)
         for ((i, option) in setting.options.withIndex()) {
-            this.setSlot(slot + (i + 1) * 9, option.itemStack) {
-                option.guiCallback.click(0, ClickType.MOUSE_RIGHT, ContainerInput.PICKUP, null)
-            }
+            // this.setSlot(slot + (i + 1) * 9, option.itemStack) {
+            //     option.guiCallback.click(0, ClickType.MOUSE_RIGHT, ContainerInput.PICKUP, null)
+            // }
         }
     }
 }

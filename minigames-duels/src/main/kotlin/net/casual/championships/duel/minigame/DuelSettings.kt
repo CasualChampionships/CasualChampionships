@@ -5,7 +5,8 @@ import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Compan
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.enumeration
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.string
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.minigame.utils.defaultOptions
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.ItemUtils.potion
@@ -14,22 +15,8 @@ import net.casual.championships.common.items.CasualGuiItems.FLAG
 import net.casual.championships.common.items.CasualGuiItems.GLOWING
 import net.casual.championships.common.items.CasualGuiItems.GREEN_DIAGONAL
 import net.casual.championships.common.items.CasualGuiItems.HEALTH_BOOST
-import net.casual.championships.common.items.CasualGuiItems.LARGE
-import net.casual.championships.common.items.CasualGuiItems.LARGE_SELECTED
-import net.casual.championships.common.items.CasualGuiItems.MEDIUM
-import net.casual.championships.common.items.CasualGuiItems.MEDIUM_SELECTED
 import net.casual.championships.common.items.CasualGuiItems.NATURAL_REGEN
-import net.casual.championships.common.items.CasualGuiItems.ONE_TIMES
-import net.casual.championships.common.items.CasualGuiItems.ONE_TIMES_SELECTED
-import net.casual.championships.common.items.CasualGuiItems.SMALL
-import net.casual.championships.common.items.CasualGuiItems.SMALL_SELECTED
-import net.casual.championships.common.items.CasualGuiItems.THREE_TIMES
-import net.casual.championships.common.items.CasualGuiItems.THREE_TIMES_SELECTED
-import net.casual.championships.common.items.CasualGuiItems.TWO_TIMES
-import net.casual.championships.common.items.CasualGuiItems.TWO_TIMES_SELECTED
-import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.duel.arena.DuelArenaSize
-import net.casual.championships.duel.arena.DuelArenaSize.*
 import net.casual.championships.duel.arena.DuelArenasDataModule
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
@@ -40,7 +27,7 @@ import kotlin.enums.enumEntries
 
 class DuelSettings(
     private val arenas: Collection<DuelArenasDataModule.ResolvedArenas>
-): DisplayableSettings(CasualSettings.Defaults(Component.translatable("casual.gui.duel.settings").withMiniFont())) {
+): DisplayableSettings(Component.translatable("casual.gui.duel.settings").withMiniFont()) {
     val displayableTeams = bool {
         name = "teams"
         val flag = FLAG.named(Component.translatable("casual.gui.duel.settings.teams").withMiniFont())
@@ -48,7 +35,7 @@ class DuelSettings(
         flag.hideTooltip(DataComponents.DYED_COLOR)
         display = flag
         value = false
-        defaults.options(this)
+        defaultOptions()
     }
     var teams by this.register(this.displayableTeams)
 
@@ -58,15 +45,9 @@ class DuelSettings(
             .potion(Potions.HEALING)
             .hideTooltip(DataComponents.POTION_CONTENTS)
         value = 1.0
-        option("normal", ONE_TIMES.named("Normal"), 0.0) { setting, _, _ ->
-            (if (setting.get() == 0.0) ONE_TIMES_SELECTED else ONE_TIMES).named("Normal")
-        }
-        option("double", ONE_TIMES.named("Double"), 1.0) { setting, _, _ ->
-            (if (setting.get() == 1.0) TWO_TIMES_SELECTED else TWO_TIMES).named("Double")
-        }
-        option("triple", ONE_TIMES.named("Triple"), 2.0) { setting, _, _ ->
-            (if (setting.get() == 2.0) THREE_TIMES_SELECTED else THREE_TIMES).named("Triple")
-        }
+        option("normal", Component.literal("normal"), 0.0)
+        option("double", Component.literal("double"), 1.0)
+        option("triple", Component.literal("triple"), 2.0)
     }
     var health by this.register(this.displayableHealth)
 
@@ -74,7 +55,7 @@ class DuelSettings(
         name = "natural_regeneration"
         display = NATURAL_REGEN.named(Component.translatable("casual.gui.duel.settings.naturalRegeneration").withMiniFont())
         value = false
-        defaults.options(this)
+        defaultOptions()
     }
     var naturalRegen by this.register(this.displayableNaturalRegen)
 
@@ -82,7 +63,7 @@ class DuelSettings(
         name = "glowing"
         display = GLOWING.named(Component.translatable("casual.gui.duel.settings.glowing").withMiniFont())
         value = false
-        defaults.options(this)
+        defaultOptions()
     }
     var glowing by this.register(this.displayableGlowing)
 
@@ -90,7 +71,7 @@ class DuelSettings(
         name = "player_drops_head"
         display = Items.PLAYER_HEAD.named(Component.translatable("casual.gui.duel.settings.playerHeadDrops").withMiniFont())
         value = true
-        defaults.options(this)
+        defaultOptions()
     }
     var playerDropsHead by this.register(this.displayablePlayerDropHeads)
 
@@ -108,15 +89,7 @@ class DuelSettings(
         name = "arena_size"
         display = GREEN_DIAGONAL.named(Component.translatable("casual.gui.duel.settings.arenaSize").withMiniFont())
         value = enumEntries<DuelArenaSize>().random()
-        option("small", ONE_TIMES.named("Small"), Small) { setting, _, _ ->
-            (if (setting.get() == Small) SMALL_SELECTED else SMALL).named("Small")
-        }
-        option("medium", ONE_TIMES.named("Medium"), Medium) { setting, _, _ ->
-            (if (setting.get() == Medium) MEDIUM_SELECTED else MEDIUM).named("Medium")
-        }
-        option("large", ONE_TIMES.named("Large"), Large) { setting, _, _ ->
-            (if (setting.get() == Large) LARGE_SELECTED else LARGE).named("Large")
-        }
+        defaultOptions(id = { size -> size.name.lowercase() })
     }
     var arenaSize by this.register(this.displayableArenaSize)
 

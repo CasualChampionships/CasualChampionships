@@ -1,6 +1,6 @@
 package net.casual.championships.uhc.utils
 
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.component.bold
 import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.join

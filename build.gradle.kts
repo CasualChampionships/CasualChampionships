@@ -47,6 +47,7 @@ allprojects {
         implementation(libs.arcade)
 
         implementation(libs.map.canvas)
+        implementation(libs.polymer.core)
     }
 
     java {
@@ -96,6 +97,7 @@ subprojects {
 dependencies {
     include(libs.arcade)
     include(libs.map.canvas)
+    include(libs.polymer.core)
 
     include(implementation(libs.voicechat.api.get())!!)
     include(implementation(libs.casual.database.get())!!)

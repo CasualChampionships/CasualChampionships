@@ -1,6 +1,6 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.component.bold
 import net.casual.arcade.utils.component.color

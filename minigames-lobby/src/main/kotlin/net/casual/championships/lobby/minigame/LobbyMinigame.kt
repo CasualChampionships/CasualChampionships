@@ -25,7 +25,7 @@ import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
 import net.casual.arcade.minigame.utils.MinigameUtils.transferAdminAndSpectatorTeamsTo
-import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
+import net.casual.arcade.pack.utils.ResourcePackUtils.afterPacksLoad
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.IdentifierUtils
 import net.casual.arcade.utils.TimeUtils.Seconds

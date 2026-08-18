@@ -11,9 +11,9 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.permissions.PermissionLevel
 
 class CasualPlayerInventoryViewGui(
+    observer: ServerPlayer,
     observee: ServerPlayer,
-    observer: ServerPlayer
-): PlayerInventoryViewGui(observee, observer) {
+): PlayerInventoryViewGui(observer, observee) {
     override fun loadBackground() {
         val name = this.observee.displayName
         this.setTitle(CasualComponents.Gui.createDoubleChestGui(name))

@@ -2,8 +2,8 @@ package net.casual.championships.common.ui.game
 
 import com.mojang.authlib.GameProfile
 import net.casual.arcade.guis.utils.ContainerType
-import net.casual.arcade.resources.utils.spaced
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.font.spacing.SpacingFontResources.spaced
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named

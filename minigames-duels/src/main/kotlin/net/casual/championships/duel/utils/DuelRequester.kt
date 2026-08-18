@@ -1,7 +1,7 @@
 package net.casual.championships.duel.utils
 
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.font.spacing.SpacingFontResources
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.component.red
 import net.casual.arcade.virtual.visuals.ready.chat.ChatReadyBroadcaster

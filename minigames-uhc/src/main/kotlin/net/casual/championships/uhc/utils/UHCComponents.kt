@@ -1,6 +1,6 @@
 package net.casual.championships.uhc.utils
 
-import net.casual.arcade.resources.font.FontResources
+import net.casual.arcade.pack.font.FontResources
 import net.casual.championships.common.util.casual
 
 object UHCComponents {

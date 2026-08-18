@@ -9,9 +9,9 @@ import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.file.ReadableArchive.Companion.child
 import net.casual.arcade.utils.file.ReadableArchive.Companion.parseJson
 import net.casual.championships.common.util.casual
+import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.ItemStackTemplate
 import java.util.*
 
@@ -29,7 +29,7 @@ class DuelArenasDataModule(
 
     class ResolvedArenas(
         val name: String,
-        val display: ItemStack,
+        val display: Component,
         val arenas: EnumMap<DuelArenaSize, DuelArena>
     )
 
@@ -66,7 +66,7 @@ class DuelArenasDataModule(
                         MinigameWorldData.get(child, server)
                     )
                 }
-                resolved[instance.name] = ResolvedArenas(instance.name, instance.display.create(), arenas)
+                resolved[instance.name] = ResolvedArenas(instance.name, instance.display.create().displayName, arenas)
             }
             return DuelArenasDataModule(resolved)
         }

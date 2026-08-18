@@ -1,8 +1,8 @@
 package net.casual.championships.common.ui.elements
 
-import net.casual.arcade.resources.font.heads.PixelGridHeadComponents
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.font.heads.PixelGridHeadComponents
+import net.casual.arcade.pack.font.spacing.SpacingFontResources
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.component.bold
 import net.casual.arcade.utils.component.italicize
 import net.casual.arcade.utils.component.wrap

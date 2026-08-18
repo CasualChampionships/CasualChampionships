@@ -1,6 +1,6 @@
 package net.casual.championships.common.ui.bossbar
 
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.TimeUtils.formatHHMMSS
 import net.casual.arcade.virtual.visuals.bossbar.DynamicVirtualBossbar
 import net.casual.arcade.virtual.visuals.elements.UniversalElement

@@ -6,12 +6,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
-import net.casual.arcade.commands.CommandTree
-import net.casual.arcade.commands.argument
+import net.casual.arcade.commands.*
 import net.casual.arcade.commands.arguments.EnumArgument
-import net.casual.arcade.commands.fail
-import net.casual.arcade.commands.literal
-import net.casual.arcade.commands.success
 import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyPlayers
 import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyTeams
 import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
@@ -28,9 +24,7 @@ import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.casual.championships.lobby.minigame.LobbyPhase
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
-import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerPlayer
 
 class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
@@ -71,7 +65,7 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
     private fun viewNextMinigameSettings(context: CommandContext<CommandSourceStack>): Int {
         val next = this.lobby.next ?: throw NO_MINIGAME.create()
         val player = context.source.playerOrException
-        next.settings.gui(player).open()
+        next.settings.open(player)
         return Command.SINGLE_SUCCESS
     }
 

@@ -28,7 +28,7 @@ object ViewCommand: CommandTree<CommandSourceStack> {
 
     private fun viewPlayerInventory(context: CommandContext<CommandSourceStack>): Int {
         val target = EntityArgument.getPlayer(context, "target")
-        val gui = CasualGuiUtils.createPlayerInventoryViewGui(target, context.source.playerOrException)
+        val gui = CasualGuiUtils.createPlayerInventoryViewGui(context.source.playerOrException, target)
         gui.open()
         return Command.SINGLE_SUCCESS
     }

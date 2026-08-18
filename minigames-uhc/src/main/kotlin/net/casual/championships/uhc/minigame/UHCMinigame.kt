@@ -26,12 +26,12 @@ import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGa
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
+import net.casual.arcade.pack.font.spacing.SpacingFontResources
+import net.casual.arcade.pack.utils.ResourcePackUtils.afterPacksLoad
+import net.casual.arcade.pack.utils.spaced
+import net.casual.arcade.pack.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniShiftedDownFont
 import net.casual.arcade.replay.recorder.player.ReplayPlayerRecorders
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.resources.utils.ResourcePackUtils.afterPacksLoad
-import net.casual.arcade.resources.utils.spaced
-import net.casual.arcade.resources.utils.withMiniFont
-import net.casual.arcade.resources.utils.withMiniShiftedDownFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.ComponentUtils

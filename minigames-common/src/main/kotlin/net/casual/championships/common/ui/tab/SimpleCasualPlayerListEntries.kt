@@ -1,7 +1,7 @@
 package net.casual.championships.common.ui.tab
 
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.component.color
 import net.casual.arcade.utils.component.italicize
 import net.casual.arcade.virtual.visuals.tab.PlayerListEntries

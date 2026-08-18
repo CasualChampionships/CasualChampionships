@@ -7,7 +7,7 @@ import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.task.impl.MinigameTask
 import net.casual.arcade.minigame.template.teleporter.EntityTeleporter.Companion.teleport
 import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks

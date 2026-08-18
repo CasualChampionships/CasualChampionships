@@ -13,7 +13,7 @@ import net.casual.arcade.commands.suggests
 import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.minigame.utils.MinigameUtils.isMinigameAdminOrHasPermission
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.component.command
 import net.casual.arcade.utils.component.event.ClickEventCallback
 import net.casual.arcade.utils.component.function

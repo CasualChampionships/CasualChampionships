@@ -1,14 +1,13 @@
 package net.casual.championships.common.datagen
 
-import eu.pb4.polymer.resourcepack.api.ResourcePackCreator
 import net.casual.arcade.datagen.language.CentredSpacingGenerator
 import net.casual.arcade.datagen.language.LanguageGenerator
 import net.casual.arcade.datagen.language.NegativeWidthGenerator
 import net.casual.arcade.datagen.language.WidthDifferenceGenerator
 import net.casual.arcade.datagen.resource.ArcadeResourceGenerator
 import net.casual.arcade.minigame.managers.chat.MinigameChatMode.*
-import net.casual.arcade.resources.creator.NamedResourcePackCreator
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.generation.PackDefinition
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.championships.common.CasualCommon
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualUtils
@@ -26,8 +25,8 @@ class CommonDatagen: ArcadeResourceGenerator {
         return CasualCommon.MOD_ID
     }
 
-    override fun resources(): Collection<ResourcePackCreator> {
-        return CasualCommon.COMMON_PACKS.map(NamedResourcePackCreator::getCreator)
+    override fun resources(): Collection<PackDefinition> {
+        return CasualCommon.COMMON_PACKS
     }
 
     override fun run(client: Minecraft) {

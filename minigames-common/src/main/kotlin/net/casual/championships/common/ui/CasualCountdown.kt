@@ -1,6 +1,6 @@
 package net.casual.championships.common.ui
 
-import net.casual.arcade.resources.utils.withMiniFont
+import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.player.sendSound

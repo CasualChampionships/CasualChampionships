@@ -1,10 +1,10 @@
 package net.casual.championships.common.util
 
-import net.casual.arcade.resources.font.FontResources
-import net.casual.arcade.resources.font.IndexedFontResources
-import net.casual.arcade.resources.font.spacing.SpacingFontResources
-import net.casual.arcade.resources.utils.withMiniFont
-import net.casual.arcade.resources.utils.withSpacingFont
+import net.casual.arcade.pack.font.FontResources
+import net.casual.arcade.pack.font.IndexedFontResources
+import net.casual.arcade.pack.font.spacing.SpacingFontResources
+import net.casual.arcade.pack.utils.withMiniFont
+import net.casual.arcade.pack.utils.withSpacingFont
 import net.casual.arcade.utils.ComponentUtils
 import net.casual.arcade.utils.ComponentUtils.translatable
 import net.casual.arcade.utils.ComponentUtils.translatableWithArgs
