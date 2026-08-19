@@ -14,13 +14,14 @@ import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.serialization.MinigameFactory
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
-import net.casual.arcade.pack.utils.ResourcePackUtils.afterPacksLoad
+import net.casual.arcade.pack.utils.ResourcePackUtils.awaitPacks
 import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.replay.recorder.player.ReplayPlayerRecorders
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.component.*
+import net.casual.arcade.utils.coroutine.launch
 import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.math.location.with
@@ -333,7 +334,10 @@ class UHCMinigame(
         player.isInvulnerable = true
         val task = PlayerTask(player) { it.isInvulnerable = false }
         GlobalTickedScheduler.Server.schedule(10.Seconds, task)
-        player.afterPacksLoad(task::run)
+        this.server.launch {
+            player.awaitPacks()
+            task.run()
+        }
 
         if (team != null) {
             this.teams.removeEliminatedTeam(team)
