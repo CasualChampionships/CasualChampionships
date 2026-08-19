@@ -8,8 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevel
-import net.casual.arcade.pack.font.heads.ProfileHeadComponents
-import net.casual.arcade.pack.font.heads.getHeadOrDefaultFor
+import net.casual.arcade.pack.font.heads.PixelGridHeadComponents
 import net.casual.arcade.pack.font.spacing.SpacingFontResources
 import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
@@ -198,7 +197,7 @@ class UHCMapRenderer(private val uhc: UHCMinigame) {
 
         icon.move(scaledPlayerX, scaledPlayerZ, 0)
         // if (icon.text == null) {
-        val head = ProfileHeadComponents.getHeadOrDefaultFor(player)
+        val head = PixelGridHeadComponents.getHeadOrDefaultFor(player)
         icon.name = Component.empty()
             .append(head)
             .append(SpacingFontResources.spaced(-10))
