@@ -65,7 +65,7 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
     private fun viewNextMinigameSettings(context: CommandContext<CommandSourceStack>): Int {
         val next = this.lobby.next ?: throw NO_MINIGAME.create()
         val player = context.source.playerOrException
-        next.settings.open(player)
+        next.settings.gui(player).open()
         return Command.SINGLE_SUCCESS
     }
 
