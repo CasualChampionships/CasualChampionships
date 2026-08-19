@@ -1,0 +1,138 @@
+package net.casual.championships.uhc.boundary
+
+import com.mojang.serialization.Codec
+import com.mojang.serialization.DataResult
+import net.casual.arcade.boundary.LevelBoundary
+import net.casual.arcade.utils.TimeUtils.Minutes
+import net.casual.arcade.utils.time.MinecraftTimeDuration
+import net.minecraft.core.Direction
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.level.levelgen.Heightmap
+import net.minecraft.world.phys.Vec3
+import kotlin.math.abs
+
+sealed class UHCBoundaryPhase(
+    val name: String,
+    private val ordinal: Int,
+    private val duration: MinecraftTimeDuration,
+    private val cooldown: MinecraftTimeDuration
+): Comparable<UHCBoundaryPhase> {
+    fun getStart(level: ServerLevel): LevelBoundary.SizeAndCenter {
+        return LevelBoundary.SizeAndCenter(this.getStartSize(level), this.getStartCenter(level))
+    }
+
+    fun getEnd(level: ServerLevel): LevelBoundary.SizeAndCenter {
+        return LevelBoundary.SizeAndCenter(this.getEndSize(level), this.getEndCenter(level))
+    }
+
+    fun getSpeedInBlocksPerTick(level: ServerLevel): Double {
+        val start = this.getStartSize(level)
+        val end = this.getEndSize(level)
+        val dx = abs(start.x - end.x)
+        val dz = abs(start.z - end.z)
+        val avg = (dx + dz) / 2
+        return avg / this.duration.ticks
+    }
+
+    fun getDuration(total: MinecraftTimeDuration): MinecraftTimeDuration {
+        return total * (this.duration.ticks.toDouble() / TOTAL_TIME.ticks)
+    }
+
+    fun getCooldown(total: MinecraftTimeDuration): MinecraftTimeDuration {
+        return total * (this.cooldown.ticks.toDouble() / TOTAL_TIME.ticks)
+    }
+
+    override fun compareTo(other: UHCBoundaryPhase): Int {
+        return this.ordinal.compareTo(other.ordinal)
+    }
+
+    abstract fun getStartSize(level: ServerLevel): Vec3
+    abstract fun getEndSize(level: ServerLevel): Vec3
+    abstract fun getStartCenter(level: ServerLevel): Vec3
+    abstract fun getEndCenter(level: ServerLevel): Vec3
+    abstract fun next(): UHCBoundaryPhase?
+
+    data object First: UHCBoundaryPhase("first", 0, 48.Minutes, 8.Minutes) {
+        override fun getStartSize(level: ServerLevel) = Vec3(6128.0, 1024.0, 6128.0)
+        override fun getEndSize(level: ServerLevel) = Vec3(3064.0, 1024.0, 3064.0)
+        override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun next() = Second
+    }
+
+    data object Second: UHCBoundaryPhase("second", 1, 26.Minutes, 5.Minutes) {
+        override fun getStartSize(level: ServerLevel) = First.getEndSize(level)
+        override fun getEndSize(level: ServerLevel) = Vec3(1532.0, 1024.0, 1532.0)
+        override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun next() = Third
+    }
+
+    data object Third: UHCBoundaryPhase("third", 2, 18.Minutes, 2.Minutes) {
+        override fun getStartSize(level: ServerLevel) = Second.getEndSize(level)
+        override fun getEndSize(level: ServerLevel) = Vec3(510.0, 1024.0, 510.0)
+        override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun next() = Fourth
+    }
+
+    data object Fourth: UHCBoundaryPhase("fourth", 3, 6.Minutes, 1.Minutes) {
+        override fun getStartSize(level: ServerLevel) = Third.getEndSize(level)
+        override fun getEndSize(level: ServerLevel) = Vec3(102.0, 1024.0, 102.0)
+        override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun next() = Fifth
+    }
+
+    data object Fifth: UHCBoundaryPhase("fifth", 4, 2.Minutes, 2.Minutes) {
+        override fun getStartSize(level: ServerLevel) = Fourth.getEndSize(level)
+        override fun getEndSize(level: ServerLevel) = Vec3(20.0, 1024.0, 20.0)
+        override fun getStartCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun getEndCenter(level: ServerLevel) = DEFAULT_CENTER
+        override fun next() = Sixth
+    }
+
+    data object Sixth: UHCBoundaryPhase("sixth", 5, 6.Minutes, 0.Minutes) {
+        override fun getStartSize(level: ServerLevel): Vec3 {
+            val height = level.height * 2.0
+            return Fifth.getEndSize(level).with(Direction.Axis.Y, height)
+        }
+
+        override fun getEndSize(level: ServerLevel): Vec3 {
+            return Fifth.getEndSize(level).with(Direction.Axis.Y, 60.0)
+        }
+
+        override fun getStartCenter(level: ServerLevel): Vec3 {
+            val y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, 0, 0).toDouble()
+            return Fifth.getEndCenter(level).with(Direction.Axis.Y, y)
+        }
+
+        override fun getEndCenter(level: ServerLevel): Vec3 {
+            return this.getStartCenter(level)
+        }
+
+        override fun next(): UHCBoundaryPhase? = null
+    }
+
+    companion object {
+        private val DEFAULT_CENTER = Vec3(0.0, 63.0, 0.0)
+
+        val CODEC: Codec<UHCBoundaryPhase> = Codec.INT.comapFlatMap(::getPhaseFromIndex, ::getIndexFromPhase)
+        val TOTAL_TIME by lazy {
+            this.entries.fold(MinecraftTimeDuration.ZERO) { acc, stage ->
+                acc + stage.duration + stage.cooldown
+            }
+        }
+
+        val entries by lazy { listOf(First, Second, Third, Fourth, Fifth, Sixth) }
+
+        private fun getPhaseFromIndex(index: Int): DataResult<UHCBoundaryPhase> {
+            val phase = this.entries.getOrNull(index) ?: return DataResult.error { "Phase index out of bounds!" }
+            return DataResult.success(phase)
+        }
+
+        private fun getIndexFromPhase(phase: UHCBoundaryPhase): Int {
+            return this.entries.indexOf(phase)
+        }
+    }
+}

@@ -21,9 +21,6 @@ class CasualTimeTracker {
     }
 
     fun getEnd(): Instant {
-        if (this.end == null) {
-            this.end = Clock.System.now()
-        }
-        return this.end!!
+        return this.end ?: Clock.System.now()
     }
 }

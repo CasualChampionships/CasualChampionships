@@ -25,7 +25,7 @@ import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
 import net.casual.arcade.minigame.utils.MinigameUtils.transferAdminAndSpectatorTeamsTo
-import net.casual.arcade.pack.utils.ResourcePackUtils.afterPacksLoad
+import net.casual.arcade.pack.utils.ResourcePackUtils.awaitPacks
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.IdentifierUtils
 import net.casual.arcade.utils.TimeUtils.Seconds
@@ -33,6 +33,7 @@ import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.coroutine.delay
+import net.casual.arcade.utils.coroutine.launch
 import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.level.resetToDefault
 import net.casual.arcade.utils.level.set
@@ -42,13 +43,13 @@ import net.casual.arcade.virtual.visuals.tab.DynamicVirtualPlayerList
 import net.casual.arcade.virtual.visuals.utils.elements.timer.TimerElement
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.minigame.rules.MinigameRulesProvider
-import net.casual.championships.common.ui.bossbar.LobbyBossbar
+import net.casual.championships.lobby.ui.bossbar.LobbyBossbar
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
 import net.casual.championships.common.util.player.unboostHealth
 import net.casual.championships.lobby.advancement.LobbyAdvancementManager
 import net.casual.championships.lobby.advancement.LobbyAdvancements
-import net.casual.championships.lobby.gui.LobbyPlayerListEntries
+import net.casual.championships.lobby.ui.tab.LobbyPlayerListEntries
 import net.casual.championships.lobby.minigame.command.DuelCommand
 import net.casual.championships.lobby.minigame.command.LobbyCommand
 import net.casual.championships.lobby.minigame.command.MinesweeperCommand
@@ -230,7 +231,10 @@ class LobbyMinigame(
 
         val winners = this.tags.getUUIDsFor(CasualTags.WON)
         if (!this.tags.has(player, SEEN_FIREWORKS) && winners.isNotEmpty()) {
-            player.afterPacksLoad { this.playFireworksFor(player) }
+            this.server.launch {
+                player.awaitPacks()
+                playFireworksFor(player)
+            }
         }
     }
 

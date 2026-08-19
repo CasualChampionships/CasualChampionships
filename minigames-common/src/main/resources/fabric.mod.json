@@ -24,7 +24,7 @@
     ]
   },
   "mixins": [
-    "casual_common.mixins.json"
+    "casual-common.mixins.json"
   ],
   "depends": {
 

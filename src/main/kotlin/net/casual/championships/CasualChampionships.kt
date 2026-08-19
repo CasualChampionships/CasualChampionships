@@ -13,7 +13,7 @@ import net.casual.championships.config.CasualConfig
 import net.casual.championships.config.DatabaseLogin
 import net.casual.championships.minigame.CasualMinigameManager
 import net.casual.championships.minigame.duel.DuelArenas
-import net.casual.championships.resources.CasualResourcePackHost
+import net.casual.championships.resources.CasualPacks
 import net.casual.championships.sync.CasualDatabaseSyncService
 import net.casual.championships.sync.CasualNoopSyncService
 import net.casual.championships.sync.CasualSyncService
@@ -34,12 +34,13 @@ object CasualChampionships: DedicatedServerModInitializer {
     var sync: CasualSyncService = CasualNoopSyncService
         private set
 
+    val packs = CasualPacks(this)
+
     val minigames = CasualMinigameManager(this, CasualUtils.resolve("event"))
 
     override fun onInitializeServer() {
         CasualUtils.logger.info("Starting CasualChampionships... Version: ${container.metadata.version}")
 
-        CasualResourcePackHost.registerEvents()
         DuelArenas.registerEvents()
 
         this.minigames.registerEvents(GlobalEventHandler.Server)
@@ -65,7 +66,7 @@ object CasualChampionships: DedicatedServerModInitializer {
     }
 
     private fun onServerRegisterCommand(event: ServerRegisterCommandEvent) {
-        event.register(CasualCommand, ViewCommand, ReplayCommand, RenameCommand, MinesweeperCommand)
+        event.register(CasualCommand, ViewCommand, ReplayCommand, RenameCommand)
     }
 
     private fun reloadSyncService(server: MinecraftServer) {

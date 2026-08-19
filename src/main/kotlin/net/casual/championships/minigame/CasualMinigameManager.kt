@@ -18,7 +18,6 @@ import net.casual.arcade.minigame.utils.MinigameResources
 import net.casual.arcade.minigame.utils.MinigameResources.Companion.sendTo
 import net.casual.arcade.pack.PackInfo
 import net.casual.arcade.pack.utils.ResourcePackUtils.sendResourcePack
-import net.casual.arcade.pack.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.ArcadeUtils
@@ -39,14 +38,13 @@ import net.casual.championships.common.minigame.TimeTrackedMinigame
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualTags
-import net.casual.championships.common.util.PerformanceUtils
+import net.casual.championships.util.PerformanceUtils
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.lobby.minigame.LobbyMinigame
 import net.casual.championships.minigame.event.EventConfiguration
 import net.casual.championships.minigame.event.EventState
 import net.casual.championships.minigame.lobby.LobbyMinigames
 import net.casual.championships.minigame.lobby.LobbySidebar
-import net.casual.championships.resources.CasualResourcePackHost
 import net.casual.championships.sync.CasualNoopSyncService
 import net.casual.championships.sync.data.SyncableParticipants
 import net.casual.championships.sync.data.SyncableTeam
@@ -70,7 +68,7 @@ class CasualMinigameManager(
     private val championships: CasualChampionships,
     private val path: Path
 ) {
-    private val packs = ArrayList<PackInfo>()
+    private var packs: List<PackInfo> = listOf()
 
     private lateinit var config: EventConfiguration
 
@@ -218,10 +216,7 @@ class CasualMinigameManager(
     }
 
     private fun reloadResourcePacks() {
-        this.packs.clear()
-        // This is kinda yucky
-        CasualResourcePackHost.getCommonPacks().mapTo(this.packs) { hosted -> hosted.toPackInfo() }
-        this.packs.addAll(CasualResourcePackHost.createResourcesFromPacks { this.config.packs }.getPacks())
+        this.packs = this.championships.packs.createGlobalPacks(this.config.packs)
     }
 
     private fun reloadLobby(server: MinecraftServer) {
@@ -233,7 +228,7 @@ class CasualMinigameManager(
 
     private fun createLobby(server: MinecraftServer): LobbyMinigame {
         val lobby = LobbyMinigames.create(this.config.lobby, this::minigame, MinigameCreationContext.initial(server))
-        lobby.resources.add(CasualResourcePackHost.createResourcesFromPacks { lobby.getAdditionalPacks() })
+        lobby.resources.add(this.championships.packs.createResources { lobby.getAdditionalPacks() })
         this.modifyLobbyMinigame(lobby)
         lobby.start()
         return lobby
@@ -274,7 +269,7 @@ class CasualMinigameManager(
             }
         }
 
-        if (CasualResourcePackHost.loadTeamColors(updated)) {
+        if (this.championships.packs.loadTeamColors(updated)) {
             this.reloadResourcePacks()
             this.reloadPlayerResources()
         }
@@ -403,12 +398,8 @@ class CasualMinigameManager(
         PerformanceUtils.disableEntityAI(minigame)
         CasualGuiUtils.setMinigameUI(minigame)
 
-        minigame.resources.add(
-            MinigameResources.of(CasualResourcePackHost.uhc.toPackInfo(!CasualChampionships.config.dev))
-        )
-        minigame.resources.add(
-            MinigameResources.of(CasualResourcePackHost.boundary.toPackInfo(!CasualChampionships.config.dev))
-        )
+        minigame.resources.add(this.championships.packs.uhc)
+        minigame.resources.add(this.championships.packs.boundary)
 
         this.registerSyncMinigameStats(minigame)
         minigame.events.register<MinigameCloseEvent> {
@@ -421,7 +412,7 @@ class CasualMinigameManager(
             }
         }
 
-        minigame.settings.replay = !CasualChampionships.config.dev
+        minigame.settings.replay = !this.championships.config.dev
     }
 
     private fun modifyDuelMinigame(minigame: DuelMinigame) {
@@ -429,7 +420,7 @@ class CasualMinigameManager(
         CasualGuiUtils.setMinigameUI(minigame)
         minigame.visuals.setPlayerListDisplay(CasualGuiUtils.createSimpleTabDisplay(minigame))
 
-        minigame.resources.add(CasualResourcePackHost.createResourcesFromPacks {
+        minigame.resources.add(this.championships.packs.createResources {
             minigame.duelArena.data.packs
         })
     }

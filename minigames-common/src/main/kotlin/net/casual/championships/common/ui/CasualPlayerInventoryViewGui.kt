@@ -1,5 +1,6 @@
 package net.casual.championships.common.ui
 
+import net.casual.arcade.guis.core.container.ContainerGuiClickBehavior
 import net.casual.arcade.guis.presets.PlayerInventoryViewGui
 import net.casual.arcade.guis.utils.SlotClickAction
 import net.casual.arcade.utils.ItemUtils
@@ -22,7 +23,10 @@ class CasualPlayerInventoryViewGui(
         this.setSlot(3, head)
     }
 
-    override fun shouldIgnoreClick(slot: Int, action: SlotClickAction): Boolean {
-        return !this.player.hasPermission(PermissionLevel.GAMEMASTERS) || super.shouldIgnoreClick(slot, action)
+    override fun resolveClickBehavior(slot: Int, action: SlotClickAction): ContainerGuiClickBehavior {
+        if (!this.player.hasPermission(PermissionLevel.GAMEMASTERS)) {
+            return ContainerGuiClickBehavior.None
+        }
+        return super.resolveClickBehavior(slot, action)
     }
 }
