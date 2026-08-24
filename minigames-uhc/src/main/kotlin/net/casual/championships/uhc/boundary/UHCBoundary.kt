@@ -103,8 +103,8 @@ class UHCBoundary(
     }
 
     fun getTimeUntilMove(): MinecraftTimeDuration {
-        val cooldown = when (this.phase) {
-            UHCBoundaryPhase.First -> this.uhc.settings.borderStartDelay
+        val cooldown = when {
+            this.uhc.uptime.Ticks <= this.uhc.settings.borderStartDelay -> this.uhc.settings.borderStartDelay
             else -> this.phase.getCooldown(this.uhc.settings.borderTime)
         }
         return cooldown - this.elapsed()
