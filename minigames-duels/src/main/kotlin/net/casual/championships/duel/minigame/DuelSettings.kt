@@ -6,6 +6,7 @@ import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Compan
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64
 import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.string
 import net.casual.arcade.minigame.utils.defaultOptions
+import net.casual.arcade.minigame.utils.item
 import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
@@ -30,6 +31,7 @@ class DuelSettings(
 ): DisplayableSettings(Component.translatable("casual.gui.duel.settings").withMiniFont()) {
     val displayableTeams = bool {
         name = "teams"
+
         val flag = FLAG.named(Component.translatable("casual.gui.duel.settings.teams").withMiniFont())
         flag.set(DataComponents.DYED_COLOR, DyedItemColor(0xFF0000))
         flag.hideTooltip(DataComponents.DYED_COLOR)
@@ -45,9 +47,9 @@ class DuelSettings(
             .potion(Potions.HEALING)
             .hideTooltip(DataComponents.POTION_CONTENTS)
         value = 1.0
-        option("normal", Component.literal("normal"), 0.0)
-        option("double", Component.literal("double"), 1.0)
-        option("triple", Component.literal("triple"), 2.0)
+        option("normal", Component.literal("Normal"), 0.0)
+        option("double", Component.literal("Double"), 1.0)
+        option("triple", Component.literal("Triple"), 2.0)
     }
     var health by this.register(this.displayableHealth)
 
@@ -69,7 +71,7 @@ class DuelSettings(
 
     val displayablePlayerDropHeads = bool {
         name = "player_drops_head"
-        display = Items.PLAYER_HEAD.named(Component.translatable("casual.gui.duel.settings.playerHeadDrops").withMiniFont())
+        display = item(Items.PLAYER_HEAD, Component.translatable("casual.gui.duel.settings.playerHeadDrops").withMiniFont())
         value = true
         defaultOptions()
     }

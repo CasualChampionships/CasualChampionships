@@ -39,10 +39,7 @@ class DuelConfigurationGui(
         val settings = CasualGuiItems.GEAR
         settings.named(Component.literal("Settings").withMiniFont())
         this.setSlot(47, settings) {
-            val gui = this.settings.gui(this.player)
-            gui.setParent(this)
-            gui.open()
-            // DuelSettingsGui(this.player, this.settings, this).open()
+            DuelSettingsGui(this.player, this.settings, this).open()
         }
 
         val players = ItemStack(CasualItems.FORWARD_FACING_PLAYER_HEAD)

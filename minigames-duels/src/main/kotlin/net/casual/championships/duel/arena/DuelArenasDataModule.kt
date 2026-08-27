@@ -66,7 +66,7 @@ class DuelArenasDataModule(
                         MinigameWorldData.get(child, server)
                     )
                 }
-                resolved[instance.name] = ResolvedArenas(instance.name, instance.display.create().displayName, arenas)
+                resolved[instance.name] = ResolvedArenas(instance.name, instance.display.create().hoverName, arenas)
             }
             return DuelArenasDataModule(resolved)
         }
