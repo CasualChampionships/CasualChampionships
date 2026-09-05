@@ -7,7 +7,7 @@ import net.casual.arcade.pack.PackInfo
 import net.casual.arcade.pack.generation.BuiltInResourcePacks
 import net.casual.arcade.pack.generation.PackDefinition
 import net.casual.arcade.pack.host.GlobalPackHost
-import net.casual.arcade.pack.host.PackHost.HostedPackRef
+import net.casual.arcade.pack.host.HostedPackRef
 import net.casual.arcade.pack.host.PathPack
 import net.casual.arcade.pack.utils.ResourcePackUtils.toPackInfo
 import net.casual.arcade.utils.scoreboard.getHexColor
@@ -27,6 +27,7 @@ class CasualPacks(
     private val generated = this.directory.resolve("generated")
 
     private val host = GlobalPackHost
+    private val hosted = LinkedHashMap<String, HostedPackRef>()
     private val common = LinkedHashMap<String, HostedPackRef>()
 
     private val colors = Object2IntOpenHashMap<TeamColor>()
@@ -35,8 +36,9 @@ class CasualPacks(
     val boundary = this.hostResources(BuiltInResourcePacks.BOUNDARY_SHADER_PACK)
 
     init {
-        for (pack in this.directory.listDirectoryEntries("*.zip")) {
-            this.host.add(PathPack(pack))
+        for (path in this.directory.listDirectoryEntries("*.zip")) {
+            val pack = PathPack(path)
+            this.hosted[pack.name] = this.host.add(pack)
         }
         for (definition in CasualCommon.COMMON_PACKS) {
             this.hostCommon(definition)
@@ -45,7 +47,7 @@ class CasualPacks(
 
     fun createGlobalPacks(additional: List<String>): List<PackInfo> {
         val packs = ArrayList<PackInfo>(this.common.size + additional.size)
-        this.common.values.mapTo(packs) { ref -> ref.value.toPackInfo() }
+        this.common.values.mapTo(packs) { ref -> ref.toPackInfo().join() }
         packs.addAll(this.resolve(additional))
         return packs
     }
@@ -93,14 +95,15 @@ class CasualPacks(
     }
 
     private fun resolve(names: List<String>): List<PackInfo> {
-        return names.mapNotNull { name -> this.host.get(name)?.toPackInfo(!this.championships.config.dev) }
+        val required = !this.championships.config.dev
+        return names.mapNotNull { name -> this.hosted[name]?.toPackInfo(required)?.join() }
     }
 
     private fun hostResources(definition: PackDefinition): MinigameResources {
-        val hosted by this.host(definition)
+        val hosted = this.host(definition)
         return object: MinigameResources {
             override fun getPacks(): Collection<PackInfo> {
-                return listOf(hosted.toPackInfo(!championships.config.dev))
+                return listOf(hosted.toPackInfo(!championships.config.dev).join())
             }
         }
     }
@@ -110,6 +113,12 @@ class CasualPacks(
     }
 
     private fun host(definition: PackDefinition): HostedPackRef {
-        return this.host.add(PathPack(definition.buildTo(this.generated)))
+        val previous = this.hosted.remove(definition.name)
+        if (previous != null) {
+            this.host.remove(previous)
+        }
+        val ref = this.host.add(definition.uuid) { PathPack(definition.buildTo(this.generated)) }
+        this.hosted[definition.name] = ref
+        return ref
     }
 }
