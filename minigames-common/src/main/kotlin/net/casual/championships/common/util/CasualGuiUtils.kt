@@ -42,6 +42,7 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.component.DyedItemColor
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
@@ -77,6 +78,10 @@ object CasualGuiUtils {
         for (player in players) {
             player.sendSound(sound)
         }
+    }
+
+    fun ItemStack.copyAndHideAttributeModifiers(): ItemStack {
+        return this.copy().hideTooltip(DataComponents.ATTRIBUTE_MODIFIERS)
     }
 
     fun createNametag(minigame: Minigame): Nametag {

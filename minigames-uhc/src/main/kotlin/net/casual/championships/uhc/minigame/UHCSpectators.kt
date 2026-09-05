@@ -1,6 +1,7 @@
 package net.casual.championships.uhc.minigame
 
 import net.casual.arcade.events.server.player.PlayerAdvancementEvent
+import net.casual.arcade.events.server.player.PlayerEntityInteractionEvent
 import net.casual.arcade.events.server.player.PlayerSetSneakingEvent
 import net.casual.arcade.events.server.player.PlayerSpectatorTeleportEvent
 import net.casual.arcade.events.server.player.PlayerTickEvent
@@ -19,12 +20,15 @@ import net.casual.arcade.utils.TimeUtils.Ticks
 import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.math.location.asLocation
 import net.casual.arcade.utils.math.location.locationWithLevel
+import net.casual.arcade.utils.player.hasPermission
+import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualTags
 import net.casual.championships.uhc.ui.gui.UHCSpectatorHotbarInventory
 import net.casual.championships.uhc.utils.UHCMinigameRules
 import net.casual.championships.uhc.utils.UHCStats
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.permissions.PermissionLevel
 import net.minecraft.world.phys.Vec3
 import kotlin.math.abs
 
@@ -109,6 +113,15 @@ class UHCSpectators(
             } else {
                 last.modify { this.uhc.server.tickCount }
             }
+        }
+    }
+
+    @Listener(flags = ListenerFlags.IS_SPECTATOR)
+    private fun onPlayerInteract(event: PlayerEntityInteractionEvent) {
+        val (player, target) = event
+        if (player.hasPermission(PermissionLevel.GAMEMASTERS) && target is ServerPlayer) {
+            val gui = CasualGuiUtils.createPlayerInventoryViewGui(player, target)
+            gui.open()
         }
     }
 

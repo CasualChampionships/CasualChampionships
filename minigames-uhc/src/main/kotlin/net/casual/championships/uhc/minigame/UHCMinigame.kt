@@ -16,7 +16,9 @@ import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.pack.utils.ResourcePackUtils.awaitPacks
 import net.casual.arcade.pack.utils.withMiniFont
+import net.casual.arcade.replay.io.ReplayFormat
 import net.casual.arcade.replay.recorder.player.ReplayPlayerRecorders
+import net.casual.arcade.replay.recorder.settings.SimpleRecorderSettings
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.TimeUtils.Seconds
@@ -31,6 +33,7 @@ import net.casual.arcade.utils.scoreboard.color
 import net.casual.arcade.utils.scoreboard.getOnlineCount
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.arcade.virtual.visuals.predicate.PlayerObserverPredicate
+import net.casual.championships.common.event.DoesWaypointIgnoreReceiverEvent
 import net.casual.championships.common.event.PlayerCheatEvent
 import net.casual.championships.common.items.CasualItems
 import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
@@ -286,7 +289,8 @@ class UHCMinigame(
                 .resolve("uhc")
                 .resolve(player.scoreboardName)
                 .createDirectories()
-            ReplayPlayerRecorders.create(player, directory).start()
+            ReplayPlayerRecorders.create(player, directory, ReplayFormat.Flashback,
+                SimpleRecorderSettings.DEFAULT.copy(recordHotbar = true)).start()
         }
     }
 
@@ -391,6 +395,19 @@ class UHCMinigame(
             literal("Player ") + event.player.displayName + literal(" tried to cheat with ${event.type}")
         }
         this.chat.broadcastInfo(message, this.players.admins)
+    }
+
+    @Listener
+    private fun onDoesWaypointIgnoreReceiver(event: DoesWaypointIgnoreReceiverEvent) {
+        val (waypoint, receiver) = event
+        if (waypoint !is ServerPlayer || !this.players.has(waypoint) || !this.players.has(receiver)) {
+            return
+        }
+        if (this.players.isSpectating(receiver)) {
+            event.cancel(waypoint.isSpectator)
+        } else {
+            event.cancel(waypoint.isSpectator || waypoint.team == null || receiver.team != waypoint.team)
+        }
     }
 
     private fun onEliminated(player: ServerPlayer, killer: Entity?) {

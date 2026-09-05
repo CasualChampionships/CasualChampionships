@@ -52,7 +52,7 @@ enum class UHCPhase(
             minigame.levels.setGameRules {
                 resetToDefault()
                 set(GameRules.IMMEDIATE_RESPAWN, true, minigame.server)
-                set(GameRules.LOCATOR_BAR, false, minigame.server)
+                //set(GameRules.LOCATOR_BAR, false, minigame.server)
                 set(GameRules.NATURAL_HEALTH_REGENERATION, false)
                 set(GameRules.SPAWN_PHANTOMS, false)
             }

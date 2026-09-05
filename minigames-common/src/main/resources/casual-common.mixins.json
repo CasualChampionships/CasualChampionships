@@ -15,6 +15,7 @@
     "event.VillagerTradeMixin",
     "event.VaultServerDataInvoker",
     "event.VaultStateMixin",
+    "event.WaypointTransmitterMixin",
     "gui.ChestBlockMixin",
     "gui.ChestMenuMixin",
     "minigame.BedBlockMixin",

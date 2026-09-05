@@ -17,17 +17,21 @@ import net.casual.championships.common.items.CasualGuiItems.GLOWING
 import net.casual.championships.common.items.CasualGuiItems.GREEN_DIAGONAL
 import net.casual.championships.common.items.CasualGuiItems.HEALTH_BOOST
 import net.casual.championships.common.items.CasualGuiItems.NATURAL_REGEN
+import net.casual.championships.common.util.CasualGuiUtils.copyAndHideAttributeModifiers
 import net.casual.championships.duel.arena.DuelArenaSize
 import net.casual.championships.duel.arena.DuelArenasDataModule
+import net.casual.championships.duel.kit.DuelKitsDataModule
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.item.component.DyedItemColor
 import kotlin.enums.enumEntries
 
 class DuelSettings(
-    private val arenas: Collection<DuelArenasDataModule.ResolvedArenas>
+    private val arenas: Collection<DuelArenasDataModule.ResolvedArenas>,
+    private val kits: Collection<DuelKitsDataModule.Kit>
 ): DisplayableSettings(Component.translatable("casual.gui.duel.settings").withMiniFont()) {
     val displayableTeams = bool {
         name = "teams"
@@ -64,7 +68,7 @@ class DuelSettings(
     val displayableGlowing = bool {
         name = "glowing"
         display = GLOWING.named(Component.translatable("casual.gui.duel.settings.glowing").withMiniFont())
-        value = false
+        value = true
         defaultOptions()
     }
     var glowing by this.register(this.displayableGlowing)
@@ -95,8 +99,26 @@ class DuelSettings(
     }
     var arenaSize by this.register(this.displayableArenaSize)
 
+    val displayableKit = string {
+        name = "kit"
+        display = Items.IRON_SWORD.named(Component.translatable("casual.gui.duel.settings.kit").withMiniFont())
+        value = kits.randomOrNull()?.name ?: ""
+        for (kit in kits) {
+            option(kit.name, kit.display.create().displayName, kit.name)
+        }
+    }
+    var kit by this.register(this.displayableKit)
+
     fun getSelectedArena(): DuelArenasDataModule.DuelArena {
         val arena = this.arenas.first { it.name == this.arena }
         return arena.arenas[this.arenaSize]!!
+    }
+
+    fun getSelectedKit(): DuelKitsDataModule.Kit {
+        return this.kits.first { it.name == this.kit }
+    }
+
+    fun getKitDisplayStack(kit: String): ItemStack {
+        return this.kits.first { it.name == kit }.display.create().copyAndHideAttributeModifiers()
     }
 }

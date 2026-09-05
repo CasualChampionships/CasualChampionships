@@ -1,8 +1,10 @@
 package net.casual.championships.lobby.minigame.command
 
 import com.mojang.brigadier.Command
+import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import kotlinx.coroutines.async
 import net.casual.arcade.commands.CommandTree
 import net.casual.arcade.commands.argument
@@ -28,6 +30,7 @@ import net.casual.arcade.utils.player.server
 import net.casual.arcade.virtual.visuals.ready.ReadyChecker
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.duel.arena.DuelArenasDataModule
+import net.casual.championships.duel.kit.DuelKitsDataModule
 import net.casual.championships.duel.ui.gui.DuelConfigurationGui
 import net.casual.championships.duel.minigame.DuelMinigame
 import net.casual.championships.duel.minigame.DuelSettings
@@ -41,6 +44,7 @@ import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.permissions.PermissionLevel
+import java.util.*
 
 class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
@@ -52,18 +56,21 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceSt
                     executes(::viewDueler)
                 }
             }
+            literal("everyone") {
+                executes { context -> duelEveryone(context, null) }
+                argument("kit", StringArgumentType.string()) {
+                    suggests { _ -> lobby.modules.get<DuelKitsDataModule>()?.names() ?: emptyList() }
+                    executes(::duelEveryone)
+                }
+            }
         }
     }
 
     private fun startDuel(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
-        if (this.lobby.phase >= LobbyPhase.Readying) {
-            player.grantAdvancement(LobbyAdvancements.NOT_NOW)
-            return context.source.fail(Component.translatable("casual.duel.cannotDuelNow"))
-        }
-        val arenas = this.lobby.modules.get<DuelArenasDataModule>()
-            ?: return context.source.fail("Lobby has no duel arenas available!")
-        val settings = DuelSettings(arenas.all())
+        this.enforceLobbyReadyingPhase(player)
+
+        val (_, _, settings) = this.getDuelArenasKitsAndSettings(context) ?: return 0
         DuelConfigurationGui(player, settings, this.lobby.players::all, this::requestDuelWith).open()
         return Command.SINGLE_SUCCESS
     }
@@ -84,6 +91,21 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceSt
         minigame.players.add(player, true, this.lobby.players.isAdmin(player))
         player.teleportTo(dueler.locationWithLevel)
         return context.source.success(Component.translatable("casual.duel.teleportingToDuel"))
+    }
+
+    private fun duelEveryone(
+        context: CommandContext<CommandSourceStack>,
+        kit: String? = StringArgumentType.getString(context, "kit")
+    ): Int {
+        val player = context.source.playerOrException
+        this.enforceLobbyReadyingPhase(player)
+
+        val (_, kits, settings) = this.getDuelArenasKitsAndSettings(context) ?: return 0
+        if (kit != null && kits.names().contains(kit)) {
+            settings.kit = kit
+        }
+        this.requestDuelWith(player, this.lobby.players.all, settings)
+        return Command.SINGLE_SUCCESS
     }
 
     private fun requestDuelWith(
@@ -108,13 +130,12 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceSt
             val tracker = ReadyChecker.track(requester, requesting)
             val awaiting = async {
                 tracker.awaitSuccess()
-                started = startDuelWith(started, initiator, duelers, setOf(), requester, settings, false)
+                started = startDuelWith(started, initiator, duelers, requester.getAccepted(), requester, settings, false)
             }
 
             val startAnyways = Component.translatable("casual.duel.clickToStart").withMiniFont().green().function {
                 awaiting.cancel()
-                val unready = requester.getAccepted()
-                started = startDuelWith(started, initiator, duelers, unready, requester, settings, true)
+                started = startDuelWith(started, initiator, duelers, requester.getAccepted(), requester, settings, true)
                 ClickEventCallback.Result.Success
             }
             requester.broadcastTo(initiator, startAnyways)
@@ -174,5 +195,31 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceSt
         }
 
         return true
+    }
+
+    private data class DuelArenasKitsAndSettings(
+        val arenas: DuelArenasDataModule,
+        val kits: DuelKitsDataModule,
+        val settings: DuelSettings
+    )
+
+    private fun getDuelArenasKitsAndSettings(context: CommandContext<CommandSourceStack>): DuelArenasKitsAndSettings? {
+        val arenas = this.lobby.modules.get<DuelArenasDataModule>()
+            ?: return null.also { context.source.fail("Lobby has no duel arenas available!") }
+        val kits = this.lobby.modules.get<DuelKitsDataModule>()
+            ?: return null.also { context.source.fail("Lobby has no duel kits available!") }
+        val settings = DuelSettings(arenas.all(), kits.all())
+        return DuelArenasKitsAndSettings(arenas, kits, settings)
+    }
+
+    private fun enforceLobbyReadyingPhase(player: ServerPlayer) {
+        if (this.lobby.phase >= LobbyPhase.Readying) {
+            player.grantAdvancement(LobbyAdvancements.NOT_NOW)
+            throw CANNOT_DUEL_NOW.create()
+        }
+    }
+
+    companion object {
+        private val CANNOT_DUEL_NOW = SimpleCommandExceptionType(Component.translatable("casual.duel.cannotDuelNow"))
     }
 }

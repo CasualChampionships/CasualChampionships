@@ -4,7 +4,10 @@
 
 build/
 run/
+serverRun*/
 run-datagen/
 
 *.psd
 /mcci/
+
+gitignore_*

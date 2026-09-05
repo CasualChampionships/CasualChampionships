@@ -12,6 +12,7 @@
   "casual.gui.duel.settings.playerHeadDrops": "Player Head Drops",
   "casual.gui.duel.settings.arena": "Arena",
   "casual.gui.duel.settings.arenaSize": "Arena Size",
+  "casual.gui.duel.settings.kit": "Kit",
 
   "casual.duel.cannotMinesweeperNow": "You cannot play Minesweeper now!",
   "casual.duel.cannotDuelNow": "You cannot duel now!",
@@ -22,6 +23,7 @@
   "casual.duel.clickToSpectate": "Click Here to Spectate",
   "casual.duel.playerNotDueling": "That player is currently not dueling",
   "casual.duel.teleportingToDuel": "Teleporting to duel!",
+  "casual.duel.noPendingDuel": "You have no pending duel!",
 
   "casual.duel.leaveDuel": "You can leave this duel by running %s",
 
