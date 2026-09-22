@@ -1,18 +1,18 @@
 package net.casual.championships.uhc.minigame
 
-import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
-import net.casual.arcade.dimensions.level.vanilla.VanillaLikeLevels
+import kotlinx.coroutines.withTimeout
 import net.casual.arcade.events.phase.BuiltInEventPhases
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.player.*
 import net.casual.arcade.guis.utils.removeCustomInventory
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.annotation.Listener
-import net.casual.arcade.minigame.annotation.ListenerFlags.IS_PLAYING
-import net.casual.arcade.minigame.annotation.ListenerFlags
+import net.casual.arcade.minigame.annotation.ListenerFilter
 import net.casual.arcade.minigame.events.*
 import net.casual.arcade.minigame.serialization.MinigameFactory
+import net.casual.arcade.minigame.serialization.SerializableMinigame
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
+import net.casual.arcade.minigame.template.level.VanillaLikeLevelsTemplate
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
 import net.casual.arcade.pack.utils.ResourcePackUtils.awaitPacks
 import net.casual.arcade.pack.utils.withMiniFont
@@ -20,7 +20,6 @@ import net.casual.arcade.replay.io.ReplayFormat
 import net.casual.arcade.replay.recorder.player.ReplayPlayerRecorders
 import net.casual.arcade.replay.recorder.settings.SimpleRecorderSettings
 import net.casual.arcade.scheduler.GlobalTickedScheduler
-import net.casual.arcade.scheduler.task.impl.PlayerTask
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.coroutine.launch
@@ -54,8 +53,11 @@ import net.casual.championships.uhc.ui.UHCHud
 import net.casual.championships.uhc.extensions.TeamSharedHealthExtension.Companion.sharedHealthExtension
 import net.casual.championships.uhc.ui.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.TMCStarterPack
-import net.casual.championships.uhc.minigame.UHCPhase.GameOver
-import net.casual.championships.uhc.minigame.UHCPhase.Initializing
+import net.casual.championships.uhc.minigame.phase.GameOverRoutine
+import net.casual.championships.uhc.minigame.phase.GameplayRoutine
+import net.casual.championships.uhc.minigame.phase.GraceRoutine
+import net.casual.championships.uhc.minigame.phase.InitializingRoutine
+import net.casual.championships.uhc.minigame.phase.UHCPhase
 import net.casual.championships.uhc.recipe.FlowerPowerRecipe
 import net.casual.championships.uhc.recipe.HeavyCoreRecipe
 import net.casual.championships.uhc.utils.UHCMinigameRules
@@ -79,16 +81,14 @@ import net.minecraft.world.phys.Vec3
 import net.minecraft.world.scores.Team
 import java.util.*
 import kotlin.io.path.createDirectories
+import kotlin.time.Duration.Companion.seconds
 
 class UHCMinigame(
     server: MinecraftServer,
     uuid: UUID,
     nerfedPlayers: Set<UUID>,
-    private val dimensions: VanillaLikeLevels,
-    private val factory: UHCMinigameFactory? = null
-): Minigame(server, uuid), MinigameRulesProvider by UHCMinigameRules, TimeTrackedMinigame {
-    override val id = ID
-
+    private val dimensions: VanillaLikeLevelsTemplate
+): Minigame(server, uuid, ID, UHCPhase.entries), SerializableMinigame, TimeTrackedMinigame, MinigameRulesProvider by UHCMinigameRules {
     val boundary = UHCBoundary(this)
     val mapRenderer = UHCMapRenderer(this)
     val uhcAdvancements = UHCAdvancementManager(this)
@@ -101,11 +101,11 @@ class UHCMinigame(
     override val timeTracker = CasualTimeTracker()
 
     val overworld: ServerLevel
-        get() = this.dimensions.getOrThrow(VanillaDimension.Overworld)
+        get() = this.levels.require(VanillaLikeLevelsTemplate.OVERWORLD)
     val nether: ServerLevel
-        get() = this.dimensions.getOrThrow(VanillaDimension.Nether)
+        get() = this.levels.require(VanillaLikeLevelsTemplate.NETHER)
     val end: ServerLevel
-        get() = this.dimensions.getOrThrow(VanillaDimension.End)
+        get() = this.levels.require(VanillaLikeLevelsTemplate.END)
 
     init {
         this.tickrate.useGlobalManager = false
@@ -114,7 +114,7 @@ class UHCMinigame(
         this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
 
-        this.levels.addAll(this.dimensions.all())
+        this.dimensions.addTo(this)
 
         for (player in nerfedPlayers) {
             this.tags.add(player, UHCModifiers.NERFED)
@@ -152,27 +152,24 @@ class UHCMinigame(
         }
     }
 
-    override fun phases(): Collection<UHCPhase> {
-        return UHCPhase.entries
+    override fun factory(): MinigameFactory {
+        return UHCMinigameFactory(this.dimensions, this.tags.getUUIDsFor(UHCModifiers.NERFED))
     }
 
-    override fun factory(): MinigameFactory? {
-        return this.factory
-    }
-
-    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-    override fun load(input: ValueInput) {
+    override fun deserialize(input: ValueInput, version: Int) {
         this.uhcAdvancements.deserialize(input.childOrEmpty("advancements"))
         this.boundary.deserialize(input.childOrEmpty("boundary"))
     }
 
-    override fun save(output: ValueOutput) {
+    override fun serialize(output: ValueOutput) {
         this.uhcAdvancements.serialize(output.child("advancements"))
         this.boundary.serialize(output.child("boundary"))
     }
 
     @Listener
     private fun onInitialize(event: MinigameInitializeEvent) {
+        this.initializePhases()
+
         this.commands.register(UHCMinigameCommands(this))
 
         this.addEventListener(this.uhcAdvancements)
@@ -193,6 +190,11 @@ class UHCMinigame(
         this.levels.spawn = UHCSpawnLocation(this)
 
         this.visuals.setSidebar(this.hud.createSidebar())
+
+        this.teams.hideNameTags()
+        this.visuals.removeAllNametags()
+        this.visuals.addNametag(CasualGuiUtils.createNametag(this))
+        this.visuals.addNametag(CasualGuiUtils.createPlayingHealthTag(this))
     }
 
     @Listener(priority = -2000)
@@ -209,7 +211,7 @@ class UHCMinigame(
         this.mapRenderer.update(this.end)
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER)
+    @Listener
     private fun onPlayerRespawn(event: PlayerRespawnEvent) {
         val player = event.player
 
@@ -233,7 +235,7 @@ class UHCMinigame(
         ReplayPlayerRecorders.get(player).forEach { it.stop() }
     }
 
-    @Listener(flags = IS_PLAYING, phase = BuiltInEventPhases.POST)
+    @Listener(filters = [ListenerFilter.IsPlaying], phase = BuiltInEventPhases.POST)
     private fun onPlayerDeath(event: PlayerDeathEvent) {
         val (player, source) = event
 
@@ -258,7 +260,7 @@ class UHCMinigame(
 
     @Listener
     private fun onMinigameAddNewPlayer(event: MinigameAddNewPlayerEvent) {
-        if (this.phase > Initializing) {
+        if (this.state > UHCPhase.Initializing) {
             event.spectating = true
         }
     }
@@ -335,12 +337,12 @@ class UHCMinigame(
         this.tags.add(player, CasualTags.HAS_TEAM_GLOW)
 
         player.setGameMode(GameType.SURVIVAL)
-        player.isInvulnerable = true
-        val task = PlayerTask(player) { it.isInvulnerable = false }
-        GlobalTickedScheduler.Server.schedule(10.Seconds, task)
+        player.isPermanentlyInvulnerable = true
         this.server.launch {
-            player.awaitPacks()
-            task.run()
+            withTimeout(10.seconds) {
+                player.awaitPacks()
+            }
+            player.isPermanentlyInvulnerable = false
         }
 
         if (team != null) {
@@ -425,7 +427,7 @@ class UHCMinigame(
         }
 
         if (this.teams.getPlayingTeams().size <= 1) {
-            this.setPhase(GameOver)
+            this.phases.set(UHCPhase.GameOver)
         }
     }
 
@@ -447,6 +449,13 @@ class UHCMinigame(
 
     private fun shouldObserveeBeInvisible(observee: ServerPlayer, observer: ServerPlayer): Boolean {
         return this.players.isSpectating(observee) && observee !== observer
+    }
+
+    private fun initializePhases() {
+        this.phases.routines[UHCPhase.Initializing] = InitializingRoutine()
+        this.phases.routines[UHCPhase.Grace] = GraceRoutine()
+        this.phases.routines[UHCPhase.Gameplay] = GameplayRoutine()
+        this.phases.routines[UHCPhase.GameOver] = GameOverRoutine()
     }
 
     companion object {

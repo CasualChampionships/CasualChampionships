@@ -7,7 +7,6 @@ import net.casual.arcade.events.server.entity.EntityStartTrackingEvent
 import net.casual.arcade.events.server.level.LevelLootEvent
 import net.casual.arcade.events.server.player.*
 import net.casual.arcade.events.threading.ThreadingTarget
-import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.utils.MathUtils
@@ -20,12 +19,13 @@ import net.casual.championships.common.event.ChunkGenerationMobSpawnEvent
 import net.casual.championships.common.event.CreateTradeOfferEvent
 import net.casual.championships.common.items.minigame.PlayerHeadItem
 import net.casual.championships.common.util.casual
-import net.casual.championships.uhc.minigame.GAME_OVER_ID
 import net.casual.championships.uhc.minigame.UHCMinigame
+import net.casual.championships.uhc.minigame.phase.UHCPhase
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags
 import net.minecraft.core.Holder
 import net.minecraft.core.component.DataComponents
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.util.Prediction
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.Entity
@@ -54,17 +54,17 @@ class UHCModifiers(
         }
 
         if (this.uhc.settings.playerDropsGapple) {
-            player.drop(Items.GOLDEN_APPLE.defaultInstance, true, false)
+            player.drop(Items.GOLDEN_APPLE.defaultInstance, true, Prediction.SERVER_ONLY)
         }
 
         if (this.uhc.settings.playerDropsHead) {
             val head = PlayerHeadItem.create(player)
             if (killer is ServerPlayer) {
                 if (!killer.inventory.add(head)) {
-                    player.drop(head, true, false)
+                    player.drop(head, true, Prediction.SERVER_ONLY)
                 }
             } else {
-                player.drop(head, true, false)
+                player.drop(head, true, Prediction.SERVER_ONLY)
             }
         }
     }
@@ -227,8 +227,12 @@ class UHCModifiers(
         }
     }
 
-    @Listener(during = During(before = GAME_OVER_ID))
+    @Listener
     private fun onPlayerTick(event: PlayerTickEvent) {
+        if (this.uhc.state >= UHCPhase.GameOver) {
+            return
+        }
+
         val (player) = event
         if (this.uhc.players.isSpectating(player)) {
             return

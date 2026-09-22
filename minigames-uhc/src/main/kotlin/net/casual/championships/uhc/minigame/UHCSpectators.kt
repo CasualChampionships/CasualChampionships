@@ -1,15 +1,9 @@
 package net.casual.championships.uhc.minigame
 
-import net.casual.arcade.events.server.player.PlayerAdvancementEvent
-import net.casual.arcade.events.server.player.PlayerEntityInteractionEvent
-import net.casual.arcade.events.server.player.PlayerSetSneakingEvent
-import net.casual.arcade.events.server.player.PlayerSpectatorTeleportEvent
-import net.casual.arcade.events.server.player.PlayerTickEvent
-import net.casual.arcade.events.server.player.PlayerVoidDamageEvent
+import net.casual.arcade.events.server.player.*
 import net.casual.arcade.guis.utils.setCustomInventory
-import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
-import net.casual.arcade.minigame.annotation.ListenerFlags
+import net.casual.arcade.minigame.annotation.ListenerFilter
 import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.minigame.events.MinigameLoadSpectatingEvent
 import net.casual.arcade.minigame.events.MinigameSetSpectatingEvent
@@ -24,6 +18,7 @@ import net.casual.arcade.utils.player.hasPermission
 import net.casual.championships.common.util.CasualGuiUtils
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
 import net.casual.championships.common.util.CasualTags
+import net.casual.championships.uhc.minigame.phase.UHCPhase
 import net.casual.championships.uhc.ui.gui.UHCSpectatorHotbarInventory
 import net.casual.championships.uhc.utils.UHCMinigameRules
 import net.casual.championships.uhc.utils.UHCStats
@@ -60,8 +55,12 @@ class UHCSpectators(
         player.setCustomInventory(UHCSpectatorHotbarInventory(player, this.uhc))
     }
 
-    @Listener(flags = ListenerFlags.IS_SPECTATOR, during = During(before = GAME_OVER_ID))
+    @Listener(filters = [ListenerFilter.IsSpectator])
     private fun onPlayerTick(event: PlayerTickEvent) {
+        if (this.uhc.state >= UHCPhase.GameOver) {
+            return
+        }
+
         val player = event.player
         if (player.isCreative) {
             return
@@ -99,7 +98,7 @@ class UHCSpectators(
         event.cancel()
     }
 
-    @Listener(flags = ListenerFlags.IS_SPECTATOR)
+    @Listener(filters = [ListenerFilter.IsSpectator])
     private fun onPlayerSneak(event: PlayerSetSneakingEvent) {
         val (player, sneaking) = event
         if (!player.isShiftKeyDown && sneaking) {
@@ -116,7 +115,7 @@ class UHCSpectators(
         }
     }
 
-    @Listener(flags = ListenerFlags.IS_SPECTATOR)
+    @Listener(filters = [ListenerFilter.IsSpectator])
     private fun onPlayerInteract(event: PlayerEntityInteractionEvent) {
         val (player, target) = event
         if (player.hasPermission(PermissionLevel.GAMEMASTERS) && target is ServerPlayer) {

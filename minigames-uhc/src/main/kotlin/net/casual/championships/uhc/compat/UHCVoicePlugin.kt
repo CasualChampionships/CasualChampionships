@@ -24,6 +24,7 @@ import java.util.*
 
 // TODO: Maybe we separate this out into common to add
 //   support for voicechat in other minigames?
+// TODO: Migrate to component
 object UHCVoicePlugin: VoicechatPlugin {
     private lateinit var api: VoicechatServerApi
 

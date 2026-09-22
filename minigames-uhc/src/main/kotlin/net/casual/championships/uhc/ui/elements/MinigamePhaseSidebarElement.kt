@@ -15,7 +15,7 @@ class MinigamePhaseSidebarElement(
     override fun get(server: MinecraftServer): SidebarComponent {
         return SidebarComponent.withCustomScore(
             Component.empty().append(this.buffer).append("Phase:").withMiniFont(),
-            Component.literal(this.minigame.phase.id).append(this.buffer).green().withMiniFont()
+            Component.literal(this.minigame.phaseOrNull?.id ?: "None").append(this.buffer).green().withMiniFont()
         )
     }
 }

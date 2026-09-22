@@ -10,8 +10,11 @@ import net.casual.championships.uhc.ui.gui.UHCMapRenderer
 import net.casual.championships.uhc.item.UHCItems
 import net.casual.championships.uhc.minigame.UHCMinigameFactory
 import net.casual.championships.uhc.boundary.UHCBoundaryRoutine
+import net.casual.championships.uhc.minigame.phase.GameOverRoutine
+import net.casual.championships.uhc.minigame.phase.GameplayRoutine
+import net.casual.championships.uhc.minigame.phase.GraceRoutine
+import net.casual.championships.uhc.minigame.phase.InitializingRoutine
 import net.casual.championships.uhc.routine.GlowingCountdownRoutine
-import net.casual.championships.uhc.routine.GraceCountdownRoutine
 import net.casual.championships.uhc.utils.UHCComponents
 import net.casual.championships.uhc.utils.UHCStats
 import net.fabricmc.api.ModInitializer
@@ -46,6 +49,9 @@ object CasualUHC: ModInitializer {
 
         UHCBoundaryRoutine.register(TaskRegistries.ROUTINE)
         GlowingCountdownRoutine.register(TaskRegistries.ROUTINE)
-        GraceCountdownRoutine.register(TaskRegistries.ROUTINE)
+        InitializingRoutine.register(TaskRegistries.ROUTINE)
+        GraceRoutine.register(TaskRegistries.ROUTINE)
+        GameplayRoutine.register(TaskRegistries.ROUTINE)
+        GameOverRoutine.register(TaskRegistries.ROUTINE)
     }
 }

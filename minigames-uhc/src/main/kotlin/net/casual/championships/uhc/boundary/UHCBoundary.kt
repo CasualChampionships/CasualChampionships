@@ -8,7 +8,6 @@ import net.casual.arcade.boundary.shape.AxisAlignedBoundaryShape
 import net.casual.arcade.boundary.shape.BoundaryShape
 import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.events.server.player.PlayerTickEvent
-import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.pack.utils.withMiniFont
@@ -34,8 +33,8 @@ import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.uhc.CasualUHC
-import net.casual.championships.uhc.minigame.GAME_OVER_ID
 import net.casual.championships.uhc.minigame.UHCMinigame
+import net.casual.championships.uhc.minigame.phase.UHCPhase
 import net.casual.championships.uhc.routine.GlowingCountdownRoutine
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -70,7 +69,7 @@ class UHCBoundary(
 
     fun startAfter(delay: MinecraftTimeDuration) {
         this.resetTimer()
-        this.uhc.scheduler.schedule(0.Ticks, UHCBoundaryRoutine(delay))
+        this.uhc.scopes.root.schedule(delay, UHCBoundaryRoutine())
     }
 
     fun getFinalPhase(level: ServerLevel): UHCBoundaryPhase {
@@ -134,7 +133,7 @@ class UHCBoundary(
     internal fun onPaused(phase: UHCBoundaryPhase) {
         if (phase == UHCBoundaryPhase.Fifth) {
             val cooldown = phase.getCooldown(this.uhc.settings.borderTime)
-            this.uhc.scheduler.schedule(0.Ticks, GlowingCountdownRoutine(cooldown))
+            this.uhc.scopes.root.schedule(0.Ticks, GlowingCountdownRoutine(cooldown))
         }
 
         this.resetTimer()
@@ -153,8 +152,12 @@ class UHCBoundary(
         CasualUHC.logger.info("Completed boundary moving!")
     }
 
-    @Listener(during = During(before = GAME_OVER_ID))
+    @Listener
     private fun onPlayerTick(event: PlayerTickEvent) {
+        if (this.uhc.state >= UHCPhase.GameOver) {
+            return
+        }
+
         val (player) = event
         if (this.uhc.players.isSpectating(player)) {
             return

@@ -1,7 +1,6 @@
 package net.casual.championships.uhc.ui
 
 import net.casual.arcade.events.server.player.PlayerTickEvent
-import net.casual.arcade.minigame.annotation.During
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.pack.font.spacing.SpacingFontResources
@@ -17,8 +16,8 @@ import net.casual.arcade.virtual.visuals.sidebar.SidebarComponents
 import net.casual.championships.common.ui.elements.TeammatesSidebarElements
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils
-import net.casual.championships.uhc.minigame.GAME_OVER_ID
 import net.casual.championships.uhc.minigame.UHCMinigame
+import net.casual.championships.uhc.minigame.phase.UHCPhase
 import net.casual.championships.uhc.ui.elements.BoundaryMovingElement
 import net.casual.championships.uhc.ui.elements.MinigamePhaseSidebarElement
 import net.casual.championships.uhc.ui.elements.MobcapSidebarElement
@@ -78,8 +77,12 @@ class UHCHud(
         return sidebar
     }
 
-    @Listener(during = During(before = GAME_OVER_ID))
+    @Listener
     private fun onPlayerTick(event: PlayerTickEvent) {
+        if (this.uhc.state >= UHCPhase.GameOver) {
+            return
+        }
+
         this.updateActionBar(event.player)
     }
 

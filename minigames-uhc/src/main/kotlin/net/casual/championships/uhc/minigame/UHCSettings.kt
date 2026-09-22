@@ -1,11 +1,11 @@
 package net.casual.championships.uhc.minigame
 
 import net.casual.arcade.dimensions.level.vanilla.VanillaDimension
-import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.bool
-import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.enumeration
-import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float32
-import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64
-import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.time
+import net.casual.arcade.minigame.settings.GameSettingBuilder.Companion.bool
+import net.casual.arcade.minigame.settings.GameSettingBuilder.Companion.enumeration
+import net.casual.arcade.minigame.settings.GameSettingBuilder.Companion.float32
+import net.casual.arcade.minigame.settings.GameSettingBuilder.Companion.float64
+import net.casual.arcade.minigame.settings.GameSettingBuilder.Companion.time
 import net.casual.arcade.minigame.utils.defaultOptions
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.lore
@@ -30,7 +30,7 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         display = Items.GLOWSTONE_DUST.named("Glowing")
         value = false
         defaultOptions()
-        listener { _, _, _ ->
+        onApply { _, _ ->
             for (player in uhc.players.playing) {
                 player.setGlowingTag(!player.hasGlowingTag())
                 player.setGlowingTag(!player.hasGlowingTag())
@@ -193,7 +193,7 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         display = Items.POPPY.named("Flower Power")
         value = false
         defaultOptions()
-        listener { _, _, value ->
+        onApply { _, value ->
             val recipe = FlowerPowerRecipe.getOrCreate(uhc.server.registryAccess())
             if (value) {
                 uhc.recipes.add(recipe)
@@ -216,7 +216,7 @@ class UHCSettings(private val uhc: UHCMinigame): CasualSettings(uhc) {
         display = Items.HEAVY_CORE.named("Heavy Heads")
         value = false
         defaultOptions()
-        listener { _, _, value ->
+        onApply { _, value ->
             val recipe = HeavyCoreRecipe.INSTANCE
             if (value) {
                 uhc.recipes.add(recipe)
