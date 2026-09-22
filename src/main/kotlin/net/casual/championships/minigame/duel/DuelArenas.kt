@@ -1,10 +1,10 @@
 package net.casual.championships.minigame.duel
 
 import net.casual.arcade.events.GlobalEventHandler
-import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerStartEvent
-import net.casual.arcade.minigame.data.MinigameDataModules
-import net.casual.arcade.minigame.data.MinigameDataModules.Companion.with
+import net.casual.arcade.events.utils.register
+import net.casual.arcade.minigame.data.MinigameDataSet
+import net.casual.arcade.minigame.data.MinigameDataSet.Companion.with
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.championships.common.util.CasualUtils
 import net.casual.championships.duel.arena.DuelArenasDataModule
@@ -15,7 +15,7 @@ object DuelArenas {
 
     private var arenas: DuelArenasDataModule? = null
 
-    fun with(modules: MinigameDataModules): MinigameDataModules {
+    fun with(modules: MinigameDataSet): MinigameDataSet {
         val arenas = this.arenas ?: return modules
         return modules.with(arenas)
     }

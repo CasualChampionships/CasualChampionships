@@ -210,7 +210,7 @@ class CasualMinigameManager(
 
     private fun reloadMinigame(server: MinecraftServer) {
         this.minigame?.close()
-        val minigame = this.config.minigame.create(MinigameCreationContext.initial(server))
+        val minigame = this.config.minigame.create(MinigameCreationContext(server))
         minigame.tryInitialize()
         this.minigame = minigame
     }
@@ -227,7 +227,7 @@ class CasualMinigameManager(
     }
 
     private fun createLobby(server: MinecraftServer): LobbyMinigame {
-        val lobby = LobbyMinigames.create(this.config.lobby, this::minigame, MinigameCreationContext.initial(server))
+        val lobby = LobbyMinigames.create(this.config.lobby, this::minigame, MinigameCreationContext(server))
         lobby.resources.add(this.championships.packs.createResources { lobby.getAdditionalPacks() })
         this.modifyLobbyMinigame(lobby)
         lobby.start()

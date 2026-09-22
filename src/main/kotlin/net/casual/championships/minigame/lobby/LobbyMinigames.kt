@@ -1,7 +1,7 @@
 package net.casual.championships.minigame.lobby
 
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.minigame.data.MinigameDataModules
+import net.casual.arcade.minigame.data.MinigameDataSet
 import net.casual.arcade.minigame.serialization.MinigameCreationContext
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.championships.common.util.CasualUtils
@@ -21,10 +21,10 @@ object LobbyMinigames {
         val server = context.server
         val modules = try {
             val archive = ReadableArchive.from(this.lobbies, lobby)
-            MinigameDataModules.from(archive, server)
+            MinigameDataSet.from(archive, server)
         } catch (exception: Exception) {
             CasualUtils.logger.error("Failed to read lobby $lobby", exception)
-            MinigameDataModules.empty()
+            MinigameDataSet.empty()
         }
         return LobbyMinigame(server, context.uuid, next, DuelKits.with(DuelArenas.with(modules)))
     }

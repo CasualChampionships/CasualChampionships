@@ -96,7 +96,7 @@ it by providing a custom world folder and defining your own values in the
 `casual_lobby_data.json` file.
 
 The `casual_lobby_parkour_data.json` file is optional, if you do remove the file, remember
-to remove the corresponding module in `minigame_data_modules.json`.
+to remove the corresponding module in `minigame_data.json`.
 
 Once you've created your lobby place it in `./config/casual-championships/lobbies/`, you
 can then reference it in the event configuration (exclude the `.zip`, if it's zipped).

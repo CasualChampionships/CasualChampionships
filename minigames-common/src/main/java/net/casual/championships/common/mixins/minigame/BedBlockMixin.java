@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(BedBlock.class)
 public class BedBlockMixin {
     @ModifyExpressionValue(
-        method = "useWithoutItem",
+        method = "destroyOnUse",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/damagesource/DamageSources;badRespawnPointExplosion(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/damagesource/DamageSource;"

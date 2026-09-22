@@ -114,8 +114,6 @@ class UHCMinigame(
         this.effects.setGlowingPredicate(PlayerObserverPredicate(this::shouldObserveeGlow))
         this.effects.setInvisiblePredicate(PlayerObserverPredicate(this::shouldObserveeBeInvisible))
 
-        this.dimensions.addTo(this)
-
         for (player in nerfedPlayers) {
             this.tags.add(player, UHCModifiers.NERFED)
         }
@@ -171,6 +169,7 @@ class UHCMinigame(
         this.initializePhases()
 
         this.commands.register(UHCMinigameCommands(this))
+        this.dimensions.addTo(this)
 
         this.addEventListener(this.uhcAdvancements)
         this.addEventListener(this.boundary)
