@@ -1,3 +1,7 @@
-dependencies {
-    implementation(libs.arcade.datagen)
+plugins {
+    id("casual.common-conventions")
+}
+
+arcade {
+    devModules("datagen")
 }

@@ -1,12 +1,6 @@
-rootProject.name = "CasualChampionships"
-
-include(":minigames-common")
-include(":minigames-duels")
-include(":minigames-lobby")
-include(":minigames-missile-wars")
-include(":minigames-uhc")
-
 pluginManagement {
+    includeBuild("build-logic")
+
     repositories {
         maven("https://maven.fabricmc.net/") {
             name = "Fabric"
@@ -23,3 +17,13 @@ dependencyResolutionManagement {
         }
     }
 }
+
+rootProject.name = "CasualChampionships"
+
+include(
+    ":minigames-common",
+    ":minigames-duels",
+    ":minigames-lobby",
+    ":minigames-missile-wars",
+    ":minigames-uhc",
+)
