@@ -12,7 +12,7 @@ import net.casual.championships.common.CasualCommon
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualUtils
 import net.minecraft.client.Minecraft
-import net.minecraft.core.Direction8
+import net.minecraft.core.CompositeDirection
 import org.jetbrains.annotations.ApiStatus.Internal
 
 @Internal
@@ -56,7 +56,7 @@ class CommonDatagen: ArcadeResourceGenerator {
                 CasualComponents.ADMINS.withMiniFont()
             ))
 
-            for (direction in Direction8.entries) {
+            for (direction in CompositeDirection.Direction8.entries) {
                 add(NegativeWidthGenerator(CasualComponents.direction(direction)))
             }
 

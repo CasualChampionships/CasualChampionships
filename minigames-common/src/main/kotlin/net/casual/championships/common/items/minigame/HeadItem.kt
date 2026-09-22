@@ -13,6 +13,7 @@ import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.*
 import net.minecraft.world.item.component.ResolvableProfile
+import net.minecraft.world.item.component.SwingAnimation
 import net.minecraft.world.item.component.TooltipDisplay
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.level.Level
@@ -29,7 +30,7 @@ abstract class HeadItem(properties: Properties): BlockItem(Blocks.PLAYER_HEAD, p
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResult {
         if (player is ServerPlayer) {
             this.addEffects(player)
-            player.swing(usedHand, true)
+            player.swing(usedHand, SwingAnimation.DEFAULT, true)
             val stack = player.getItemInHand(usedHand)
             player.cooldowns.addCooldown(stack, 20)
             stack.consume(1, player)
@@ -42,7 +43,7 @@ abstract class HeadItem(properties: Properties): BlockItem(Blocks.PLAYER_HEAD, p
         val player = context.player
         if (player is ServerPlayer) {
             this.addEffects(player)
-            player.swing(context.hand, true)
+            player.swing(context.hand, SwingAnimation.DEFAULT, true)
             player.cooldowns.addCooldown(context.itemInHand, 20)
             if (!player.abilities.instabuild) {
                 context.itemInHand.shrink(1)

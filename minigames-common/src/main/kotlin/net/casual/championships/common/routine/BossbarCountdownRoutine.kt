@@ -2,8 +2,8 @@ package net.casual.championships.common.routine
 
 import com.mojang.serialization.MapCodec
 import net.casual.arcade.minigame.Minigame
-import net.casual.arcade.minigame.task.routine.MinigameRoutine
-import net.casual.arcade.minigame.task.routine.minigame
+import net.casual.arcade.minigame.routine.MinigameRoutine
+import net.casual.arcade.minigame.routine.minigame
 import net.casual.arcade.scheduler.task.routine.RoutineScope
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.arcade.virtual.visuals.bossbar.VirtualBossbar

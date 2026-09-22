@@ -13,8 +13,8 @@ import net.casual.arcade.utils.component.join
 import net.casual.arcade.utils.component.lime
 import net.casual.arcade.utils.component.shadowless
 import net.casual.arcade.utils.component.white
+import net.minecraft.core.CompositeDirection
 import net.minecraft.core.Direction
-import net.minecraft.core.Direction8
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 
@@ -116,16 +116,16 @@ object CasualComponents {
         }
     }
 
-    fun direction(direction: Direction8): MutableComponent {
+    fun direction(direction: CompositeDirection.Direction8): MutableComponent {
         return when (direction) {
-            Direction8.NORTH -> NORTH
-            Direction8.NORTH_EAST -> NORTH_EAST
-            Direction8.EAST -> EAST
-            Direction8.SOUTH_EAST -> SOUTH_EAST
-            Direction8.SOUTH -> SOUTH
-            Direction8.SOUTH_WEST -> SOUTH_WEST
-            Direction8.WEST -> WEST
-            Direction8.NORTH_WEST -> NORTH_WEST
+            CompositeDirection.Direction8.NORTH -> NORTH
+            CompositeDirection.Direction8.NORTH_EAST -> NORTH_EAST
+            CompositeDirection.Direction8.EAST -> EAST
+            CompositeDirection.Direction8.SOUTH_EAST -> SOUTH_EAST
+            CompositeDirection.Direction8.SOUTH -> SOUTH
+            CompositeDirection.Direction8.SOUTH_WEST -> SOUTH_WEST
+            CompositeDirection.Direction8.WEST -> WEST
+            CompositeDirection.Direction8.NORTH_WEST -> NORTH_WEST
         }
     }
 
