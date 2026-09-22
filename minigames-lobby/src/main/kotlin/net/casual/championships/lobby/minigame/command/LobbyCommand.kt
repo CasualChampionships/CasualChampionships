@@ -10,8 +10,8 @@ import net.casual.arcade.commands.*
 import net.casual.arcade.commands.arguments.EnumArgument
 import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyPlayers
 import net.casual.arcade.minigame.utils.MinigameUtils.checkReadyTeams
-import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
 import net.casual.arcade.minigame.utils.MinigameUtils.requiresAdminOrPermission
+import net.casual.arcade.scheduler.utils.launch
 import net.casual.arcade.utils.component.Component
 import net.casual.arcade.utils.component.event.ClickEventCallback
 import net.casual.arcade.utils.component.function
@@ -77,7 +77,7 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
 
     private fun startCountdown(context: CommandContext<CommandSourceStack>): Int {
         this.lobby.next ?: return context.source.fail("Cannot move to next minigame, it has not been set!")
-        this.lobby.setPhase(LobbyPhase.Countdown)
+        this.lobby.phases.set(LobbyPhase.Countdown)
         return context.source.success("Successfully started the countdown")
     }
 
@@ -89,7 +89,7 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
 
     private fun broadcastPlayerReadyCheck(context: CommandContext<CommandSourceStack>): Int {
         this.lobby.next ?: return context.source.fail("Cannot ready for next minigame, it has not been set!")
-        this.lobby.setPhase(LobbyPhase.Readying)
+        this.lobby.phases.set(LobbyPhase.Readying)
         context.source.server.launch {
             lobby.checkReadyPlayers()
             onSuccessfullyReady()
@@ -99,7 +99,7 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
 
     private fun broadcastTeamReadyCheck(context: CommandContext<CommandSourceStack>): Int {
         this.lobby.next ?: return context.source.fail("Cannot ready for next minigame, it has not been set!")
-        this.lobby.setPhase(LobbyPhase.Readying)
+        this.lobby.phases.set(LobbyPhase.Readying)
         context.source.server.launch {
             lobby.checkReadyTeams()
             onSuccessfullyReady()
@@ -126,15 +126,15 @@ class LobbyCommand(val lobby: LobbyMinigame): CommandTree<CommandSourceStack> {
     }
 
     private fun playRulesThenCountdown(): ClickEventCallback.Result {
-        this.lobby.launchPhased {
+        this.lobby.scopes.current.launch {
             lobby.playRulesForNextMinigame()
-            lobby.setPhase(LobbyPhase.Countdown)
+            lobby.phases.request(LobbyPhase.Countdown)
         }
         return ClickEventCallback.Result.Consume
     }
 
     private fun skipRulesThenCountdown(): ClickEventCallback.Result {
-        this.lobby.setPhase(LobbyPhase.Countdown)
+        this.lobby.phases.set(LobbyPhase.Countdown)
         return ClickEventCallback.Result.Consume
     }
 

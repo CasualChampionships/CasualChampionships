@@ -22,7 +22,7 @@ class MinesweeperCommand(private val lobby: LobbyMinigame): CommandTree<CommandS
     }
 
     private fun openMinesweeper(context: CommandContext<CommandSourceStack>): Int {
-        if (this.lobby.phase < LobbyPhase.Readying) {
+        if (this.lobby.state < LobbyPhase.Readying) {
             MinesweeperGui(context.source.playerOrException).open()
             return Command.SINGLE_SUCCESS
         }

@@ -2,7 +2,9 @@ package net.casual.championships.lobby.minigame.modules
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import net.casual.arcade.minigame.data.MinigameDataModule
+import net.casual.arcade.minigame.data.MinigameData
+import net.casual.arcade.minigame.data.MinigameDataProvider
+import net.casual.arcade.minigame.data.MinigameDataType
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.file.ReadableArchive.Companion.parseJson
 import net.casual.arcade.utils.math.location.Location
@@ -10,7 +12,6 @@ import net.casual.arcade.utils.serialization.codec.ArcadeExtraCodecs
 import net.casual.championships.common.util.casual
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
-import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
@@ -19,7 +20,7 @@ class LobbyParkourData(
     val exit: Location,
     val areas: List<AABB>,
     val checkpoints: List<Checkpoint>
-): MinigameDataModule {
+): MinigameData {
     fun isWithinParkourArea(point: Vec3): Boolean {
         return this.areas.any { it.contains(point) }
     }
@@ -32,6 +33,10 @@ class LobbyParkourData(
             }
         }
         return current
+    }
+
+    override fun type(): MinigameDataType<*> {
+        return type
     }
 
     data class Checkpoint(
@@ -50,7 +55,7 @@ class LobbyParkourData(
         }
     }
 
-    companion object: MinigameDataModule.Provider {
+    companion object: MinigameDataProvider<LobbyParkourData> {
         private const val LOBBY_PARKOUR_DATA = "casual_lobby_parkour_data.json"
 
         private val CODEC = RecordCodecBuilder.create { instance ->
@@ -61,9 +66,9 @@ class LobbyParkourData(
             ).apply(instance, ::LobbyParkourData)
         }
 
-        override val id: Identifier = casual("lobby_parkour_data")
+        override val type: MinigameDataType<LobbyParkourData> = MinigameDataType(casual("lobby_parkour_data"))
 
-        override fun get(archive: ReadableArchive, server: MinecraftServer): MinigameDataModule {
+        override fun get(archive: ReadableArchive, server: MinecraftServer): LobbyParkourData {
             return archive.parseJson(LOBBY_PARKOUR_DATA, CODEC).getOrThrow()
         }
 

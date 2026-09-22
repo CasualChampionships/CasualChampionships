@@ -2,11 +2,9 @@ package net.casual.championships.lobby.minigame
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import net.casual.arcade.events.server.ServerTickEvent
-import net.casual.arcade.events.utils.register
 import net.casual.arcade.guis.inventory.VirtualInventory
 import net.casual.arcade.guis.utils.removeCustomInventory
 import net.casual.arcade.guis.utils.setCustomInventory
-import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.utils.ItemUtils.hideTooltip
 import net.casual.arcade.utils.ItemUtils.named
 import net.casual.arcade.utils.component.bold
@@ -32,7 +30,7 @@ class LobbyParkour(
     fun initialize() {
         this.lobby.effects.setInvisiblePredicate(this::checkInvisibility, true)
 
-        val data = this.lobby.modules.get<LobbyParkourData>() ?: return
+        val data = this.lobby.modules.get(LobbyParkourData.type) ?: return
         this.lobby.events.register<ServerTickEvent> { this.tick(data) }
     }
 

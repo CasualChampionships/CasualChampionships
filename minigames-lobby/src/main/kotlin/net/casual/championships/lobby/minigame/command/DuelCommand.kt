@@ -12,7 +12,6 @@ import net.casual.arcade.commands.fail
 import net.casual.arcade.commands.literal
 import net.casual.arcade.commands.success
 import net.casual.arcade.commands.suggests
-import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
 import net.casual.arcade.minigame.utils.MinigameUtils.getMinigame
 import net.casual.arcade.minigame.utils.MinigameUtils.isMinigameAdminOrHasPermission
 import net.casual.arcade.pack.utils.withMiniFont
@@ -59,7 +58,7 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceSt
             literal("everyone") {
                 executes { context -> duelEveryone(context, null) }
                 argument("kit", StringArgumentType.string()) {
-                    suggests { _ -> lobby.modules.get<DuelKitsDataModule>()?.names() ?: emptyList() }
+                    suggests { _ -> lobby.modules.get(DuelKitsDataModule.type)?.names() ?: emptyList() }
                     executes(::duelEveryone)
                 }
             }
@@ -157,7 +156,7 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceSt
             }
             return true
         }
-        if (!this.lobby.players.has(initiator) || this.lobby.phase >= LobbyPhase.Readying) {
+        if (!this.lobby.players.has(initiator) || this.lobby.state >= LobbyPhase.Readying) {
             requester.broadcastTo(initiator, Component.translatable("casual.duel.cannotDuelNow").withMiniFont().red())
             initiator.grantAdvancement(LobbyAdvancements.NOT_NOW)
             return false
@@ -204,16 +203,16 @@ class DuelCommand(private val lobby: LobbyMinigame): CommandTree<CommandSourceSt
     )
 
     private fun getDuelArenasKitsAndSettings(context: CommandContext<CommandSourceStack>): DuelArenasKitsAndSettings? {
-        val arenas = this.lobby.modules.get<DuelArenasDataModule>()
+        val arenas = this.lobby.modules.get(DuelArenasDataModule.type)
             ?: return null.also { context.source.fail("Lobby has no duel arenas available!") }
-        val kits = this.lobby.modules.get<DuelKitsDataModule>()
+        val kits = this.lobby.modules.get(DuelKitsDataModule.type)
             ?: return null.also { context.source.fail("Lobby has no duel kits available!") }
         val settings = DuelSettings(arenas.all(), kits.all())
         return DuelArenasKitsAndSettings(arenas, kits, settings)
     }
 
     private fun enforceLobbyReadyingPhase(player: ServerPlayer) {
-        if (this.lobby.phase >= LobbyPhase.Readying) {
+        if (this.lobby.state >= LobbyPhase.Readying) {
             player.grantAdvancement(LobbyAdvancements.NOT_NOW)
             throw CANNOT_DUEL_NOW.create()
         }

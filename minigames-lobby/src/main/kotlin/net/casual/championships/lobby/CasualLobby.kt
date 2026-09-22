@@ -1,6 +1,6 @@
 package net.casual.championships.lobby
 
-import net.casual.arcade.minigame.data.MinigameDataModule.Provider.Companion.register
+import net.casual.arcade.minigame.data.MinigameDataProvider.Companion.register
 import net.casual.arcade.minigame.utils.MinigameRegistries
 import net.casual.championships.lobby.minigame.modules.LobbyData
 import net.casual.championships.lobby.minigame.modules.LobbyParkourData
@@ -11,7 +11,7 @@ object CasualLobby: ModInitializer {
     override fun onInitialize() {
         LobbyStats.load()
 
-        LobbyData.register(MinigameRegistries.MINIGAME_DATA_MODULE_PROVIDER)
-        LobbyParkourData.register(MinigameRegistries.MINIGAME_DATA_MODULE_PROVIDER)
+        LobbyData.register(MinigameRegistries.MINIGAME_DATA_PROVIDER)
+        LobbyParkourData.register(MinigameRegistries.MINIGAME_DATA_PROVIDER)
     }
 }

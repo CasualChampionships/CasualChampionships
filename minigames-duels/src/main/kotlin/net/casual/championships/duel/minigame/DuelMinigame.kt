@@ -3,6 +3,7 @@ package net.casual.championships.duel.minigame
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import net.casual.arcade.dimensions.level.CustomLevel
+import net.casual.arcade.dimensions.level.LevelPersistence
 import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
 import net.casual.arcade.dimensions.utils.getDimensionPath
 import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator

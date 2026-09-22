@@ -1,8 +1,7 @@
 package net.casual.championships.lobby.minigame
 
+import kotlinx.coroutines.awaitCancellation
 import net.casual.arcade.dimensions.level.CustomLevel
-import net.casual.arcade.dimensions.level.LevelPersistence
-import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
 import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
 import net.casual.arcade.events.server.ServerTickEvent
 import net.casual.arcade.events.server.player.PlayerTeamJoinEvent
@@ -10,9 +9,8 @@ import net.casual.arcade.events.server.player.PlayerVoidDamageEvent
 import net.casual.arcade.minigame.Minigame
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.area.BoxedArea
-import net.casual.arcade.minigame.data.MinigameDataModules
-import net.casual.arcade.minigame.data.MinigameDataModules.Companion.get
-import net.casual.arcade.minigame.data.module.MinigameWorldData
+import net.casual.arcade.minigame.data.MinigameDataSet
+import net.casual.arcade.minigame.data.impl.MinigameWorldData
 import net.casual.arcade.minigame.events.MinigameAddNewPlayerEvent
 import net.casual.arcade.minigame.events.MinigameAddPlayerEvent
 import net.casual.arcade.minigame.events.MinigameInitializeEvent
@@ -20,16 +18,14 @@ import net.casual.arcade.minigame.events.MinigameSetPhaseEvent
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode
 import net.casual.arcade.minigame.gamemode.ExtendedGameMode.Companion.extendedGameMode
 import net.casual.arcade.minigame.managers.MinigameLevelManager.SpawnLocation
-import net.casual.arcade.minigame.phase.Phase
 import net.casual.arcade.minigame.settings.MinigameSettings
 import net.casual.arcade.minigame.utils.MinigameUtils.addEventListener
-import net.casual.arcade.minigame.utils.MinigameUtils.launchPhased
 import net.casual.arcade.minigame.utils.MinigameUtils.transferAdminAndSpectatorTeamsTo
 import net.casual.arcade.pack.utils.ResourcePackUtils.awaitPacks
 import net.casual.arcade.scheduler.task.impl.PlayerTask
-import net.casual.arcade.utils.IdentifierUtils
 import net.casual.arcade.utils.TimeUtils.Seconds
 import net.casual.arcade.utils.TimeUtils.Ticks
+import net.casual.arcade.utils.arcade
 import net.casual.arcade.utils.chat.ChatFormatter
 import net.casual.arcade.utils.component.*
 import net.casual.arcade.utils.coroutine.delay
@@ -38,33 +34,30 @@ import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.level.resetToDefault
 import net.casual.arcade.utils.level.set
 import net.casual.arcade.utils.player.*
-import net.casual.arcade.utils.registries.toKey
 import net.casual.arcade.virtual.visuals.tab.DynamicVirtualPlayerList
 import net.casual.arcade.virtual.visuals.utils.elements.timer.TimerElement
 import net.casual.championships.common.minigame.CasualSettings
 import net.casual.championships.common.minigame.rules.MinigameRulesProvider
-import net.casual.championships.lobby.ui.bossbar.LobbyBossbar
 import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastWithSound
 import net.casual.championships.common.util.player.unboostHealth
 import net.casual.championships.lobby.advancement.LobbyAdvancementManager
 import net.casual.championships.lobby.advancement.LobbyAdvancements
-import net.casual.championships.lobby.ui.tab.LobbyPlayerListEntries
 import net.casual.championships.lobby.minigame.command.DuelCommand
 import net.casual.championships.lobby.minigame.command.LobbyCommand
 import net.casual.championships.lobby.minigame.command.MinesweeperCommand
 import net.casual.championships.lobby.minigame.modules.LobbyData
+import net.casual.championships.lobby.ui.bossbar.LobbyBossbar
+import net.casual.championships.lobby.ui.tab.LobbyPlayerListEntries
 import net.minecraft.core.Vec3i
-import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
-import net.minecraft.resources.ResourceKey
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.level.Level
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes
 import net.minecraft.world.level.gamerules.GameRules
+import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Team
 import java.util.*
@@ -74,10 +67,9 @@ class LobbyMinigame(
     server: MinecraftServer,
     uuid: UUID,
     next: KProperty0<Minigame?>,
-    val modules: MinigameDataModules
-): Minigame(server, uuid) {
-    private val lobbyData: LobbyData
-        get() = this.modules.get<LobbyData>() ?: LobbyData.DEFAULT
+    val modules: MinigameDataSet
+): Minigame(server, uuid, ID, LobbyPhase.entries) {
+    private val lobbyData: LobbyData = this.modules.get(LobbyData.type) ?: LobbyData.DEFAULT
 
     private val fireworks = LobbyFireworks(this, this.lobbyData)
     private val parkour = LobbyParkour(this)
@@ -89,7 +81,6 @@ class LobbyMinigame(
     val next by next
 
     override val settings: MinigameSettings = CasualSettings(this)
-    override val id: Identifier = ID
 
     fun teleport(player: ServerPlayer) {
         val winners = this.tags.getUUIDsFor(CasualTags.WON)
@@ -111,14 +102,6 @@ class LobbyMinigame(
         return this.lobbyData.packs
     }
 
-    fun startCountdown() {
-        this.launchPhased {
-            visuals.countdown.transition(players = players::all)
-            delay(1.Seconds)
-            moveToNextMinigame()
-        }
-    }
-
     fun moveToNextMinigame() {
         val next = this.next
         if (next == null || next.closed) {
@@ -130,7 +113,7 @@ class LobbyMinigame(
         this.players.transferTo(next, players)
         next.start()
 
-        this.setPhase(LobbyPhase.Waiting)
+        this.phases.request(LobbyPhase.Waiting)
     }
 
     suspend fun playRulesForNextMinigame() {
@@ -155,13 +138,15 @@ class LobbyMinigame(
         }
     }
 
-    override fun phases(): Collection<Phase<out Minigame>> {
-        return LobbyPhase.entries
+    override fun debug(output: ValueOutput) {
+        super.debug(output)
+        output.storeNullable("next_minigame_id", Identifier.CODEC, this.next?.id)
     }
 
     @Listener
     private fun onMinigameInitialize(event: MinigameInitializeEvent) {
-        this.levels.add(this.level)
+        this.initializePhases()
+
         this.levels.spawn = SpawnLocation.global(this.lobbyData.spawn.get().with(this.level))
 
         this.parkour.initialize()
@@ -179,8 +164,6 @@ class LobbyMinigame(
 
         this.visuals.addBossbar(this.bossbar)
 
-        this.registerProperties()
-
         this.settings.pauseOnServerStop = false
         this.settings.canPvp.set(false)
         this.settings.canGetHungry.set(false)
@@ -192,7 +175,7 @@ class LobbyMinigame(
         this.settings.canAttackEntities.set(true)
         this.settings.canInteractAll = false
 
-        if (!this.modules.has<MinigameWorldData>()) {
+        if (!this.modules.has(MinigameWorldData.type)) {
             BoxedArea(Vec3i(0, -1, 0), 10, 3, this.level).place()
         }
     }
@@ -277,32 +260,20 @@ class LobbyMinigame(
         }
     }
 
-    private fun registerProperties() {
-        this.property("next_minigame") { this.next?.id?.toString() }
-    }
-
     private fun playFireworksFor(player: ServerPlayer) {
         this.tags.add(player, SEEN_FIREWORKS)
         player.sendSound(CasualSounds.GAME_WON)
         this.scheduler.schedule(10.Seconds, PlayerTask(player, this.fireworks::spawnFireworkDisplayFor))
     }
 
-    private fun extractLobbyWorld(destination: ResourceKey<Level>) {
-        val world = this.modules.get<MinigameWorldData>() ?: return
-        world.extract(this.server, destination)
-    }
-
     private fun createLevel(): CustomLevel {
         val data = this.lobbyData
-        val dimension = IdentifierUtils.random().toKey(Registries.DIMENSION)
-        this.extractLobbyWorld(dimension)
-        val level = CustomLevelBuilder.build(this.server) {
+        val level = this.levels.create(arcade("overworld")) {
             spoofedDimensionKey(casual("lobby"))
-            dimensionKey(dimension)
+            randomDimensionKey()
             dimensionType(BuiltinDimensionTypes.OVERWORLD)
             chunkGenerator(VoidChunkGenerator(server))
             defaultLevelProperties()
-            persistence(LevelPersistence.Temporary)
             viewDistance(20)
             weather {
                 if (data.raining) {
@@ -332,7 +303,35 @@ class LobbyMinigame(
                 else -> clockState(totalTicks = data.timeOfDay.get().toLong(), paused = true)
             }
         }
+        this.modules.get(MinigameWorldData.type)?.extract(this.server, level.dimension())
         return level
+    }
+
+    private fun initializePhases() {
+        this.phases.coroutines[LobbyPhase.Waiting] = this::runWaitingLogic
+        this.phases.coroutines[LobbyPhase.Readying] = this::runReadingLogic
+        this.phases.coroutines[LobbyPhase.Countdown] = this::runCountdownLogic
+    }
+
+    private suspend fun runWaitingLogic() {
+        this.visuals.addBossbar(this.bossbar)
+        for (team in this.teams.getAllTeams()) {
+            team.collisionRule = Team.CollisionRule.NEVER
+        }
+    }
+
+    private suspend fun runReadingLogic() {
+        awaitCancellation()
+    }
+
+    private suspend fun runCountdownLogic() {
+        this.visuals.removeBossbar(this.bossbar)
+        for (team in this.teams.getAllTeams()) {
+            team.collisionRule = Team.CollisionRule.ALWAYS
+        }
+        this.visuals.countdown.transition(players = players::all)
+        delay(1.Seconds)
+        this.moveToNextMinigame()
     }
 
     companion object {

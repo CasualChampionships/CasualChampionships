@@ -5,7 +5,6 @@ import net.casual.arcade.events.server.player.PlayerTickEvent
 import net.casual.arcade.events.server.player.PlayerTryAttackEvent
 import net.casual.arcade.events.server.player.PlayerVoidDamageEvent
 import net.casual.arcade.minigame.annotation.Listener
-import net.casual.arcade.minigame.annotation.ListenerFlags
 import net.casual.arcade.minigame.annotation.MinigameEventListener
 import net.casual.arcade.minigame.stats.Stat.Companion.increment
 import net.casual.arcade.utils.TimeUtils.Minutes
@@ -88,7 +87,7 @@ class LobbyAdvancementManager(
         }
     }
 
-    @Listener(flags = ListenerFlags.HAS_PLAYER)
+    @Listener
     private fun onPlayerAdvancement(event: PlayerAdvancementEvent) {
         event.announce = event.announce && LobbyAdvancements.contains(event.advancement)
     }
