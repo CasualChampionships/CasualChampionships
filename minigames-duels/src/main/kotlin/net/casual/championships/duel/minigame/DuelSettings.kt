@@ -1,10 +1,10 @@
 package net.casual.championships.duel.minigame
 
-import net.casual.arcade.minigame.settings.display.DisplayableSettings
-import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.bool
-import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.enumeration
-import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.float64
-import net.casual.arcade.minigame.settings.display.MenuGameSettingBuilder.Companion.string
+import net.casual.arcade.minigame.settings.GameSettingBuilder.Companion.bool
+import net.casual.arcade.minigame.settings.GameSettingBuilder.Companion.enumeration
+import net.casual.arcade.minigame.settings.GameSettingBuilder.Companion.float64
+import net.casual.arcade.minigame.settings.GameSettingBuilder.Companion.string
+import net.casual.arcade.minigame.settings.GameSettings
 import net.casual.arcade.minigame.utils.defaultOptions
 import net.casual.arcade.minigame.utils.item
 import net.casual.arcade.pack.utils.withMiniFont
@@ -32,7 +32,7 @@ import kotlin.enums.enumEntries
 class DuelSettings(
     private val arenas: Collection<DuelArenasDataModule.ResolvedArenas>,
     private val kits: Collection<DuelKitsDataModule.Kit>
-): DisplayableSettings(Component.translatable("casual.gui.duel.settings").withMiniFont()) {
+): GameSettings(Component.translatable("casual.gui.duel.settings").withMiniFont()) {
     val displayableTeams = bool {
         name = "teams"
 

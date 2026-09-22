@@ -26,12 +26,12 @@ class DuelKitsGui(
         })
 
         val kitSlots = KIT_SLOTS.iterator()
-        for (option in this.settings.displayableKit.options) {
+        for ((id) in this.settings.displayableKit.options) {
             if (!kitSlots.hasNext()) {
                 break
             }
-            this.setSlot(kitSlots.next(), this.settings.getKitDisplayStack(option.id)) {
-                this.settings.kit = option.id
+            this.setSlot(kitSlots.next(), this.settings.getKitDisplayStack(id)) {
+                this.settings.kit = id
             }
         }
 

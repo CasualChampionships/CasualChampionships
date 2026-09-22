@@ -2,24 +2,29 @@ package net.casual.championships.duel.kit
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import net.casual.arcade.minigame.data.MinigameDataModule
+import net.casual.arcade.minigame.data.MinigameData
+import net.casual.arcade.minigame.data.MinigameDataProvider
+import net.casual.arcade.minigame.data.MinigameDataType
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.file.ReadableArchive.Companion.parseJson
 import net.casual.championships.common.util.casual
-import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.level.storage.loot.LootTable
 
 class DuelKitsDataModule(
     private val kits: Map<String, Kit>
-): MinigameDataModule {
+): MinigameData {
     fun all(): Collection<Kit> {
         return this.kits.values
     }
 
     fun names(): Set<String> {
         return this.kits.keys
+    }
+
+    override fun type(): MinigameDataType<*> {
+        return type
     }
 
     class Kit(
@@ -48,10 +53,10 @@ class DuelKitsDataModule(
         }
     }
 
-    companion object: MinigameDataModule.Provider {
+    companion object: MinigameDataProvider<DuelKitsDataModule> {
         private const val DUEL_KITS_DATA = "casual_duel_kits_data.json"
 
-        override val id: Identifier = casual("duel_kits_data")
+        override val type: MinigameDataType<DuelKitsDataModule> = MinigameDataType(casual("duel_kits_data"))
 
         override fun get(archive: ReadableArchive, server: MinecraftServer): DuelKitsDataModule {
             val kitNames = archive.parseJson(DUEL_KITS_DATA, KitsData.CODEC).getOrThrow().kitNames

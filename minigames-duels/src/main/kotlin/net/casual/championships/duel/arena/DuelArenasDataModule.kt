@@ -2,24 +2,29 @@ package net.casual.championships.duel.arena
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import net.casual.arcade.minigame.data.MinigameDataModule
-import net.casual.arcade.minigame.data.module.MinigameWorldData
+import net.casual.arcade.minigame.data.MinigameData
+import net.casual.arcade.minigame.data.MinigameDataProvider
+import net.casual.arcade.minigame.data.MinigameDataType
+import net.casual.arcade.minigame.data.impl.MinigameWorldData
 import net.casual.arcade.utils.EnumUtils
 import net.casual.arcade.utils.file.ReadableArchive
 import net.casual.arcade.utils.file.ReadableArchive.Companion.child
 import net.casual.arcade.utils.file.ReadableArchive.Companion.parseJson
 import net.casual.championships.common.util.casual
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.Identifier
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.item.ItemStackTemplate
 import java.util.*
 
 class DuelArenasDataModule(
     private val arenas: Map<String, ResolvedArenas>
-): MinigameDataModule {
+): MinigameData {
     fun all(): Collection<ResolvedArenas> {
         return this.arenas.values
+    }
+
+    override fun type(): MinigameDataType<*> {
+        return type
     }
 
     data class DuelArena(
@@ -49,10 +54,10 @@ class DuelArenasDataModule(
         }
     }
 
-    companion object: MinigameDataModule.Provider {
+    companion object: MinigameDataProvider<DuelArenasDataModule> {
         private const val DUEL_ARENAS_DATA = "casual_duel_arenas_data.json"
 
-        override val id: Identifier = casual("duel_arenas_data")
+        override val type: MinigameDataType<DuelArenasDataModule> = MinigameDataType(casual("duel_arenas_data"))
 
         override fun get(archive: ReadableArchive, server: MinecraftServer): DuelArenasDataModule {
             val unresolved = archive.parseJson(DUEL_ARENAS_DATA, UnresolvedArenas.CODEC.listOf()).getOrThrow()
