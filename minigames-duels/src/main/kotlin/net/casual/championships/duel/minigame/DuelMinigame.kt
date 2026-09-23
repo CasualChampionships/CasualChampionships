@@ -1,10 +1,7 @@
 package net.casual.championships.duel.minigame
 
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.delay
 import net.casual.arcade.dimensions.level.CustomLevel
-import net.casual.arcade.dimensions.level.LevelPersistence
-import net.casual.arcade.dimensions.level.builder.CustomLevelBuilder
 import net.casual.arcade.dimensions.utils.getDimensionPath
 import net.casual.arcade.dimensions.utils.impl.VoidChunkGenerator
 import net.casual.arcade.events.phase.BuiltInEventPhases
@@ -30,12 +27,8 @@ import net.casual.arcade.utils.entity.teleportTo
 import net.casual.arcade.utils.level.resetToDefault
 import net.casual.arcade.utils.level.set
 import net.casual.arcade.utils.math.location.asLocation
-import net.casual.arcade.utils.player.clearPlayerInventory
-import net.casual.arcade.utils.player.resetHealth
-import net.casual.arcade.utils.player.sendTitle
-import net.casual.arcade.utils.player.server
+import net.casual.arcade.utils.player.*
 import net.casual.arcade.utils.registries.isOf
-import net.casual.arcade.utils.registries.toKey
 import net.casual.arcade.utils.scoreboard.color
 import net.casual.arcade.utils.scoreboard.getOnlinePlayers
 import net.casual.championships.common.event.LevelFluidTrySpreadEvent
@@ -44,13 +37,8 @@ import net.casual.championships.common.items.minigame.recipes.GoldenHeadRecipe
 import net.casual.championships.common.minigame.CasualTimeTracker
 import net.casual.championships.common.minigame.TimeTrackedMinigame
 import net.casual.championships.common.ui.bossbar.ActiveBossbar
-import net.casual.championships.common.util.CasualComponents
-import net.casual.championships.common.util.CasualGuiUtils
+import net.casual.championships.common.util.*
 import net.casual.championships.common.util.CasualGuiUtils.broadcastInfo
-import net.casual.championships.common.util.CasualStats
-import net.casual.championships.common.util.CasualUtils
-import net.casual.championships.common.util.RuleUtils
-import net.casual.championships.common.util.casual
 import net.casual.championships.common.util.player.boostHealth
 import net.casual.championships.common.util.player.unboostHealth
 import net.casual.championships.duel.arena.DuelArenasDataModule
@@ -58,13 +46,11 @@ import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.component.DataComponents
-import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.ItemTags
-import net.minecraft.util.Prediction
 import net.minecraft.util.context.ContextKeySet
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
@@ -191,10 +177,10 @@ class DuelMinigame(
             val head = PlayerHeadItem.create(player)
             if (killer is ServerPlayer) {
                 if (!killer.inventory.add(head)) {
-                    player.drop(head, true, Prediction.SERVER_ONLY)
+                    player.dropRandomly(head)
                 }
             } else {
-                player.drop(head, true, Prediction.SERVER_ONLY)
+                player.dropRandomly(head)
             }
         }
 
@@ -334,10 +320,12 @@ class DuelMinigame(
         for (player in this.players.playing) {
             player.restrictMovement()
         }
-        this.visuals.countdown.transition(players = this.players::all)
-
-        for (player in this.players.playing) {
-            player.unrestrictMovement()
+        try {
+            this.visuals.countdown.transition(players = this.players::all)
+        } finally {
+            for (player in this.players.playing) {
+                player.unrestrictMovement()
+            }
         }
     }
 

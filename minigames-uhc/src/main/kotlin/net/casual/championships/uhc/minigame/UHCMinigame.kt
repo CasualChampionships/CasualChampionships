@@ -167,24 +167,22 @@ class UHCMinigame(
     @Listener
     private fun onInitialize(event: MinigameInitializeEvent) {
         this.initializePhases()
-
-        this.commands.register(UHCMinigameCommands(this))
         this.dimensions.addTo(this)
+        this.settings.enableChatCommand.set(true)
+    }
+
+    @Listener
+    private fun onLoad(event: MinigameLoadEvent) {
+        this.commands.register(UHCMinigameCommands(this))
 
         this.addEventListener(this.uhcAdvancements)
         this.addEventListener(this.boundary)
         this.addEventListener(this.hud)
         this.addEventListener(this.spectators)
         this.addEventListener(this.modifiers)
+
         this.recipes.add(GoldenHeadRecipe.INSTANCE)
-        if (this.settings.heavyHeads) {
-            this.recipes.add(HeavyCoreRecipe.INSTANCE)
-        }
-        if (this.settings.flowerPower) {
-            this.recipes.add(FlowerPowerRecipe.getOrCreate(this.server.registryAccess()))
-        }
         this.advancements.addAll(UHCAdvancements)
-        this.settings.enableChatCommand.set(true)
 
         this.levels.spawn = UHCSpawnLocation(this)
 

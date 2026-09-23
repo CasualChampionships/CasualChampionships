@@ -41,7 +41,6 @@ dependencies {
 arcade {
     version = libs.versions.arcade
     modules("arcade")
-    // Arcade modules are only bundled once, by the root project
     include = false
 }
 

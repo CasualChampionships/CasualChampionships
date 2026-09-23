@@ -156,7 +156,7 @@ class CasualMinigameManager(
 
     internal fun registerEvents(registry: ListenerRegistry<ServerSideEvent>) {
         registry.register<PlayerRequestLoginEvent>(::onPlayerRequestLogin)
-        registry.register<MinigameInitializeEvent>(::onMinigameInitialize)
+        registry.register<MinigameLoadEvent>(::onMinigameLoad)
         registry.register<PlayerJoinEvent>(phase = PlayerJoinEvent.PHASE_INITIALIZED, listener = ::onPlayerJoinEarly)
         registry.register<PlayerJoinEvent>(::onPlayerJoin)
         registry.register<PlayerChatEvent>(::onPlayerChat)
@@ -343,7 +343,7 @@ class CasualMinigameManager(
         }
     }
 
-    private fun onMinigameInitialize(event: MinigameInitializeEvent) {
+    private fun onMinigameLoad(event: MinigameLoadEvent) {
         val minigame = event.minigame
 
         minigame.resources.add(object: MinigameResources {

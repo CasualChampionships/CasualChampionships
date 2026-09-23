@@ -38,7 +38,7 @@ object UHCVoicePlugin: VoicechatPlugin {
 
     override fun registerEvents(registration: EventRegistration) {
         registration.registerEvent(PlayerConnectedEvent::class.java, this::onPlayerConnectedEvent)
-        GlobalEventHandler.Server.register<MinigameInitializeEvent> { (minigame) ->
+        GlobalEventHandler.Server.register<MinigameLoadEvent> { (minigame) ->
             if (minigame is UHCMinigame) {
                 this.initialize(minigame)
             }

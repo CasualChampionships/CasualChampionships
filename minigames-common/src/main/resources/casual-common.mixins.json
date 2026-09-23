@@ -8,6 +8,8 @@
   },
   "mixins": [
     "bugfixes.BaseContainerBlockEntityMixin",
+    "bugfixes.BaseFireBlockMixin",
+    "bugfixes.EntityAccessor",
     "event.FlowingFluidMixin",
     "event.NaturalSpawnerMixin",
     "event.NetherPortalBlockMixin",

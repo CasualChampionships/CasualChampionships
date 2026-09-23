@@ -8,14 +8,11 @@ import net.casual.arcade.scheduler.task.routine.Routine
 import net.casual.arcade.scheduler.task.routine.RoutineScope
 import net.casual.arcade.scheduler.utils.call
 import net.casual.arcade.utils.component.gold
-import net.casual.arcade.utils.component.red
-import net.casual.arcade.utils.impl.Sound
 import net.casual.arcade.utils.serialization.codec.CodecProvider
 import net.casual.arcade.utils.time.MinecraftTimeDuration
 import net.casual.championships.common.routine.BossbarCountdownRoutine
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
-import net.casual.championships.common.util.CasualSounds
 import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.ui.bossbar.GraceBossbar
@@ -31,7 +28,6 @@ class GraceRoutine: MinigameRoutine<UHCMinigame> {
     override suspend fun RoutineScope<UHCMinigame>.run() {
         val grace = step(MinecraftTimeDuration.CODEC) {
             minigame.settings.isChatGlobal = false
-            // minigame.settings.mobsWithNoAIAreFlammable = true
             minigame.settings.canPvp.set(false)
 
             minigame.boundary.startAfter(minigame.settings.borderStartDelay)
@@ -49,14 +45,6 @@ class GraceRoutine: MinigameRoutine<UHCMinigame> {
         }
 
         call(BossbarCountdownRoutine(grace) { timer -> GraceBossbar.create(minigame.server, timer) })
-
-        step {
-            minigame.chat.broadcastGame(
-                CasualComponents.BORDER_GRACE_OVER.red().withMiniFont(),
-                sound = Sound(CasualSounds.GAME_BORDER_MOVING)
-            )
-            minigame.settings.canPvp.set(true)
-        }
     }
 
     companion object: CodecProvider<GraceRoutine> {

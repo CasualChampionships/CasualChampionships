@@ -314,10 +314,12 @@ class LobbyMinigame(
     }
 
     private suspend fun runWaitingLogic() {
+        this.visuals.removeBossbar(this.bossbar)
         this.visuals.addBossbar(this.bossbar)
         for (team in this.teams.getAllTeams()) {
             team.collisionRule = Team.CollisionRule.NEVER
         }
+        awaitCancellation()
     }
 
     private suspend fun runReadingLogic() {
