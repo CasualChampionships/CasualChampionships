@@ -10,6 +10,7 @@ import net.casual.arcade.boundary.utils.levelBoundary
 import net.casual.arcade.events.server.player.PlayerTickEvent
 import net.casual.arcade.minigame.annotation.Listener
 import net.casual.arcade.minigame.annotation.MinigameEventListener
+import net.casual.arcade.minigame.phase.MinigamePhaseLifetime
 import net.casual.arcade.pack.utils.withMiniFont
 import net.casual.arcade.utils.MathUtils
 import net.casual.arcade.utils.MathUtils.isAbove
@@ -32,10 +33,10 @@ import net.casual.championships.common.event.portal.PortalFindValidPositionEvent
 import net.casual.championships.common.util.CasualComponents
 import net.casual.championships.common.util.CasualGuiUtils.broadcastGame
 import net.casual.championships.common.util.CasualSounds
+import net.casual.championships.common.util.casual
 import net.casual.championships.uhc.CasualUHC
 import net.casual.championships.uhc.minigame.UHCMinigame
 import net.casual.championships.uhc.minigame.phase.UHCPhase
-import net.casual.championships.uhc.routine.GlowingCountdownRoutine
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component
@@ -57,6 +58,11 @@ class UHCBoundary(
 
     private var lastPhaseChange = 0.Ticks
 
+    private val scope = this.uhc.scopes.named(
+        casual("uhc_boundary"),
+        MinigamePhaseLifetime.Between(UHCPhase.Initializing, UHCPhase.GameOver)
+    )
+
     fun reset() {
         for (level in this.uhc.levels) {
             level.levelBoundary = this.createBoundary(level)
@@ -68,8 +74,9 @@ class UHCBoundary(
     }
 
     fun startAfter(delay: MinecraftTimeDuration) {
+        this.scope.cancel()
         this.resetTimer()
-        this.uhc.scopes.root.schedule(delay, UHCBoundaryRoutine())
+        this.scope.schedule(delay, UHCBoundaryRoutine())
     }
 
     fun getFinalPhase(level: ServerLevel): UHCBoundaryPhase {
@@ -130,12 +137,7 @@ class UHCBoundary(
         this.move(phase.getDuration(this.uhc.settings.borderTime), phase::getEnd)
     }
 
-    internal fun onPaused(phase: UHCBoundaryPhase) {
-        if (phase == UHCBoundaryPhase.Fifth) {
-            val cooldown = phase.getCooldown(this.uhc.settings.borderTime)
-            this.uhc.scopes.root.schedule(0.Ticks, GlowingCountdownRoutine(cooldown))
-        }
-
+    internal fun onPaused() {
         this.resetTimer()
         this.uhc.chat.broadcastGame(component = CasualComponents.BORDER_PAUSED.withMiniFont().red())
     }
